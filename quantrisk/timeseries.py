@@ -30,18 +30,20 @@ from bson import ObjectId
 import os
 import zlib
 
-utc=pytz.UTC
+utc = pytz.UTC
 indexTradingCal = pd.DatetimeIndex(tradingcalendar.trading_days)
 indexTradingCal = indexTradingCal.normalize()
 
 
-##### timeseries manipulation functions
-def rolling_metric_stat(ret_ts, metric
-                        , stat_func=np.mean
-                        , window=63, sample_freq=21
-                        , return_all_values=False):
+# timeseries manipulation functions
+def rolling_metric_stat(ret_ts, metric, stat_func=np.mean,
+                        window=63, sample_freq=21,
+                        return_all_values=False):
     roll_results = pd.rolling_apply(ret_ts, window, metric).dropna()
-    roll_results_sample = roll_results[ np.sort(range(len(roll_results)-1, 0, -sample_freq)) ]
+    roll_results_sample = roll_results[
+    np.sort(
+        range(
+            len(roll_results) - 1, 0, -sample_freq))]
 
     if return_all_values:
         return roll_results_sample
@@ -49,11 +51,13 @@ def rolling_metric_stat(ret_ts, metric
         temp_f = lambda x: stat_func(x)
         return temp_f(roll_results_sample)
 
+
 def normalize(df, withStartingValue=1):
     if withStartingValue > 1:
-        return withStartingValue * ( df / df.iloc[0] )
+        return withStartingValue * (df / df.iloc[0])
     else:
         return df / df.iloc[0]
+
 
 def cum_returns(df, withStartingValue=None):
     if withStartingValue is None:
@@ -61,23 +65,32 @@ def cum_returns(df, withStartingValue=None):
     else:
         return np.exp(np.log(1 + df).cumsum()) * withStartingValue
 
+
 def aggregate_returns(df_daily_rets, convert_to):
     cumulate_returns = lambda x: cum_returns(x)[-1]
     if convert_to == 'daily':
         return df_daily_rets
     elif convert_to == 'weekly':
-        return df_daily_rets.groupby([lambda x: x.year, lambda x: x.month, lambda x: x.isocalendar()[1]]).apply(cumulate_returns)
+        return df_daily_rets.groupby(
+            [lambda x: x.year, lambda x: x.month, lambda x: x.isocalendar()[1]]).apply(cumulate_returns)
     elif convert_to == 'monthly':
-        return df_daily_rets.groupby([lambda x: x.year, lambda x: x.month]).apply(cumulate_returns)
+        return df_daily_rets.groupby(
+            [lambda x: x.year, lambda x: x.month]).apply(cumulate_returns)
     elif convert_to == 'yearly':
-        return df_daily_rets.groupby([lambda x: x.year]).apply(cumulate_returns)
+        return df_daily_rets.groupby(
+            [lambda x: x.year]).apply(cumulate_returns)
     else:
         ValueError('convert_to must be daily, weekly, monthly or yearly')
 
-def detrendTS(theTS):
-    return pd.Series(data=signal.detrend(theTS.values),index=theTS.index.values)
 
-def appendSeries( ts1, ts2 ):
+def detrend_TS(theTS):
+    return pd.Series(
+    data=signal.detrend(
+        theTS.values),
+         index=theTS.index.values)
+
+
+def append_series(ts1, ts2):
     '''
     @params
       ts1: <pd.Series>
@@ -85,30 +98,41 @@ def appendSeries( ts1, ts2 ):
       ts2: <pd.Series>
           The 2nd Series to be appended below 1st timeseries
     '''
-    return pd.Series( data=np.concatenate([ts1,ts2]) , index=np.concatenate([ts1.index,ts2.index]) )
+    return pd.Series(
+        data=np.concatenate([ts1, ts2]), index=np.concatenate([ts1.index, ts2.index]))
+
 
 def dfTS(df, dateColumnLabel='Date'):
-    # e.g.: takes a dataframe from a yahoo finance price csv and returns a df with datetime64 index
+    # e.g.: takes a dataframe from a yahoo finance price csv and returns a df
+    # with datetime64 index
     colNames = df.columns
     tempDF = df.copy()
-    indexDates = map(np.datetime64, df.ix[:,dateColumnLabel].values)
-    # tempDF = pd.DataFrame(data=df.values , index=map(pd.to_datetime, indexDates))
-    tempDF = pd.DataFrame(data=df.values , index=indexDates)
+    indexDates = map(np.datetime64, df.ix[:, dateColumnLabel].values)
+    # tempDF = pd.DataFrame(data=df.values , index=map(pd.to_datetime,
+    # indexDates))
+    tempDF = pd.DataFrame(data=df.values, index=indexDates)
     tempDF.columns = colNames
 
-    return tempDF.drop(axis=1,labels=dateColumnLabel).sort_index()
+    return tempDF.drop(axis=1, labels=dateColumnLabel).sort_index()
 
-def multiTimeseriesToDF_fromDict( tsDictInput, asPctChange=False, startDate=None, endDate=None,
-                        dropNA=False, ffillNA=False, fillNAvalue=None ):
+
+def multi_TS_to_DF_from_dict(tsDictInput, asPctChange=False, startDate=None, endDate=None,
+                                dropNA=False, ffillNA=False, fillNAvalue=None):
     tempDict = {}
 
     for i in tsDictInput.keys():
         if asPctChange:
             # print(i)
             # print(tsDictInput.get(i).head())
-            tempDict[ i ] = sliceTS(tsDictInput.get(i).pct_change().dropna(), startDate=startDate, endDate=endDate)
+            tempDict[i] = slice_TS(
+    tsDictInput.get(i).pct_change().dropna(),
+    startDate=startDate,
+     endDate=endDate)
         else:
-            tempDict[ i ] = sliceTS(tsDictInput.get(i), startDate=startDate, endDate=endDate)
+            tempDict[i] = slice_TS(
+    tsDictInput.get(i),
+    startDate=startDate,
+     endDate=endDate)
     tempDF = pd.DataFrame(tempDict)
     if dropNA:
         tempDF = tempDF.dropna()
@@ -119,15 +143,20 @@ def multiTimeseriesToDF_fromDict( tsDictInput, asPctChange=False, startDate=None
 
     return tempDF
 
-def multiTimeseriesToDF( tsSeriesList, tsSeriesNamesArr, asPctChange=False, startDate=None, endDate=None,
-                        dropNA=False, ffillNA=False, fillNAvalue=None ):
+
+def multi_TS_to_DF(tsSeriesList, tsSeriesNamesArr, asPctChange=False, startDate=None, endDate=None,
+                    dropNA=False, ffillNA=False, fillNAvalue=None):
     tempDict = {}
 
-    for i in range(0,len(tsSeriesNamesArr)):
+    for i in range(0, len(tsSeriesNamesArr)):
         if asPctChange:
-            tempDict[ tsSeriesNamesArr[i] ] = sliceTS(tsSeriesList[i].pct_change().dropna(), startDate=startDate, endDate=endDate)
+            tempDict[
+    tsSeriesNamesArr[i]] = slice_TS(
+        tsSeriesList[i].pct_change().dropna(),
+        startDate=startDate,
+         endDate=endDate)
         else:
-            tempDict[ tsSeriesNamesArr[i] ] = tsSeriesList[i]
+            tempDict[tsSeriesNamesArr[i]] = tsSeriesList[i]
     tempDF = pd.DataFrame(tempDict)
     if dropNA:
         tempDF = tempDF.dropna()
@@ -138,16 +167,22 @@ def multiTimeseriesToDF( tsSeriesList, tsSeriesNamesArr, asPctChange=False, star
 
     return tempDF
 
-def sliceTS(theTS, startDate=None, endDate=None, inclusive_start=False, inclusive_end=False ):
+
+def slice_TS(
+    theTS,
+    startDate=None,
+    endDate=None,
+    inclusive_start=False,
+     inclusive_end=False):
 
     if (startDate is None) and (endDate is None):
         return theTS
 
     if startDate is None:
         if inclusive_end:
-            return theTS[ :endDate ]
+            return theTS[:endDate]
         else:
-            return theTS[ :endDate ][:-1]
+            return theTS[:endDate][:-1]
 
     if endDate is None:
         if inclusive_start:
@@ -156,27 +191,24 @@ def sliceTS(theTS, startDate=None, endDate=None, inclusive_start=False, inclusiv
             return theTS[startDate:][1:]
 
     if inclusive_start & inclusive_end:
-        return theTS[ startDate:endDate ]
+        return theTS[startDate:endDate]
 
     if inclusive_start & ~inclusive_end:
-        return theTS[ startDate:endDate ][:-1]
+        return theTS[startDate:endDate][:-1]
     elif ~inclusive_start & inclusive_end:
-        return theTS[ startDate:endDate ][1:]
+        return theTS[startDate:endDate][1:]
     elif ~inclusive_start & ~inclusive_end:
-        return theTS[ startDate:endDate ][1:-1]
+        return theTS[startDate:endDate][1:-1]
 
     return pd.Series()
 
 
+# timeseries manipulation functions
 
 
+# Strategy Performance statistics & timeseries analysis functions
 
-##### timeseries manipulation functions
-
-
-##### Strategy Performance statistics & timeseries analysis functions
-
-def maxDrawdown(ts, inputIsNAV=True):
+def max_drawdown(ts, inputIsNAV=True):
     if ts.size < 1:
         return np.nan
 
@@ -195,12 +227,14 @@ def maxDrawdown(ts, inputIsNAV=True):
             DD = (peak - value) / peak
         if (DD > MDD):
             MDD = DD
-    return -1*MDD
+    return -1 * MDD
 
-def annualReturn(ts, inputIsNAV=True, style='calendar'):
+
+def annual_return(ts, inputIsNAV=True, style='calendar'):
     # if style == 'compound' then return will be calculated in geometric terms: (1+mean(all_daily_returns))^252 - 1
     # if style == 'calendar' then return will be calculated as ((last_value - start_value)/start_value)/num_of_years
-    # if style == 'arithmetic' then return is simply mean(all_daily_returns)*252
+    # if style == 'arithmetic' then return is simply
+    # mean(all_daily_returns)*252
     if ts.size < 1:
         return np.nan
 
@@ -210,9 +244,9 @@ def annualReturn(ts, inputIsNAV=True, style='calendar'):
             num_years = len(tempReturns) / 252
             start_value = ts[0]
             end_value = ts[-1]
-            return ((end_value - start_value)/start_value) / num_years
+            return ((end_value - start_value) / start_value) / num_years
         if style == 'compound':
-            return pow( (1 + tempReturns.mean()), 252 ) - 1
+            return pow((1 + tempReturns.mean()), 252) - 1
         else:
             return tempReturns.mean() * 252
     else:
@@ -221,14 +255,14 @@ def annualReturn(ts, inputIsNAV=True, style='calendar'):
             temp_NAV = cum_returns(ts, withStartingValue=100)
             start_value = temp_NAV[0]
             end_value = temp_NAV[-1]
-            return ((end_value - start_value)/start_value) / num_years
+            return ((end_value - start_value) / start_value) / num_years
         if style == 'compound':
-            return pow( (1 + ts.mean()), 252 ) - 1
+            return pow((1 + ts.mean()), 252) - 1
         else:
             return ts.mean() * 252
 
 
-def annualVolatility(ts, inputIsNAV=True):
+def annual_volatility(ts, inputIsNAV=True):
     if ts.size < 2:
         return np.nan
     if inputIsNAV:
@@ -238,15 +272,15 @@ def annualVolatility(ts, inputIsNAV=True):
         return ts.std() * np.sqrt(252)
 
 
-def calmerRatio(ts, inputIsNAV=True, returns_style='calendar'):
-    temp_max_dd = maxDrawdown(ts=ts, inputIsNAV=inputIsNAV)
+def calmer_ratio(ts, inputIsNAV=True, returns_style='calendar'):
+                temp_max_dd = max_drawdown(ts=ts, inputIsNAV=inputIsNAV)
     # print(temp_max_dd)
     if temp_max_dd < 0:
         if inputIsNAV:
-            temp = annualReturn(ts=ts, inputIsNAV=True, style=returns_style) / abs(maxDrawdown(ts=ts,inputIsNAV=True))
+            temp = annual_return(ts=ts, inputIsNAV=True, style=returns_style) / abs(max_drawdown(ts=ts,inputIsNAV=True))
         else:
             tempNAV = cum_returns(ts,withStartingValue=100)
-            temp = annualReturn(ts=tempNAV, inputIsNAV=True, style=returns_style) / abs(maxDrawdown(ts=tempNAV,inputIsNAV=True))
+            temp = annual_return(ts=tempNAV, inputIsNAV=True, style=returns_style) / abs(max_drawdown(ts=tempNAV,inputIsNAV=True))
         # print(temp)
     else:
         return np.nan
@@ -256,10 +290,12 @@ def calmerRatio(ts, inputIsNAV=True, returns_style='calendar'):
     else:
         return temp
 
-def sharpeRatio(ts, inputIsNAV=True, returns_style='calendar'):
-    return annualReturn(ts, inputIsNAV=inputIsNAV, style=returns_style) / annualVolatility(ts, inputIsNAV=inputIsNAV)
 
-def stabilityOfTimeseries( ts, logValue=True, inputIsNAV=True ):
+def sharpe_ratio(ts, inputIsNAV=True, returns_style='calendar'):
+    return annual_return(ts, inputIsNAV=inputIsNAV, style=returns_style) / annual_volatility(ts, inputIsNAV=inputIsNAV)
+
+
+def stability_of_timeseries(ts, logValue=True, inputIsNAV=True):
     if ts.size < 2:
         return np.nan
 
@@ -287,6 +323,7 @@ def stabilityOfTimeseries( ts, logValue=True, inputIsNAV=True ):
 
     return model.rsquared
 
+
 def calc_multifactor(df_rets, factors):
     import statsmodels.api as sm
     factors = factors.loc[df_rets.index]
@@ -296,14 +333,16 @@ def calc_multifactor(df_rets, factors):
 
     return results.params
 
+
 def rolling_multifactor_beta(ser, multi_factor_df, rolling_window=63):
     results = [ calc_multifactor( ser[beg:end], multi_factor_df)
                for beg,end in zip(ser.index[0:-rolling_window],ser.index[rolling_window:]) ]
 
     return pd.DataFrame(index=ser.index[rolling_window:], data=results)
 
-def multi_factor_alpha( factors_ts_list, single_ts, factor_names_list, input_is_returns=False
-                        , annualized=False, annualize_factor=252, show_output=False):
+
+def multi_factor_alpha(factors_ts_list, single_ts, factor_names_list, input_is_returns=False,
+                        annualized=False, annualize_factor=252, show_output=False):
 
     factors_ts = [ i.asfreq(freq='D',normalize=True) for i in factors_ts_list ]
     dep_var = single_ts.asfreq(freq='D',normalize=True)
@@ -338,7 +377,9 @@ def multi_factor_alpha( factors_ts_list, single_ts, factor_names_list, input_is_
         return factor_alpha
 
 
-def calc_alpha_beta(df_rets, benchmark_rets, startDate=None, endDate=None, return_beta_only=False, inputs_are_returns=True, normalize=False, remove_zeros=False):
+def calc_alpha_beta(df_rets, benchmark_rets, startDate=None, endDate=None,
+                    return_beta_only=False, inputs_are_returns=True,
+                    normalize=False, remove_zeros=False):
     if not inputs_are_returns:
         df_rets = df_rets.pct_change().dropna()
         benchmark_rets = benchmark_rets.pct_change().dropna()
@@ -383,8 +424,6 @@ def calc_alpha_beta(df_rets, benchmark_rets, startDate=None, endDate=None, retur
         return alpha * 252, beta
 
 
-
-
 def rolling_beta(ser, benchmark_rets, rolling_window=63):
     results = [ calc_alpha_beta( ser[beg:end], benchmark_rets, return_beta_only=True, normalize=True)
                for beg,end in zip(ser.index[0:-rolling_window],ser.index[rolling_window:]) ]
@@ -393,8 +432,6 @@ def rolling_beta(ser, benchmark_rets, rolling_window=63):
 
 
 def rolling_beta_TS(theTS, benchmarkTS, startDate=None, endDate=None, rolling_window=63):
-
-
     if startDate != None:
         theTS = theTS[(startDate -  timedelta(days=rolling_window)):]
 
@@ -402,15 +439,15 @@ def rolling_beta_TS(theTS, benchmarkTS, startDate=None, endDate=None, rolling_wi
         theTS = theTS[:endDate]
 
 
-    results = [ betaTimeseries( theTS[beg:end], benchmarkTS)
+    results = [ beta_TS( theTS[beg:end], benchmarkTS)
                for beg,end in zip(theTS.index[0:-rolling_window], theTS.index[rolling_window:]) ]
-
 
     return pd.Series(index=theTS.index[rolling_window:], data=results)
 
 
-
-def betaTimeseries( theTS, benchmarkTS, startDate=None, endDate=None, inputIsReturns=False):
+def beta_TS(theTS, benchmarkTS,
+            startDate=None, endDate=None,
+            inputIsReturns=False):
     tempTS = theTS.copy()
     tempBench = benchmarkTS.copy()
 
@@ -439,7 +476,7 @@ def betaTimeseries( theTS, benchmarkTS, startDate=None, endDate=None, inputIsRet
     # tempTS.reindex(indexTradingCal)
     # tempBench.reindex(indexTradingCal)
 
-    tempAlign = tempBench.align(tempTS,join='inner')
+    tempAlign = tempBench.align(tempTS, join='inner')
     alignBench = tempAlign[0]
     alignTS = tempAlign[1]
     # print( alignBench.head() )
@@ -458,13 +495,14 @@ def betaTimeseries( theTS, benchmarkTS, startDate=None, endDate=None, inputIsRet
 
     m, b = np.polyfit(regX, regY, 1)
 
-
     return m
 
-def rolling_beta_TS(ts=None, benchmark=None, startDate=None, endDate=None, rolling_window=63, sampling_days=None ):
+
+def rolling_beta_TS(ts=None, benchmark=None, startDate=None, endDate=None,
+                    rolling_window=63, sampling_days=None):
 #     ts = ts.normalize()
     if startDate != None:
-        #set start date rolling_window trading days before startDate
+        # set start date rolling_window trading days before startDate
         tsp = ts[startDate:].index[0]
         true_start = ts.index.get_loc(tsp) - rolling_window
         ts = ts[true_start:]
@@ -473,7 +511,7 @@ def rolling_beta_TS(ts=None, benchmark=None, startDate=None, endDate=None, rolli
         ts = ts[:endDate]
 
 
-    results = [ betaTimeseries( ts[beg:end], benchmark)
+    results = [ beta_TS( ts[beg:end], benchmark)
                for beg,end in zip(ts.index[0:-rolling_window], ts.index[rolling_window:]) ]
 
     results = pd.Series(index=ts.index[rolling_window:], data=results)
@@ -483,7 +521,9 @@ def rolling_beta_TS(ts=None, benchmark=None, startDate=None, endDate=None, rolli
 
     return results
 
-def calc_beta_like_zipline(df_rets, benchmark_rets, startDate=None, endDate=None, inputs_are_returns=True):
+
+def calc_beta_like_zipline(df_rets, benchmark_rets, startDate=None, endDate=None,
+                            inputs_are_returns=True):
     if not inputs_are_returns:
         df_rets = df_rets.pct_change().dropna()
         benchmark_rets = benchmark_rets.pct_change().dropna()
@@ -505,10 +545,11 @@ def calc_beta_like_zipline(df_rets, benchmark_rets, startDate=None, endDate=None
 
     return beta
 
-def calc_beta_like_zipline_rolling(df_rets, benchmark_rets, startDate=None, endDate=None, sampling_days=None, rolling_window=252, inputs_are_returns=True):
 
+def calc_beta_like_zipline_rolling(df_rets, benchmark_rets, startDate=None, endDate=None,
+                                    sampling_days=None, rolling_window=252, inputs_are_returns=True):
     if startDate != None:
-        #set start date rolling_window trading days before startDate
+        # set start date rolling_window trading days before startDate
         tsp = df_rets[startDate:].index[0]
         true_start = df_rets.index.get_loc(tsp) - rolling_window
         df_rets = df_rets[true_start:]
@@ -543,11 +584,11 @@ def hurst(ts, lagsToTest=20):
     # calculate hurst
     hurst = m[0]*2
     # plot lag vs variance
-    #py.plot(lagvec,tau,'o'); show()
+    # py.plot(lagvec,tau,'o'); show()
     return hurst
 
-def halfLife(ts):
 
+def half_life(ts):
     price = pd.Series(ts)
     lagged_price = price.shift(1).fillna(method="bfill")
     delta = price - lagged_price
@@ -556,14 +597,15 @@ def halfLife(ts):
 
     return half_life
 
+
 def perf_stats(ts, inputIsNAV=True, returns_style='compound', return_as_dict=False):
     all_stats = {}
-    all_stats['annual_return'] = annualReturn(ts, inputIsNAV=inputIsNAV, style=returns_style)
-    all_stats['annual_volatility'] = annualVolatility(ts, inputIsNAV=inputIsNAV)
-    all_stats['sharpe_ratio'] = sharpeRatio(ts, inputIsNAV=inputIsNAV, returns_style=returns_style)
-    all_stats['calmar_ratio'] = calmerRatio(ts, inputIsNAV=inputIsNAV, returns_style=returns_style)
-    all_stats['stability'] = stabilityOfTimeseries(ts, inputIsNAV=inputIsNAV)
-    all_stats['max_drawdown'] = maxDrawdown(ts, inputIsNAV=inputIsNAV)
+    all_stats['annual_return'] = annual_return(ts, inputIsNAV=inputIsNAV, style=returns_style)
+    all_stats['annual_volatility'] = annual_volatility(ts, inputIsNAV=inputIsNAV)
+    all_stats['sharpe_ratio'] = sharpe_ratio(ts, inputIsNAV=inputIsNAV, returns_style=returns_style)
+    all_stats['calmar_ratio'] = calmer_ratio(ts, inputIsNAV=inputIsNAV, returns_style=returns_style)
+    all_stats['stability'] = stability_of_timeseries(ts, inputIsNAV=inputIsNAV)
+    all_stats['max_drawdown'] = max_drawdown(ts, inputIsNAV=inputIsNAV)
     # print(all_stats)
 
     if return_as_dict:
@@ -574,10 +616,10 @@ def perf_stats(ts, inputIsNAV=True, returns_style='compound', return_as_dict=Fal
         return all_stats_df
 
 
-##### Strategy Performance statistics & timeseries analysis functions
+# Strategy Performance statistics & timeseries analysis functions
 def calc_correl_matrix(tsDict, startDate=None, endDate=None, returnAsDict=False):
     # if 'returnAsDict' = False, then it will return in the form of the MultiIndex dataframe that corr() returns
-    tempDF = multiTimeseriesToDF_fromDict(tsDict, asPctChange=True, startDate=startDate, endDate=endDate, dropNA=True)
+    tempDF = multi_TS_to_DF_from_dict(tsDict, asPctChange=True, startDate=startDate, endDate=endDate, dropNA=True)
     if returnAsDict:
         tempDF_unstack = tempDF.corr().unstack()
         tempDict = {}
@@ -586,6 +628,7 @@ def calc_correl_matrix(tsDict, startDate=None, endDate=None, returnAsDict=False)
         return tempDict
     else:
         return tempDF.corr()
+
 
 def calc_avg_pairwise_correl_dict(tsDict, startDate=None, endDate=None, overlapping_periods_for_all=True):
     pairwise_dict = {}
@@ -624,6 +667,7 @@ def calc_avg_pairwise_correl_dict(tsDict, startDate=None, endDate=None, overlapp
 
     return pairwise_dict
 
+
 def get_max_draw_down_underwater(underwater):
     valley = np.argmax(underwater) # end of the period
     # Find first 0
@@ -632,12 +676,14 @@ def get_max_draw_down_underwater(underwater):
     recovery = underwater[valley:][underwater[valley:] == 0].index[0]
     return peak, valley, recovery
 
+
 def get_max_draw_down(df_rets):
     df_rets = df_rets.copy()
     df_cum = cum_returns(df_rets)
     running_max = np.maximum.accumulate(df_cum)
     underwater = running_max - df_cum
     return get_max_draw_down_underwater(underwater)
+
 
 def get_top_draw_downs(df_rets, top=10):
     df_rets = df_rets.copy()
@@ -654,6 +700,7 @@ def get_top_draw_downs(df_rets, top=10):
         if len(df_rets) == 0:
             break
     return drawdowns
+
 
 def gen_drawdown_table(df_rets, top=10):
     df_cum = cum_returns(df_rets,1)
@@ -676,6 +723,7 @@ def gen_drawdown_table(df_rets, top=10):
     df_drawdowns['recovery date'] = pd.to_datetime(df_drawdowns['recovery date'],unit='D')
 
     return df_drawdowns
+
 
 def rolling_sharpe(df_rets, rolling_sharpe_window):
     return pd.rolling_mean(df_rets, rolling_sharpe_window) / pd.rolling_std(df_rets, rolling_sharpe_window) * np.sqrt(252)
