@@ -31,6 +31,8 @@ install_reqs = ['numpy>=1.9.2', 'scipy>=0.13.0', 'matplotlib>=1.2.1',
 
 test_reqs = ['nose']
 
+dep_links = []
+
 if __name__ == "__main__":
     setup(name=DISTNAME,
           version=VERSION,
