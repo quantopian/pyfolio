@@ -2,6 +2,7 @@ import json
 import pandas as pd
 import numpy as np
 
+
 def map_transaction(txn):
     return {'sid': txn['sid']['sid'],
             'symbol': txn['sid']['symbol'],
@@ -11,10 +12,13 @@ def map_transaction(txn):
             'commission': txn['commission'],
             'dt': txn['dt']}
 
-def pos_dict_to_df(df_pos):
-    return pd.concat([pd.DataFrame(json.loads(x), index=[dt]) for dt, x in df_pos.iteritems()]).fillna(0)
 
-def make_transaction_frame(transactions):  
+def pos_dict_to_df(df_pos):
+    return pd.concat([pd.DataFrame(json.loads(x), index=[dt])
+                      for dt, x in df_pos.iteritems()]).fillna(0)
+
+
+def make_transaction_frame(transactions):
     transaction_list = []
     for dt in transactions.index:
         txns = transactions.ix[dt]
@@ -26,22 +30,27 @@ def make_transaction_frame(transactions):
                 transaction_list.append(txn)
     df = pd.DataFrame(sorted(transaction_list, key=lambda x: x['dt']))
     df['txn_dollars'] = df['amount'] * df['price']
-    df['date_time_utc'] = map(pd.Timestamp, df.dt.values) 
-    
+    df['date_time_utc'] = map(pd.Timestamp, df.dt.values)
+
     return df
+
 
 def get_portfolio_values(positions):
     def get_pos_values(pos):
-        position_sizes = {i['sid']['symbol']: i['amount']*i['last_sale_price'] for i in pos.pos}
+        position_sizes = {
+            i['sid']['symbol']: i['amount'] *
+            i['last_sale_price'] for i in pos.pos}
         position_sizes['cash'] = pos.cash
         return json.dumps(position_sizes)
-    
+
     position_values = positions.apply(get_pos_values, axis='columns')
     return pos_dict_to_df(position_values)
+
 
 def get_portfolio_alloc(df_pos_vals):
     df_pos_alloc = (df_pos_vals.T / df_pos_vals.abs().sum(axis='columns').T).T
     return df_pos_alloc
+
 
 def get_long_short_pos(df_pos):
     df_pos_wo_cash = df_pos.drop('cash', axis='columns')
@@ -49,8 +58,10 @@ def get_long_short_pos(df_pos):
     df_long = df_pos_wo_cash.apply(lambda x: x[x > 0].sum(), axis='columns')
     df_short = -df_pos_wo_cash.apply(lambda x: x[x < 0].sum(), axis='columns')
     df_cash = df_pos.cash.abs()
-    df_long_short = pd.DataFrame({'long': df_long, 'short': df_short, 'cash': df_cash})
+    df_long_short = pd.DataFrame(
+        {'long': df_long, 'short': df_short, 'cash': df_cash})
     return df_long_short
+
 
 def get_top_long_short_abs(df_pos, top=10):
     df_pos = df_pos.drop('cash', axis='columns')
@@ -62,28 +73,38 @@ def get_top_long_short_abs(df_pos, top=10):
     df_top_abs = df_abs_max[:top]
     return df_top_long, df_top_short, df_top_abs
 
+
 def turnover(transactions_df, backtest_data_df, period='M'):
     # Calculates the percent absolute value portfolio turnover
     # transactions_df and backtest_data_df can come straight from the test harness
-    # period takes the same arguments as df.resample 
-    turnover = transactions_df.apply(lambda z: z.apply(lambda r: abs(r))).resample(period, 'sum').sum(axis=1)
+    # period takes the same arguments as df.resample
+    turnover = transactions_df.apply(
+        lambda z: z.apply(
+            lambda r: abs(r))).resample(
+        period,
+        'sum').sum(
+                axis=1)
     portfolio_value = backtest_data_df.portfolio_value.resample(period, 'mean')
-    turnoverpct = turnover/portfolio_value
+    turnoverpct = turnover / portfolio_value
     turnoverpct = turnoverpct.fillna(0)
     return turnoverpct
 
-def get_all_tickers_traded(algo_id='54b820a41a3fd8f231000092', contest='clean_run_04_20_2015_v1'):
-    engine_harness = sqlalchemy.create_engine(host_settings.SQLTESTHARNESS, echo=False)
-    
+
+def get_all_tickers_traded(
+        algo_id='54b820a41a3fd8f231000092',
+        contest='clean_run_04_20_2015_v1'):
+    engine_harness = sqlalchemy.create_engine(
+        host_settings.SQLTESTHARNESS,
+        echo=False)
+
     try:
-        df_rets, df_pos, df_txn_daily, fetcher_urls = get_single_algo(algo_id,
-                                                                      engine_harness,
-                                                                      contest)
+        df_rets, df_pos, df_txn_daily, fetcher_urls = get_single_algo(
+            algo_id, engine_harness, contest)
     except:
         return np.array([], 'object')
 
     df_pos_alloc = get_portfolio_alloc(df_pos)
-    
+
     _, _, df_top_abs_all = get_top_long_short_abs(df_pos_alloc, top=1000)
- 
+
     return df_top_abs_all.index.values
