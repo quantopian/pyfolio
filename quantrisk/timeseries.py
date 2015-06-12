@@ -1,41 +1,29 @@
 from __future__ import division
 
-from quant_utils.utils import *
-
 import pandas as pd
 import numpy as np
 import scipy as sp
 import scipy.stats as stats
 import scipy.signal as signal
-import seaborn as sns
-from collections import *
-from operator import *
-import string
 
 import statsmodels.api as sm
 
-import zipline
-from zipline.finance.risk import RiskMetricsCumulative, RiskMetricsPeriod
-from zipline.utils.factory import create_simulation_parameters
-from zipline.utils import tradingcalendar
-
 import datetime
-from datetime import datetime
-from datetime import timedelta
-import pytz
-import time
-
-from bson import ObjectId
-
-import os
-import zlib
-
-utc = pytz.UTC
-indexTradingCal = pd.DatetimeIndex(tradingcalendar.trading_days)
-indexTradingCal = indexTradingCal.normalize()
-
 
 # timeseries manipulation functions
+
+
+def var_cov_var_normal(P, c, mu=0, sigma=1, **kwargs):
+    """
+    Variance-Covariance calculation of daily Value-at-Risk
+    using confidence level c, with mean of returns mu
+    and standard deviation of returns sigma, on a portfolio
+    of value P.
+    """
+    alpha = sp.stats.norm.ppf(1-c, mu, sigma)
+    return P - P*(alpha + 1)
+
+
 def rolling_metric_stat(ret_ts, metric, stat_func=np.mean,
                         window=63, sample_freq=21,
                         return_all_values=False):
@@ -273,7 +261,7 @@ def annual_volatility(ts, inputIsNAV=True):
 
 
 def calmer_ratio(ts, inputIsNAV=True, returns_style='calendar'):
-                temp_max_dd = max_drawdown(ts=ts, inputIsNAV=inputIsNAV)
+    temp_max_dd = max_drawdown(ts=ts, inputIsNAV=inputIsNAV)
     # print(temp_max_dd)
     if temp_max_dd < 0:
         if inputIsNAV:
@@ -431,171 +419,48 @@ def rolling_beta(ser, benchmark_rets, rolling_window=63):
     return pd.Series(index=ser.index[rolling_window:], data=results)
 
 
-def rolling_beta_TS(theTS, benchmarkTS, startDate=None, endDate=None, rolling_window=63):
-    if startDate != None:
-        theTS = theTS[(startDate -  timedelta(days=rolling_window)):]
+def out_of_sample_vs_in_sample_returns_kde(bt_ts, oos_ts, transform_style='scale', return_zero_if_exception=True):
+    
+    bt_ts_pct = bt_ts.pct_change().dropna()
+    oos_ts_pct = oos_ts.pct_change().dropna()
+    
+    bt_ts_r = bt_ts_pct.reshape(len(bt_ts_pct),1)
+    oos_ts_r = oos_ts_pct.reshape(len(oos_ts_pct),1)
+    
+    if transform_style == 'raw':
+        bt_scaled = bt_ts_r
+        oos_scaled = oos_ts_r
+    if transform_style == 'scale':
+        bt_scaled = preprocessing.scale(bt_ts_r, axis=0)
+        oos_scaled = preprocessing.scale(oos_ts_r, axis=0)
+    if transform_style == 'normalize_L2':
+        bt_scaled = preprocessing.normalize(bt_ts_r, axis=1)
+        oos_scaled = preprocessing.normalize(oos_ts_r, axis=1)
+    if transform_style == 'normalize_L1':
+        bt_scaled = preprocessing.normalize(bt_ts_r, axis=1, norm='l1')
+        oos_scaled = preprocessing.normalize(oos_ts_r, axis=1, norm='l1')
 
-    if endDate != None:
-        theTS = theTS[:endDate]
+    X_train = bt_scaled
+    X_test = oos_scaled
 
+    X_train = X_train.reshape(len(X_train))
+    X_test = X_test.reshape(len(X_test))
 
-    results = [ beta_TS( theTS[beg:end], benchmarkTS)
-               for beg,end in zip(theTS.index[0:-rolling_window], theTS.index[rolling_window:]) ]
+    x_axis_dim = np.linspace(-4, 4, 100)
+    kernal_method = 'scott'
 
-    return pd.Series(index=theTS.index[rolling_window:], data=results)
+    try:
+        scipy_kde_train = stats.gaussian_kde(X_train, bw_method=kernal_method)(x_axis_dim)
+        scipy_kde_test = stats.gaussian_kde(X_test, bw_method=kernal_method)(x_axis_dim)
+    except:
+        if return_zero_if_exception:
+            return 0.0
+        else:
+            return np.nan
+    
+    kde_diff = sum(abs(scipy_kde_test - scipy_kde_train)) / (sum(scipy_kde_train) + sum(scipy_kde_test))
 
-
-def beta_TS(theTS, benchmarkTS,
-            startDate=None, endDate=None,
-            inputIsReturns=False):
-    tempTS = theTS.copy()
-    tempBench = benchmarkTS.copy()
-
-    tempTS = tempTS.asfreq(freq='D',normalize=True)
-    tempBench = tempBench.asfreq(freq='D',normalize=True)
-
-    if not inputIsReturns:
-        tempTS = tempTS.pct_change().dropna()
-        tempBench = tempBench.pct_change().dropna()
-
-    if startDate != None:
-        tempTS = tempTS[startdate:]
-        tempBench = tempBench[startdate:]
-
-    if endDate != None:
-        tempTS = tempTS[:enddate]
-        tempBench = tempBench[:enddate]
-
-    tempTS = tempTS[ np.isfinite(tempTS) ]
-    tempBench = tempBench[ np.isfinite(tempBench) ]
-
-    # remove intraday timestamps by normalizing since only working with daily data right now
-    # tempTS.reindex(tempTS.index.normalize())
-    # tempBench.reindex(tempBench.index.normalize())
-
-    # tempTS.reindex(indexTradingCal)
-    # tempBench.reindex(indexTradingCal)
-
-    tempAlign = tempBench.align(tempTS, join='inner')
-    alignBench = tempAlign[0]
-    alignTS = tempAlign[1]
-    # print( alignBench.head() )
-    # print( alignTS.head() )
-
-    if alignBench.shape[0] < 2:
-        return np.nan
-    if alignTS.shape[0] < 2:
-        return np.nan
-
-    regX = np.array( alignBench.values )
-    regY = np.array( alignTS.values )
-
-    regX = np.reshape(regX,len(regX))
-    regY = np.reshape(regY,len(regY))
-
-    m, b = np.polyfit(regX, regY, 1)
-
-    return m
-
-
-def rolling_beta_TS(ts=None, benchmark=None, startDate=None, endDate=None,
-                    rolling_window=63, sampling_days=None):
-#     ts = ts.normalize()
-    if startDate != None:
-        # set start date rolling_window trading days before startDate
-        tsp = ts[startDate:].index[0]
-        true_start = ts.index.get_loc(tsp) - rolling_window
-        ts = ts[true_start:]
-
-    if endDate != None:
-        ts = ts[:endDate]
-
-
-    results = [ beta_TS( ts[beg:end], benchmark)
-               for beg,end in zip(ts.index[0:-rolling_window], ts.index[rolling_window:]) ]
-
-    results = pd.Series(index=ts.index[rolling_window:], data=results)
-
-    if sampling_days is not None:
-        results = results[::sampling_days]
-
-    return results
-
-
-def calc_beta_like_zipline(df_rets, benchmark_rets, startDate=None, endDate=None,
-                            inputs_are_returns=True):
-    if not inputs_are_returns:
-        df_rets = df_rets.pct_change().dropna()
-        benchmark_rets = benchmark_rets.pct_change().dropna()
-
-    if startDate != None:
-        df_rets = df_rets[startDate:]
-
-    if endDate != None:
-        df_rets = df_rets[:endDate]
-
-    benchmark_rets = benchmark_rets.loc[df_rets.index.normalize()]
-
-    returns_matrix = np.vstack([df_rets.values, benchmark_rets.values])
-
-    C = np.cov(returns_matrix, ddof=1)
-    algorithm_covariance = C[0][1]
-    benchmark_variance = C[1][1]
-    beta = algorithm_covariance / benchmark_variance
-
-    return beta
-
-
-def calc_beta_like_zipline_rolling(df_rets, benchmark_rets, startDate=None, endDate=None,
-                                    sampling_days=None, rolling_window=252, inputs_are_returns=True):
-    if startDate != None:
-        # set start date rolling_window trading days before startDate
-        tsp = df_rets[startDate:].index[0]
-        true_start = df_rets.index.get_loc(tsp) - rolling_window
-        df_rets = df_rets[true_start:]
-
-    if endDate != None:
-        df_rets = df_rets[:endDate]
-
-    results = [ calc_beta_like_zipline( df_rets[beg:end], benchmark_rets, inputs_are_returns=inputs_are_returns)
-               for beg,end in zip(df_rets.index[0:-rolling_window], df_rets.index[rolling_window:]) ]
-
-    results = pd.Series(index=df_rets.index[rolling_window:], data=results)
-
-    if sampling_days is not None:
-        results = results[::sampling_days]
-
-    return results
-
-
-def hurst(ts, lagsToTest=20):
-    tau = []
-    lagvec = []
-    #  Step through the different lags
-    for lag in range(2,lagsToTest):
-        #  produce price difference with lag
-        pp = np.subtract(ts[lag:],ts[:-lag])
-        #  Write the different lags into a vector
-        lagvec.append(lag)
-        #  Calculate the variance of the differnce vector
-        tau.append(np.sqrt(np.std(pp)))
-    #  linear fit to double-log graph (gives power)
-    m = np.polyfit(np.log10(lagvec),np.log10(tau),1)
-    # calculate hurst
-    hurst = m[0]*2
-    # plot lag vs variance
-    # py.plot(lagvec,tau,'o'); show()
-    return hurst
-
-
-def half_life(ts):
-    price = pd.Series(ts)
-    lagged_price = price.shift(1).fillna(method="bfill")
-    delta = price - lagged_price
-    beta = np.polyfit(lagged_price, delta, 1)[0]
-    half_life = (-1*np.log(2)/beta)
-
-    return half_life
+    return kde_diff
 
 
 def perf_stats(ts, inputIsNAV=True, returns_style='compound', return_as_dict=False):
@@ -606,66 +471,13 @@ def perf_stats(ts, inputIsNAV=True, returns_style='compound', return_as_dict=Fal
     all_stats['calmar_ratio'] = calmer_ratio(ts, inputIsNAV=inputIsNAV, returns_style=returns_style)
     all_stats['stability'] = stability_of_timeseries(ts, inputIsNAV=inputIsNAV)
     all_stats['max_drawdown'] = max_drawdown(ts, inputIsNAV=inputIsNAV)
-    # print(all_stats)
-
+    
     if return_as_dict:
         return all_stats
     else:
         all_stats_df = pd.DataFrame(index=all_stats.keys(), data=all_stats.values())
         all_stats_df.columns = ['perf_stats']
         return all_stats_df
-
-
-# Strategy Performance statistics & timeseries analysis functions
-def calc_correl_matrix(tsDict, startDate=None, endDate=None, returnAsDict=False):
-    # if 'returnAsDict' = False, then it will return in the form of the MultiIndex dataframe that corr() returns
-    tempDF = multi_TS_to_DF_from_dict(tsDict, asPctChange=True, startDate=startDate, endDate=endDate, dropNA=True)
-    if returnAsDict:
-        tempDF_unstack = tempDF.corr().unstack()
-        tempDict = {}
-        for i in tsDict.keys():
-            tempDict[i] = tempDF_unstack[i]
-        return tempDict
-    else:
-        return tempDF.corr()
-
-
-def calc_avg_pairwise_correl_dict(tsDict, startDate=None, endDate=None, overlapping_periods_for_all=True):
-    pairwise_dict = {}
-    if overlapping_periods_for_all:
-        # this path first joins all the timeseries into dataframe containing rows (days) that are valid in ALL timeseries
-        tempcorrel = calc_correl_matrix(tsDict, startDate, endDate, returnAsDict=True)
-        for i in tempcorrel.keys():
-            temp_series = tempcorrel[i].dropna()
-            # the below just removes the affect of the results containing the 1.0 correlation that each element has with itself
-            if len(temp_series) > 0:
-                temp_series_avg = np.append(temp_series,-1.0).sum() / (temp_series.size - 1)
-                pairwise_dict[i] = temp_series_avg
-            else:
-                pairwise_dict[i] = np.nan
-    else:
-        # this path computes each pairwise correl for days valid across just those 2 inputs in each individual pair
-        # so if 1 input only has 10 valid days, each of its pairwise correlations will be across those 10 days,
-        # but for other pairs of timeseries that have more valid days, those correlations will include all the valid days
-        for i in tsDict.keys():
-            pair_correl_arr = np.array([],dtype='float')
-            # pair_correl_arr = pd.Series()
-            for j in ( set(tsDict.keys()) - {i} ):
-                pair_dict = {}
-                pair_dict[i] = tsDict[i]
-                pair_dict[j] = tsDict[j]
-                tempcorrel = calc_correl_matrix(pair_dict, startDate, endDate, returnAsDict=True)
-                # pair_correl_arr = np.append( pair_correl_arr, tempcorrel[i][j] )
-                if not np.isnan(tempcorrel[i][j]):
-                    pair_correl_arr = np.append( pair_correl_arr, tempcorrel[i][j] )
-                    # pair_correl_arr = pd.Series.append( pair_correl_arr, tempcorrel[i][j] )
-
-            if len(pair_correl_arr) > 0:
-                pairwise_dict[i] = pair_correl_arr.mean()
-            else:
-                pairwise_dict[i] = np.nan
-
-    return pairwise_dict
 
 
 def get_max_draw_down_underwater(underwater):
@@ -727,3 +539,108 @@ def gen_drawdown_table(df_rets, top=10):
 
 def rolling_sharpe(df_rets, rolling_sharpe_window):
     return pd.rolling_mean(df_rets, rolling_sharpe_window) / pd.rolling_std(df_rets, rolling_sharpe_window) * np.sqrt(252)
+
+
+def cone_rolling(input_rets, num_stdev=1.5, warm_up_days_pct=0.5, std_scale_factor=252, 
+                 update_std_oos_rolling=False, cone_fit_end_date=None, extend_fit_trend=True, create_future_cone=True):
+
+    # if specifying 'cone_fit_end_date' please use a pandas compatible format, e.g. '2015-8-4', 'YYYY-MM-DD'
+
+    warm_up_days = int(warm_up_days_pct*input_rets.size)
+
+    # create initial linear fit from beginning of timeseries thru warm_up_days or the specified 'cone_fit_end_date'
+    if cone_fit_end_date is None:
+        df_rets = input_rets[:warm_up_days]
+    else:
+        df_rets = input_rets[ input_rets.index < cone_fit_end_date]
+    
+    perf_ts = cum_returns(df_rets, 1)
+        
+    X = range(0, perf_ts.size)
+    X = sm.add_constant(X)
+    sm.OLS(perf_ts , range(0,len(perf_ts)))
+    line_ols = sm.OLS(perf_ts.values , X).fit()
+    fit_line_ols_coef = line_ols.params[1]
+    fit_line_ols_inter = line_ols.params[0]
+
+    x_points = range(0, perf_ts.size)
+    x_points = np.array(x_points) * fit_line_ols_coef + fit_line_ols_inter
+    
+    perf_ts_r = pd.DataFrame(perf_ts)
+    perf_ts_r.columns = ['perf']
+    
+    warm_up_std_pct = np.std(perf_ts.pct_change().dropna())
+    std_pct = warm_up_std_pct * np.sqrt(std_scale_factor) 
+
+    perf_ts_r['line'] = x_points
+    perf_ts_r['sd_up'] = perf_ts_r['line'] * ( 1 + num_stdev * std_pct )
+    perf_ts_r['sd_down'] = perf_ts_r['line'] * ( 1 - num_stdev * std_pct )
+    
+    std_pct = warm_up_std_pct * np.sqrt(std_scale_factor) 
+    
+    last_backtest_day_index = df_rets.index[-1]
+    cone_end_rets = input_rets[ input_rets.index > last_backtest_day_index ]
+    new_cone_day_scale_factor = int(1)
+    oos_intercept_shift = perf_ts_r.perf[-1] - perf_ts_r.line[-1]
+
+    # make the cone for the out-of-sample/live papertrading period
+    for i in cone_end_rets.index:
+        df_rets = input_rets[:i]
+        perf_ts = cum_returns(df_rets, 1)
+        
+        if extend_fit_trend:
+            line_ols_coef = fit_line_ols_coef
+            line_ols_inter = fit_line_ols_inter
+        else:
+            X = range(0, perf_ts.size)
+            X = sm.add_constant(X)
+            sm.OLS(perf_ts , range(0,len(perf_ts)))
+            line_ols = sm.OLS(perf_ts.values , X).fit()
+            line_ols_coef = line_ols.params[1]
+            line_ols_inter = line_ols.params[0]
+            
+        x_points = range(0, perf_ts.size)
+        x_points = np.array(x_points) * line_ols_coef + line_ols_inter + oos_intercept_shift
+        
+        temp_line = x_points   
+        if update_std_oos_rolling:
+            #std_pct = np.sqrt(std_scale_factor) * np.std(perf_ts.pct_change().dropna())
+            std_pct = np.sqrt(new_cone_day_scale_factor) * np.std(perf_ts.pct_change().dropna())
+        else:
+            std_pct = np.sqrt(new_cone_day_scale_factor) * warm_up_std_pct
+        
+        temp_sd_up = temp_line * ( 1 + num_stdev * std_pct )
+        temp_sd_down = temp_line * ( 1 - num_stdev * std_pct )
+        
+        new_daily_cone = pd.DataFrame(index=[i], data={'perf':perf_ts[i], 
+                                                       'line':temp_line[-1], 
+                                                       'sd_up':temp_sd_up[-1], 
+                                                       'sd_down':temp_sd_down[-1] } )
+        
+        perf_ts_r = perf_ts_r.append(new_daily_cone)
+        new_cone_day_scale_factor+=1
+
+
+    if create_future_cone:
+        extend_ahead_days = 252
+        future_cone_dates = pd.date_range(cone_end_rets.index[-1], periods=extend_ahead_days, freq='B')
+        
+        future_cone_intercept_shift = perf_ts_r.perf[-1] - perf_ts_r.line[-1]
+        
+        future_days_scale_factor = np.linspace(1,extend_ahead_days,extend_ahead_days)
+        std_pct = np.sqrt(future_days_scale_factor) * warm_up_std_pct
+        
+        x_points = range(perf_ts.size, perf_ts.size + extend_ahead_days)
+        x_points = np.array(x_points) * line_ols_coef + line_ols_inter + oos_intercept_shift + future_cone_intercept_shift
+        temp_line = x_points   
+        temp_sd_up = temp_line * ( 1 + num_stdev * std_pct )
+        temp_sd_down = temp_line * ( 1 - num_stdev * std_pct )
+
+        future_cone = pd.DataFrame(index=map( np.datetime64, future_cone_dates ), data={'perf':temp_line, 
+                                                                                        'line':temp_line, 
+                                                                                        'sd_up':temp_sd_up, 
+                                                                                        'sd_down':temp_sd_down } )
+    
+        perf_ts_r = perf_ts_r.append(future_cone)
+
+    return perf_ts_r
