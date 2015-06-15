@@ -31,8 +31,6 @@ install_reqs = ['numpy>=1.9.2', 'scipy>=0.13.0', 'matplotlib>=1.2.1',
 
 test_reqs = ['nose']
 
-dep_links = []
-
 if __name__ == "__main__":
     setup(name=DISTNAME,
           version=VERSION,
@@ -45,7 +43,6 @@ if __name__ == "__main__":
           packages=['quantrisk', 'quantrisk.tests'],
           package_data = {'quantrisk.examples': ['data/*.*']},
           classifiers=classifiers,
-          install_requires=install_reqs,
-          dependency_links=dep_links,
+          #install_requires=install_reqs,
           tests_require=test_reqs,
           test_suite='nose.collector')
