@@ -54,12 +54,13 @@ def get_portfolio_alloc(df_pos_vals):
 
 def get_long_short_pos(df_pos):
     df_pos_wo_cash = df_pos.drop('cash', axis='columns')
-    # renormalize
     df_long = df_pos_wo_cash.apply(lambda x: x[x > 0].sum(), axis='columns')
     df_short = -df_pos_wo_cash.apply(lambda x: x[x < 0].sum(), axis='columns')
-    df_cash = df_pos.cash.abs()
-    df_long_short = pd.DataFrame(
-        {'long': df_long, 'short': df_short, 'cash': df_cash})
+    # Shorting positions adds to cash
+    df_cash = df_pos.cash.abs() - df_short
+    df_long_short = pd.DataFrame({'long': df_long,
+                                  'short': df_short,
+                                  'cash': df_cash})
     return df_long_short
 
 
