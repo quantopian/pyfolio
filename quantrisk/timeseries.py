@@ -571,6 +571,7 @@ def get_top_draw_downs(df_rets, top=10):
         drawdowns.append((peak, valley, recovery))
         if len(df_rets) == 0:
             break
+
     return drawdowns
 
 
@@ -582,21 +583,15 @@ def gen_drawdown_table(df_rets, top=10):
                                                            'valley date',
                                                            'recovery date',
                                                            'duration'])
+
     for i, (peak, valley, recovery) in enumerate(drawdown_periods):
-        df_drawdowns.loc[
-            i,
-            'duration'] = len(
-            pd.date_range(
-                peak,
-                recovery,
-                freq='B'))
+        df_drawdowns.loc[i, 'duration'] = len(pd.date_range(peak,
+                                                            recovery,
+                                                            freq='B'))
         df_drawdowns.loc[i, 'peak date'] = peak
         df_drawdowns.loc[i, 'valley date'] = valley
         df_drawdowns.loc[i, 'recovery date'] = recovery
-        # df_drawdowns.loc[i, 'net drawdown in %'] = (df_cum.loc[peak] - df_cum.loc[valley]) * 100
-        df_drawdowns.loc[
-            i,
-            'net drawdown in %'] = (
+        df_drawdowns.loc[i, 'net drawdown in %'] = (
             (df_cum.loc[peak] - df_cum.loc[valley]) / df_cum.loc[peak]) * 100
 
     df_drawdowns['peak date'] = pd.to_datetime(
@@ -613,9 +608,8 @@ def gen_drawdown_table(df_rets, top=10):
 
 
 def rolling_sharpe(df_rets, rolling_sharpe_window):
-    return pd.rolling_mean(df_rets,
-                           rolling_sharpe_window) / pd.rolling_std(df_rets,
-                                                                   rolling_sharpe_window) * np.sqrt(252)
+    return pd.rolling_mean(df_rets, rolling_sharpe_window) \
+        / pd.rolling_std(df_rets, rolling_sharpe_window) * np.sqrt(252)
 
 
 def cone_rolling(

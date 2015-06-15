@@ -253,13 +253,12 @@ def plot_drawdowns(df_rets, top=10):
     colors = sns.cubehelix_palette(len(df_drawdowns))[::-1]
     for i, (peak, recovery) in df_drawdowns[
             ['peak date', 'recovery date']].iterrows():
-        ax1.fill_between(
-            (peak,
-             recovery),
-            lim[0],
-            lim[1],
-            alpha=.5,
-            color=colors[i])
+        ax1.fill_between((peak, recovery),
+                         lim[0],
+                         lim[1],
+                         alpha=.5,
+                         color=colors[i])
+
     plt.suptitle('Top %i draw down periods' % top)
     ax1.set_ylabel('returns in %')
     ax2.set_ylabel('drawdown in %')
