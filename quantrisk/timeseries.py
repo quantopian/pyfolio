@@ -552,7 +552,7 @@ def get_max_draw_down(df_rets):
     df_rets = df_rets.copy()
     df_cum = cum_returns(df_rets)
     running_max = np.maximum.accumulate(df_cum)
-    underwater = running_max - df_cum
+    underwater = (running_max - df_cum) / running_max
     return get_max_draw_down_underwater(underwater)
 
 
