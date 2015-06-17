@@ -572,7 +572,7 @@ def get_top_draw_downs(df_rets, top=10):
     for t in range(top):
         peak, valley, recovery = get_max_draw_down_underwater(underwater)
         # Slice out draw-down period
-        if not np.isnan(recovery):
+        if not pd.isnull(recovery):
             underwater = pd.concat(
                 [underwater.loc[:peak].iloc[:-1], underwater.loc[recovery:].iloc[1:]])
         else:
@@ -596,7 +596,7 @@ def gen_drawdown_table(df_rets, top=10):
                                                            'duration'])
 
     for i, (peak, valley, recovery) in enumerate(drawdown_periods):
-        if np.isnan(recovery):
+        if pd.isnull(recovery):
             df_drawdowns.loc[i, 'duration'] = np.nan
         else:
             df_drawdowns.loc[i, 'duration'] = len(pd.date_range(peak,
