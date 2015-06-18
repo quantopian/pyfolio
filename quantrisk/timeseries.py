@@ -546,7 +546,10 @@ def get_max_draw_down_underwater(underwater):
     # Find first 0
     peak = underwater[:valley][underwater[:valley] == 0].index[-1]
     # Find last 0
-    recovery = underwater[valley:][underwater[valley:] == 0].index[0]
+    try:
+        recovery = underwater[valley:][underwater[valley:] == 0].index[0]
+    except IndexError:
+        recovery = np.nan # drawdown not recovered
     return peak, valley, recovery
 
 
@@ -555,6 +558,7 @@ def get_max_draw_down(df_rets):
     df_cum = cum_returns(df_rets)
     running_max = np.maximum.accumulate(df_cum)
     underwater = (running_max - df_cum) / running_max
+    #import pdb; pdb.set_trace()
     return get_max_draw_down_underwater(underwater)
 
 
@@ -568,8 +572,13 @@ def get_top_draw_downs(df_rets, top=10):
     for t in range(top):
         peak, valley, recovery = get_max_draw_down_underwater(underwater)
         # Slice out draw-down period
-        underwater = pd.concat(
-            [underwater.loc[:peak].iloc[:-1], underwater.loc[recovery:].iloc[1:]])
+        if not pd.isnull(recovery):
+            underwater = pd.concat(
+                [underwater.loc[:peak].iloc[:-1], underwater.loc[recovery:].iloc[1:]])
+        else:
+            # drawdown has not ended yet
+            underwater = underwater.loc[:peak]
+
         drawdowns.append((peak, valley, recovery))
         if len(df_rets) == 0:
             break
@@ -587,9 +596,12 @@ def gen_drawdown_table(df_rets, top=10):
                                                            'duration'])
 
     for i, (peak, valley, recovery) in enumerate(drawdown_periods):
-        df_drawdowns.loc[i, 'duration'] = len(pd.date_range(peak,
-                                                            recovery,
-                                                            freq='B'))
+        if pd.isnull(recovery):
+            df_drawdowns.loc[i, 'duration'] = np.nan
+        else:
+            df_drawdowns.loc[i, 'duration'] = len(pd.date_range(peak,
+                                                                recovery,
+                                                                freq='B'))
         df_drawdowns.loc[i, 'peak date'] = peak
         df_drawdowns.loc[i, 'valley date'] = valley
         df_drawdowns.loc[i, 'recovery date'] = recovery

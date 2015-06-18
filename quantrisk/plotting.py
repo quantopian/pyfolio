@@ -247,6 +247,8 @@ def plot_drawdowns(df_rets, top=10):
     colors = sns.cubehelix_palette(len(df_drawdowns))[::-1]
     for i, (peak, recovery) in df_drawdowns[
             ['peak date', 'recovery date']].iterrows():
+        if pd.isnull(recovery):
+            recovery = df_rets.iloc[-1].index
         ax1.fill_between((peak, recovery),
                          lim[0],
                          lim[1],
