@@ -1,80 +1,94 @@
+from __future__ import division
+
 import timeseries
 import utils
+import positions
+import plotting
+import internals
 
 import numpy as np
 import pandas as pd
 
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter
-
-def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
-    df_rets_backtest = df_rets[ df_rets.index < algo_create_date]
-    df_rets_live = df_rets[ df_rets.index > algo_create_date]
-
-    print 'Out-of-Sample Months: ' + str( int( len(df_rets_live) / 21) )
-    print 'Backtest Months: ' + str( int( len(df_rets_backtest) / 21) )
-
-    perf_stats_backtest = np.round(timeseries.perf_stats(df_rets_backtest, inputIsNAV=False, returns_style='arithmetic'), 2)
-    perf_stats_backtest_ab = np.round(timeseries.calc_alpha_beta(df_rets_backtest, benchmark_rets), 2)
-    perf_stats_backtest.loc['alpha'] = perf_stats_backtest_ab[0]
-    perf_stats_backtest.loc['beta'] = perf_stats_backtest_ab[1]
-    perf_stats_backtest.columns = ['Backtest']
-
-    perf_stats_live = np.round(timeseries.perf_stats(df_rets_live, inputIsNAV=False, returns_style='arithmetic'), 2)
-    perf_stats_live_ab = np.round(timeseries.calc_alpha_beta(df_rets_live, benchmark_rets), 2)
-    perf_stats_live.loc['alpha'] = perf_stats_live_ab[0]
-    perf_stats_live.loc['beta'] = perf_stats_live_ab[1]
-    perf_stats_live.columns = ['Out_of_Sample']
-
-    perf_stats_all = np.round(timeseries.perf_stats(df_rets, inputIsNAV=False, returns_style='arithmetic'), 2)
-    perf_stats_all_ab = np.round(timeseries.calc_alpha_beta(df_rets, benchmark_rets), 2)
-    perf_stats_all.loc['alpha'] = perf_stats_all_ab[0]
-    perf_stats_all.loc['beta'] = perf_stats_all_ab[1]
-    perf_stats_all.columns = ['All_History']
-
-    perf_stats_both = perf_stats_backtest.join(perf_stats_live, how='inner')
-    perf_stats_both = perf_stats_both.join(perf_stats_all, how='inner')
-
-    print perf_stats_both
+def analyze_single_algo(df_rets, df_pos_val, df_txn, gross_lev, fetcher_urls='',
+                        timeseries_input_only=False, algo_create_date=None):
     
-def show_cone_plot(algo_ts, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, future_cone_stdev, timeseries_input_only, fig, ax, show_plot=True):
+    benchmark_rets = utils.get_symbol_rets('SPY')
+    benchmark2_rets = utils.get_symbol_rets('IEF')  #7-10yr Bond ETF.
     
-    if not timeseries_input_only and algo_ts.index[-1] <= algo_create_date and show_plot:
-        algo_ts.plot(lw=3, color='forestgreen', label='', alpha=0.6)
-        plt.legend(['S&P500', '7-10yr Bond', 'Algo backtest'], loc='upper left')
-    else:
-        if show_plot:
-            algo_ts[:algo_create_date].plot(lw=3, color='forestgreen', label='', alpha=0.6)
-            algo_ts[algo_create_date:].plot(lw=4, color='red', label='', alpha=0.6)
+    # if your directory structure isn't exactly the same as the research server you can manually specify the location
+    # of the directory holding the risk factor data
+    #risk_factors = load_portfolio_risk_factors(local_risk_factor_path)
+    risk_factors = internals.load_portfolio_risk_factors().dropna(axis=0)
+    
+    plotting.set_plot_defaults()
+    
+    algo_ts = (df_rets + 1).cumprod()    
+    print "Entire data start date: " + str(algo_ts.index[0])
+    print "Entire data end date: " + str(algo_ts.index[-1])
+    
+    if not timeseries_input_only:
+        print 'Fetcher URLs: ', fetcher_urls
+    
+    print '\n'
+    
+    warm_up_days_pct = 0.5
+    algo_create_date = df_rets.index[ int(len(df_rets)*warm_up_days_pct) ]
+    
+    plotting.show_perf_stats(df_rets, algo_create_date, benchmark_rets)
+    
+    plotting.plot_rolling_returns(algo_ts, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, timeseries_input_only)
+    
+    plotting.plot_rolling_beta(algo_ts, df_rets, benchmark_rets)
 
-            cone_df = timeseries.cone_rolling(df_rets, num_stdev=future_cone_stdev, cone_fit_end_date=algo_create_date)
+    plotting.plot_rolling_sharp(algo_ts, df_rets)
+    
+    plotting.plot_rolling_risk_factors(algo_ts, df_rets, risk_factors, legend_loc='best')    
+        
+    plotting.plot_calendar_returns_info_graphic(df_rets)
 
-            cone_df_fit = cone_df[ cone_df.index < algo_create_date]
-            cone_df_live = cone_df[ cone_df.index > algo_create_date]
-            cone_df_live = cone_df_live[ cone_df_live.index < df_rets.index[-1] ]
-            cone_df_future = cone_df[ cone_df.index > df_rets.index[-1] ]
+    ###########################
+    # Position analysis
+    
+    if not timeseries_input_only:
+        plotting.plot_gross_leverage(algo_ts, gross_lev)
 
-            cone_df_fit['line'].plot(ls='--', lw=2, color='forestgreen', alpha=0.7)
-            cone_df_live['line'].plot(ls='--', lw=2, color='coral', alpha=0.7)
-            cone_df_future['line'].plot(ls='--', lw=2, color='navy', alpha=0.7)
+        df_pos_alloc = positions.get_portfolio_alloc(df_pos_val)
 
-            ax.fill_between(cone_df_live.index, 
-                            cone_df_live.sd_down, 
-                            cone_df_live.sd_up, 
-                            color='coral', alpha=0.20)
+        plotting.plot_exposures(algo_ts, df_pos_alloc)
+        
+        plotting.show_and_plot_top_positions(algo_ts, df_pos_alloc)
+        
+        plotting.plot_holdings(df_pos_alloc)
+    
+    df_weekly = timeseries.aggregate_returns(df_rets, 'weekly')
+    df_monthly = timeseries.aggregate_returns(df_rets, 'monthly')
+    
+    plotting.plot_return_quantiles(df_rets, df_weekly, df_monthly)
+    
+    plotting.show_return_range(df_rets, df_weekly)
+    
+    # Get interesting time periods
 
-            ax.fill_between(cone_df_future.index, 
-                            cone_df_future.sd_down, 
-                            cone_df_future.sd_up, 
-                            color='navy', alpha=0.15)
+    plotting.plot_interesting_times(df_rets, benchmark_rets)
             
-            plt.axhline(1.0 , linestyle='--', color='black', lw=2)
-            plt.ylabel('Cumulative returns', fontsize=14)
-            plt.xlim((algo_ts.index[0], cone_df.index[-1]))
+    #########################
+    # Drawdowns
+    try:
+        plot_drawdowns(df_rets, top=5)
+        print '\nWorst Drawdown Periods'
+        drawdown_df = gen_drawdown_table(df_rets, top=5)
+        drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
+        drawdown_df['valley date'] = pd.to_datetime(drawdown_df['valley date'],unit='D')
+        drawdown_df['recovery date'] = pd.to_datetime(drawdown_df['recovery date'],unit='D')
+        print drawdown_df
+    except:
+        pass
+    
+    ##########################
+    # Turn-over analysis
+    if not timeseries_input_only:
+        plotting.plot_daily_turnover(algo_ts, df_txn, df_pos_val)
         
-            if timeseries_input_only:
-                plt.legend(['S&P500', '7-10yr Bond', 'Portfolio'], loc='upper left')
-            else:
-                plt.legend(['S&P500', '7-10yr Bond', 'Algo backtest','Algo LIVE'], loc='upper left')
+        plotting.plot_daily_volume(algo_ts, df_txn)
         
-        return cone_df, cone_df_fit, cone_df_live, cone_df_future
+        plotting.plot_volume_per_day_hist(algo_ts, df_txn)
