@@ -24,33 +24,18 @@ def var_cov_var_normal(P, c, mu=0, sigma=1, **kwargs):
     return P - P * (alpha + 1)
 
 
-def rolling_metric_stat(ret_ts, metric, stat_func=np.mean,
-                        window=63, sample_freq=21,
-                        return_all_values=False):
-    roll_results = pd.rolling_apply(ret_ts, window, metric).dropna()
-    roll_results_sample = roll_results[
-        np.sort(range(len(roll_results) - 1, 0, -sample_freq))
-    ]
-
-    if return_all_values:
-        return roll_results_sample
-    else:
-        temp_f = lambda x: stat_func(x)
-        return temp_f(roll_results_sample)
-
-
-def normalize(df, starting_value=1):
+def normalize(df_rets, starting_value=1):
     if starting_value > 1:
-        return starting_value * (df / df.iloc[0])
+        return starting_value * (df_rets / df_rets.iloc[0])
     else:
-        return df / df.iloc[0]
+        return df_rets / df_rets.iloc[0]
 
 
-def cum_returns(df, starting_value=None):
+def cum_returns(df_rets, starting_value=None):
     if starting_value is None:
-        return np.exp(np.log(1 + df).cumsum()) - 1
+        return np.exp(np.log(1 + df_rets).cumsum()) - 1
     else:
-        return np.exp(np.log(1 + df).cumsum()) * starting_value
+        return np.exp(np.log(1 + df_rets).cumsum()) * starting_value
 
 
 def aggregate_returns(df_daily_rets, convert_to):
@@ -71,14 +56,14 @@ def aggregate_returns(df_daily_rets, convert_to):
 
 # Strategy Performance statistics & timeseries analysis functions
 
-def max_drawdown(ts, inputIsNAV=True):
-    if ts.size < 1:
+def max_drawdown(df_rets, inputIsNAV=True):
+    if df_rets.size < 1:
         return np.nan
 
     if inputIsNAV:
-        temp_ts = ts
+        temp_ts = df_rets
     else:
-        temp_ts = cum_returns(ts, starting_value=100)
+        temp_ts = cum_returns(df_rets, starting_value=100)
 
     MDD = 0
     DD = 0
@@ -93,20 +78,20 @@ def max_drawdown(ts, inputIsNAV=True):
     return -1 * MDD
 
 
-def annual_return(ts, inputIsNAV=True, style='calendar'):
+def annual_return(df_rets, inputIsNAV=True, style='calendar'):
     # if style == 'compound' then return will be calculated in geometric terms: (1+mean(all_daily_returns))^252 - 1
     # if style == 'calendar' then return will be calculated as ((last_value - start_value)/start_value)/num_of_years
     # if style == 'arithmetic' then return is simply
     # mean(all_daily_returns)*252
-    if ts.size < 1:
+    if df_rets.size < 1:
         return np.nan
 
     if inputIsNAV:
-        tempReturns = ts.pct_change().dropna()
+        tempReturns = df_rets.pct_change().dropna()
         if style == 'calendar':
             num_years = len(tempReturns) / 252
-            start_value = ts[0]
-            end_value = ts[-1]
+            start_value = df_rets[0]
+            end_value = df_rets[-1]
             return ((end_value - start_value) / start_value) / num_years
         if style == 'compound':
             return pow((1 + tempReturns.mean()), 252) - 1
@@ -114,41 +99,41 @@ def annual_return(ts, inputIsNAV=True, style='calendar'):
             return tempReturns.mean() * 252
     else:
         if style == 'calendar':
-            num_years = len(ts) / 252
-            temp_NAV = cum_returns(ts, starting_value=100)
+            num_years = len(df_rets) / 252
+            temp_NAV = cum_returns(df_rets,starting_value=100)
             start_value = temp_NAV[0]
             end_value = temp_NAV[-1]
             return ((end_value - start_value) / start_value) / num_years
         if style == 'compound':
-            return pow((1 + ts.mean()), 252) - 1
+            return pow((1 + df_rets.mean()), 252) - 1
         else:
-            return ts.mean() * 252
+            return df_rets.mean() * 252
 
 
-def annual_volatility(ts, inputIsNAV=True):
-    if ts.size < 2:
+def annual_volatility(df_rets, inputIsNAV=True):
+    if df_rets.size < 2:
         return np.nan
     if inputIsNAV:
-        tempReturns = ts.pct_change().dropna()
+        tempReturns = df_rets.pct_change().dropna()
         return tempReturns.std() * np.sqrt(252)
     else:
-        return ts.std() * np.sqrt(252)
+        return df_rets.std() * np.sqrt(252)
 
 
-def calmer_ratio(ts, inputIsNAV=True, returns_style='calendar'):
-    temp_max_dd = max_drawdown(ts=ts, inputIsNAV=inputIsNAV)
+def calmer_ratio(df_rets, inputIsNAV=True, returns_style='calendar'):
+    temp_max_dd = max_drawdown(df_rets=df_rets, inputIsNAV=inputIsNAV)
     # print(temp_max_dd)
     if temp_max_dd < 0:
         if inputIsNAV:
-            temp = annual_return(ts=ts,
+            temp = annual_return(df_rets=df_rets,
                                  inputIsNAV=True,
-                                 style=returns_style) / abs(max_drawdown(ts=ts,
+                                 style=returns_style) / abs(max_drawdown(df_rets=df_rets,
                                                                          inputIsNAV=True))
         else:
-            tempNAV = cum_returns(ts, starting_value=100)
-            temp = annual_return(ts=tempNAV,
+            tempNAV = cum_returns(df_rets, starting_value=100)
+            temp = annual_return(df_rets=tempNAV,
                                  inputIsNAV=True,
-                                 style=returns_style) / abs(max_drawdown(ts=tempNAV,
+                                 style=returns_style) / abs(max_drawdown(df_rets=tempNAV,
                                                                          inputIsNAV=True))
         # print(temp)
     else:
@@ -160,35 +145,35 @@ def calmer_ratio(ts, inputIsNAV=True, returns_style='calendar'):
         return temp
 
 
-def sharpe_ratio(ts, inputIsNAV=True, returns_style='calendar'):
-    return annual_return(ts,
+def sharpe_ratio(df_rets, inputIsNAV=True, returns_style='calendar'):
+    return annual_return(df_rets,
                          inputIsNAV=inputIsNAV,
-                         style=returns_style) / annual_volatility(ts,
+                         style=returns_style) / annual_volatility(df_rets,
                                                                   inputIsNAV=inputIsNAV)
 
 
-def stability_of_timeseries(ts, logValue=True, inputIsNAV=True):
-    if ts.size < 2:
+def stability_of_timeseries(df_rets, logValue=True, inputIsNAV=True):
+    if df_rets.size < 2:
         return np.nan
 
     if logValue:
         if inputIsNAV:
-            tempValues = np.log10(ts.values)
-            tsLen = ts.size
+            tempValues = np.log10(df_rets.values)
+            leng_df_rets = df_rets.size
         else:
-            temp_ts = cum_returns(ts, starting_value=100)
+            temp_ts = cum_returns(df_rets, starting_value=100)
             tempValues = np.log10(temp_ts.values)
-            tsLen = temp_ts.size
+            leng_df_rets = temp_ts.size
     else:
         if inputIsNAV:
-            tempValues = ts.values
-            tsLen = ts.size
+            tempValues = df_rets.values
+            leng_df_rets = df_rets.size
         else:
-            temp_ts = cum_returns(ts, starting_value=100)
+            temp_ts = cum_returns(df_rets, starting_value=100)
             tempValues = temp_ts.values
-            tsLen = temp_ts.size
+            leng_df_rets = temp_ts.size
 
-    X = range(0, tsLen)
+    X = range(0, leng_df_rets)
     X = sm.add_constant(X)
 
     model = sm.OLS(tempValues, X).fit()
@@ -326,28 +311,28 @@ def out_of_sample_vs_in_sample_returns_kde(
 
 
 def perf_stats(
-        ts,
+        df_rets,
         inputIsNAV=True,
         returns_style='compound',
         return_as_dict=False):
     all_stats = {}
     all_stats['annual_return'] = annual_return(
-        ts,
+        df_rets,
         inputIsNAV=inputIsNAV,
         style=returns_style)
     all_stats['annual_volatility'] = annual_volatility(
-        ts,
+        df_rets,
         inputIsNAV=inputIsNAV)
     all_stats['sharpe_ratio'] = sharpe_ratio(
-        ts,
+        df_rets,
         inputIsNAV=inputIsNAV,
         returns_style=returns_style)
     all_stats['calmar_ratio'] = calmer_ratio(
-        ts,
+        df_rets,
         inputIsNAV=inputIsNAV,
         returns_style=returns_style)
-    all_stats['stability'] = stability_of_timeseries(ts, inputIsNAV=inputIsNAV)
-    all_stats['max_drawdown'] = max_drawdown(ts, inputIsNAV=inputIsNAV)
+    all_stats['stability'] = stability_of_timeseries(df_rets,inputIsNAV=inputIsNAV)
+    all_stats['max_drawdown'] = max_drawdown(df_rets,inputIsNAV=inputIsNAV)
 
     if return_as_dict:
         return all_stats
@@ -607,13 +592,13 @@ def gen_date_ranges_interesting():
 
     return periods
 
-def extract_interesting_date_ranges(df):
+def extract_interesting_date_ranges(df_rets):
     periods = gen_date_ranges_interesting()
-    df_ts = df.copy()
-    df_ts.index = df_ts.index.map(pd.Timestamp)
+    df_rets_dupe = df_rets.copy()
+    df_rets_dupe.index = df_rets_dupe.index.map(pd.Timestamp)
     ranges = OrderedDict()
     for name, (start, end) in periods.iteritems():
-        period = df_ts.loc[start:end]
+        period = df_rets_dupe.loc[start:end]
         if len(period) == 0:
             continue
         ranges[name] = period
