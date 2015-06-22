@@ -12,8 +12,6 @@ import statsmodels.api as sm
 
 import datetime
 
-# timeseries manipulation functions
-
 
 def var_cov_var_normal(P, c, mu=0, sigma=1, **kwargs):
     """
@@ -31,9 +29,8 @@ def rolling_metric_stat(ret_ts, metric, stat_func=np.mean,
                         return_all_values=False):
     roll_results = pd.rolling_apply(ret_ts, window, metric).dropna()
     roll_results_sample = roll_results[
-        np.sort(
-            range(
-                len(roll_results) - 1, 0, -sample_freq))]
+        np.sort(range(len(roll_results) - 1, 0, -sample_freq))
+    ]
 
     if return_all_values:
         return roll_results_sample
