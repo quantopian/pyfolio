@@ -100,4 +100,4 @@ def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None, gross_lev=None, fe
         create_position_tear_sheet(df_rets, df_pos, gross_lev=gross_lev)
 
         if df_txn is not None:
-            create_position_tear_sheet(df_rets, df_pos, df_txn)
+            create_txn_tear_sheet(df_rets, df_pos, df_txn)
