@@ -392,59 +392,17 @@ def multi_factor_alpha(
         return factor_alpha
 
 
-def calc_alpha_beta(df_rets, benchmark_rets, startDate=None, endDate=None,
-                    return_beta_only=False, inputs_are_returns=True,
-                    normalize=False, remove_zeros=False):
-    if not inputs_are_returns:
-        df_rets = df_rets.pct_change().dropna()
-        benchmark_rets = benchmark_rets.pct_change().dropna()
+def calc_alpha_beta(df_rets, benchmark_rets):
+    ret_index = df_rets.index
+    beta, alpha = sp.stats.linregress(benchmark_rets.loc[ret_index].values,
+                                      df_rets.values)[:2]
 
-    if startDate is not None:
-        df_rets = df_rets[startDate:]
-
-    if endDate is not None:
-        df_rets = df_rets[:endDate]
-
-    if df_rets.ndim == 1:
-        if remove_zeros:
-            df_rets = df_rets[df_rets != 0]
-
-        if normalize:
-            ret_index = df_rets.index.normalize()
-        else:
-            ret_index = df_rets.index
-
-        beta, alpha = sp.stats.linregress(benchmark_rets.loc[ret_index].values,
-                                          df_rets.values)[:2]
-
-    if df_rets.ndim == 2:
-        beta = pd.Series(index=df_rets.columns)
-        alpha = pd.Series(index=df_rets.columns)
-        for algo_id in df_rets:
-            df = df_rets[algo_id]
-            if remove_zeros:
-                df = df[df != 0]
-            if normalize:
-                ret_index = df.index.normalize()
-            else:
-                ret_index = df.index
-            beta[algo_id], alpha[algo_id] = sp.stats.linregress(
-                benchmark_rets.loc[ret_index].values, df.values)[
-                :2]
-        alpha.name = 'alpha'
-        beta.name = 'beta'
-
-    if return_beta_only:
-        return beta
-    else:
-        return alpha * 252, beta
+    return alpha * 252, beta
 
 
 def rolling_beta(ser, benchmark_rets, rolling_window=63):
     results = [calc_alpha_beta(ser[beg:end],
-                               benchmark_rets,
-                               return_beta_only=True,
-                               normalize=True) for beg,
+                               benchmark_rets)[1] for beg,
                end in zip(ser.index[0:-rolling_window],
                           ser.index[rolling_window:])]
 
