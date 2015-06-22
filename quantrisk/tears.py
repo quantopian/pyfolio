@@ -84,7 +84,7 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
 def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
     algo_ts = timeseries.cum_returns(df_rets, starting_value=1)
 
-    plotting.plot_daily_turnover(algo_ts, df_txn, df_pos_val)
+    plotting.plot_turnover(algo_ts, df_txn, df_pos_val)
 
     plotting.plot_daily_volume(algo_ts, df_txn)
 

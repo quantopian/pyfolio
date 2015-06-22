@@ -28,7 +28,7 @@ def plot_rolling_risk_factors(
         my_algo_returns,
         risk_factors,
         rolling_beta_window=63*2,
-        legend_loc='lower left'):
+        legend_loc='best'):
     from matplotlib.ticker import FuncFormatter
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
 
@@ -218,7 +218,7 @@ def plot_calendar_returns_info_graphic(daily_rets_ts, x_dim=15, y_dim=6):
     plt.ylabel('year')"""
 
 
-def plot_holdings(df_pos, end_date=None, legend_loc='lower left'):
+def plot_holdings(df_pos, end_date=None, legend_loc='best'):
     plt.figure(figsize=(13, 6))
     df_pos = df_pos.copy().drop('cash', axis='columns')
     df_holdings = df_pos.apply(lambda x: np.sum(x != 0), axis='columns')
@@ -298,7 +298,7 @@ def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
 
     print perf_stats_both
 
-def plot_rolling_returns(algo_ts, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, timeseries_input_only=True):
+def plot_rolling_returns(algo_ts, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, timeseries_input_only=True, legend_loc='best'):
     #future_cone_stdev = 1.5
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
@@ -310,7 +310,10 @@ def plot_rolling_returns(algo_ts, df_rets, benchmark_rets, benchmark2_rets, algo
 
     if not timeseries_input_only and algo_ts.index[-1] <= algo_create_date:
         algo_ts.plot(lw=3, color='forestgreen', label='', alpha=0.6)
-        plt.legend(['S&P500', '7-10yr Bond', 'Algo backtest'], loc='upper left')
+        plt.legend(['S&P500',
+                    '7-10yr Bond',
+                    'Algo backtest'],
+                   loc=legend_loc)
     else:
         algo_ts[:algo_create_date].plot(lw=3, color='forestgreen', label='', alpha=0.6)
         algo_ts[algo_create_date:].plot(lw=4, color='red', label='', alpha=0.6)
@@ -341,9 +344,16 @@ def plot_rolling_returns(algo_ts, df_rets, benchmark_rets, benchmark2_rets, algo
         plt.xlim((algo_ts.index[0], algo_ts.index[-1]))
 
         if timeseries_input_only:
-            plt.legend(['S&P500', '7-10yr Bond', 'Portfolio'], loc='upper left')
+            plt.legend(['S&P500',
+                        '7-10yr Bond',
+                        'Portfolio'],
+                       loc=legend_loc)
         else:
-            plt.legend(['S&P500', '7-10yr Bond', 'Algo backtest','Algo LIVE'], loc='upper left')
+            plt.legend(['S&P500',
+                        '7-10yr Bond',
+                        'Algo backtest',
+                        'Algo LIVE'],
+                       loc=legend_loc)
 
 def plot_rolling_beta(algo_ts, df_rets, benchmark_rets, rolling_beta_window=63):
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
@@ -458,7 +468,7 @@ def show_return_range(df_rets, df_weekly):
 
     print np.round(var_sigma, 3)
 
-def plot_interesting_times(df_rets, benchmark_rets):
+def plot_interesting_times(df_rets, benchmark_rets, legend_loc='best'):
     rets_interesting = timeseries.extract_interesting_date_ranges(df_rets)
     print '\nStress Events'
     print np.round(pd.DataFrame(rets_interesting).describe().transpose().loc[:,['mean','min','max']], 3)
@@ -470,17 +480,25 @@ def plot_interesting_times(df_rets, benchmark_rets):
         ax = fig.add_subplot(6, 3, i+1)
         timeseries.cum_returns(rets_period).plot(ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
         timeseries.cum_returns(bmark_interesting[name]).plot(ax=ax, color='gray', label='SPY', alpha=0.6)
-        plt.legend(['algo', 'SPY'], loc='lower left')
+        plt.legend(['algo',
+                    'SPY'],
+                   loc=legend_loc)
         ax.set_title(name, size=14)
         ax.set_ylabel('', size=12)
     ax.legend()
 
-def plot_daily_turnover(algo_ts, df_txn, df_pos_val):
+def plot_turnover(algo_ts, df_txn, df_pos_val, legend_loc='best'):
     fig = plt.figure(figsize=(13, 4))
     df_turnover = df_txn.txn_volume / df_pos_val.abs().sum(axis='columns')
-    df_turnover.plot(alpha=1.0, lw=0.5)
+    df_turnover_by_month = df_turnover.resample('1M', how='mean')
+    df_turnover.plot(color='steelblue', alpha=1.0, lw=0.5)
+    df_turnover_by_month.plot(color='orangered', alpha=0.5, lw=2)
     plt.axhline(df_turnover.mean(), color='steelblue', linestyle='--', lw=3, alpha=1.0)
-    plt.title('Daily turn-over')
+    plt.legend(['Daily turnover',
+                'Average daily turnover, by month',
+                'Average daily turnover, net'],
+               loc=legend_loc)
+    plt.title('Daily turnover')
     plt.xlim( (algo_ts.index[0], algo_ts.index[-1]) )
     plt.ylim((0, 1))
     plt.ylabel('% turn-over')
