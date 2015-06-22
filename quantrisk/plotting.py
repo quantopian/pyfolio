@@ -355,7 +355,7 @@ def plot_rolling_returns(algo_ts, df_rets, benchmark_rets, benchmark2_rets, algo
                         'Algo LIVE'],
                        loc=legend_loc)
 
-def plot_rolling_beta(algo_ts, df_rets, benchmark_rets, rolling_beta_window=63):
+def plot_rolling_beta(algo_ts, df_rets, benchmark_rets, rolling_beta_window=63, legend_loc='best'):
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     fig = plt.figure(figsize=(13,3))
     ax = fig.add_subplot(111)
@@ -377,7 +377,9 @@ def plot_rolling_beta(algo_ts, df_rets, benchmark_rets, rolling_beta_window=63):
     #                rb_1.mean() - future_cone_stdev*np.std(rb_1),
     #                color='steelblue', alpha=0.2)
 
-    plt.legend(['6-mo', '12-mo'])
+    plt.legend(['6-mo',
+                '12-mo'],
+               loc=legend_loc)
 
 def plot_rolling_sharp(algo_ts, df_rets, rolling_sharpe_window=63*2):
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
