@@ -25,7 +25,7 @@ def set_plot_defaults():
 
 def plot_rolling_risk_factors(
         algo_ts,
-        my_algo_returns,
+        df_rets,
         risk_factors,
         rolling_beta_window=63*2,
         legend_loc='best'):
@@ -46,7 +46,7 @@ def plot_rolling_risk_factors(
     plt.ylabel('beta', fontsize=14)
 
     rolling_risk_multifactor = timeseries.rolling_multifactor_beta(
-        my_algo_returns,
+        df_rets,
         risk_factors.ix[
             :,
             [
@@ -56,15 +56,15 @@ def plot_rolling_risk_factors(
         rolling_window=rolling_beta_window)
 
     rolling_beta_SMB = timeseries.rolling_beta(
-        my_algo_returns,
+        df_rets,
         risk_factors['SMB'],
         rolling_window=rolling_beta_window)
     rolling_beta_HML = timeseries.rolling_beta(
-        my_algo_returns,
+        df_rets,
         risk_factors['HML'],
         rolling_window=rolling_beta_window)
     rolling_beta_UMD = timeseries.rolling_beta(
-        my_algo_returns,
+        df_rets,
         risk_factors['UMD'],
         rolling_window=rolling_beta_window)
 
@@ -95,7 +95,7 @@ def plot_rolling_risk_factors(
     plt.axhline(0.0, color='black')
 
     plt.ylabel('alpha', fontsize=14)
-    plt.xlim( (algo_ts.index[0], algo_ts.index[-1]) )
+    plt.xlim( (df_rets.index[0], df_rets.index[-1]) )
     plt.ylim((-.40, .40))
     plt.title(
         'Multi-factor Alpha (vs. Factors: Small-Cap, High-Growth, Momentum)',
@@ -241,14 +241,18 @@ def plot_holdings(df_pos, end_date=None, legend_loc='best'):
     plt.title('# of Holdings Per Day')
     
 
-def plot_drawdowns(df_rets, top=10):
+def plot_drawdowns(df_rets, algo_ts=None, top=10):
     df_drawdowns = timeseries.gen_drawdown_table(df_rets)
-
-    df_cum = timeseries.cum_returns(df_rets)
-    running_max = np.maximum.accumulate(df_cum)
-    underwater = running_max - df_cum
+    
+    # algo_ts - 1 = cum_returns when startingvalue=None
+    
+    if algo_ts is None:
+        algo_ts = timeseries.cum_returns(df_rets, starting_value=1)
+    
+    running_max = np.maximum.accumulate(algo_ts - 1)
+    underwater = running_max - (algo_ts - 1)
     fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(13, 6))
-    (100 * df_cum).plot(ax=ax1)
+    (100 * (algo_ts - 1)).plot(ax=ax1)
     (-100 * underwater).plot(ax=ax2, kind='area', color='darkred', alpha=0.4)
     lim = ax1.get_ylim()
     colors = sns.cubehelix_palette(len(df_drawdowns))[::-1]
@@ -513,7 +517,7 @@ def plot_daily_volume(algo_ts, df_txn):
     plt.xlim( (algo_ts.index[0], algo_ts.index[-1]) )
     plt.ylabel('# shares traded')
 
-def plot_volume_per_day_hist(algo_ts, df_txn):
+def plot_volume_per_day_hist(df_txn):
     fig = plt.figure(figsize=(13, 4))
     sns.distplot(df_txn.txn_volume)
     plt.title('Histogram of daily trading volume')

@@ -56,7 +56,7 @@ def create_returns_tear_sheet(df_rets, warm_up_days_pct=0.5):
     # Drawdowns
 
     try:
-        plot_drawdowns(df_rets, top=5)
+        plot_drawdowns(df_rets, algo_ts, top=5)
         print '\nWorst Drawdown Periods'
         drawdown_df = gen_drawdown_table(df_rets, top=5)
         drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
@@ -88,7 +88,7 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
 
     plotting.plot_daily_volume(algo_ts, df_txn)
 
-    plotting.plot_volume_per_day_hist(algo_ts, df_txn)
+    plotting.plot_volume_per_day_hist(df_txn)
 
 
 def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
