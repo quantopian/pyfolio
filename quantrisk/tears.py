@@ -91,7 +91,8 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
     plotting.plot_volume_per_day_hist(algo_ts, df_txn)
 
 
-def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None, gross_lev=None, fetcher_urls='',
+def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
+                           gross_lev=None, fetcher_urls='',
                            algo_create_date=None):
 
     create_returns_tear_sheet(df_rets)
