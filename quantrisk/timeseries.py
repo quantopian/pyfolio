@@ -39,18 +39,18 @@ def rolling_metric_stat(ret_ts, metric, stat_func=np.mean,
         return temp_f(roll_results_sample)
 
 
-def normalize(df, withStartingValue=1):
-    if withStartingValue > 1:
-        return withStartingValue * (df / df.iloc[0])
+def normalize(df, starting_value=1):
+    if starting_value > 1:
+        return starting_value * (df / df.iloc[0])
     else:
         return df / df.iloc[0]
 
 
-def cum_returns(df, withStartingValue=None):
-    if withStartingValue is None:
+def cum_returns(df, starting_value=None):
+    if starting_value is None:
         return np.exp(np.log(1 + df).cumsum()) - 1
     else:
-        return np.exp(np.log(1 + df).cumsum()) * withStartingValue
+        return np.exp(np.log(1 + df).cumsum()) * starting_value
 
 
 def aggregate_returns(df_daily_rets, convert_to):
@@ -215,7 +215,7 @@ def max_drawdown(ts, inputIsNAV=True):
     if inputIsNAV:
         temp_ts = ts
     else:
-        temp_ts = cum_returns(ts, withStartingValue=100)
+        temp_ts = cum_returns(ts, starting_value=100)
 
     MDD = 0
     DD = 0
@@ -252,7 +252,7 @@ def annual_return(ts, inputIsNAV=True, style='calendar'):
     else:
         if style == 'calendar':
             num_years = len(ts) / 252
-            temp_NAV = cum_returns(ts, withStartingValue=100)
+            temp_NAV = cum_returns(ts, starting_value=100)
             start_value = temp_NAV[0]
             end_value = temp_NAV[-1]
             return ((end_value - start_value) / start_value) / num_years
@@ -282,7 +282,7 @@ def calmer_ratio(ts, inputIsNAV=True, returns_style='calendar'):
                                  style=returns_style) / abs(max_drawdown(ts=ts,
                                                                          inputIsNAV=True))
         else:
-            tempNAV = cum_returns(ts, withStartingValue=100)
+            tempNAV = cum_returns(ts, starting_value=100)
             temp = annual_return(ts=tempNAV,
                                  inputIsNAV=True,
                                  style=returns_style) / abs(max_drawdown(ts=tempNAV,
@@ -313,7 +313,7 @@ def stability_of_timeseries(ts, logValue=True, inputIsNAV=True):
             tempValues = np.log10(ts.values)
             tsLen = ts.size
         else:
-            temp_ts = cum_returns(ts, withStartingValue=100)
+            temp_ts = cum_returns(ts, starting_value=100)
             tempValues = np.log10(temp_ts.values)
             tsLen = temp_ts.size
     else:
@@ -321,7 +321,7 @@ def stability_of_timeseries(ts, logValue=True, inputIsNAV=True):
             tempValues = ts.values
             tsLen = ts.size
         else:
-            temp_ts = cum_returns(ts, withStartingValue=100)
+            temp_ts = cum_returns(ts, starting_value=100)
             tempValues = temp_ts.values
             tsLen = temp_ts.size
 

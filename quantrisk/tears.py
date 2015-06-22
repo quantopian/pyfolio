@@ -20,7 +20,7 @@ def create_returns_tear_sheet(df_rets, warm_up_days_pct=0.5):
 
     plotting.set_plot_defaults()
 
-    algo_ts = timeseries.cum_returns(df_rets, withStartingValue=1)
+    algo_ts = timeseries.cum_returns(df_rets, starting_value=1)
 
     print "Entire data start date: " + str(algo_ts.index[0])
     print "Entire data end date: " + str(algo_ts.index[-1])
@@ -68,7 +68,7 @@ def create_returns_tear_sheet(df_rets, warm_up_days_pct=0.5):
 
 
 def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
-    algo_ts = timeseries.cum_returns(df_rets, withStartingValue=1)
+    algo_ts = timeseries.cum_returns(df_rets, starting_value=1)
 
     plotting.plot_gross_leverage(algo_ts, gross_lev)
 
@@ -82,7 +82,7 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
 
 
 def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
-    algo_ts = timeseries.cum_returns(df_rets, withStartingValue=1)
+    algo_ts = timeseries.cum_returns(df_rets, starting_value=1)
 
     plotting.plot_daily_turnover(algo_ts, df_txn, df_pos_val)
 
