@@ -208,21 +208,23 @@ def plot_calendar_returns_info_graphic(daily_rets_ts, x_dim=15, y_dim=6):
     ax3.set_xlabel("Distribution of Monthly Returns (%)")
 
 
-def plot_avg_holdings(df_pos):
+"""def plot_avg_holdings(df_pos):
     df_pos = df_pos.copy().drop('cash', axis='columns')
     df_holdings = df_pos.groupby([lambda x: x.year, lambda x: x.month]).apply(
         lambda x: np.mean([len(x[x != 0]) for _, x in x.iterrows()])).unstack()
     sns.heatmap(df_holdings, annot=True, cbar=False)
     plt.title('Average # of holdings per month')
     plt.xlabel('month')
-    plt.ylabel('year')
+    plt.ylabel('year')"""
 
 
-def plot_holdings(df_pos, end_date=None):
+def plot_holdings(df_pos, end_date=None, legend_loc='lower left'):
     plt.figure(figsize=(13, 6))
     df_pos = df_pos.copy().drop('cash', axis='columns')
     df_holdings = df_pos.apply(lambda x: np.sum(x != 0), axis='columns')
+    df_holdings_by_month = df_holdings.resample('1M', how='mean')
     df_holdings.plot(color='steelblue', alpha=0.6, lw=0.5)
+    df_holdings_by_month.plot(color='orangered', alpha=0.5, lw=2)
     plt.axhline(
         df_holdings.values.mean(),
         color='steelblue',
@@ -231,8 +233,13 @@ def plot_holdings(df_pos, end_date=None):
         alpha=1.0)
     if end_date is not None:
         plt.xlim((df_holdings.index[0], end_date))
+        
+    plt.legend(['Daily holdings',
+                'Average daily holdings, by month',
+                'Average daily holdings, net'],
+               loc=legend_loc)
     plt.title('# of Holdings Per Day')
-
+    
 
 def plot_drawdowns(df_rets, top=10):
     df_drawdowns = timeseries.gen_drawdown_table(df_rets)
