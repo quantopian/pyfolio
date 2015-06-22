@@ -386,9 +386,9 @@ def plot_rolling_sharp(algo_ts, df_rets, rolling_sharpe_window=63*2):
 
 def plot_gross_leverage(algo_ts, gross_lev):
     fig = plt.figure(figsize=(13, 3))
-    gross_lev.plot(alpha=0.8, lw=0.5, color='forestgreen', legend=False)
+    gross_lev.plot(alpha=0.8, lw=0.5, color='g', legend=False)
     #plt.axhline(0.0, color='black', lw=2)
-    plt.axhline(np.mean(gross_lev.iloc[:,0]), color='forestgreen', linestyle='--', lw=3, alpha=1.0)
+    plt.axhline(np.mean(gross_lev.iloc[:,0]), color='g', linestyle='--', lw=3, alpha=1.0)
     plt.xlim( (algo_ts.index[0], algo_ts.index[-1]) )
     plt.title('Gross Leverage')
     plt.ylabel('Gross Leverage', fontsize=14)
