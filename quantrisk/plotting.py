@@ -24,7 +24,7 @@ def set_plot_defaults():
 
 
 def plot_rolling_risk_factors(
-        algo_ts,
+        df_cum_rets,
         df_rets,
         risk_factors,
         rolling_beta_window=63*2,
@@ -241,18 +241,18 @@ def plot_holdings(df_pos, end_date=None, legend_loc='best'):
     plt.title('# of Holdings Per Day')
     
 
-def plot_drawdowns(df_rets, algo_ts=None, top=10):
+def plot_drawdowns(df_rets, df_cum_rets=None, top=10):
     df_drawdowns = timeseries.gen_drawdown_table(df_rets)
     
-    # algo_ts - 1 = cum_returns when startingvalue=None
+    # df_cum_rets - 1 = cum_returns when startingvalue=None
     
-    if algo_ts is None:
-        algo_ts = timeseries.cum_returns(df_rets, starting_value=1)
+    if df_cum_rets is None:
+        df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
     
-    running_max = np.maximum.accumulate(algo_ts - 1)
-    underwater = running_max - (algo_ts - 1)
+    running_max = np.maximum.accumulate(df_cum_rets - 1)
+    underwater = running_max - (df_cum_rets - 1)
     fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(13, 6))
-    (100 * (algo_ts - 1)).plot(ax=ax1)
+    (100 * (df_cum_rets - 1)).plot(ax=ax1)
     (-100 * underwater).plot(ax=ax2, kind='area', color='darkred', alpha=0.4)
     lim = ax1.get_ylim()
     colors = sns.cubehelix_palette(len(df_drawdowns))[::-1]
@@ -302,25 +302,25 @@ def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
 
     print perf_stats_both
 
-def plot_rolling_returns(algo_ts, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, timeseries_input_only=True, legend_loc='best'):
+def plot_rolling_returns(df_cum_rets, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, timeseries_input_only=True, legend_loc='best'):
     #future_cone_stdev = 1.5
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     fig = plt.figure(figsize=(13,8))
     ax = fig.add_subplot(111)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
-    timeseries.cum_returns(benchmark_rets[algo_ts.index], 1.0).plot(ax=ax, lw=2, color='gray', label='', alpha=0.60)
-    timeseries.cum_returns(benchmark2_rets[algo_ts.index], 1.0).plot(ax=ax, lw=2, color='gray', label='', alpha=0.35)
+    timeseries.cum_returns(benchmark_rets[df_cum_rets.index], 1.0).plot(ax=ax, lw=2, color='gray', label='', alpha=0.60)
+    timeseries.cum_returns(benchmark2_rets[df_cum_rets.index], 1.0).plot(ax=ax, lw=2, color='gray', label='', alpha=0.35)
 
-    if not timeseries_input_only and algo_ts.index[-1] <= algo_create_date:
-        algo_ts.plot(lw=3, color='forestgreen', label='', alpha=0.6)
+    if not timeseries_input_only and df_cum_rets.index[-1] <= algo_create_date:
+        df_cum_rets.plot(lw=3, color='forestgreen', label='', alpha=0.6)
         plt.legend(['S&P500',
                     '7-10yr Bond',
                     'Algo backtest'],
                    loc=legend_loc)
     else:
-        algo_ts[:algo_create_date].plot(lw=3, color='forestgreen', label='', alpha=0.6)
-        algo_ts[algo_create_date:].plot(lw=4, color='red', label='', alpha=0.6)
+        df_cum_rets[:algo_create_date].plot(lw=3, color='forestgreen', label='', alpha=0.6)
+        df_cum_rets[algo_create_date:].plot(lw=4, color='red', label='', alpha=0.6)
 
         #cone_df = timeseries.cone_rolling(df_rets, num_stdev=future_cone_stdev, cone_fit_end_date=algo_create_date)
 
@@ -345,7 +345,7 @@ def plot_rolling_returns(algo_ts, df_rets, benchmark_rets, benchmark2_rets, algo
 
         plt.axhline(1.0 , linestyle='--', color='black', lw=2)
         plt.ylabel('Cumulative returns', fontsize=14)
-        plt.xlim((algo_ts.index[0], algo_ts.index[-1]))
+        plt.xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
 
         if timeseries_input_only:
             plt.legend(['S&P500',
@@ -359,7 +359,7 @@ def plot_rolling_returns(algo_ts, df_rets, benchmark_rets, benchmark2_rets, algo
                         'Algo LIVE'],
                        loc=legend_loc)
 
-def plot_rolling_beta(algo_ts, df_rets, benchmark_rets, rolling_beta_window=63, legend_loc='best'):
+def plot_rolling_beta(df_cum_rets, df_rets, benchmark_rets, rolling_beta_window=63, legend_loc='best'):
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     fig = plt.figure(figsize=(13,3))
     ax = fig.add_subplot(111)
@@ -371,7 +371,7 @@ def plot_rolling_beta(algo_ts, df_rets, benchmark_rets, rolling_beta_window=63, 
     rb_1.plot(color='steelblue', lw=3, alpha=0.6, ax=ax)
     rb_2 = timeseries.rolling_beta(df_rets, benchmark_rets, rolling_window=rolling_beta_window*3)
     rb_2.plot(color='grey', lw=3, alpha=0.4, ax=ax)
-    plt.xlim( (algo_ts.index[0], algo_ts.index[-1]) )
+    plt.xlim( (df_cum_rets.index[0], df_cum_rets.index[-1]) )
     plt.ylim((-2.5, 2.5))
     plt.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)
     plt.axhline(0.0, color='black', linestyle='-', lw=2)
@@ -385,7 +385,7 @@ def plot_rolling_beta(algo_ts, df_rets, benchmark_rets, rolling_beta_window=63, 
                 '12-mo'],
                loc=legend_loc)
 
-def plot_rolling_sharp(algo_ts, df_rets, rolling_sharpe_window=63*2):
+def plot_rolling_sharp(df_cum_rets, df_rets, rolling_sharpe_window=63*2):
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     fig = plt.figure(figsize=(13, 3))
     ax = fig.add_subplot(111)
@@ -403,28 +403,28 @@ def plot_rolling_sharp(algo_ts, df_rets, rolling_sharpe_window=63*2):
     #                rolling_sharpe_ts.mean() - future_cone_stdev*np.std(rolling_sharpe_ts),
     #                color='orangered', alpha=0.15)
 
-    plt.xlim((algo_ts.index[0], algo_ts.index[-1]))
+    plt.xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
     plt.ylim((-3.0, 6.0))
     plt.ylabel('Sharpe ratio', fontsize=14)
 
-def plot_gross_leverage(algo_ts, gross_lev):
+def plot_gross_leverage(df_cum_rets, gross_lev):
     fig = plt.figure(figsize=(13, 3))
     gross_lev.plot(alpha=0.8, lw=0.5, color='g', legend=False)
     #plt.axhline(0.0, color='black', lw=2)
     plt.axhline(np.mean(gross_lev.iloc[:,0]), color='g', linestyle='--', lw=3, alpha=1.0)
-    plt.xlim( (algo_ts.index[0], algo_ts.index[-1]) )
+    plt.xlim( (df_cum_rets.index[0], df_cum_rets.index[-1]) )
     plt.title('Gross Leverage')
     plt.ylabel('Gross Leverage', fontsize=14)
 
-def plot_exposures(algo_ts, df_pos_alloc):
+def plot_exposures(df_cum_rets, df_pos_alloc):
     fig = plt.figure(figsize=(13, 3))
     df_long_short = positions.get_long_short_pos(df_pos_alloc)
     df_long_short.plot(kind='area', color=['lightblue','green','coral'], alpha=1.0)
-    plt.xlim( (algo_ts.index[0], algo_ts.index[-1]) )
+    plt.xlim( (df_cum_rets.index[0], df_cum_rets.index[-1]) )
     plt.title("Long/Short/Cash Exposure")
     plt.ylabel('Exposure', fontsize=14)
 
-def show_and_plot_top_positions(algo_ts, df_pos_alloc, show_and_plot=2):
+def show_and_plot_top_positions(df_cum_rets, df_pos_alloc, show_and_plot=2):
     # show_and_plot allows for both showing info and plot, or doing only one. plot:0, show:1, both:2 (default 2).
     df_top_long, df_top_short, df_top_abs = positions.get_top_long_short_abs(df_pos_alloc)
 
@@ -456,7 +456,7 @@ def show_and_plot_top_positions(algo_ts, df_pos_alloc, show_and_plot=2):
         df_pos_alloc[df_top_abs.index].plot(title='Portfolio allocation over time, only top 10 holdings', alpha=0.4)#kind='area')
         plt.ylabel('Exposure by Stock', fontsize=14)
         # plt.figure(figsize=(13, 6))
-        plt.xlim( (algo_ts.index[0], algo_ts.index[-1]) )
+        plt.xlim( (df_cum_rets.index[0], df_cum_rets.index[-1]) )
 
 def plot_return_quantiles(df_rets, df_weekly, df_monthly):
     fig = plt.figure(figsize=(13, 6))
@@ -493,7 +493,7 @@ def plot_interesting_times(df_rets, benchmark_rets, legend_loc='best'):
         ax.set_ylabel('', size=12)
     ax.legend()
 
-def plot_turnover(algo_ts, df_txn, df_pos_val, legend_loc='best'):
+def plot_turnover(df_cum_rets, df_txn, df_pos_val, legend_loc='best'):
     fig = plt.figure(figsize=(13, 4))
     df_turnover = df_txn.txn_volume / df_pos_val.abs().sum(axis='columns')
     df_turnover_by_month = df_turnover.resample('1M', how='mean')
@@ -505,16 +505,16 @@ def plot_turnover(algo_ts, df_txn, df_pos_val, legend_loc='best'):
                 'Average daily turnover, net'],
                loc=legend_loc)
     plt.title('Daily turnover')
-    plt.xlim( (algo_ts.index[0], algo_ts.index[-1]) )
+    plt.xlim( (df_cum_rets.index[0], df_cum_rets.index[-1]) )
     plt.ylim((0, 1))
     plt.ylabel('% turn-over')
 
-def plot_daily_volume(algo_ts, df_txn):
+def plot_daily_volume(df_cum_rets, df_txn):
     fig = plt.figure(figsize=(13, 4))
     df_txn.txn_shares.plot(alpha=1.0, lw=0.5)
     plt.axhline(df_txn.txn_shares.mean(), color='steelblue', linestyle='--', lw=3, alpha=1.0)
     plt.title('Daily volume traded')
-    plt.xlim( (algo_ts.index[0], algo_ts.index[-1]) )
+    plt.xlim( (df_cum_rets.index[0], df_cum_rets.index[-1]) )
     plt.ylabel('# shares traded')
 
 def plot_volume_per_day_hist(df_txn):
