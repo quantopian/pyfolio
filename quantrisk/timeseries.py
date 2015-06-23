@@ -257,59 +257,6 @@ def rolling_beta(ser, benchmark_rets, rolling_window=63):
     return pd.Series(index=ser.index[rolling_window:], data=results)
 
 
-def out_of_sample_vs_in_sample_returns_kde(
-        bt_ts,
-        oos_ts,
-        transform_style='scale',
-        return_zero_if_exception=True):
-
-    bt_ts_pct = bt_ts.pct_change().dropna()
-    oos_ts_pct = oos_ts.pct_change().dropna()
-
-    bt_ts_r = bt_ts_pct.reshape(len(bt_ts_pct), 1)
-    oos_ts_r = oos_ts_pct.reshape(len(oos_ts_pct), 1)
-
-    if transform_style == 'raw':
-        bt_scaled = bt_ts_r
-        oos_scaled = oos_ts_r
-    if transform_style == 'scale':
-        bt_scaled = preprocessing.scale(bt_ts_r, axis=0)
-        oos_scaled = preprocessing.scale(oos_ts_r, axis=0)
-    if transform_style == 'normalize_L2':
-        bt_scaled = preprocessing.normalize(bt_ts_r, axis=1)
-        oos_scaled = preprocessing.normalize(oos_ts_r, axis=1)
-    if transform_style == 'normalize_L1':
-        bt_scaled = preprocessing.normalize(bt_ts_r, axis=1, norm='l1')
-        oos_scaled = preprocessing.normalize(oos_ts_r, axis=1, norm='l1')
-
-    X_train = bt_scaled
-    X_test = oos_scaled
-
-    X_train = X_train.reshape(len(X_train))
-    X_test = X_test.reshape(len(X_test))
-
-    x_axis_dim = np.linspace(-4, 4, 100)
-    kernal_method = 'scott'
-
-    try:
-        scipy_kde_train = stats.gaussian_kde(
-            X_train,
-            bw_method=kernal_method)(x_axis_dim)
-        scipy_kde_test = stats.gaussian_kde(
-            X_test,
-            bw_method=kernal_method)(x_axis_dim)
-    except:
-        if return_zero_if_exception:
-            return 0.0
-        else:
-            return np.nan
-
-    kde_diff = sum(abs(scipy_kde_test - scipy_kde_train)) / \
-        (sum(scipy_kde_train) + sum(scipy_kde_test))
-
-    return kde_diff
-
-
 def perf_stats(
         df_rets,
         inputIsNAV=True,
