@@ -56,6 +56,7 @@ def aggregate_returns(df_daily_rets, convert_to):
 
 # Strategy Performance statistics & timeseries analysis functions
 
+
 def max_drawdown(df_rets, inputIsNAV=True):
     if df_rets.size < 1:
         return np.nan
@@ -100,7 +101,7 @@ def annual_return(df_rets, inputIsNAV=True, style='calendar'):
     else:
         if style == 'calendar':
             num_years = len(df_rets) / 252
-            temp_NAV = cum_returns(df_rets,starting_value=100)
+            temp_NAV = cum_returns(df_rets, starting_value=100)
             start_value = temp_NAV[0]
             end_value = temp_NAV[-1]
             return ((end_value - start_value) / start_value) / num_years
@@ -278,8 +279,9 @@ def perf_stats(
         df_rets,
         inputIsNAV=inputIsNAV,
         returns_style=returns_style)
-    all_stats['stability'] = stability_of_timeseries(df_rets,inputIsNAV=inputIsNAV)
-    all_stats['max_drawdown'] = max_drawdown(df_rets,inputIsNAV=inputIsNAV)
+    all_stats['stability'] = stability_of_timeseries(
+        df_rets, inputIsNAV=inputIsNAV)
+    all_stats['max_drawdown'] = max_drawdown(df_rets, inputIsNAV=inputIsNAV)
 
     if return_as_dict:
         return all_stats
@@ -299,7 +301,7 @@ def get_max_draw_down_underwater(underwater):
     try:
         recovery = underwater[valley:][underwater[valley:] == 0].index[0]
     except IndexError:
-        recovery = np.nan # drawdown not recovered
+        recovery = np.nan  # drawdown not recovered
     return peak, valley, recovery
 
 
@@ -500,6 +502,7 @@ def cone_rolling(
 
     return perf_ts_r
 
+
 def gen_date_ranges_interesting():
     periods = OrderedDict()
     # Dotcom bubble
@@ -512,32 +515,37 @@ def gen_date_ranges_interesting():
     periods['9/11'] = (pd.Timestamp('20010911'), pd.Timestamp('20011011'))
 
     # 05/08/11	US down grade and European Debt Crisis 2011
-    periods['US downgrade/European Debt Crisis'] = (pd.Timestamp('20110805'), pd.Timestamp('20110905'))
+    periods[
+        'US downgrade/European Debt Crisis'] = (pd.Timestamp('20110805'), pd.Timestamp('20110905'))
 
     # 16/03/11	Fukushima melt down 2011
     periods['Fukushima'] = (pd.Timestamp('20110316'), pd.Timestamp('20110416'))
 
     # 01/08/03	US Housing Bubble 2003
-    periods['US Housing'] = (pd.Timestamp('20030108'), pd.Timestamp('20030208'))
+    periods['US Housing'] = (
+        pd.Timestamp('20030108'), pd.Timestamp('20030208'))
 
     # 06/09/12	EZB IR Event 2012
-    periods['EZB IR Event'] = (pd.Timestamp('20120910'), pd.Timestamp('20121010'))
+    periods['EZB IR Event'] = (
+        pd.Timestamp('20120910'), pd.Timestamp('20121010'))
 
-    #August 2007, March and September of 2008, Q1 & Q2 2009,
+    # August 2007, March and September of 2008, Q1 & Q2 2009,
     periods['Aug07'] = (pd.Timestamp('20070801'), pd.Timestamp('20070901'))
     periods['Mar08'] = (pd.Timestamp('20080301'), pd.Timestamp('20070401'))
     periods['Sept08'] = (pd.Timestamp('20080901'), pd.Timestamp('20081001'))
     periods['2009Q1'] = (pd.Timestamp('20090101'), pd.Timestamp('20090301'))
     periods['2009Q2'] = (pd.Timestamp('20090301'), pd.Timestamp('20090601'))
 
-    #Flash Crash (May 6, 2010 + 1 week post),
-    periods['Flash Crash'] = (pd.Timestamp('20100505'), pd.Timestamp('20100510'))
+    # Flash Crash (May 6, 2010 + 1 week post),
+    periods['Flash Crash'] = (
+        pd.Timestamp('20100505'), pd.Timestamp('20100510'))
 
     # April and October 2014).
     periods['Apr14'] = (pd.Timestamp('20140401'), pd.Timestamp('20140501'))
     periods['Oct14'] = (pd.Timestamp('20141001'), pd.Timestamp('20141101'))
 
     return periods
+
 
 def extract_interesting_date_ranges(df_rets):
     periods = gen_date_ranges_interesting()

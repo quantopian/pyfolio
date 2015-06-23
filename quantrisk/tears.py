@@ -9,9 +9,10 @@ import internals
 import numpy as np
 import pandas as pd
 
+
 def create_returns_tear_sheet(df_rets, warm_up_days_pct=0.5):
     benchmark_rets = utils.get_symbol_rets('SPY')
-    benchmark2_rets = utils.get_symbol_rets('IEF')  #7-10yr Bond ETF.
+    benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
 
     # if your directory structure isn't exactly the same as the research server you can manually specify the location
     # of the directory holding the risk factor data
@@ -25,19 +26,21 @@ def create_returns_tear_sheet(df_rets, warm_up_days_pct=0.5):
     print "Entire data start date: " + str(df_cum_rets.index[0])
     print "Entire data end date: " + str(df_cum_rets.index[-1])
 
-    algo_create_date = df_rets.index[ int(len(df_rets)*warm_up_days_pct) ]
+    algo_create_date = df_rets.index[int(len(df_rets) * warm_up_days_pct)]
 
     print '\n'
 
     plotting.show_perf_stats(df_rets, algo_create_date, benchmark_rets)
 
-    plotting.plot_rolling_returns(df_cum_rets, df_rets, benchmark_rets, benchmark2_rets, algo_create_date)
+    plotting.plot_rolling_returns(
+        df_cum_rets, df_rets, benchmark_rets, benchmark2_rets, algo_create_date)
 
     plotting.plot_rolling_beta(df_cum_rets, df_rets, benchmark_rets)
 
     plotting.plot_rolling_sharp(df_cum_rets, df_rets)
 
-    plotting.plot_rolling_risk_factors(df_cum_rets, df_rets, risk_factors, legend_loc='best')
+    plotting.plot_rolling_risk_factors(
+        df_cum_rets, df_rets, risk_factors, legend_loc='best')
 
     plotting.plot_calendar_returns_info_graphic(df_rets)
 
@@ -59,9 +62,12 @@ def create_returns_tear_sheet(df_rets, warm_up_days_pct=0.5):
         plot_drawdowns(df_rets, df_cum_rets, top=5)
         print '\nWorst Drawdown Periods'
         drawdown_df = gen_drawdown_table(df_rets, top=5)
-        drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
-        drawdown_df['valley date'] = pd.to_datetime(drawdown_df['valley date'],unit='D')
-        drawdown_df['recovery date'] = pd.to_datetime(drawdown_df['recovery date'],unit='D')
+        drawdown_df['peak date'] = pd.to_datetime(
+            drawdown_df['peak date'], unit='D')
+        drawdown_df['valley date'] = pd.to_datetime(
+            drawdown_df['valley date'], unit='D')
+        drawdown_df['recovery date'] = pd.to_datetime(
+            drawdown_df['recovery date'], unit='D')
         print drawdown_df
     except:
         pass
