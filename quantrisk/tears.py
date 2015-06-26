@@ -8,7 +8,10 @@ import internals
 
 import numpy as np
 import pandas as pd
+from sklearn import preprocessing
 
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0):
     
@@ -45,6 +48,14 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
         df_cum_rets, df_rets, risk_factors, legend_loc='best')
 
     plotting.plot_calendar_returns_info_graphic(df_rets)
+
+    plt.figure(figsize=(13,7))
+    df_rets_backtest = df_rets[df_rets.index < algo_create_date]
+    df_rets_live = df_rets[df_rets.index > algo_create_date]
+
+    sns.kdeplot(preprocessing.scale(df_rets_backtest) , bw='scott', shade=True, label='backtest', color='forestgreen')
+    sns.kdeplot(preprocessing.scale(df_rets_live) ,  bw='scott', shade=True, label='out-of-sample', color='red')
+    plt.title("Daily Returns Similarity")
 
     df_weekly = timeseries.aggregate_returns(df_rets, 'weekly')
     df_monthly = timeseries.aggregate_returns(df_rets, 'monthly')
