@@ -30,7 +30,6 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alpha_init)
         beta_reg = pm.Normal('beta', mu=0, sd=1, testval=beta_init)
 
-        data_missing = pd.DataFrame()
         returns = pm.T('returns',
                        nu=nu+2,
                        mu=alpha_reg + beta_reg * bmark,
@@ -127,4 +126,4 @@ def plot_bayes_cone(df_train, df_test, bmark, plot_train_len=50, ax=None):
             verticalalignment='bottom', horizontalalignment='right',
             transform=ax.transAxes,)
 
-    return ax
+    return score
