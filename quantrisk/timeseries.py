@@ -31,11 +31,41 @@ def normalize(df_rets, starting_value=1):
         return df_rets / df_rets.iloc[0]
 
 
-def cum_returns(df_rets, starting_value=None):
-    if starting_value is None:
-        return np.exp(np.log(1 + df_rets).cumsum()) - 1
-    else:
-        return np.exp(np.log(1 + df_rets).cumsum()) * starting_value
+def cum_returns(df_rets, starting_value=1.):
+    """Compute cumulative returns from simple returns
+
+    Parameters
+    ----------
+    df_rets : pandas.Series
+        Series of simple returns. First element may be nan
+        and will be filled with 0. to have returned Series
+        start in origin.
+    starting_value : float, optional
+        Have cumulative returns start around this value.
+        Default = 1.
+
+    Returns
+    -------
+    pandas.Series
+        Series of cumulative returns.
+
+    Notes
+    -----
+    For increased numerical accuracy, convert input to log returns
+    where it is possible to sum instead of multiplying
+
+    """
+    # df_price.pct_change() adds a nan in first position, we can use
+    # that to have cum_returns start at the origin so that
+    # df_cum.iloc[0] == starting_value
+    # Note that we can't add that ourselves as we don't know which dt
+    # to use.
+    if pd.isnull(df_rets.iloc[0]):
+        df_rets.iloc[0] = 0.
+
+    df_cum = np.exp(np.log(1 + df_rets).cumsum())
+
+    return df_cum * starting_value
 
 
 def aggregate_returns(df_daily_rets, convert_to):
