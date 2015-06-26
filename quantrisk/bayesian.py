@@ -14,7 +14,7 @@ from .timeseries import cum_returns
 
 def model_returns_t_alpha_beta(data, bmark, samples=2000):
     if len(data) != len(bmark):
-        # padding missing data
+        # pad missing data
         data = pd.Series(data, index=bmark.index)
 
     data_no_missing = data.dropna()
@@ -115,9 +115,16 @@ def _plot_bayes_cone(df_train, df_test, preds, ax=None):
     ax.fill_between(df_test.index, perc[5] + offset, perc[95] + offset, alpha=.3)
     ax.fill_between(df_test.index, perc[25] + offset, perc[75] + offset, alpha=.6)
 
+    return ax
+
 def plot_bayes_cone(df_train, df_test, bmark, plot_train_len=50, ax=None):
     # generate cone
     trace = model_returns_t_alpha_beta(df_train, bmark)
-    compute_consistency_score(df_train, trace['returns_missing'])
-    _plot_bayes_cone(df_train.iloc[-plot_train_len:], df_test,
+    score = compute_consistency_score(df_test, trace['returns_missing'])
+    ax = _plot_bayes_cone(df_train.iloc[-plot_train_len:], df_test,
                      trace['returns_missing'], ax=ax)
+    ax.text(0.20, 0.95, 'Consistency score: %.1f' % score, fontsize=15,
+            verticalalignment='bottom', horizontalalignment='right',
+            transform=ax.transAxes,)
+
+    return ax
