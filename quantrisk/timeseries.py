@@ -80,7 +80,7 @@ def aggregate_returns(df_daily_rets, convert_to):
         return df_daily_rets.groupby(
             [lambda x: x.year]).apply(cumulate_returns)
     else:
-        ValueError('convert_to must be daily, weekly, monthly or yearly')
+        ValueError('convert_to must be weekly, monthly or yearly')
 
 # Strategy Performance statistics & timeseries analysis functions
 

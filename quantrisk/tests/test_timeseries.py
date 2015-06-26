@@ -43,6 +43,8 @@ class TestDrawdown(TestCase):
     def test_max_drawdown(self, df_rets, input_is_NAV, expected):
         self.assertEqual(timeseries.max_drawdown(df_rets, input_is_NAV), expected)
         
+    
+        
 
 class TestCumReturns(TestCase):
     dt = pd.date_range('2000-1-1', periods=3, freq='D')
@@ -81,3 +83,30 @@ class TestAggregateReturns(TestCase):
     ])
     def test_aggregate_rets(self, df_rets, convert_to, expected):
         self.assertEqual(timeseries.aggregate_returns(df_rets, convert_to).values.tolist(), expected)
+
+        
+class TestStats(TestCase):
+    simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-1', periods=500, freq='D'))
+    
+    @parameterized.expand([
+        (simple_rets, True, 'calendar', -84.0),
+        (simple_rets, True, 'compound', -1.0),
+        (simple_rets, False, 'calendar', 0.10584000000000014),
+        (simple_rets, False, 'compound', 0.16317653888658334)
+    ])
+    def test_annual_ret(self, df_rets, inputIsNAV, style, expected):
+        self.assertEqual(timeseries.annual_return(df_rets, inputIsNAV=inputIsNAV, style=style), expected)
+    
+    @parameterized.expand([
+        (simple_rets, True, 9.1651513899116814),
+        (simple_rets, False, 0.12271674212427248)
+    ])
+    def test_annual_volatility(self, df_rets, inputIsNAV, expected):
+        self.assertEqual(timeseries.annual_volatility(df_rets, inputIsNAV=inputIsNAV), expected)
+        
+    @parameterized.expand([
+        (simple_rets, True, 'calendar', -84.0),
+        #(simple_rets[:30], False, 'compound', x)
+    ])
+    def test_calmer(self, df_rets, inputIsNAV, returns_style, expected):
+        self.assertEqual(timeseries.calmer_ratio(df_rets, inputIsNAV=inputIsNAV, returns_style=returns_style), expected)
