@@ -1,6 +1,7 @@
 from __future__ import division
 
 import pandas as pd
+import numpy as np
 import json
 import zlib
 import pandas.io.data as web
@@ -12,6 +13,10 @@ def json_to_obj(json):
 
 def one_dec_places(x, pos):
     return '%.1f' % x
+
+
+def round_two_dec_places(x):
+    return np.round(x, 2)
 
 
 def get_symbol_rets(symbol):

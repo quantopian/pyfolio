@@ -10,13 +10,14 @@ import numpy as np
 import pandas as pd
 
 
-def create_returns_tear_sheet(df_rets, warm_up_days_pct=0.5):
+def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0):
+    
     benchmark_rets = utils.get_symbol_rets('SPY')
     benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
 
     # if your directory structure isn't exactly the same as the research server you can manually specify the location
     # of the directory holding the risk factor data
-    #risk_factors = load_portfolio_risk_factors(local_risk_factor_path)
+    # risk_factors = load_portfolio_risk_factors(local_risk_factor_path)
     risk_factors = internals.load_portfolio_risk_factors().dropna(axis=0)
 
     plotting.set_plot_defaults()
@@ -26,14 +27,15 @@ def create_returns_tear_sheet(df_rets, warm_up_days_pct=0.5):
     print "Entire data start date: " + str(df_cum_rets.index[0])
     print "Entire data end date: " + str(df_cum_rets.index[-1])
 
-    algo_create_date = df_rets.index[int(len(df_rets) * warm_up_days_pct)]
+    if algo_create_date is None:
+            algo_create_date = df_rets.index[ int(len(df_rets)*backtest_days_pct) ] 
 
     print '\n'
 
     plotting.show_perf_stats(df_rets, algo_create_date, benchmark_rets)
 
     plotting.plot_rolling_returns(
-        df_cum_rets, df_rets, benchmark_rets, benchmark2_rets, algo_create_date)
+        df_cum_rets, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, cone_std=cone_std)
 
     plotting.plot_rolling_beta(df_cum_rets, df_rets, benchmark_rets)
 
@@ -58,19 +60,14 @@ def create_returns_tear_sheet(df_rets, warm_up_days_pct=0.5):
     #########################
     # Drawdowns
 
-    try:
-        plot_drawdowns(df_rets, df_cum_rets, top=5)
-        print '\nWorst Drawdown Periods'
-        drawdown_df = gen_drawdown_table(df_rets, top=5)
-        drawdown_df['peak date'] = pd.to_datetime(
-            drawdown_df['peak date'], unit='D')
-        drawdown_df['valley date'] = pd.to_datetime(
-            drawdown_df['valley date'], unit='D')
-        drawdown_df['recovery date'] = pd.to_datetime(
-            drawdown_df['recovery date'], unit='D')
-        print drawdown_df
-    except:
-        pass
+    plotting.plot_drawdowns(df_rets, top=5)
+    print '\nWorst Drawdown Periods'
+    drawdown_df = timeseries.gen_drawdown_table(df_rets, top=5)
+    drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
+    drawdown_df['valley date'] = pd.to_datetime(drawdown_df['valley date'],unit='D')
+    drawdown_df['recovery date'] = pd.to_datetime(drawdown_df['recovery date'],unit='D')
+    drawdown_df['net drawdown in %'] = map( utils.round_two_dec_places, drawdown_df['net drawdown in %'] ) 
+    print drawdown_df.sort('net drawdown in %', ascending=False)
 
 
 def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
@@ -99,9 +96,10 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
 
 def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
                            gross_lev=None, fetcher_urls='',
-                           algo_create_date=None):
+                           algo_create_date=None,
+                           backtest_days_pct=0.5, cone_std=1.0):
 
-    create_returns_tear_sheet(df_rets)
+    create_returns_tear_sheet(df_rets, algo_create_date=algo_create_date, backtest_days_pct=backtest_days_pct, cone_std=cone_std)
 
     if df_pos is not None:
         create_position_tear_sheet(df_rets, df_pos, gross_lev=gross_lev)

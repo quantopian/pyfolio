@@ -1,6 +1,8 @@
 from __future__ import division
 from collections import OrderedDict
 
+from operator import *
+from collections import *
 
 import pandas as pd
 import numpy as np
@@ -80,7 +82,7 @@ def aggregate_returns(df_daily_rets, convert_to):
         return df_daily_rets.groupby(
             [lambda x: x.year]).apply(cumulate_returns)
     else:
-        ValueError('convert_to must be weekly, monthly or yearly')
+        ValueError('convert_to must be daily, weekly, monthly or yearly')
 
 # Strategy Performance statistics & timeseries analysis functions
 
@@ -335,7 +337,7 @@ def get_max_draw_down_underwater(underwater):
 
 def get_max_draw_down(df_rets):
     df_rets = df_rets.copy()
-    df_cum = cum_returns(df_rets)
+    df_cum = cum_returns(df_rets, 1.0)
     running_max = np.maximum.accumulate(df_cum)
     underwater = (running_max - df_cum) / running_max
     return get_max_draw_down_underwater(underwater)
@@ -343,7 +345,7 @@ def get_max_draw_down(df_rets):
 
 def get_top_draw_downs(df_rets, top=10):
     df_rets = df_rets.copy()
-    df_cum = cum_returns(df_rets)
+    df_cum = cum_returns(df_rets, 1.0)
     running_max = np.maximum.accumulate(df_cum)
     underwater = running_max - df_cum
 
@@ -366,7 +368,7 @@ def get_top_draw_downs(df_rets, top=10):
 
 
 def gen_drawdown_table(df_rets, top=10):
-    df_cum = cum_returns(df_rets, 1)
+    df_cum = cum_returns(df_rets, 1.0)
     drawdown_periods = get_top_draw_downs(df_rets, top=top)
     df_drawdowns = pd.DataFrame(index=range(top), columns=['net drawdown in %',
                                                            'peak date',
@@ -406,53 +408,51 @@ def rolling_sharpe(df_rets, rolling_sharpe_window):
 
 
 def cone_rolling(
-        input_rets,
-        num_stdev=1.5,
-        warm_up_days_pct=0.5,
-        std_scale_factor=252,
-        update_std_oos_rolling=False,
-        cone_fit_end_date=None,
-        extend_fit_trend=True,
-        create_future_cone=True):
+                input_rets, 
+                num_stdev=1.0, 
+                warm_up_days_pct=0.5, 
+                std_scale_factor=252, 
+                update_std_oos_rolling=False, 
+                cone_fit_end_date=None, 
+                extend_fit_trend=True, 
+                create_future_cone=True):
 
-    # if specifying 'cone_fit_end_date' please use a pandas compatible format,
-    # e.g. '2015-8-4', 'YYYY-MM-DD'
+    # if specifying 'cone_fit_end_date' please use a pandas compatible format, e.g. '2015-8-4', 'YYYY-MM-DD'
 
-    warm_up_days = int(warm_up_days_pct * input_rets.size)
+    warm_up_days = int(warm_up_days_pct*input_rets.size)
 
-    # create initial linear fit from beginning of timeseries thru warm_up_days
-    # or the specified 'cone_fit_end_date'
+    # create initial linear fit from beginning of timeseries thru warm_up_days or the specified 'cone_fit_end_date'
     if cone_fit_end_date is None:
         df_rets = input_rets[:warm_up_days]
     else:
-        df_rets = input_rets[input_rets.index < cone_fit_end_date]
-
+        df_rets = input_rets[ input_rets.index < cone_fit_end_date]
+    
     perf_ts = cum_returns(df_rets, 1)
-
+        
     X = range(0, perf_ts.size)
     X = sm.add_constant(X)
-    sm.OLS(perf_ts, range(0, len(perf_ts)))
-    line_ols = sm.OLS(perf_ts.values, X).fit()
+    sm.OLS(perf_ts , range(0,len(perf_ts)))
+    line_ols = sm.OLS(perf_ts.values , X).fit()
     fit_line_ols_coef = line_ols.params[1]
     fit_line_ols_inter = line_ols.params[0]
 
     x_points = range(0, perf_ts.size)
     x_points = np.array(x_points) * fit_line_ols_coef + fit_line_ols_inter
-
+    
     perf_ts_r = pd.DataFrame(perf_ts)
     perf_ts_r.columns = ['perf']
-
+    
     warm_up_std_pct = np.std(perf_ts.pct_change().dropna())
-    std_pct = warm_up_std_pct * np.sqrt(std_scale_factor)
+    std_pct = warm_up_std_pct * np.sqrt(std_scale_factor) 
 
     perf_ts_r['line'] = x_points
-    perf_ts_r['sd_up'] = perf_ts_r['line'] * (1 + num_stdev * std_pct)
-    perf_ts_r['sd_down'] = perf_ts_r['line'] * (1 - num_stdev * std_pct)
-
-    std_pct = warm_up_std_pct * np.sqrt(std_scale_factor)
-
+    perf_ts_r['sd_up'] = perf_ts_r['line'] * ( 1 + num_stdev * std_pct )
+    perf_ts_r['sd_down'] = perf_ts_r['line'] * ( 1 - num_stdev * std_pct )
+    
+    std_pct = warm_up_std_pct * np.sqrt(std_scale_factor) 
+    
     last_backtest_day_index = df_rets.index[-1]
-    cone_end_rets = input_rets[input_rets.index > last_backtest_day_index]
+    cone_end_rets = input_rets[ input_rets.index > last_backtest_day_index ]
     new_cone_day_scale_factor = int(1)
     oos_intercept_shift = perf_ts_r.perf[-1] - perf_ts_r.line[-1]
 
@@ -460,72 +460,60 @@ def cone_rolling(
     for i in cone_end_rets.index:
         df_rets = input_rets[:i]
         perf_ts = cum_returns(df_rets, 1)
-
+        
         if extend_fit_trend:
             line_ols_coef = fit_line_ols_coef
             line_ols_inter = fit_line_ols_inter
         else:
             X = range(0, perf_ts.size)
             X = sm.add_constant(X)
-            sm.OLS(perf_ts, range(0, len(perf_ts)))
-            line_ols = sm.OLS(perf_ts.values, X).fit()
+            sm.OLS(perf_ts , range(0,len(perf_ts)))
+            line_ols = sm.OLS(perf_ts.values , X).fit()
             line_ols_coef = line_ols.params[1]
             line_ols_inter = line_ols.params[0]
-
+            
         x_points = range(0, perf_ts.size)
-        x_points = np.array(x_points) * line_ols_coef + \
-            line_ols_inter + oos_intercept_shift
-
-        temp_line = x_points
+        x_points = np.array(x_points) * line_ols_coef + line_ols_inter + oos_intercept_shift
+        
+        temp_line = x_points   
         if update_std_oos_rolling:
             #std_pct = np.sqrt(std_scale_factor) * np.std(perf_ts.pct_change().dropna())
-            std_pct = np.sqrt(new_cone_day_scale_factor) * \
-                np.std(perf_ts.pct_change().dropna())
+            std_pct = np.sqrt(new_cone_day_scale_factor) * np.std(perf_ts.pct_change().dropna())
         else:
             std_pct = np.sqrt(new_cone_day_scale_factor) * warm_up_std_pct
-
-        temp_sd_up = temp_line * (1 + num_stdev * std_pct)
-        temp_sd_down = temp_line * (1 - num_stdev * std_pct)
-
-        new_daily_cone = pd.DataFrame(index=[i],
-                                      data={'perf': perf_ts[i],
-                                            'line': temp_line[-1],
-                                            'sd_up': temp_sd_up[-1],
-                                            'sd_down': temp_sd_down[-1]})
-
+        
+        temp_sd_up = temp_line * ( 1 + num_stdev * std_pct )
+        temp_sd_down = temp_line * ( 1 - num_stdev * std_pct )
+        
+        new_daily_cone = pd.DataFrame(index=[i], data={'perf':perf_ts[i], 
+                                                       'line':temp_line[-1], 
+                                                       'sd_up':temp_sd_up[-1], 
+                                                       'sd_down':temp_sd_down[-1] } )
+        
         perf_ts_r = perf_ts_r.append(new_daily_cone)
-        new_cone_day_scale_factor += 1
+        new_cone_day_scale_factor+=1
+
 
     if create_future_cone:
         extend_ahead_days = 252
-        future_cone_dates = pd.date_range(
-            cone_end_rets.index[-1], periods=extend_ahead_days, freq='B')
-
+        future_cone_dates = pd.date_range(cone_end_rets.index[-1], periods=extend_ahead_days, freq='B')
+        
         future_cone_intercept_shift = perf_ts_r.perf[-1] - perf_ts_r.line[-1]
-
-        future_days_scale_factor = np.linspace(
-            1,
-            extend_ahead_days,
-            extend_ahead_days)
+        
+        future_days_scale_factor = np.linspace(1,extend_ahead_days,extend_ahead_days)
         std_pct = np.sqrt(future_days_scale_factor) * warm_up_std_pct
-
+        
         x_points = range(perf_ts.size, perf_ts.size + extend_ahead_days)
-        x_points = np.array(x_points) * line_ols_coef + line_ols_inter + \
-            oos_intercept_shift + future_cone_intercept_shift
-        temp_line = x_points
-        temp_sd_up = temp_line * (1 + num_stdev * std_pct)
-        temp_sd_down = temp_line * (1 - num_stdev * std_pct)
+        x_points = np.array(x_points) * line_ols_coef + line_ols_inter + oos_intercept_shift + future_cone_intercept_shift
+        temp_line = x_points   
+        temp_sd_up = temp_line * ( 1 + num_stdev * std_pct )
+        temp_sd_down = temp_line * ( 1 - num_stdev * std_pct )
 
-        future_cone = pd.DataFrame(
-            index=map(
-                np.datetime64,
-                future_cone_dates),
-            data={
-                'perf': temp_line,
-                'line': temp_line,
-                'sd_up': temp_sd_up,
-                'sd_down': temp_sd_down})
-
+        future_cone = pd.DataFrame(index=map( np.datetime64, future_cone_dates ), data={'perf':temp_line, 
+                                                                                        'line':temp_line, 
+                                                                                        'sd_up':temp_sd_up, 
+                                                                                        'sd_down':temp_sd_down } )
+    
         perf_ts_r = perf_ts_r.append(future_cone)
 
     return perf_ts_r

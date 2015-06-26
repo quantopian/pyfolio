@@ -133,20 +133,6 @@ def plot_cone_chart(
 
 
 def plot_calendar_returns_info_graphic(daily_rets_ts, x_dim=15, y_dim=6):
-    #cumulate_returns = lambda x: cum_returns(x)[-1]
-
-    #rets_df = pd.DataFrame(index=daily_rets_ts.index, data=daily_rets_ts.values)
-
-    #rets_df['dt'] = map( pd.to_datetime, rets_df.index )
-    #rets_df['month'] = map( lambda x: x.month, rets_df.dt )
-    #rets_df['year'] = map( lambda x: x.year, rets_df.dt )
-
-    # monthly_ret = rets_df.groupby(['year','month'])[0].sum()
-    #monthly_ret = rets_df.groupby(['year','month'])[0].apply(cumulate_returns)
-    #monthly_ret_table = monthly_ret.unstack()
-    #monthly_ret_table['Annual Return'] = monthly_ret_table.sum(axis=1)
-    #monthly_ret_table['Annual Return'] = monthly_ret_table.apply(cumulate_returns, axis=1)
-    #ann_ret_df = pd.DataFrame(index=monthly_ret_table['Annual Return'].index, data=monthly_ret_table['Annual Return'].values)
 
     ann_ret_df = pd.DataFrame(
         timeseries.aggregate_returns(
@@ -173,7 +159,7 @@ def plot_calendar_returns_info_graphic(daily_rets_ts, x_dim=15, y_dim=6):
     ax1.set_xlabel("Monthly Returns (%)")
 
     ax2 = fig.add_subplot(1, 3, 2)
-    # sns.barplot(ann_ret_df.index, ann_ret_df[0], ci=None)
+
     ax2.axvline(
         100 *
         ann_ret_df.values.mean(),
@@ -184,7 +170,7 @@ def plot_calendar_returns_info_graphic(daily_rets_ts, x_dim=15, y_dim=6):
     (100 * ann_ret_df.sort_index(ascending=False)
      ).plot(ax=ax2, kind='barh', alpha=0.70)
     ax2.axvline(0.0, color='black', linestyle='-', lw=3)
-    # sns.heatmap(ann_ret_df*100.0, annot=True, annot_kws={"size": 14, "weight":'bold'}, center=0.0, cbar=False, cmap=matplotlib.cm.RdYlGn)
+   
     ax2.set_ylabel(' ')
     ax2.set_xlabel("Annual Returns (%)")
     ax2.legend(['mean'])
@@ -196,7 +182,7 @@ def plot_calendar_returns_info_graphic(daily_rets_ts, x_dim=15, y_dim=6):
         color='orangered',
         alpha=0.80,
         bins=20)
-    #sns.distplot(100*monthly_ret_table.values.flatten(), bins=20, ax=ax3, color='orangered', kde=True)
+
     ax3.axvline(
         100 *
         monthly_ret_table.dropna().values.flatten().mean(),
@@ -243,33 +229,35 @@ def plot_holdings(df_pos, end_date=None, legend_loc='best'):
 
 
 def plot_drawdowns(df_rets, df_cum_rets=None, top=10):
-    df_drawdowns = timeseries.gen_drawdown_table(df_rets)
+    df_drawdowns = timeseries.gen_drawdown_table(df_rets, top=top)
 
     # df_cum_rets - 1 = cum_returns when startingvalue=None
 
     if df_cum_rets is None:
-        df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
+        df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1.0)
 
-    running_max = np.maximum.accumulate(df_cum_rets - 1)
-    underwater = running_max - (df_cum_rets - 1)
+    running_max = np.maximum.accumulate(df_cum_rets)
+    underwater = -100 * ( (running_max - df_cum_rets) / running_max )
+    
     fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(13, 6))
-    (100 * (df_cum_rets - 1)).plot(ax=ax1)
-    (-100 * underwater).plot(ax=ax2, kind='area', color='darkred', alpha=0.4)
+    (df_cum_rets).plot(ax=ax1)
+    (underwater).plot(ax=ax2, kind='area', color='coral', alpha=0.7)
     lim = ax1.get_ylim()
     colors = sns.cubehelix_palette(len(df_drawdowns))[::-1]
     for i, (peak, recovery) in df_drawdowns[
             ['peak date', 'recovery date']].iterrows():
         if pd.isnull(recovery):
-            recovery = df_rets.iloc[-1].index
+            recovery = df_rets.index[-1]
         ax1.fill_between((peak, recovery),
                          lim[0],
                          lim[1],
-                         alpha=.5,
+                         alpha=.4,
                          color=colors[i])
 
     plt.suptitle('Top %i draw down periods' % top)
-    ax1.set_ylabel('returns in %')
-    ax2.set_ylabel('drawdown in %')
+    ax1.set_ylabel('Algo Performance')
+    ax1.legend(['Algo'], 'upper left')
+    ax2.set_ylabel('Drawdown in %')
     ax2.set_title('Underwater plot')
 
 
@@ -310,8 +298,15 @@ def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
     print perf_stats_both
 
 
-def plot_rolling_returns(df_cum_rets, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, timeseries_input_only=True, legend_loc='best'):
-    #future_cone_stdev = 1.5
+def plot_rolling_returns(
+                    df_cum_rets, 
+                    df_rets, 
+                    benchmark_rets, 
+                    benchmark2_rets, 
+                    algo_create_date, 
+                    timeseries_input_only=True,
+                    cone_std=None, 
+                    legend_loc='best'):
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     fig = plt.figure(figsize=(13, 8))
@@ -334,26 +329,30 @@ def plot_rolling_returns(df_cum_rets, df_rets, benchmark_rets, benchmark2_rets, 
         df_cum_rets[algo_create_date:].plot(
             lw=4, color='red', label='', alpha=0.6)
 
-        #cone_df = timeseries.cone_rolling(df_rets, num_stdev=future_cone_stdev, cone_fit_end_date=algo_create_date)
+        if cone_std is not None:
+            cone_df = timeseries.cone_rolling(df_rets, num_stdev=cone_std, cone_fit_end_date=algo_create_date)
 
-        #cone_df_fit = cone_df[ cone_df.index < algo_create_date]
-        #cone_df_live = cone_df[ cone_df.index > algo_create_date]
-        #cone_df_live = cone_df_live[ cone_df_live.index < df_rets.index[-1] ]
-        #cone_df_future = cone_df[ cone_df.index > df_rets.index[-1] ]
-
-        #cone_df_fit['line'].plot(ls='--', lw=2, color='forestgreen', alpha=0.7)
-        #cone_df_live['line'].plot(ls='--', lw=2, color='coral', alpha=0.7)
-        #cone_df_future['line'].plot(ls='--', lw=2, color='navy', alpha=0.7)
-
-        # ax.fill_between(cone_df_live.index,
-        #                cone_df_live.sd_down,
-        #                cone_df_live.sd_up,
-        #                color='coral', alpha=0.20)
-
-        # ax.fill_between(cone_df_future.index,
-        #                cone_df_future.sd_down,
-        #                cone_df_future.sd_up,
-        #                color='navy', alpha=0.15)
+            cone_df_fit = cone_df[ cone_df.index < algo_create_date]
+            
+            cone_df_live = cone_df[ cone_df.index > algo_create_date]
+            cone_df_live = cone_df_live[ cone_df_live.index < df_rets.index[-1] ]
+            
+            cone_df_future = cone_df[ cone_df.index > df_rets.index[-1] ]
+            
+            #cone_df['line'].plot(ax=ax, ls='--', lw=2, color='forestgreen', alpha=0.7)
+            cone_df_fit['line'].plot(ax=ax, ls='--', lw=2, color='forestgreen', alpha=0.7)
+            cone_df_live['line'].plot(ax=ax, ls='--', lw=2, color='red', alpha=0.7)
+            cone_df_future['line'].plot(ax=ax, ls='--', lw=2, color='navy', alpha=0.7)
+            
+            ax.fill_between(cone_df_live.index, 
+                            cone_df_live.sd_down, 
+                            cone_df_live.sd_up, 
+                            color='red', alpha=0.30)
+            
+            ax.fill_between(cone_df_future.index, 
+                            cone_df_future.sd_down, 
+                            cone_df_future.sd_up, 
+                            color='navy', alpha=0.25)
 
         plt.axhline(1.0, linestyle='--', color='black', lw=2)
         plt.ylabel('Cumulative returns', fontsize=14)
