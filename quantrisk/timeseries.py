@@ -70,9 +70,7 @@ def cum_returns(df_rets, starting_value=1.):
 
 def aggregate_returns(df_daily_rets, convert_to):
     cumulate_returns = lambda x: cum_returns(x)[-1]
-    if convert_to == 'daily':
-        return df_daily_rets
-    elif convert_to == 'weekly':
+    if convert_to == 'weekly':
         return df_daily_rets.groupby(
             [lambda x: x.year, lambda x: x.month, lambda x: x.isocalendar()[1]]).apply(cumulate_returns)
     elif convert_to == 'monthly':
