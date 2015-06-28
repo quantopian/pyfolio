@@ -33,16 +33,6 @@ def vectorize(func):
         if df.ndim == 1:
             return func(df, *args, **kwargs)
         elif df.ndim == 2:
-            # Call function on each column
-            out = OrderedDict()
-            series_output = False
-            for col in df:
-                out[col] = func(df[col], *args, **kwargs)
-                if isinstance(out[col], pd.Series):
-                    series_output = True
-            if series_output:
-                return pd.DataFrame(out)
-            else:
-                return pd.Series(out)
+            return df.apply(func, *args, **kwargs)
 
     return wrapper
