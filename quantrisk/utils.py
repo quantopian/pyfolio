@@ -1,4 +1,5 @@
 from __future__ import division
+from collections import OrderedDict
 
 import pandas as pd
 import numpy as np
@@ -25,3 +26,23 @@ def get_symbol_rets(symbol):
     px.columns.name = symbol
     rets = px.AdjClose.pct_change().dropna()
     return rets
+
+
+def vectorize(func):
+    def wrapper(df, *args, **kwargs):
+        if df.ndim == 1:
+            return func(df, *args, **kwargs)
+        elif df.ndim == 2:
+            # Call function on each column
+            out = OrderedDict()
+            series_output = False
+            for col in df:
+                out[col] = func(df[col], *args, **kwargs)
+                if isinstance(out[col], pd.Series):
+                    series_output = True
+            if series_output:
+                return pd.DataFrame(out)
+            else:
+                return pd.Series(out)
+
+    return wrapper
