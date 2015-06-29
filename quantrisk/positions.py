@@ -97,23 +97,23 @@ def turnover(transactions_df, backtest_data_df, period='M'):
     return turnoverpct
 
 def get_all_tickers_traded(
-                        algo_id, contest=None, 
-                        backtest_min_years=None, 
+                        algo_id, contest=None,
+                        backtest_min_years=None,
                         backtest_max_years=None):
-    
+
     engine_harness = sqlalchemy.create_engine(host_settings.SQLTESTHARNESS, echo=False)
-    
+
     try:
-        df_rets, df_pos, df_txn_daily, fetcher_urls = get_single_algo(algo_id, 
+        df_rets, df_pos, df_txn_daily, fetcher_urls = get_single_algo(algo_id,
                                                                       minyears=backtest_min_years,
-                                                                      maxyears=backtest_max_years,         
-                                                                      engine=engine_harness, 
+                                                                      maxyears=backtest_max_years,
+                                                                      engine=engine_harness,
                                                                       contest=contest)
     except:
         return np.array([], 'object')
 
     df_pos_alloc = get_portfolio_alloc(df_pos)
-    
+
     _, _, df_top_abs_all = get_top_long_short_abs(df_pos_alloc, top=1000)
- 
+
     return df_top_abs_all.index.values
