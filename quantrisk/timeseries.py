@@ -615,9 +615,12 @@ def extract_interesting_date_ranges(df_rets):
     df_rets_dupe.index = df_rets_dupe.index.map(pd.Timestamp)
     ranges = OrderedDict()
     for name, (start, end) in periods.iteritems():
-        period = df_rets_dupe.loc[start:end]
-        if len(period) == 0:
+        try:
+            period = df_rets_dupe.loc[start:end]
+            if len(period) == 0:
+                continue
+            ranges[name] = period
+        except:
             continue
-        ranges[name] = period
 
     return ranges
