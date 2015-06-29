@@ -1,4 +1,5 @@
 from __future__ import division
+import warnings
 
 import pandas as pd
 import numpy as np
@@ -446,6 +447,11 @@ def plot_gross_leverage(df_cum_rets, gross_lev):
 def plot_exposures(df_cum_rets, df_pos_alloc):
     fig = plt.figure(figsize=(13, 3))
     df_long_short = positions.get_long_short_pos(df_pos_alloc)
+    # Area plots can not work with negative values.
+    # TODO Investigate what we want to do in case of negative cash.
+    if np.any(df_long_short.cash < 0):
+        warnings.warn('Negative cash, taking absolute for area plot.')
+        df_long_short = df_long_short.abs()
     df_long_short.plot(
         kind='area', color=['lightblue', 'green', 'coral'], alpha=1.0)
     plt.xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
