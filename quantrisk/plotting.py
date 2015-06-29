@@ -170,7 +170,7 @@ def plot_calendar_returns_info_graphic(daily_rets_ts, x_dim=15, y_dim=6):
     (100 * ann_ret_df.sort_index(ascending=False)
      ).plot(ax=ax2, kind='barh', alpha=0.70)
     ax2.axvline(0.0, color='black', linestyle='-', lw=3)
-   
+
     ax2.set_ylabel(' ')
     ax2.set_xlabel("Annual Returns (%)")
     ax2.legend(['mean'])
@@ -238,7 +238,7 @@ def plot_drawdowns(df_rets, df_cum_rets=None, top=10):
 
     running_max = np.maximum.accumulate(df_cum_rets)
     underwater = -100 * ( (running_max - df_cum_rets) / running_max )
-    
+
     fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(13, 6))
     (df_cum_rets).plot(ax=ax1)
     (underwater).plot(ax=ax2, kind='area', color='coral', alpha=0.7)
@@ -296,23 +296,23 @@ def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
     perf_stats_both = perf_stats_both.join(perf_stats_all, how='inner')
 
     print perf_stats_both
-    
-    diff_pct = timeseries.out_of_sample_vs_in_sample_returns_kde(timeseries.cum_returns(df_rets_backtest , 1.0), 
+
+    diff_pct = timeseries.out_of_sample_vs_in_sample_returns_kde(timeseries.cum_returns(df_rets_backtest , 1.0),
                                                              timeseries.cum_returns(df_rets_live, 1.0) )
-    
+
     consistency_pct = int( 100*(1.0 - diff_pct) )
     print "\n" + str(consistency_pct) + "%" + " :Similarity between Backtest vs. Out-of-Sample (daily returns distribution)\n"
-    
+
 
 
 def plot_rolling_returns(
-                    df_cum_rets, 
-                    df_rets, 
-                    benchmark_rets, 
-                    benchmark2_rets, 
-                    algo_create_date, 
+                    df_cum_rets,
+                    df_rets,
+                    benchmark_rets,
+                    benchmark2_rets,
+                    algo_create_date,
                     timeseries_input_only=True,
-                    cone_std=None, 
+                    cone_std=None,
                     legend_loc='best'):
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
@@ -340,25 +340,25 @@ def plot_rolling_returns(
             cone_df = timeseries.cone_rolling(df_rets, num_stdev=cone_std, cone_fit_end_date=algo_create_date)
 
             cone_df_fit = cone_df[ cone_df.index < algo_create_date]
-            
+
             cone_df_live = cone_df[ cone_df.index > algo_create_date]
             cone_df_live = cone_df_live[ cone_df_live.index < df_rets.index[-1] ]
-            
+
             cone_df_future = cone_df[ cone_df.index > df_rets.index[-1] ]
-            
+
             #cone_df['line'].plot(ax=ax, ls='--', lw=2, color='forestgreen', alpha=0.7)
             cone_df_fit['line'].plot(ax=ax, ls='--', lw=2, color='forestgreen', alpha=0.7)
             cone_df_live['line'].plot(ax=ax, ls='--', lw=2, color='red', alpha=0.7)
             cone_df_future['line'].plot(ax=ax, ls='--', lw=2, color='navy', alpha=0.7)
-            
-            ax.fill_between(cone_df_live.index, 
-                            cone_df_live.sd_down, 
-                            cone_df_live.sd_up, 
+
+            ax.fill_between(cone_df_live.index,
+                            cone_df_live.sd_down,
+                            cone_df_live.sd_up,
                             color='red', alpha=0.30)
-            
-            ax.fill_between(cone_df_future.index, 
-                            cone_df_future.sd_down, 
-                            cone_df_future.sd_up, 
+
+            ax.fill_between(cone_df_future.index,
+                            cone_df_future.sd_down,
+                            cone_df_future.sd_up,
                             color='navy', alpha=0.25)
 
         plt.axhline(1.0, linestyle='--', color='black', lw=2)

@@ -86,11 +86,7 @@ def turnover(transactions_df, backtest_data_df, period='M'):
     # transactions_df and backtest_data_df can come straight from the test harness
     # period takes the same arguments as df.resample
     turnover = transactions_df.apply(
-        lambda z: z.apply(
-            lambda r: abs(r))).resample(
-        period,
-        'sum').sum(
-                axis=1)
+        lambda z: z.apply(lambda r: abs(r))).resample(period, 'sum').sum(axis=1)
     portfolio_value = backtest_data_df.portfolio_value.resample(period, 'mean')
     turnoverpct = turnover / portfolio_value
     turnoverpct = turnoverpct.fillna(0)
