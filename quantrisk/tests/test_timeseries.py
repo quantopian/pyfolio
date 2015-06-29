@@ -50,11 +50,11 @@ class TestCumReturns(TestCase):
     dt = pd.date_range('2000-1-1', periods=3, freq='D')
 
     @parameterized.expand([
-        (pd.Series([.1, -.05, .1], index=dt), pd.Series([1.1, 1.1*.95, 1.1*.95*1.1], index=dt)),
-        (pd.Series([np.nan, -.05, .1], index=dt), pd.Series([1., 1.*.95, 1.*.95*1.1], index=dt)),
+        (pd.Series([.1, -.05, .1], index=dt), pd.Series([1.1, 1.1*.95, 1.1*.95*1.1], index=dt), 1.),
+        (pd.Series([np.nan, -.05, .1], index=dt), pd.Series([1., 1.*.95, 1.*.95*1.1], index=dt), 1.),
     ])
-    def test_expected_result(self, input, expected):
-        output = timeseries.cum_returns(input)
+    def test_expected_result(self, input, expected, starting_value):
+        output = timeseries.cum_returns(input, starting_value=starting_value)
         pdt.assert_series_equal(output, expected)
 
 class TestVariance(TestCase):

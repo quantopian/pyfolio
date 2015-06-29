@@ -34,7 +34,7 @@ def normalize(df_rets, starting_value=1):
         return df_rets / df_rets.iloc[0]
 
 
-def cum_returns(df_rets, starting_value=1.):
+def cum_returns(df_rets, starting_value=None):
     """Compute cumulative returns from simple returns
 
     Parameters
@@ -68,7 +68,10 @@ def cum_returns(df_rets, starting_value=1.):
 
     df_cum = np.exp(np.log(1 + df_rets).cumsum())
 
-    return df_cum * starting_value
+    if starting_value is None:
+        return df_cum - 1
+    else:
+        return df_cum * starting_value
 
 
 def aggregate_returns(df_daily_rets, convert_to):
