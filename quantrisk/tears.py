@@ -11,12 +11,15 @@ import pandas as pd
 from sklearn import preprocessing
 
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import seaborn as sns
 
-def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0):
+def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0, benchmark_rets=None, benchmark2_rets=None):
 
-    benchmark_rets = utils.get_symbol_rets('SPY')
-    benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
+    if benchmark_rets is None:
+        benchmark_rets = utils.get_symbol_rets('SPY')
+    if benchmark2_rets is None:
+        benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
 
     # if your directory structure isn't exactly the same as the research server you can manually specify the location
     # of the directory holding the risk factor data
@@ -37,44 +40,53 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     plotting.show_perf_stats(df_rets, algo_create_date, benchmark_rets)
 
+    fig = plt.figure(figsize=(14, 10*6))
+    gs = gridspec.GridSpec(10, 3, wspace=0.5, hspace=0.5)
+    ax1 = plt.subplot(gs[:2, :]) # Rolling returns
+    ax2 = plt.subplot(gs[2, :]) # Rolling beta
+    #plt.setp(ax2.get_xticklabels(), visible=False)
+    ax3 = plt.subplot(gs[3, :], sharex=ax2) # Rolling sharpe
+    #plt.setp(ax3.get_xticklabels(), visible=False)
+    ax4 = plt.subplot(gs[4, :], sharex=ax2) # Rolling risk factors
+    ax5 = plt.subplot(gs[5, 0])
+    ax6 = plt.subplot(gs[5, 1])
+    ax7 = plt.subplot(gs[5, 2])
+    ax8 = plt.subplot(gs[6, :])
+    ax9 = plt.subplot(gs[7, :])
+    ax10 = plt.subplot(gs[8, :])
+    ax11 = plt.subplot(gs[9, :])
+
     plotting.plot_rolling_returns(
-        df_cum_rets, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, cone_std=cone_std)
+        df_cum_rets, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, cone_std=cone_std, ax=ax1)
 
-    plotting.plot_rolling_beta(df_cum_rets, df_rets, benchmark_rets)
+    plotting.plot_rolling_beta(df_cum_rets, df_rets, benchmark_rets, ax=ax2)
 
-    plotting.plot_rolling_sharp(df_cum_rets, df_rets)
+    plotting.plot_rolling_sharp(df_cum_rets, df_rets, ax=ax3)
 
     plotting.plot_rolling_risk_factors(
-        df_cum_rets, df_rets, risk_factors, legend_loc='best')
+        df_cum_rets, df_rets, risk_factors, ax=ax4)
 
-    plotting.plot_monthly_returns_heatmap(df_rets)
-    plotting.plot_annual_returns(df_rets)
-    plotting.plot_monthly_returns_dist(df_rets)
+    plotting.plot_monthly_returns_heatmap(df_rets, ax=ax5)
+    plotting.plot_annual_returns(df_rets, ax=ax6)
+    plotting.plot_monthly_returns_dist(df_rets, ax=ax7)
 
-    plt.figure(figsize=(13,7))
     df_rets_backtest = df_rets[df_rets.index < algo_create_date]
     df_rets_live = df_rets[df_rets.index > algo_create_date]
 
-    sns.kdeplot(preprocessing.scale(df_rets_backtest) , bw='scott', shade=True, label='backtest', color='forestgreen')
-    sns.kdeplot(preprocessing.scale(df_rets_live) ,  bw='scott', shade=True, label='out-of-sample', color='red')
-    plt.title("Daily Returns Similarity")
+    plotting.plot_daily_returns_similarity(df_rets_backtest, df_rets_live, ax=ax8)
 
     df_weekly = timeseries.aggregate_returns(df_rets, 'weekly')
     df_monthly = timeseries.aggregate_returns(df_rets, 'monthly')
 
-    plotting.plot_return_quantiles(df_rets, df_weekly, df_monthly)
+    plotting.plot_return_quantiles(df_rets, df_weekly, df_monthly, ax=ax9)
 
     plotting.show_return_range(df_rets, df_weekly)
 
-    # Get interesting time periods
-
-    create_interesting_times_tear_sheet(df_rets, benchmark_rets)
-
-    #########################
     # Drawdowns
     df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
-    plotting.plot_drawdown_periods(df_rets, df_cum_rets, top=5)
-    plotting.plot_drawdown_underwater(df_cum_rets=df_cum_rets)
+    plotting.plot_drawdown_periods(df_rets, df_cum_rets, top=5, ax=ax10)
+
+    plotting.plot_drawdown_underwater(df_cum_rets=df_cum_rets, ax=ax11)
 
     print '\nWorst Drawdown Periods'
     drawdown_df = timeseries.gen_drawdown_table(df_rets, top=5)
@@ -108,10 +120,13 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
 
     plotting.plot_volume_per_day_hist(df_txn)
 
-def create_interesting_times_tear_sheet(df_rets, benchmark_rets, legend_loc='best'):
+def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc='best'):
     rets_interesting = timeseries.extract_interesting_date_ranges(df_rets)
     print '\nStress Events'
     print np.round(pd.DataFrame(rets_interesting).describe().transpose().loc[:, ['mean', 'min', 'max']], 3)
+
+    if benchmark_rets is None:
+        benchmark_rets = utils.get_symbol_rets('SPY')
 
     bmark_interesting = timeseries.extract_interesting_date_ranges(
         benchmark_rets)
@@ -135,7 +150,12 @@ def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
                            algo_create_date=None,
                            backtest_days_pct=0.5, cone_std=1.0):
 
-    create_returns_tear_sheet(df_rets, algo_create_date=algo_create_date, backtest_days_pct=backtest_days_pct, cone_std=cone_std)
+    benchmark_rets = utils.get_symbol_rets('SPY')
+    benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
+
+    create_returns_tear_sheet(df_rets, algo_create_date=algo_create_date, backtest_days_pct=backtest_days_pct, cone_std=cone_std, benchmark_rets=benchmark_rets, benchmark2_rets=benchmark2_rets)
+
+    create_interesting_times_tear_sheet(df_rets, benchmark_rets=benchmark_rets)
 
     if df_pos is not None:
         create_position_tear_sheet(df_rets, df_pos, gross_lev=gross_lev)
