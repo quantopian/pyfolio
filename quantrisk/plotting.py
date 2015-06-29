@@ -133,19 +133,13 @@ def plot_cone_chart(
                 warm_up_x_end:], color=oos_color, alpha=0.15)
 
 
-def plot_calendar_returns_info_graphic(daily_rets_ts, x_dim=15, y_dim=6):
-
-    ann_ret_df = pd.DataFrame(
-        timeseries.aggregate_returns(
-            daily_rets_ts,
-            'yearly'))
-
+def plot_monthly_returns_heatmap(daily_rets_ts):
     monthly_ret_table = timeseries.aggregate_returns(daily_rets_ts, 'monthly')
     monthly_ret_table = monthly_ret_table.unstack()
     monthly_ret_table = np.round(monthly_ret_table, 3)
 
-    fig = plt.figure(figsize=(21, 6))
-    ax1 = fig.add_subplot(1, 3, 1)
+    fig = plt.figure(figsize=(7, 6))
+    ax = fig.add_subplot(111)
     sns.heatmap(
         monthly_ret_table.fillna(0) *
         100.0,
@@ -156,12 +150,19 @@ def plot_calendar_returns_info_graphic(daily_rets_ts, x_dim=15, y_dim=6):
         center=0.0,
         cbar=False,
         cmap=matplotlib.cm.RdYlGn)
-    ax1.set_ylabel(' ')
-    ax1.set_xlabel("Monthly Returns (%)")
+    ax.set_ylabel(' ')
+    ax.set_xlabel("Monthly Returns (%)")
 
-    ax2 = fig.add_subplot(1, 3, 2)
+def plot_annual_returns(daily_rets_ts):
+    ann_ret_df = pd.DataFrame(
+        timeseries.aggregate_returns(
+            daily_rets_ts,
+            'yearly'))
 
-    ax2.axvline(
+    fig = plt.figure(figsize=(7, 6))
+    ax = fig.add_subplot(111)
+
+    ax.axvline(
         100 *
         ann_ret_df.values.mean(),
         color='steelblue',
@@ -169,31 +170,37 @@ def plot_calendar_returns_info_graphic(daily_rets_ts, x_dim=15, y_dim=6):
         lw=4,
         alpha=0.7)
     (100 * ann_ret_df.sort_index(ascending=False)
-     ).plot(ax=ax2, kind='barh', alpha=0.70)
-    ax2.axvline(0.0, color='black', linestyle='-', lw=3)
+     ).plot(ax=ax, kind='barh', alpha=0.70)
+    ax.axvline(0.0, color='black', linestyle='-', lw=3)
 
-    ax2.set_ylabel(' ')
-    ax2.set_xlabel("Annual Returns (%)")
-    ax2.legend(['mean'])
+    ax.set_ylabel(' ')
+    ax.set_xlabel("Annual Returns (%)")
+    ax.legend(['mean'])
 
-    ax3 = fig.add_subplot(1, 3, 3)
-    ax3.hist(
+def plot_monthly_returns_dist(daily_rets_ts):
+    monthly_ret_table = timeseries.aggregate_returns(daily_rets_ts, 'monthly')
+    monthly_ret_table = monthly_ret_table.unstack()
+    monthly_ret_table = np.round(monthly_ret_table, 3)
+    
+    fig = plt.figure(figsize=(7, 6))
+    ax = fig.add_subplot(111)
+    ax.hist(
         100 *
         monthly_ret_table.dropna().values.flatten(),
         color='orangered',
         alpha=0.80,
         bins=20)
 
-    ax3.axvline(
+    ax.axvline(
         100 *
         monthly_ret_table.dropna().values.flatten().mean(),
         color='gold',
         linestyle='--',
         lw=4,
         alpha=1.0)
-    ax3.axvline(0.0, color='black', linestyle='-', lw=3, alpha=0.75)
-    ax3.legend(['mean'])
-    ax3.set_xlabel("Distribution of Monthly Returns (%)")
+    ax.axvline(0.0, color='black', linestyle='-', lw=3, alpha=0.75)
+    ax.legend(['mean'])
+    ax.set_xlabel("Distribution of Monthly Returns (%)")
 
 
 """def plot_avg_holdings(df_pos):

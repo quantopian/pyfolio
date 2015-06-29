@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0):
-    
+
     benchmark_rets = utils.get_symbol_rets('SPY')
     benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
 
@@ -31,7 +31,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     print "Entire data end date: " + str(df_cum_rets.index[-1])
 
     if algo_create_date is None:
-            algo_create_date = df_rets.index[ int(len(df_rets)*backtest_days_pct) ] 
+            algo_create_date = df_rets.index[ int(len(df_rets)*backtest_days_pct) ]
 
     print '\n'
 
@@ -47,7 +47,9 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     plotting.plot_rolling_risk_factors(
         df_cum_rets, df_rets, risk_factors, legend_loc='best')
 
-    plotting.plot_calendar_returns_info_graphic(df_rets)
+    plotting.plot_monthly_returns_heatmap(df_rets)
+    plotting.plot_annual_returns(df_rets)
+    plotting.plot_monthly_returns_dist(df_rets)
 
     plt.figure(figsize=(13,7))
     df_rets_backtest = df_rets[df_rets.index < algo_create_date]
@@ -77,7 +79,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
     drawdown_df['valley date'] = pd.to_datetime(drawdown_df['valley date'],unit='D')
     drawdown_df['recovery date'] = pd.to_datetime(drawdown_df['recovery date'],unit='D')
-    drawdown_df['net drawdown in %'] = map( utils.round_two_dec_places, drawdown_df['net drawdown in %'] ) 
+    drawdown_df['net drawdown in %'] = map( utils.round_two_dec_places, drawdown_df['net drawdown in %'] )
     print drawdown_df.sort('net drawdown in %', ascending=False)
 
 
