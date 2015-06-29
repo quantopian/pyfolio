@@ -68,12 +68,14 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     # Get interesting time periods
 
-    plotting.plot_interesting_times(df_rets, benchmark_rets)
+    create_interesting_times_tear_sheet(df_rets, benchmark_rets)
 
     #########################
     # Drawdowns
+    df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
+    plotting.plot_drawdown_periods(df_rets, df_cum_rets, top=5)
+    plotting.plot_drawdown_underwater(df_cum_rets=df_cum_rets)
 
-    plotting.plot_drawdowns(df_rets, top=5)
     print '\nWorst Drawdown Periods'
     drawdown_df = timeseries.gen_drawdown_table(df_rets, top=5)
     drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
@@ -106,6 +108,27 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
 
     plotting.plot_volume_per_day_hist(df_txn)
 
+def create_interesting_times_tear_sheet(df_rets, benchmark_rets, legend_loc='best'):
+    rets_interesting = timeseries.extract_interesting_date_ranges(df_rets)
+    print '\nStress Events'
+    print np.round(pd.DataFrame(rets_interesting).describe().transpose().loc[:, ['mean', 'min', 'max']], 3)
+
+    bmark_interesting = timeseries.extract_interesting_date_ranges(
+        benchmark_rets)
+
+    fig = plt.figure(figsize=(31, 19))
+    for i, (name, rets_period) in enumerate(rets_interesting.iteritems()):
+        ax = fig.add_subplot(6, 3, i + 1)
+        timeseries.cum_returns(rets_period).plot(
+            ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
+        timeseries.cum_returns(bmark_interesting[name]).plot(
+            ax=ax, color='gray', label='SPY', alpha=0.6)
+        plt.legend(['algo',
+                    'SPY'],
+                   loc=legend_loc)
+        ax.set_title(name, size=14)
+        ax.set_ylabel('', size=12)
+    ax.legend()
 
 def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
                            gross_lev=None, fetcher_urls='',

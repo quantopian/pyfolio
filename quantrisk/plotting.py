@@ -181,7 +181,7 @@ def plot_monthly_returns_dist(daily_rets_ts):
     monthly_ret_table = timeseries.aggregate_returns(daily_rets_ts, 'monthly')
     monthly_ret_table = monthly_ret_table.unstack()
     monthly_ret_table = np.round(monthly_ret_table, 3)
-    
+
     fig = plt.figure(figsize=(7, 6))
     ax = fig.add_subplot(111)
     ax.hist(
@@ -236,37 +236,40 @@ def plot_holdings(df_pos, end_date=None, legend_loc='best'):
     plt.title('# of Holdings Per Day')
 
 
-def plot_drawdowns(df_rets, df_cum_rets=None, top=10):
-    df_drawdowns = timeseries.gen_drawdown_table(df_rets, top=top)
-
-    # df_cum_rets - 1 = cum_returns when startingvalue=None
-
+def plot_drawdown_periods(df_rets, df_cum_rets=None, top=10):
     if df_cum_rets is None:
         df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1.0)
+    df_drawdowns = timeseries.gen_drawdown_table(df_rets, top=top)
+    fig = plt.figure(figsize=(13, 3))
+    ax = fig.add_subplot(111)
+    df_cum_rets.plot(ax=ax)
 
-    running_max = np.maximum.accumulate(df_cum_rets)
-    underwater = -100 * ( (running_max - df_cum_rets) / running_max )
-
-    fig, (ax1, ax2) = plt.subplots(nrows=2, figsize=(13, 6))
-    (df_cum_rets).plot(ax=ax1)
-    (underwater).plot(ax=ax2, kind='area', color='coral', alpha=0.7)
-    lim = ax1.get_ylim()
+    lim = ax.get_ylim()
     colors = sns.cubehelix_palette(len(df_drawdowns))[::-1]
     for i, (peak, recovery) in df_drawdowns[
             ['peak date', 'recovery date']].iterrows():
         if pd.isnull(recovery):
             recovery = df_rets.index[-1]
-        ax1.fill_between((peak, recovery),
+        ax.fill_between((peak, recovery),
                          lim[0],
                          lim[1],
                          alpha=.4,
                          color=colors[i])
 
-    plt.suptitle('Top %i draw down periods' % top)
-    ax1.set_ylabel('Algo Performance')
-    ax1.legend(['Algo'], 'upper left')
-    ax2.set_ylabel('Drawdown in %')
-    ax2.set_title('Underwater plot')
+    ax.set_title('Top %i draw down periods' % top)
+    ax.set_ylabel('Algo Performance')
+    ax.legend(['Algo'], 'upper left')
+
+def plot_drawdown_underwater(df_rets=None, df_cum_rets=None):
+    fig = plt.figure(figsize=(13, 3))
+    ax = fig.add_subplot(111)
+    if df_cum_rets is None:
+        df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1.0)
+    running_max = np.maximum.accumulate(df_cum_rets)
+    underwater = -100 * ( (running_max - df_cum_rets) / running_max )
+    underwater.plot(ax=ax, kind='area', color='coral', alpha=0.7)
+    ax.set_ylabel('Drawdown in %')
+    ax.set_title('Underwater plot')
 
 
 def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
@@ -524,29 +527,6 @@ def show_return_range(df_rets, df_weekly):
                           index=['2-sigma returns daily', '2-sigma returns weekly'])
 
     print np.round(var_sigma, 3)
-
-
-def plot_interesting_times(df_rets, benchmark_rets, legend_loc='best'):
-    rets_interesting = timeseries.extract_interesting_date_ranges(df_rets)
-    print '\nStress Events'
-    print np.round(pd.DataFrame(rets_interesting).describe().transpose().loc[:, ['mean', 'min', 'max']], 3)
-
-    bmark_interesting = timeseries.extract_interesting_date_ranges(
-        benchmark_rets)
-
-    fig = plt.figure(figsize=(31, 19))
-    for i, (name, rets_period) in enumerate(rets_interesting.iteritems()):
-        ax = fig.add_subplot(6, 3, i + 1)
-        timeseries.cum_returns(rets_period).plot(
-            ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
-        timeseries.cum_returns(bmark_interesting[name]).plot(
-            ax=ax, color='gray', label='SPY', alpha=0.6)
-        plt.legend(['algo',
-                    'SPY'],
-                   loc=legend_loc)
-        ax.set_title(name, size=14)
-        ax.set_ylabel('', size=12)
-    ax.legend()
 
 
 def plot_turnover(df_cum_rets, df_txn, df_pos_val, legend_loc='best'):
