@@ -5,6 +5,7 @@ import timeseries
 import plotting
 import positions
 import txn
+import internals
 
 try:
     import bayesian
