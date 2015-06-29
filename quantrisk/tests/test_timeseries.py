@@ -36,15 +36,15 @@ class TestDrawdown(TestCase):
         self.assertTrue(pd.isnull(drawdowns.loc[0, 'valley date'])) if expected_valley is None else self.assertEqual(drawdowns.loc[0, 'valley date'], expected_valley)
         self.assertTrue(pd.isnull(drawdowns.loc[0, 'recovery date'])) if expected_recovery is None else self.assertEqual(drawdowns.loc[0, 'recovery date'], expected_recovery)
         self.assertTrue(pd.isnull(drawdowns.loc[0, 'duration'])) if expected_duration is None else self.assertEqual(drawdowns.loc[0, 'duration'], expected_duration)
-        
+
     @parameterized.expand([
         (pd.Series(px_list_1, index=dt), True, -0.41666666666666669)
     ])
     def test_max_drawdown(self, df_rets, input_is_NAV, expected):
         self.assertEqual(timeseries.max_drawdown(df_rets, input_is_NAV), expected)
-        
-    
-        
+
+
+
 
 class TestCumReturns(TestCase):
     dt = pd.date_range('2000-1-1', periods=3, freq='D')
@@ -63,17 +63,17 @@ class TestVariance(TestCase):
     ])
     def test_var_cov_var_normal(self, P, c, mu, sigma, expected):
         self.assertEqual(timeseries.var_cov_var_normal(P, c, mu, sigma), expected)
-        
+
 class TestNormalize(TestCase):
     dt = pd.date_range('2000-1-1', periods=8, freq='D')
     px_list = [1.0, 1.2, 1.0, 0.8, 0.7, 0.8, 0.8, 0.8]
-    
+
     @parameterized.expand([
        (pd.Series(np.array(px_list)*100, index=dt), pd.Series(px_list, index=dt))
     ])
     def test_normalize(self, df, expected):
         self.assertTrue(timeseries.normalize(df).equals(expected))
-        
+
 class TestAggregateReturns(TestCase):
     simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-1', periods=500, freq='D'))
     @parameterized.expand([
@@ -84,10 +84,10 @@ class TestAggregateReturns(TestCase):
     def test_aggregate_rets(self, df_rets, convert_to, expected):
         self.assertEqual(timeseries.aggregate_returns(df_rets, convert_to).values.tolist(), expected)
 
-        
+
 class TestStats(TestCase):
     simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-1', periods=500, freq='D'))
-    
+
     @parameterized.expand([
         (simple_rets, True, 'calendar', -84.0),
         (simple_rets, True, 'compound', -1.0),
@@ -96,14 +96,14 @@ class TestStats(TestCase):
     ])
     def test_annual_ret(self, df_rets, inputIsNAV, style, expected):
         self.assertEqual(timeseries.annual_return(df_rets, inputIsNAV=inputIsNAV, style=style), expected)
-    
+
     @parameterized.expand([
         (simple_rets, True, 9.1651513899116814),
         (simple_rets, False, 0.12271674212427248)
     ])
     def test_annual_volatility(self, df_rets, inputIsNAV, expected):
         self.assertEqual(timeseries.annual_volatility(df_rets, inputIsNAV=inputIsNAV), expected)
-        
+
     @parameterized.expand([
         (simple_rets, True, 'calendar', -84.0),
         #(simple_rets[:30], False, 'compound', x)

@@ -216,13 +216,13 @@ def stability_of_timeseries(df_rets, logValue=True, inputIsNAV=True):
     return model.rsquared
 
 def out_of_sample_vs_in_sample_returns_kde(bt_ts, oos_ts, transform_style='scale', return_zero_if_exception=True):
-    
+
     bt_ts_pct = bt_ts.pct_change().dropna()
     oos_ts_pct = oos_ts.pct_change().dropna()
-    
+
     bt_ts_r = bt_ts_pct.reshape(len(bt_ts_pct),1)
     oos_ts_r = oos_ts_pct.reshape(len(oos_ts_pct),1)
-    
+
     if transform_style == 'raw':
         bt_scaled = bt_ts_r
         oos_scaled = oos_ts_r
@@ -244,7 +244,7 @@ def out_of_sample_vs_in_sample_returns_kde(bt_ts, oos_ts, transform_style='scale
 
     x_axis_dim = np.linspace(-4, 4, 100)
     kernal_method = 'scott'
-    
+
     try:
         scipy_kde_train = stats.gaussian_kde(X_train, bw_method=kernal_method)(x_axis_dim)
         scipy_kde_test = stats.gaussian_kde(X_test, bw_method=kernal_method)(x_axis_dim)
@@ -253,7 +253,7 @@ def out_of_sample_vs_in_sample_returns_kde(bt_ts, oos_ts, transform_style='scale
             return 0.0
         else:
             return np.nan
-    
+
     kde_diff = sum(abs(scipy_kde_test - scipy_kde_train)) / (sum(scipy_kde_train) + sum(scipy_kde_test))
 
     return kde_diff
@@ -454,13 +454,13 @@ def rolling_sharpe(df_rets, rolling_sharpe_window):
 
 
 def cone_rolling(
-                input_rets, 
-                num_stdev=1.0, 
-                warm_up_days_pct=0.5, 
-                std_scale_factor=252, 
-                update_std_oos_rolling=False, 
-                cone_fit_end_date=None, 
-                extend_fit_trend=True, 
+                input_rets,
+                num_stdev=1.0,
+                warm_up_days_pct=0.5,
+                std_scale_factor=252,
+                update_std_oos_rolling=False,
+                cone_fit_end_date=None,
+                extend_fit_trend=True,
                 create_future_cone=True):
 
     # if specifying 'cone_fit_end_date' please use a pandas compatible format, e.g. '2015-8-4', 'YYYY-MM-DD'
@@ -472,9 +472,9 @@ def cone_rolling(
         df_rets = input_rets[:warm_up_days]
     else:
         df_rets = input_rets[ input_rets.index < cone_fit_end_date]
-    
+
     perf_ts = cum_returns(df_rets, 1)
-        
+
     X = range(0, perf_ts.size)
     X = sm.add_constant(X)
     sm.OLS(perf_ts , range(0,len(perf_ts)))
@@ -484,19 +484,19 @@ def cone_rolling(
 
     x_points = range(0, perf_ts.size)
     x_points = np.array(x_points) * fit_line_ols_coef + fit_line_ols_inter
-    
+
     perf_ts_r = pd.DataFrame(perf_ts)
     perf_ts_r.columns = ['perf']
-    
+
     warm_up_std_pct = np.std(perf_ts.pct_change().dropna())
-    std_pct = warm_up_std_pct * np.sqrt(std_scale_factor) 
+    std_pct = warm_up_std_pct * np.sqrt(std_scale_factor)
 
     perf_ts_r['line'] = x_points
     perf_ts_r['sd_up'] = perf_ts_r['line'] * ( 1 + num_stdev * std_pct )
     perf_ts_r['sd_down'] = perf_ts_r['line'] * ( 1 - num_stdev * std_pct )
-    
-    std_pct = warm_up_std_pct * np.sqrt(std_scale_factor) 
-    
+
+    std_pct = warm_up_std_pct * np.sqrt(std_scale_factor)
+
     last_backtest_day_index = df_rets.index[-1]
     cone_end_rets = input_rets[ input_rets.index > last_backtest_day_index ]
     new_cone_day_scale_factor = int(1)
@@ -506,7 +506,7 @@ def cone_rolling(
     for i in cone_end_rets.index:
         df_rets = input_rets[:i]
         perf_ts = cum_returns(df_rets, 1)
-        
+
         if extend_fit_trend:
             line_ols_coef = fit_line_ols_coef
             line_ols_inter = fit_line_ols_inter
@@ -517,25 +517,25 @@ def cone_rolling(
             line_ols = sm.OLS(perf_ts.values , X).fit()
             line_ols_coef = line_ols.params[1]
             line_ols_inter = line_ols.params[0]
-            
+
         x_points = range(0, perf_ts.size)
         x_points = np.array(x_points) * line_ols_coef + line_ols_inter + oos_intercept_shift
-        
-        temp_line = x_points   
+
+        temp_line = x_points
         if update_std_oos_rolling:
             #std_pct = np.sqrt(std_scale_factor) * np.std(perf_ts.pct_change().dropna())
             std_pct = np.sqrt(new_cone_day_scale_factor) * np.std(perf_ts.pct_change().dropna())
         else:
             std_pct = np.sqrt(new_cone_day_scale_factor) * warm_up_std_pct
-        
+
         temp_sd_up = temp_line * ( 1 + num_stdev * std_pct )
         temp_sd_down = temp_line * ( 1 - num_stdev * std_pct )
-        
-        new_daily_cone = pd.DataFrame(index=[i], data={'perf':perf_ts[i], 
-                                                       'line':temp_line[-1], 
-                                                       'sd_up':temp_sd_up[-1], 
+
+        new_daily_cone = pd.DataFrame(index=[i], data={'perf':perf_ts[i],
+                                                       'line':temp_line[-1],
+                                                       'sd_up':temp_sd_up[-1],
                                                        'sd_down':temp_sd_down[-1] } )
-        
+
         perf_ts_r = perf_ts_r.append(new_daily_cone)
         new_cone_day_scale_factor+=1
 
@@ -543,23 +543,23 @@ def cone_rolling(
     if create_future_cone:
         extend_ahead_days = 252
         future_cone_dates = pd.date_range(cone_end_rets.index[-1], periods=extend_ahead_days, freq='B')
-        
+
         future_cone_intercept_shift = perf_ts_r.perf[-1] - perf_ts_r.line[-1]
-        
+
         future_days_scale_factor = np.linspace(1,extend_ahead_days,extend_ahead_days)
         std_pct = np.sqrt(future_days_scale_factor) * warm_up_std_pct
-        
+
         x_points = range(perf_ts.size, perf_ts.size + extend_ahead_days)
         x_points = np.array(x_points) * line_ols_coef + line_ols_inter + oos_intercept_shift + future_cone_intercept_shift
-        temp_line = x_points   
+        temp_line = x_points
         temp_sd_up = temp_line * ( 1 + num_stdev * std_pct )
         temp_sd_down = temp_line * ( 1 - num_stdev * std_pct )
 
-        future_cone = pd.DataFrame(index=map( np.datetime64, future_cone_dates ), data={'perf':temp_line, 
-                                                                                        'line':temp_line, 
-                                                                                        'sd_up':temp_sd_up, 
+        future_cone = pd.DataFrame(index=map( np.datetime64, future_cone_dates ), data={'perf':temp_line,
+                                                                                        'line':temp_line,
+                                                                                        'sd_up':temp_sd_up,
                                                                                         'sd_down':temp_sd_down } )
-    
+
         perf_ts_r = perf_ts_r.append(future_cone)
 
     return perf_ts_r
