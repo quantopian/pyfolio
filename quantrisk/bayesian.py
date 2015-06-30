@@ -83,7 +83,7 @@ def compute_bayes_cone(preds):
     return perc
 
 def compute_consistency_score(df_test, preds):
-    df_test_cum = cum_returns(df_test)
+    df_test_cum = cum_returns(df_test, starting_value=1.)
     cum_preds = np.cumprod(preds + 1, 1)
 
     q = [sp.stats.percentileofscore(cum_preds[i, :], df_test_cum.iloc[i]) for i in range(len(df_test_cum))]
@@ -94,8 +94,8 @@ def _plot_bayes_cone(df_train, df_test, preds, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    df_train_cum = cum_returns(df_train)
-    df_test_cum = cum_returns(df_test)
+    df_train_cum = cum_returns(df_train, starting_value=1.)
+    df_test_cum = cum_returns(df_test, starting_value=1.)
     index = np.concatenate([df_train.index, df_test.index])
     offset = df_train_cum.iloc[-1] - df_test_cum.iloc[0]
 
@@ -122,7 +122,7 @@ def plot_bayes_cone(df_train, df_test, bmark, plot_train_len=50, ax=None):
     score = compute_consistency_score(df_test, trace['returns_missing'])
     ax = _plot_bayes_cone(df_train.iloc[-plot_train_len:], df_test,
                      trace['returns_missing'], ax=ax)
-    ax.text(0.20, 0.95, 'Consistency score: %.1f' % score, fontsize=15,
+    ax.text(0.40, 0.85, 'Consistency score: %.1f' % score,
             verticalalignment='bottom', horizontalalignment='right',
             transform=ax.transAxes,)
 
