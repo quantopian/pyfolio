@@ -42,19 +42,20 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     fig = plt.figure(figsize=(14, 10*6))
     gs = gridspec.GridSpec(10, 3, wspace=0.5, hspace=0.5)
-    ax1 = plt.subplot(gs[:2, :]) # Rolling returns
-    ax2 = plt.subplot(gs[2, :]) # Rolling beta
-    #plt.setp(ax2.get_xticklabels(), visible=False)
-    ax3 = plt.subplot(gs[3, :], sharex=ax2) # Rolling sharpe
-    #plt.setp(ax3.get_xticklabels(), visible=False)
-    ax4 = plt.subplot(gs[4, :], sharex=ax2) # Rolling risk factors
-    ax5 = plt.subplot(gs[5, 0])
-    ax6 = plt.subplot(gs[5, 1])
-    ax7 = plt.subplot(gs[5, 2])
-    ax8 = plt.subplot(gs[6, :])
-    ax9 = plt.subplot(gs[7, :])
-    ax10 = plt.subplot(gs[8, :])
-    ax11 = plt.subplot(gs[9, :])
+    ax_rolling_returns = plt.subplot(gs[:2, :])
+    ax_rolling_beta = plt.subplot(gs[2, :], sharex=ax_rolling_returns)
+    #plt.setp(ax_rolling_beta.get_xticklabels(), visible=False)
+    ax_rolling_sharpe = plt.subplot(gs[3, :], sharex=ax_rolling_returns)
+    #plt.setp(ax_rolling_sharpe.get_xticklabels(), visible=False)
+    ax_rolling_risk = plt.subplot(gs[4, :], sharex=ax_rolling_returns)
+    ax_drawdown = plt.subplot(gs[5, :], sharex=ax_rolling_returns)
+    ax_underwater = plt.subplot(gs[6, :], sharex=ax_rolling_returns)
+    ax5 = plt.subplot(gs[7, 0])
+    ax6 = plt.subplot(gs[7, 1])
+    ax7 = plt.subplot(gs[7, 2])
+    ax8 = plt.subplot(gs[8, :])
+    ax9 = plt.subplot(gs[9, :])
+
 
     plotting.plot_rolling_returns(
         df_cum_rets,
@@ -63,23 +64,28 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
         benchmark2_rets,
         algo_create_date,
         cone_std=cone_std,
-        ax=ax1)
+        ax=ax_rolling_returns)
 
-    plotting.plot_rolling_beta(df_cum_rets, df_rets, benchmark_rets, ax=ax2)
+    plotting.plot_rolling_beta(
+        df_cum_rets, df_rets, benchmark_rets, ax=ax_rolling_beta)
 
-    plotting.plot_rolling_sharp(df_cum_rets, df_rets, ax=ax3)
+    plotting.plot_rolling_sharp(
+        df_cum_rets, df_rets, ax=ax_rolling_sharpe)
 
     plotting.plot_rolling_risk_factors(
-        df_cum_rets, df_rets, risk_factors, ax=ax4)
+        df_cum_rets, df_rets, risk_factors, ax=ax_rolling_risk)
 
-    plotting.plot_monthly_returns_heatmap(df_rets, ax=ax5)
-    plotting.plot_annual_returns(df_rets, ax=ax6)
-    plotting.plot_monthly_returns_dist(df_rets, ax=ax7)
+    # Drawdowns
+    df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
+    plotting.plot_drawdown_periods(
+        df_rets, df_cum_rets, top=5, ax=ax_drawdown)
 
+    plotting.plot_drawdown_underwater(
+        df_cum_rets=df_cum_rets, ax=ax_underwater)
+
+    ####
     df_rets_backtest = df_rets[df_rets.index < algo_create_date]
     df_rets_live = df_rets[df_rets.index > algo_create_date]
-
-    plotting.plot_daily_returns_similarity(df_rets_backtest, df_rets_live, ax=ax8)
 
     df_weekly = timeseries.aggregate_returns(df_rets, 'weekly')
     df_monthly = timeseries.aggregate_returns(df_rets, 'monthly')
@@ -88,11 +94,11 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     plotting.show_return_range(df_rets, df_weekly)
 
-    # Drawdowns
-    df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
-    plotting.plot_drawdown_periods(df_rets, df_cum_rets, top=5, ax=ax10)
+    plotting.plot_daily_returns_similarity(df_rets_backtest, df_rets_live, ax=ax8)
 
-    plotting.plot_drawdown_underwater(df_cum_rets=df_cum_rets, ax=ax11)
+    plotting.plot_monthly_returns_heatmap(df_rets, ax=ax5)
+    plotting.plot_annual_returns(df_rets, ax=ax6)
+    plotting.plot_monthly_returns_dist(df_rets, ax=ax7)
 
     print '\nWorst Drawdown Periods'
     drawdown_df = timeseries.gen_drawdown_table(df_rets, top=5)
