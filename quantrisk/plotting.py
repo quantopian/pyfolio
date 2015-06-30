@@ -49,12 +49,7 @@ def plot_rolling_risk_factors(
 
     rolling_risk_multifactor = timeseries.rolling_multifactor_beta(
         df_rets,
-        risk_factors.ix[
-            :,
-            [
-                'SMB',
-                'HML',
-                'UMD']],
+        risk_factors.loc[:, ['SMB', 'HML', 'UMD']],
         rolling_window=rolling_beta_window)
 
     rolling_beta_SMB = timeseries.rolling_beta(
@@ -472,11 +467,9 @@ def plot_rolling_sharp(df_cum_rets, df_rets, rolling_sharpe_window=63 * 2, legen
     #                rolling_sharpe_ts.mean() - future_cone_stdev*np.std(rolling_sharpe_ts),
     #                color='orangered', alpha=0.15)
 
-    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
     ax.set_ylim((-3.0, 6.0))
     ax.set_ylabel('Sharpe ratio', fontsize=14)
-    ax.legend(['Sharpe',
-                'Average'],
+    ax.legend(['Sharpe', 'Average'],
                loc=legend_loc)
     return ax
 

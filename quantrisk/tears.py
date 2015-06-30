@@ -57,7 +57,13 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     ax11 = plt.subplot(gs[9, :])
 
     plotting.plot_rolling_returns(
-        df_cum_rets, df_rets, benchmark_rets, benchmark2_rets, algo_create_date, cone_std=cone_std, ax=ax1)
+        df_cum_rets,
+        df_rets,
+        benchmark_rets,
+        benchmark2_rets,
+        algo_create_date,
+        cone_std=cone_std,
+        ax=ax1)
 
     plotting.plot_rolling_beta(df_cum_rets, df_rets, benchmark_rets, ax=ax2)
 
