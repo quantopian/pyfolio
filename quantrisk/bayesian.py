@@ -86,7 +86,8 @@ def compute_consistency_score(df_test, preds):
     df_test_cum = cum_returns(df_test, starting_value=1.)
     cum_preds = np.cumprod(preds + 1, 1)
 
-    q = [sp.stats.percentileofscore(cum_preds[:, i], df_test_cum.iloc[i]) for i in range(len(df_test_cum))]
+    q = [sp.stats.percentileofscore(cum_preds[:, i], df_test_cum.iloc[i], kind='weak') for i in range(len(df_test_cum))]
+    print q
     # normalize to be from 100 (perfect median line) to 0 (completely outside of cone)
     return 100 - np.abs(50 - np.mean(q)) / .5
 
@@ -117,14 +118,32 @@ def _plot_bayes_cone(df_train, plot_train_len, df_test, preds, ax=None):
 
     return ax
 
-def plot_bayes_cone(df_train, df_test, bmark, plot_train_len=50, ax=None):
+def plot_bayes_cone(model, df_train, df_test, bmark, plot_train_len=50, ax=None, samples=500):
     # generate cone
-    trace = model_returns_t_alpha_beta(df_train, bmark)
+    if model == 'alpha_beta':
+       trace = model_returns_t_alpha_beta(df_train, bmark, samples)
+    elif model == 't':
+        period = df_train.index.append(df_test.index)
+        rets = pd.Series(df_train, period)
+        trace = model_returns_t(rets, samples)
+    elif model == 'normal':
+        period = df_train.index.append(df_test.index)
+        rets = pd.Series(df_train, period)
+        trace = model_returns_normal(rets, samples)
     score = compute_consistency_score(df_test, trace['returns_missing'])
-    ax = _plot_bayes_cone(df_train, plot_train_len, df_test,
-                     trace['returns_missing'], ax=ax)
-    ax.text(0.40, 0.85, 'Consistency score: %.1f' % score,
-            verticalalignment='bottom', horizontalalignment='right',
-            transform=ax.transAxes,)
+    corrco = mean_corrcoef(trace['returns_missing'],df_test)
+    corrco_cum = mean_corrcoef(np.cumprod(trace['returns_missing'] + 1, 1),cum_returns(df_test, starting_value=1.))
 
+    ax = _plot_bayes_cone(df_train, plot_train_len, df_test, trace['returns_missing'], ax=ax)
+    ax.text(0.40, 0.90, 'Consistency score: %.1f' % score, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
+    ax.text(0.40, 0.80, 'rets mean correlation: %.1f' % corrco, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
+    ax.text(0.40, 0.70, 'cumrets mean correlation: %.1f' % corrco_cum, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
     return score
+
+def mean_corrcoef(predictions,data):
+    # assuming that columns in the predictions correspond to days and the rows to posterior samples
+    reg_corr = []
+    reg_corr = np.array(reg_corr)
+    for i in range(predictions.shape[0]): # for each poseterior sample
+        reg_corr = np.append(reg_corr, np.corrcoef(predictions[i,:], data)[0,1])
+    return np.mean(reg_corr)
