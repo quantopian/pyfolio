@@ -268,11 +268,26 @@ def calc_multifactor(df_rets, factors):
     return results.params
 
 
-def rolling_multifactor_beta(ser, multi_factor_df, rolling_window=63):
-    results = [calc_multifactor(ser[beg:end], multi_factor_df) for beg, end in zip(
-        ser.index[0:-rolling_window], ser.index[rolling_window:])]
+def rolling_beta(df_rets, benchmark_rets, rolling_window=63):
+    out = pd.Series(index=df_rets.index)
+    for beg, end in zip(df_rets.index[0:-rolling_window],
+                        df_rets.index[rolling_window:]):
+        out.loc[end] = calc_alpha_beta(df_rets.loc[beg:end],
+                                       benchmark_rets.loc[beg:end])[1]
 
-    return pd.DataFrame(index=ser.index[rolling_window:], data=results)
+    return out
+
+
+def rolling_multifactor_beta(df_rets, df_multi_factor, rolling_window=63):
+    out = pd.DataFrame(columns=['const'] + list(df_multi_factor.columns),
+                       index=df_rets.index)
+
+    for beg, end in zip(df_rets.index[0:-rolling_window],
+                        df_rets.index[rolling_window:]):
+        out.loc[end] = calc_multifactor(df_rets.loc[beg:end],
+                                        df_multi_factor.loc[beg:end])
+
+    return out
 
 
 def multi_factor_alpha(
@@ -288,8 +303,8 @@ def multi_factor_alpha(
     dep_var = single_ts.asfreq(freq='D', normalize=True)
 
     if not input_is_returns:
-        factors_ts = [i.pct_change().dropna() for i in factors_ts]
-        dep_var = dep_var.pct_change().dropna()
+        factors_ts = [i.pct_change().iloc[1:] for i in factors_ts]
+        dep_var = dep_var.pct_change().iloc[1:]
 
     factors_align = pd.DataFrame(factors_ts).T.dropna()
     factors_align.columns = factor_names_list
@@ -323,15 +338,6 @@ def calc_alpha_beta(df_rets, benchmark_rets):
                                       df_rets.values)[:2]
 
     return alpha * 252, beta
-
-
-def rolling_beta(ser, benchmark_rets, rolling_window=63):
-    results = [calc_alpha_beta(ser[beg:end],
-                               benchmark_rets)[1] for beg,
-               end in zip(ser.index[0:-rolling_window],
-                          ser.index[rolling_window:])]
-
-    return pd.Series(index=ser.index[rolling_window:], data=results)
 
 
 def perf_stats(

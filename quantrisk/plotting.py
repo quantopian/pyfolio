@@ -100,7 +100,6 @@ def plot_rolling_risk_factors(
     ax.axhline(0.0, color='black')
 
     ax.set_ylabel('alpha', fontsize=14)
-    ax.set_xlim((df_rets.index[0], df_rets.index[-1]))
     ax.set_ylim((-.40, .40))
     ax.set_title(
         'Multi-factor Alpha (vs. Factors: Small-Cap, High-Growth, Momentum)',
@@ -406,7 +405,6 @@ def plot_rolling_returns(
 
         ax.axhline(1.0, linestyle='--', color='black', lw=2)
         ax.set_ylabel('Cumulative returns', fontsize=14)
-        ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
 
         if timeseries_input_only:
             ax.legend(['S&P500',
@@ -438,7 +436,6 @@ def plot_rolling_beta(df_cum_rets, df_rets, benchmark_rets, rolling_beta_window=
     rb_2 = timeseries.rolling_beta(
         df_rets, benchmark_rets, rolling_window=rolling_beta_window * 3)
     rb_2.plot(color='grey', lw=3, alpha=0.4, ax=ax, **kwargs)
-    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
     ax.set_ylim((-2.5, 2.5))
     ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)
     ax.axhline(0.0, color='black', linestyle='-', lw=2)
