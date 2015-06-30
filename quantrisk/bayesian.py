@@ -86,11 +86,11 @@ def compute_consistency_score(df_test, preds):
     df_test_cum = cum_returns(df_test, starting_value=1.)
     cum_preds = np.cumprod(preds + 1, 1)
 
-    q = [sp.stats.percentileofscore(cum_preds[i, :], df_test_cum.iloc[i]) for i in range(len(df_test_cum))]
+    q = [sp.stats.percentileofscore(cum_preds[:, i], df_test_cum.iloc[i]) for i in range(len(df_test_cum))]
     # normalize to be from 100 (perfect median line) to 0 (completely outside of cone)
     return 100 - np.abs(50 - np.mean(q)) / .5
 
-def _plot_bayes_cone(df_train, df_test, preds, ax=None):
+def _plot_bayes_cone(df_train, plot_train_len, df_test, preds, ax=None):
     if ax is None:
         ax = plt.gca()
 
@@ -108,11 +108,12 @@ def _plot_bayes_cone(df_train, df_test, preds, ax=None):
     df_train_cum.loc[df_test_cum_rel.index[0]] = df_test_cum_rel.iloc[0]
 
     # Plotting
-    df_train_cum.plot(ax=ax, color='g', label='in-sample')
+    df_train_cum.iloc[-plot_train_len:].plot(ax=ax, color='g', label='in-sample')
     df_test_cum_rel.plot(ax=ax, color='r', label='out-of-sample')
 
     ax.fill_between(df_test.index, perc[5] + offset, perc[95] + offset, alpha=.3)
     ax.fill_between(df_test.index, perc[25] + offset, perc[75] + offset, alpha=.6)
+    ax.legend()
 
     return ax
 
@@ -120,7 +121,7 @@ def plot_bayes_cone(df_train, df_test, bmark, plot_train_len=50, ax=None):
     # generate cone
     trace = model_returns_t_alpha_beta(df_train, bmark)
     score = compute_consistency_score(df_test, trace['returns_missing'])
-    ax = _plot_bayes_cone(df_train.iloc[-plot_train_len:], df_test,
+    ax = _plot_bayes_cone(df_train, plot_train_len, df_test,
                      trace['returns_missing'], ax=ax)
     ax.text(0.40, 0.85, 'Consistency score: %.1f' % score,
             verticalalignment='bottom', horizontalalignment='right',
