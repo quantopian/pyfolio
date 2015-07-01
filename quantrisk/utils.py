@@ -16,6 +16,10 @@ def one_dec_places(x, pos):
     return '%.1f' % x
 
 
+def percentage(x, pos):
+    return '%.0f%%' % x
+
+
 def round_two_dec_places(x):
     return np.round(x, 2)
 
