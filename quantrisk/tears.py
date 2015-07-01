@@ -40,7 +40,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     plotting.show_perf_stats(df_rets, algo_create_date, benchmark_rets)
 
-    fig = plt.figure(figsize=(14, 10*6))
+    plt.figure(figsize=(14, 10*6))
     gs = gridspec.GridSpec(10, 3, wspace=0.5, hspace=0.5)
     ax_rolling_returns = plt.subplot(gs[:2, :])
     ax_rolling_beta = plt.subplot(gs[2, :], sharex=ax_rolling_returns)
@@ -105,7 +105,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
 def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
     
-    fig = plt.figure(figsize=(14, 4*6))
+    plt.figure(figsize=(14, 4*6))
     gs = gridspec.GridSpec(4, 3, wspace=0.5, hspace=0.5)
     ax_gross_leverage = plt.subplot(gs[0, :])
     ax_exposures = plt.subplot(gs[1, :], sharex=ax_gross_leverage)
@@ -126,7 +126,7 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
 
 def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
     
-    fig = plt.figure(figsize=(14, 3*6))
+    plt.figure(figsize=(14, 3*6))
     gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
     ax_turnover = plt.subplot(gs[0, :])
     ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
@@ -153,19 +153,24 @@ def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc
     bmark_interesting = timeseries.extract_interesting_date_ranges(
         benchmark_rets)
 
-    fig = plt.figure(figsize=(31, 19))
+    num_plots = len(rets_interesting)
+    num_rows = int((num_plots+1)/2.0) # 2 plots, 1 row; 3 plots, 2 rows; 4 plots, 2 rows; etc.
+    plt.figure(figsize=(14, num_rows*6.0))
+    gs = gridspec.GridSpec(num_rows, 2, wspace=0.5, hspace=0.5)
+    
     for i, (name, rets_period) in enumerate(rets_interesting.iteritems()):
-        ax = fig.add_subplot(6, 3, i + 1)
+        
+        ax = plt.subplot(gs[int(i/2.0), i%2]) # i=0 -> 0, i=1 -> 0, i=2 -> 1 ;; i=0 -> 0, i=1 -> 1, i=2 -> 0
         timeseries.cum_returns(rets_period).plot(
             ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
         timeseries.cum_returns(bmark_interesting[name]).plot(
             ax=ax, color='gray', label='SPY', alpha=0.6)
-        plt.legend(['algo',
+        ax.legend(['algo',
                     'SPY'],
                    loc=legend_loc)
         ax.set_title(name, size=14)
-        ax.set_ylabel('', size=12)
-    ax.legend()
+        ax.set_ylabel('Returns')
+        ax.set_xlabel('Date')
 
 def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
                            gross_lev=None, fetcher_urls='',
