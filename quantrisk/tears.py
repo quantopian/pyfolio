@@ -83,7 +83,9 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     plotting.plot_drawdown_underwater(
         df_cum_rets=df_cum_rets, ax=ax_underwater)
 
+    plotting.show_worst_drawdown_periods(df_rets)
     ####
+    
     df_rets_backtest = df_rets[df_rets.index < algo_create_date]
     df_rets_live = df_rets[df_rets.index > algo_create_date]
 
@@ -99,14 +101,6 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     plotting.plot_daily_returns_similarity(df_rets_backtest, df_rets_live, ax=ax_daily_similarity)
     
     plotting.plot_return_quantiles(df_rets, df_weekly, df_monthly, ax=ax_return_quantiles)
-
-    print '\nWorst Drawdown Periods'
-    drawdown_df = timeseries.gen_drawdown_table(df_rets, top=5)
-    drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
-    drawdown_df['valley date'] = pd.to_datetime(drawdown_df['valley date'],unit='D')
-    drawdown_df['recovery date'] = pd.to_datetime(drawdown_df['recovery date'],unit='D')
-    drawdown_df['net drawdown in %'] = map( utils.round_two_dec_places, drawdown_df['net drawdown in %'] )
-    print drawdown_df.sort('net drawdown in %', ascending=False)
 
 
 def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):

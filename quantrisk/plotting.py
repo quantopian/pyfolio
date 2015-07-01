@@ -673,3 +673,14 @@ def plot_daily_returns_similarity(df_rets_backtest, df_rets_live, ax=None, **kwa
     sns.kdeplot(preprocessing.scale(df_rets_live),  bw='scott', shade=True, label='out-of-sample', color='red', ax=ax, **kwargs)
     ax.set_title("Daily Returns Similarity")
     return ax
+
+def show_worst_drawdown_periods(df_rets, top=5):
+    print '\nWorst Drawdown Periods'
+    drawdown_df = timeseries.gen_drawdown_table(df_rets, top=top)
+    drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
+    drawdown_df['valley date'] = pd.to_datetime(drawdown_df['valley date'],unit='D')
+    drawdown_df['recovery date'] = pd.to_datetime(drawdown_df['recovery date'],unit='D')
+    drawdown_df['net drawdown in %'] = map( utils.round_two_dec_places, drawdown_df['net drawdown in %'] )
+    print drawdown_df.sort('net drawdown in %', ascending=False)
+    
+    
