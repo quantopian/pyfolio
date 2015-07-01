@@ -127,7 +127,7 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
 
     plotting.show_and_plot_top_positions(df_cum_rets, df_pos_alloc, ax=ax_top_positions)
 
-    plotting.plot_holdings(df_pos_alloc, ax=ax_holdings)
+    plotting.plot_holdings(df_pos_alloc, df_rets, ax=ax_holdings)
 
 
 def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):

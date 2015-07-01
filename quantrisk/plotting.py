@@ -223,8 +223,8 @@ def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
     ax.set_ylabel('year')"""
 
 
-def plot_holdings(df_pos, end_date=None, legend_loc='best', ax=None, **kwargs):
-
+def plot_holdings(df_pos, df_rets, legend_loc='best', ax=None, **kwargs):
+    
     if ax is None:
         ax = plt.gca()
 
@@ -239,8 +239,8 @@ def plot_holdings(df_pos, end_date=None, legend_loc='best', ax=None, **kwargs):
         ls='--',
         lw=3,
         alpha=1.0)
-    if end_date is not None:
-        ax.set_xlim((df_holdings.index[0], end_date))
+    
+    ax.set_xlim((df_rets.index[0], df_rets.index[-1]))
 
     ax.legend(['Daily holdings',
                 'Average daily holdings, by month',
