@@ -124,12 +124,12 @@ def plot_cone_chart(
 
     warm_up_x_end = int(len(cone_df) * warm_up_days_pct)
 
-    plt.fill_between(
+    ax.fill_between(
         cone_df.index[
             :warm_up_x_end], cone_df.sd_down[
             :warm_up_x_end], cone_df.sd_up[
                 :warm_up_x_end], color=in_sample_color, alpha=0.15)
-    plt.fill_between(
+    ax.fill_between(
         cone_df.index[
             warm_up_x_end:], cone_df.sd_down[
             warm_up_x_end:], cone_df.sd_up[
@@ -218,9 +218,9 @@ def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
     df_holdings = df_pos.groupby([lambda x: x.year, lambda x: x.month]).apply(
         lambda x: np.mean([len(x[x != 0]) for _, x in x.iterrows()])).unstack()
     sns.heatmap(df_holdings, annot=True, cbar=False)
-    plt.title('Average # of holdings per month')
-    plt.xlabel('month')
-    plt.ylabel('year')"""
+    ax.set_title('Average # of holdings per month')
+    ax.set_xlabel('month')
+    ax.set_ylabel('year')"""
 
 
 def plot_holdings(df_pos, end_date=None, legend_loc='best', ax=None, **kwargs):
@@ -233,20 +233,20 @@ def plot_holdings(df_pos, end_date=None, legend_loc='best', ax=None, **kwargs):
     df_holdings_by_month = df_holdings.resample('1M', how='mean')
     df_holdings.plot(color='steelblue', alpha=0.6, lw=0.5, ax=ax, **kwargs)
     df_holdings_by_month.plot(color='orangered', alpha=0.5, lw=2, ax=ax, **kwargs)
-    plt.axhline(
+    ax.axhline(
         df_holdings.values.mean(),
         color='steelblue',
         ls='--',
         lw=3,
         alpha=1.0)
     if end_date is not None:
-        plt.xlim((df_holdings.index[0], end_date))
+        ax.set_xlim((df_holdings.index[0], end_date))
 
-    plt.legend(['Daily holdings',
+    ax.legend(['Daily holdings',
                 'Average daily holdings, by month',
                 'Average daily holdings, net'],
                loc=legend_loc)
-    plt.title('# of Holdings Per Day')
+    ax.set_title('# of Holdings Per Day')
     return ax
 
 def plot_drawdown_periods(df_rets, df_cum_rets=None, top=10, ax=None, **kwargs):
@@ -435,7 +435,7 @@ def plot_rolling_beta(df_cum_rets, df_rets, benchmark_rets, rolling_beta_window=
     ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)
     ax.axhline(0.0, color='black', linestyle='-', lw=2)
 
-    # plt.fill_between(cone_df_future.index,
+    # ax.fill_between(cone_df_future.index,
     #                rb_1.mean() + future_cone_stdev*np.std(rb_1),
     #                rb_1.mean() - future_cone_stdev*np.std(rb_1),
     #                color='steelblue', alpha=0.2)
@@ -462,7 +462,7 @@ def plot_rolling_sharp(df_cum_rets, df_rets, rolling_sharpe_window=63 * 2, legen
     ax.axhline(rolling_sharpe_ts.mean(), color='steelblue', linestyle='--', lw=3)
     ax.axhline(0.0, color='black', linestyle='-', lw=3)
 
-    # plt.fill_between(cone_df_future.index,
+    # ax.fill_between(cone_df_future.index,
     #                rolling_sharpe_ts.mean() + future_cone_stdev*np.std(rolling_sharpe_ts),
     #                rolling_sharpe_ts.mean() - future_cone_stdev*np.std(rolling_sharpe_ts),
     #                color='orangered', alpha=0.15)
@@ -480,12 +480,12 @@ def plot_gross_leverage(df_cum_rets, gross_lev, ax=None, **kwargs):
         ax = plt.gca()
 
     gross_lev.plot(alpha=0.8, lw=0.5, color='g', legend=False, ax=ax, **kwargs)
-    #plt.axhline(0.0, color='black', lw=2)
-    plt.axhline(
+    #ax.axhline(0.0, color='black', lw=2)
+    ax.axhline(
         np.mean(gross_lev.iloc[:, 0]), color='g', linestyle='--', lw=3, alpha=1.0)
-    plt.xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
-    plt.title('Gross Leverage')
-    plt.ylabel('Gross Leverage', fontsize=14)
+    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+    ax.set_title('Gross Leverage')
+    ax.set_ylabel('Gross Leverage', fontsize=14)
     return ax
 
 
@@ -503,9 +503,9 @@ def plot_exposures(df_cum_rets, df_pos_alloc, ax=None, **kwargs):
     df_long_short.plot(
         kind='area', color=['lightblue', 'green', 'coral'], alpha=1.0,
         ax=ax, **kwargs)
-    plt.xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
-    plt.title("Long/Short/Cash Exposure")
-    plt.ylabel('Exposure', fontsize=14)
+    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+    ax.set_title("Long/Short/Cash Exposure")
+    ax.set_ylabel('Exposure', fontsize=14)
     return ax
 
 
@@ -547,8 +547,8 @@ def show_and_plot_top_positions(df_cum_rets, df_pos_alloc, show_and_plot=2, ax=N
         df_pos_alloc[df_top_abs.index].plot(
             title='Portfolio allocation over time, only top 10 holdings', alpha=0.4,
             ax=ax, **kwargs)
-        plt.ylabel('Exposure by Stock', fontsize=14)
-        plt.xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+        ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+        ax.set_ylabel('Exposure by Stock', fontsize=14)
         return ax
 
 
@@ -587,16 +587,16 @@ def plot_turnover(df_cum_rets, df_txn, df_pos_val, legend_loc='best', ax=None, *
     df_turnover_by_month = df_turnover.resample('1M', how='mean')
     df_turnover.plot(color='steelblue', alpha=1.0, lw=0.5, ax=ax, **kwargs)
     df_turnover_by_month.plot(color='orangered', alpha=0.5, lw=2, ax=ax, **kwargs)
-    plt.axhline(
+    ax.axhline(
         df_turnover.mean(), color='steelblue', linestyle='--', lw=3, alpha=1.0)
-    plt.legend(['Daily turnover',
+    ax.legend(['Daily turnover',
                 'Average daily turnover, by month',
                 'Average daily turnover, net'],
                loc=legend_loc)
-    plt.title('Daily turnover')
-    plt.xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
-    plt.ylim((0, 1))
-    plt.ylabel('% turn-over')
+    ax.set_title('Daily turnover')
+    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+    ax.set_ylim((0, 1))
+    ax.set_ylabel('% turn-over')
     return ax
 
 
@@ -606,11 +606,11 @@ def plot_daily_volume(df_cum_rets, df_txn, ax=None, **kwargs):
         ax = plt.gca()
 
     df_txn.txn_shares.plot(alpha=1.0, lw=0.5, ax=ax, **kwargs)
-    plt.axhline(df_txn.txn_shares.mean(), color='steelblue',
+    ax.axhline(df_txn.txn_shares.mean(), color='steelblue',
                 linestyle='--', lw=3, alpha=1.0)
-    plt.title('Daily volume traded')
-    plt.xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
-    plt.ylabel('# shares traded')
+    ax.set_title('Daily volume traded')
+    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+    ax.set_ylabel('# shares traded')
     return ax
 
 
@@ -620,7 +620,7 @@ def plot_volume_per_day_hist(df_txn, ax=None, **kwargs):
         ax = plt.gca()
 
     sns.distplot(df_txn.txn_volume, ax=ax, **kwargs)
-    plt.title('Histogram of daily trading volume')
+    ax.set_title('Histogram of daily trading volume')
     return ax
 
 def plot_daily_returns_similarity(df_rets_backtest, df_rets_live, ax=None, **kwargs):

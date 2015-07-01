@@ -110,29 +110,45 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
 
 def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
+    
+    fig = plt.figure(figsize=(14, 4*6))
+    gs = gridspec.GridSpec(4, 3, wspace=0.5, hspace=0.5)
+    ax_gross_leverage = plt.subplot(gs[0, :])
+    ax_exposures = plt.subplot(gs[1, :], sharex=ax_gross_leverage)
+    ax_top_positions = plt.subplot(gs[2, :], sharex=ax_gross_leverage)
+    ax_holdings = plt.subplot(gs[3, :], sharex=ax_gross_leverage)
+    
     df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
-
-    plotting.plot_gross_leverage(df_cum_rets, gross_lev)
-
     df_pos_alloc = positions.get_portfolio_alloc(df_pos_val)
 
-    plotting.plot_exposures(df_cum_rets, df_pos_alloc)
+    plotting.plot_gross_leverage(df_cum_rets, gross_lev, ax=ax_gross_leverage)
 
-    plotting.show_and_plot_top_positions(df_cum_rets, df_pos_alloc)
+    plotting.plot_exposures(df_cum_rets, df_pos_alloc, ax=ax_exposures)
 
-    plotting.plot_holdings(df_pos_alloc)
+    plotting.show_and_plot_top_positions(df_cum_rets, df_pos_alloc, ax=ax_top_positions)
+
+    plotting.plot_holdings(df_pos_alloc, ax=ax_holdings)
 
 
 def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
+    
+    fig = plt.figure(figsize=(14, 3*6))
+    gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
+    ax_turnover = plt.subplot(gs[0, :])
+    ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
+    ax_daily_volume_hist = plt.subplot(gs[2, :])
+    
     df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
 
-    plotting.plot_turnover(df_cum_rets, df_txn, df_pos_val)
+    plotting.plot_turnover(df_cum_rets, df_txn, df_pos_val, ax=ax_turnover)
 
-    plotting.plot_daily_volume(df_cum_rets, df_txn)
+    plotting.plot_daily_volume(df_cum_rets, df_txn, ax=ax_daily_volume)
 
-    plotting.plot_volume_per_day_hist(df_txn)
+    plotting.plot_volume_per_day_hist(df_txn, ax=ax_daily_volume_hist)
+    
 
 def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc='best'):
+    
     rets_interesting = timeseries.extract_interesting_date_ranges(df_rets)
     print '\nStress Events'
     print np.round(pd.DataFrame(rets_interesting).describe().transpose().loc[:, ['mean', 'min', 'max']], 3)
