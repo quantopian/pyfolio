@@ -50,11 +50,11 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     ax_rolling_risk = plt.subplot(gs[4, :], sharex=ax_rolling_returns)
     ax_drawdown = plt.subplot(gs[5, :], sharex=ax_rolling_returns)
     ax_underwater = plt.subplot(gs[6, :], sharex=ax_rolling_returns)
-    ax5 = plt.subplot(gs[7, 0])
-    ax6 = plt.subplot(gs[7, 1])
-    ax7 = plt.subplot(gs[7, 2])
-    ax8 = plt.subplot(gs[8, :])
-    ax9 = plt.subplot(gs[9, :])
+    ax_monthly_heatmap = plt.subplot(gs[7, 0])
+    ax_annual_returns = plt.subplot(gs[7, 1])
+    ax_monthly_dist = plt.subplot(gs[7, 2])
+    ax_daily_similarity = plt.subplot(gs[8, :])
+    ax_return_quantiles = plt.subplot(gs[9, :])
 
 
     plotting.plot_rolling_returns(
@@ -90,15 +90,15 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     df_weekly = timeseries.aggregate_returns(df_rets, 'weekly')
     df_monthly = timeseries.aggregate_returns(df_rets, 'monthly')
 
-    plotting.plot_return_quantiles(df_rets, df_weekly, df_monthly, ax=ax9)
-
     plotting.show_return_range(df_rets, df_weekly)
 
-    plotting.plot_daily_returns_similarity(df_rets_backtest, df_rets_live, ax=ax8)
-
-    plotting.plot_monthly_returns_heatmap(df_rets, ax=ax5)
-    plotting.plot_annual_returns(df_rets, ax=ax6)
-    plotting.plot_monthly_returns_dist(df_rets, ax=ax7)
+    plotting.plot_monthly_returns_heatmap(df_rets, ax=ax_monthly_heatmap)
+    plotting.plot_annual_returns(df_rets, ax=ax_annual_returns)
+    plotting.plot_monthly_returns_dist(df_rets, ax=ax_monthly_dist)
+    
+    plotting.plot_daily_returns_similarity(df_rets_backtest, df_rets_live, ax=ax_daily_similarity)
+    
+    plotting.plot_return_quantiles(df_rets, df_weekly, df_monthly, ax=ax_return_quantiles)
 
     print '\nWorst Drawdown Periods'
     drawdown_df = timeseries.gen_drawdown_table(df_rets, top=5)
