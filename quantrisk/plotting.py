@@ -217,7 +217,7 @@ def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
         alpha=1.0)
     ax.axvline(0.0, color='black', linestyle='-', lw=3, alpha=0.75)
     ax.legend(['mean'])
-    ax.set_ylabel('Number of Months')
+    ax.set_ylabel('Number of months')
     ax.set_xlabel('Returns')
     ax.set_title("Distribution of Monthly Returns")
     return ax
@@ -533,7 +533,7 @@ def plot_exposures(df_cum_rets, df_pos_alloc, ax=None, **kwargs):
     return ax
 
 
-def show_and_plot_top_positions(df_cum_rets, df_pos_alloc, show_and_plot=2, legend_loc='best', ax=None, **kwargs):
+def show_and_plot_top_positions(df_cum_rets, df_pos_alloc, show_and_plot=2, legend_loc='real_best', ax=None, **kwargs):
     # show_and_plot allows for both showing info and plot, or doing only one.
     # plot:0, show:1, both:2 (default 2).
     df_top_long, df_top_short, df_top_abs = positions.get_top_long_short_abs(
@@ -571,7 +571,17 @@ def show_and_plot_top_positions(df_cum_rets, df_pos_alloc, show_and_plot=2, lege
         df_pos_alloc[df_top_abs.index].plot(
             title='Portfolio Allocation Over Time, Only Top 10 Holdings', alpha=0.4,
             ax=ax, **kwargs)
-        ax.legend(loc=legend_loc)
+        
+        # Place legend below plot, shrink plot by 20%
+        if legend_loc == 'real_best':
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+
+            # Put a legend below current axis
+            ax.legend(loc='upper center', frameon=True, bbox_to_anchor=(0.5, -0.14), ncol=5)
+        else:
+            ax.legend(loc=legend_loc)
+        
         ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
         ax.set_ylabel('Exposure by stock')
         return ax
