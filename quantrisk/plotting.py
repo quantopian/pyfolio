@@ -167,7 +167,8 @@ def plot_annual_returns(daily_rets_ts, ax=None, **kwargs):
         
     x_axis_formatter = FuncFormatter(utils.percentage)
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
-
+    ax.tick_params(axis='x', which='major', labelsize=10)
+    
     ann_ret_df = pd.DataFrame(
         timeseries.aggregate_returns(
             daily_rets_ts,
@@ -197,7 +198,8 @@ def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
 
     x_axis_formatter = FuncFormatter(utils.percentage)
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
-        
+    ax.tick_params(axis='x', which='major', labelsize=10)
+    
     monthly_ret_table = timeseries.aggregate_returns(daily_rets_ts, 'monthly')
     monthly_ret_table = monthly_ret_table.unstack()
     monthly_ret_table = np.round(monthly_ret_table, 3)
