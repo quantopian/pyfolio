@@ -58,11 +58,10 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
 
     plotting.plot_rolling_returns(
-        df_cum_rets,
         df_rets,
-        benchmark_rets,
-        benchmark2_rets,
-        algo_create_date,
+        benchmark_rets=benchmark_rets,
+        benchmark2_rets=benchmark2_rets,
+        live_start_date=algo_create_date,
         cone_std=cone_std,
         ax=ax_rolling_returns)
 
