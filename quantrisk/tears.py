@@ -23,7 +23,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
     if benchmark2_rets is None:
-        benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
+        benchmark2_rets = utils.get_symbol_rets('IEF')  # 7df_c-10yr Bond ETF.
 
     risk_factors = utils.load_portfolio_risk_factors().dropna(axis=0)
 
@@ -69,21 +69,20 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
         ax=ax_rolling_returns)
 
     plotting.plot_rolling_beta(
-        df_cum_rets, df_rets, benchmark_rets, ax=ax_rolling_beta)
+        df_rets, benchmark_rets, ax=ax_rolling_beta)
 
     plotting.plot_rolling_sharp(
-        df_cum_rets, df_rets, ax=ax_rolling_sharpe)
+        df_rets, ax=ax_rolling_sharpe)
 
     plotting.plot_rolling_risk_factors(
-        df_cum_rets, df_rets, risk_factors, ax=ax_rolling_risk)
+        df_rets, risk_factors, ax=ax_rolling_risk)
 
     # Drawdowns
-    df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
     plotting.plot_drawdown_periods(
-        df_rets, df_cum_rets, top=5, ax=ax_drawdown)
+        df_rets, top=5, ax=ax_drawdown)
 
     plotting.plot_drawdown_underwater(
-        df_cum_rets=df_cum_rets, ax=ax_underwater)
+        df_rets=df_rets, ax=ax_underwater)
 
     plotting.show_worst_drawdown_periods(df_rets)
     ####
@@ -127,16 +126,15 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
     ax_top_positions = plt.subplot(gs[2, :], sharex=ax_gross_leverage)
     ax_holdings = plt.subplot(gs[3, :], sharex=ax_gross_leverage)
 
-    df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
     df_pos_alloc = positions.get_portfolio_alloc(df_pos_val)
 
-    plotting.plot_gross_leverage(df_cum_rets, gross_lev, ax=ax_gross_leverage)
+    plotting.plot_gross_leverage(df_rets, gross_lev, ax=ax_gross_leverage)
 
-    plotting.plot_exposures(df_cum_rets, df_pos_alloc, ax=ax_exposures)
+    plotting.plot_exposures(df_rets, df_pos_alloc, ax=ax_exposures)
 
-    plotting.show_and_plot_top_positions(df_cum_rets, df_pos_alloc, ax=ax_top_positions)
+    plotting.show_and_plot_top_positions(df_rets, df_pos_alloc, ax=ax_top_positions)
 
-    plotting.plot_holdings(df_pos_alloc, df_rets, ax=ax_holdings)
+    plotting.plot_holdings(df_rets, df_pos_alloc, ax=ax_holdings)
 
 
 def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
@@ -147,11 +145,9 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
     ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
     ax_daily_volume_hist = plt.subplot(gs[2, :])
 
-    df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
+    plotting.plot_turnover(df_rets, df_txn, df_pos_val, ax=ax_turnover)
 
-    plotting.plot_turnover(df_cum_rets, df_txn, df_pos_val, ax=ax_turnover)
-
-    plotting.plot_daily_volume(df_cum_rets, df_txn, ax=ax_daily_volume)
+    plotting.plot_daily_volume(df_rets, df_txn, ax=ax_daily_volume)
 
     plotting.plot_volume_per_day_hist(df_txn, ax=ax_daily_volume_hist)
 
