@@ -1,10 +1,10 @@
 from __future__ import division
 
-import timeseries
-import utils
-import positions
-import plotting
-import internals
+from . import timeseries
+from . import utils
+from . import positions
+from . import plotting
+from . import bayesian
 
 import numpy as np
 import pandas as pd
@@ -23,10 +23,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     if benchmark2_rets is None:
         benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
 
-    # if your directory structure isn't exactly the same as the research server you can manually specify the location
-    # of the directory holding the risk factor data
-    # risk_factors = load_portfolio_risk_factors(local_risk_factor_path)
-    risk_factors = internals.load_portfolio_risk_factors().dropna(axis=0)
+    risk_factors = utils.load_portfolio_risk_factors().dropna(axis=0)
 
     plotting.set_plot_defaults()
 
