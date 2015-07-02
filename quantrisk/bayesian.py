@@ -87,7 +87,6 @@ def compute_consistency_score(df_test, preds):
     cum_preds = np.cumprod(preds + 1, 1)
 
     q = [sp.stats.percentileofscore(cum_preds[:, i], df_test_cum.iloc[i], kind='weak') for i in range(len(df_test_cum))]
-    print q
     # normalize to be from 100 (perfect median line) to 0 (completely outside of cone)
     return 100 - np.abs(50 - np.mean(q)) / .5
 

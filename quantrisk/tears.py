@@ -189,7 +189,7 @@ def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc
 
 def create_bayesian_tear_sheet(df_rets, bmark, live_start_date, plot_train_len=50):
     plt.figure(figsize=(14, 10*2))
-    gs = gridspec.GridSpec(2, 2, wspace=0.1, hspace=0.1)
+    gs = gridspec.GridSpec(2, 2, wspace=0.5, hspace=0.5)
     ax_sharpe = plt.subplot(gs[0, 0])
     ax_vol = plt.subplot(gs[0, 1])
     ax_cone = plt.subplot(gs[1, :])
@@ -198,7 +198,8 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date, plot_train_len=5
     df_test = df_rets.loc[df_rets.index >= live_start_date]
     bmark = bmark.loc[df_rets.index]
 
-    trace_t = bayesian.run_model('t', df_train, df_test=df_test, samples=500)
+    trace_t = bayesian.run_model('t', df_train, df_test=df_test,
+                                 samples=2000)
 
     sns.distplot(trace_t['sharpe'], ax=ax_sharpe)
     ax_sharpe.set_title('Bayesian T-Sharpe Ratio')
@@ -209,9 +210,12 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date, plot_train_len=5
     ax_vol.set_xlabel('Volatility')
     ax_vol.set_ylabel('Belief')
 
-    trace_alpha_beta = bayesian.run_model('alpha_beta', df_train, bmark=bmark, samples=2000)
+    trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
+                                          bmark=bmark, samples=2000)
 
-    bayesian._plot_bayes_cone(df_train, df_test, trace_alpha_beta['returns_missing'], ax=ax_cone)
+    bayesian._plot_bayes_cone(df_train, df_test,
+                              trace_alpha_beta['returns_missing'],
+                              ax=ax_cone)
 
 
 def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
