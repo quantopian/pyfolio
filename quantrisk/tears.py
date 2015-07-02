@@ -53,7 +53,9 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     ax_monthly_heatmap = plt.subplot(gs[7, 0])
     ax_annual_returns = plt.subplot(gs[7, 1])
     ax_monthly_dist = plt.subplot(gs[7, 2])
-    ax_daily_similarity = plt.subplot(gs[8, :])
+    ax_daily_similarity_scale = plt.subplot(gs[8, 0])
+    ax_daily_similarity_no_var = plt.subplot(gs[8, 1])
+    ax_daily_similarity_no_var_no_mean = plt.subplot(gs[8, 2])
     ax_return_quantiles = plt.subplot(gs[9, :])
 
 
@@ -96,9 +98,22 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     plotting.plot_monthly_returns_heatmap(df_rets, ax=ax_monthly_heatmap)
     plotting.plot_annual_returns(df_rets, ax=ax_annual_returns)
     plotting.plot_monthly_returns_dist(df_rets, ax=ax_monthly_dist)
-    
-    plotting.plot_daily_returns_similarity(df_rets_backtest, df_rets_live, ax=ax_daily_similarity)
-    
+
+    plotting.plot_daily_returns_similarity(df_rets_backtest,
+                                           df_rets_live,
+                                           ax=ax_daily_similarity_scale)
+    plotting.plot_daily_returns_similarity(df_rets_backtest,
+                                           df_rets_live,
+                                           scale_kws={'with_std': False},
+                                           title='Similarity without\nvariance normalization',
+                                           ax=ax_daily_similarity_no_var)
+    plotting.plot_daily_returns_similarity(df_rets_backtest,
+                                           df_rets_live,
+                                           scale_kws={'with_std': False,
+                                                      'with_mean': False},
+                                           title='Similarity without variance\nand mean normalization',
+                                           ax=ax_daily_similarity_no_var_no_mean)
+
     plotting.plot_return_quantiles(df_rets, df_weekly, df_monthly, ax=ax_return_quantiles)
 
 

@@ -664,14 +664,21 @@ def plot_volume_per_day_hist(df_txn, ax=None, **kwargs):
     ax.set_xlabel('Volume')
     return ax
 
-def plot_daily_returns_similarity(df_rets_backtest, df_rets_live, ax=None, **kwargs):
+def plot_daily_returns_similarity(df_rets_backtest, df_rets_live, title="Daily Returns Similarity", scale_kws=None, ax=None, **kwargs):
 
     if ax is None:
         ax = plt.gca()
+    if scale_kws is None:
+        scale_kws = {}
 
-    sns.kdeplot(preprocessing.scale(df_rets_backtest), bw='scott', shade=True, label='backtest', color='forestgreen', ax=ax, **kwargs)
-    sns.kdeplot(preprocessing.scale(df_rets_live),  bw='scott', shade=True, label='out-of-sample', color='red', ax=ax, **kwargs)
-    ax.set_title("Daily Returns Similarity")
+    sns.kdeplot(preprocessing.scale(df_rets_backtest, **scale_kws),
+                bw='scott', shade=True, label='backtest',
+                color='forestgreen', ax=ax, **kwargs)
+    sns.kdeplot(preprocessing.scale(df_rets_live, **scale_kws),
+                bw='scott', shade=True, label='out-of-sample',
+                color='red', ax=ax, **kwargs)
+    ax.set_title(title)
+
     return ax
 
 def show_worst_drawdown_periods(df_rets, top=5):
