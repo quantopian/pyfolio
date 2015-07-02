@@ -223,15 +223,6 @@ def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
     ax.set_title("Distribution of Monthly Returns")
     return ax
 
-"""def plot_avg_holdings(df_pos):
-    df_pos = df_pos.copy().drop('cash', axis='columns')
-    df_holdings = df_pos.groupby([lambda x: x.year, lambda x: x.month]).apply(
-        lambda x: np.mean([len(x[x != 0]) for _, x in x.iterrows()])).unstack()
-    sns.heatmap(df_holdings, annot=True, cbar=False)
-    ax.set_title('Average # of holdings per month')
-    ax.set_xlabel('month')
-    ax.set_ylabel('year')"""
-
 
 def plot_holdings(df_rets, df_pos, legend_loc='best', ax=None, **kwargs):
 
@@ -260,6 +251,7 @@ def plot_holdings(df_rets, df_pos, legend_loc='best', ax=None, **kwargs):
     ax.set_ylabel('Amount of holdings per day')
     ax.set_xlabel('Date')
     return ax
+
 
 def plot_drawdown_periods(df_rets, top=10, ax=None, **kwargs):
 
@@ -410,7 +402,6 @@ def plot_rolling_returns(
 
             cone_df_future = cone_df[ cone_df.index > df_rets.index[-1] ]
 
-            #cone_df['line'].plot(ax=ax, ls='--', lw=2, color='forestgreen', alpha=0.7)
             cone_df_fit['line'].plot(ax=ax, ls='--', lw=2, color='forestgreen', alpha=0.7, **kwargs)
             cone_df_live['line'].plot(ax=ax, ls='--', lw=2, color='red', alpha=0.7, **kwargs)
             cone_df_future['line'].plot(ax=ax, ls='--', lw=2, color='navy', alpha=0.7, **kwargs)
@@ -453,10 +444,6 @@ def plot_rolling_beta(df_rets, benchmark_rets, rolling_beta_window=63, legend_lo
     ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)
     ax.axhline(0.0, color='black', linestyle='-', lw=2)
 
-    # ax.fill_between(cone_df_future.index,
-    #                rb_1.mean() + future_cone_stdev*np.std(rb_1),
-    #                rb_1.mean() - future_cone_stdev*np.std(rb_1),
-    #                color='steelblue', alpha=0.2)
     ax.set_xlabel('Date')
     ax.legend(['6-mo',
                 '12-mo'],
@@ -480,11 +467,6 @@ def plot_rolling_sharp(df_rets, rolling_sharpe_window=63 * 2, legend_loc='best',
     ax.axhline(rolling_sharpe_ts.mean(), color='steelblue', linestyle='--', lw=3)
     ax.axhline(0.0, color='black', linestyle='-', lw=3)
 
-    # ax.fill_between(cone_df_future.index,
-    #                rolling_sharpe_ts.mean() + future_cone_stdev*np.std(rolling_sharpe_ts),
-    #                rolling_sharpe_ts.mean() - future_cone_stdev*np.std(rolling_sharpe_ts),
-    #                color='orangered', alpha=0.15)
-
     ax.set_ylim((-3.0, 6.0))
     ax.set_ylabel('Sharpe ratio')
     ax.set_xlabel('Date')
@@ -499,7 +481,7 @@ def plot_gross_leverage(df_rets, gross_lev, ax=None, **kwargs):
         ax = plt.gca()
         
     gross_lev.plot(alpha=0.8, lw=0.5, color='g', legend=False, ax=ax, **kwargs)
-    #ax.axhline(0.0, color='black', lw=2)
+    
     ax.axhline(
         np.mean(gross_lev.iloc[:, 0]), color='g', linestyle='--', lw=3, alpha=1.0)
     df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
@@ -516,8 +498,7 @@ def plot_exposures(df_rets, df_pos_alloc, ax=None, **kwargs):
         ax = plt.gca()
 
     df_long_short = positions.get_long_short_pos(df_pos_alloc)
-    # Area plots can not work with negative values.
-    # TODO Investigate what we want to do in case of negative cash.
+    
     if np.any(df_long_short.cash < 0):
         warnings.warn('Negative cash, taking absolute for area plot.')
         df_long_short = df_long_short.abs()

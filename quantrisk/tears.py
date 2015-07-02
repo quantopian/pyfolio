@@ -45,9 +45,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     gs = gridspec.GridSpec(10, 3, wspace=0.5, hspace=0.5)
     ax_rolling_returns = plt.subplot(gs[:2, :])
     ax_rolling_beta = plt.subplot(gs[2, :], sharex=ax_rolling_returns)
-    #plt.setp(ax_rolling_beta.get_xticklabels(), visible=False)
     ax_rolling_sharpe = plt.subplot(gs[3, :], sharex=ax_rolling_returns)
-    #plt.setp(ax_rolling_sharpe.get_xticklabels(), visible=False)
     ax_rolling_risk = plt.subplot(gs[4, :], sharex=ax_rolling_returns)
     ax_drawdown = plt.subplot(gs[5, :], sharex=ax_rolling_returns)
     ax_underwater = plt.subplot(gs[6, :], sharex=ax_rolling_returns)
@@ -85,7 +83,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
         df_rets=df_rets, ax=ax_underwater)
 
     plotting.show_worst_drawdown_periods(df_rets)
-    ####
+    
 
     df_rets_backtest = df_rets[df_rets.index < algo_create_date]
     df_rets_live = df_rets[df_rets.index > algo_create_date]

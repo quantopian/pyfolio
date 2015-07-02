@@ -88,8 +88,6 @@ def aggregate_returns(df_daily_rets, convert_to):
     else:
         ValueError('convert_to must be daily, weekly, monthly or yearly')
 
-# Strategy Performance statistics & timeseries analysis functions
-
 
 def max_drawdown(df_rets, inputIsNAV=True):
     if df_rets.size < 1:
@@ -116,8 +114,7 @@ def max_drawdown(df_rets, inputIsNAV=True):
 def annual_return(df_rets, inputIsNAV=True, style='calendar'):
     # if style == 'compound' then return will be calculated in geometric terms: (1+mean(all_daily_returns))^252 - 1
     # if style == 'calendar' then return will be calculated as ((last_value - start_value)/start_value)/num_of_years
-    # if style == 'arithmetic' then return is simply
-    # mean(all_daily_returns)*252
+    # if style == 'arithmetic' then return is simply mean(all_daily_returns)*252
     if df_rets.size < 1:
         return np.nan
 
@@ -170,7 +167,7 @@ def calmer_ratio(df_rets, inputIsNAV=True, returns_style='calendar'):
                                  inputIsNAV=True,
                                  style=returns_style) / abs(max_drawdown(df_rets=tempNAV,
                                                                          inputIsNAV=True))
-        # print(temp)
+        
     else:
         return np.nan
 
@@ -529,7 +526,6 @@ def cone_rolling(
 
         temp_line = x_points
         if update_std_oos_rolling:
-            #std_pct = np.sqrt(std_scale_factor) * np.std(perf_ts.pct_change().dropna())
             std_pct = np.sqrt(new_cone_day_scale_factor) * np.std(perf_ts.pct_change().dropna())
         else:
             std_pct = np.sqrt(new_cone_day_scale_factor) * warm_up_std_pct
