@@ -4,7 +4,10 @@ from . import timeseries
 from . import utils
 from . import positions
 from . import plotting
-from . import bayesian
+try:
+    from . import bayesian
+except ImportError:
+    warnings.warn("Could not import bayesian submodule due to missing pymc3 dependency.", ImportWarning)
 
 import numpy as np
 import pandas as pd
@@ -13,7 +16,6 @@ from sklearn import preprocessing
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
-
 
 
 def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0, benchmark_rets=None, benchmark2_rets=None):
