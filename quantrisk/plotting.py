@@ -164,11 +164,11 @@ def plot_annual_returns(daily_rets_ts, ax=None, **kwargs):
 
     if ax is None:
         ax = plt.gca()
-        
+
     x_axis_formatter = FuncFormatter(utils.percentage)
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
     ax.tick_params(axis='x', which='major', labelsize=10)
-    
+
     ann_ret_df = pd.DataFrame(
         timeseries.aggregate_returns(
             daily_rets_ts,
@@ -199,7 +199,7 @@ def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
     x_axis_formatter = FuncFormatter(utils.percentage)
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
     ax.tick_params(axis='x', which='major', labelsize=10)
-    
+
     monthly_ret_table = timeseries.aggregate_returns(daily_rets_ts, 'monthly')
     monthly_ret_table = monthly_ret_table.unstack()
     monthly_ret_table = np.round(monthly_ret_table, 3)
@@ -235,7 +235,7 @@ def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
 
 
 def plot_holdings(df_pos, df_rets, legend_loc='best', ax=None, **kwargs):
-    
+
     if ax is None:
         ax = plt.gca()
 
@@ -250,7 +250,7 @@ def plot_holdings(df_pos, df_rets, legend_loc='best', ax=None, **kwargs):
         ls='--',
         lw=3,
         alpha=1.0)
-    
+
     ax.set_xlim((df_rets.index[0], df_rets.index[-1]))
 
     ax.legend(['Daily holdings',
@@ -269,7 +269,7 @@ def plot_drawdown_periods(df_rets, df_cum_rets=None, top=10, ax=None, **kwargs):
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
-        
+
     if df_cum_rets is None:
         df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1.0)
     df_drawdowns = timeseries.gen_drawdown_table(df_rets, top=top)
@@ -302,7 +302,7 @@ def plot_drawdown_underwater(df_rets=None, df_cum_rets=None, ax=None, **kwargs):
 
     y_axis_formatter = FuncFormatter(utils.percentage)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
-        
+
     if df_cum_rets is None:
         df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1.0)
     running_max = np.maximum.accumulate(df_cum_rets)
@@ -571,7 +571,7 @@ def show_and_plot_top_positions(df_cum_rets, df_pos_alloc, show_and_plot=2, lege
         df_pos_alloc[df_top_abs.index].plot(
             title='Portfolio Allocation Over Time, Only Top 10 Holdings', alpha=0.4,
             ax=ax, **kwargs)
-        
+
         # Place legend below plot, shrink plot by 20%
         if legend_loc == 'real_best':
             box = ax.get_position()
@@ -581,7 +581,7 @@ def show_and_plot_top_positions(df_cum_rets, df_pos_alloc, show_and_plot=2, lege
             ax.legend(loc='upper center', frameon=True, bbox_to_anchor=(0.5, -0.14), ncol=5)
         else:
             ax.legend(loc=legend_loc)
-        
+
         ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
         ax.set_ylabel('Exposure by stock')
         return ax
@@ -620,7 +620,7 @@ def plot_turnover(df_cum_rets, df_txn, df_pos_val, legend_loc='best', ax=None, *
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
-        
+
     df_turnover = df_txn.txn_volume / df_pos_val.abs().sum(axis='columns')
     df_turnover_by_month = df_turnover.resample('1M', how='mean')
     df_turnover.plot(color='steelblue', alpha=1.0, lw=0.5, ax=ax, **kwargs)
@@ -689,5 +689,3 @@ def show_worst_drawdown_periods(df_rets, top=5):
     drawdown_df['recovery date'] = pd.to_datetime(drawdown_df['recovery date'],unit='D')
     drawdown_df['net drawdown in %'] = map( utils.round_two_dec_places, drawdown_df['net drawdown in %'] )
     print drawdown_df.sort('net drawdown in %', ascending=False)
-    
-    

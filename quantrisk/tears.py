@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
 
+
+
 def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0, benchmark_rets=None, benchmark2_rets=None):
 
     if benchmark_rets is None:
@@ -139,13 +141,13 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
 
 
 def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
-    
+
     plt.figure(figsize=(14, 3*6))
     gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
     ax_turnover = plt.subplot(gs[0, :])
     ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
     ax_daily_volume_hist = plt.subplot(gs[2, :])
-    
+
     df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
 
     plotting.plot_turnover(df_cum_rets, df_txn, df_pos_val, ax=ax_turnover)
@@ -153,10 +155,10 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
     plotting.plot_daily_volume(df_cum_rets, df_txn, ax=ax_daily_volume)
 
     plotting.plot_volume_per_day_hist(df_txn, ax=ax_daily_volume_hist)
-    
+
 
 def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc='best'):
-    
+
     rets_interesting = timeseries.extract_interesting_date_ranges(df_rets)
     print '\nStress Events'
     print np.round(pd.DataFrame(rets_interesting).describe().transpose().loc[:, ['mean', 'min', 'max']], 3)
@@ -171,9 +173,9 @@ def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc
     num_rows = int((num_plots+1)/2.0) # 2 plots, 1 row; 3 plots, 2 rows; 4 plots, 2 rows; etc.
     plt.figure(figsize=(14, num_rows*6.0))
     gs = gridspec.GridSpec(num_rows, 2, wspace=0.5, hspace=0.5)
-    
+
     for i, (name, rets_period) in enumerate(rets_interesting.iteritems()):
-        
+
         ax = plt.subplot(gs[int(i/2.0), i%2]) # i=0 -> 0, i=1 -> 0, i=2 -> 1 ;; i=0 -> 0, i=1 -> 1, i=2 -> 0
         timeseries.cum_returns(rets_period).plot(
             ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
