@@ -69,7 +69,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     plotting.plot_rolling_beta(
         df_rets, benchmark_rets, ax=ax_rolling_beta)
 
-    plotting.plot_rolling_sharp(
+    plotting.plot_rolling_sharpe(
         df_rets, ax=ax_rolling_sharpe)
 
     plotting.plot_rolling_risk_factors(

@@ -451,7 +451,7 @@ def plot_rolling_beta(df_rets, benchmark_rets, rolling_beta_window=63, legend_lo
     return ax
 
 
-def plot_rolling_sharp(df_rets, rolling_sharpe_window=63 * 2, legend_loc='best', ax=None, **kwargs):
+def plot_rolling_sharpe(df_rets, rolling_sharpe_window=63 * 2, legend_loc='best', ax=None, **kwargs):
 
     if ax is None:
         ax = plt.gca()
