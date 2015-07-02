@@ -91,7 +91,7 @@ def compute_consistency_score(df_test, preds):
     # normalize to be from 100 (perfect median line) to 0 (completely outside of cone)
     return 100 - np.abs(50 - np.mean(q)) / .5
 
-def _plot_bayes_cone(df_train, plot_train_len, df_test, preds, ax=None):
+def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=50, ax=None):
     if ax is None:
         ax = plt.gca()
 
@@ -118,8 +118,8 @@ def _plot_bayes_cone(df_train, plot_train_len, df_test, preds, ax=None):
 
     return ax
 
-def plot_bayes_cone(model, df_train, df_test, bmark, plot_train_len=50, ax=None, samples=500):
-    # generate cone
+def run_model(model, df_train, df_test=None, bmark=None, samples=500):
+
     if model == 'alpha_beta':
        trace = model_returns_t_alpha_beta(df_train, bmark, samples)
     elif model == 't':
@@ -130,11 +130,18 @@ def plot_bayes_cone(model, df_train, df_test, bmark, plot_train_len=50, ax=None,
         period = df_train.index.append(df_test.index)
         rets = pd.Series(df_train, period)
         trace = model_returns_normal(rets, samples)
+
+    return trace
+
+def plot_bayes_cone(model, df_train, df_test, bmark, plot_train_len=50, ax=None, samples=500):
+    # generate cone
+    trace = run_model(model, df_train, df_test=df_test, bmark=bmark,
+                      samples=samples)
     score = compute_consistency_score(df_test, trace['returns_missing'])
     corrco = mean_corrcoef(trace['returns_missing'],df_test)
     corrco_cum = mean_corrcoef(np.cumprod(trace['returns_missing'] + 1, 1),cum_returns(df_test, starting_value=1.))
 
-    ax = _plot_bayes_cone(df_train, plot_train_len, df_test, trace['returns_missing'], ax=ax)
+    ax = _plot_bayes_cone(df_train, df_test, trace['returns_missing'], plot_train_len=plot_train_len, ax=ax)
     ax.text(0.40, 0.90, 'Consistency score: %.1f' % score, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
     ax.text(0.40, 0.80, 'rets mean correlation: %.1f' % corrco, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
     ax.text(0.40, 0.70, 'cumrets mean correlation: %.1f' % corrco_cum, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
