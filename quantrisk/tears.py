@@ -85,7 +85,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     plotting.show_worst_drawdown_periods(df_rets)
     ####
-    
+
     df_rets_backtest = df_rets[df_rets.index < algo_create_date]
     df_rets_live = df_rets[df_rets.index > algo_create_date]
 
@@ -117,14 +117,14 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
 
 def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
-    
+
     plt.figure(figsize=(14, 4*6))
     gs = gridspec.GridSpec(4, 3, wspace=0.5, hspace=0.5)
     ax_gross_leverage = plt.subplot(gs[0, :])
     ax_exposures = plt.subplot(gs[1, :], sharex=ax_gross_leverage)
     ax_top_positions = plt.subplot(gs[2, :], sharex=ax_gross_leverage)
     ax_holdings = plt.subplot(gs[3, :], sharex=ax_gross_leverage)
-    
+
     df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
     df_pos_alloc = positions.get_portfolio_alloc(df_pos_val)
 
