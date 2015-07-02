@@ -214,7 +214,7 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date, plot_train_len=5
 
 def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
                            gross_lev=None, fetcher_urls='',
-                           algo_create_date=None,
+                           algo_create_date=None, bayesian=False,
                            backtest_days_pct=0.5, cone_std=1.0):
 
     benchmark_rets = utils.get_symbol_rets('SPY')
@@ -229,3 +229,6 @@ def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
 
         if df_txn is not None:
             create_txn_tear_sheet(df_rets, df_pos, df_txn)
+
+    if bayesian:
+        create_bayesian_tear_sheet(df_rets, benchmark_rets, live_start_date=algo_create_date)
