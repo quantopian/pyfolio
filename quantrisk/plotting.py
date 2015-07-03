@@ -573,9 +573,9 @@ def plot_return_quantiles(df_rets, df_weekly, df_monthly, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    sns.boxplot([df_rets, df_weekly, df_monthly],
-                names=['daily', 'weekly', 'monthly'],
+    sns.boxplot(data=[df_rets, df_weekly, df_monthly],
                 ax=ax, **kwargs)
+    ax.set_xticklabels(['daily', 'weekly', 'monthly'])
     ax.set_title('Return quantiles')
     return ax
 
