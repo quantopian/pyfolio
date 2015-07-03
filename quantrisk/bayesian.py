@@ -90,7 +90,7 @@ def compute_consistency_score(df_test, preds):
     # normalize to be from 100 (perfect median line) to 0 (completely outside of cone)
     return 100 - np.abs(50 - np.mean(q)) / .5
 
-def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=50, ax=None):
+def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=None, ax=None):
     if ax is None:
         ax = plt.gca()
 
@@ -108,7 +108,10 @@ def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=50, ax=None):
     df_train_cum.loc[df_test_cum_rel.index[0]] = df_test_cum_rel.iloc[0]
 
     # Plotting
-    df_train_cum.iloc[-plot_train_len:].plot(ax=ax, color='g', label='in-sample')
+    if plot_train_len is not None:
+        df_train_cum = df_train_cum.iloc[-plot_train_len:]
+
+    df_train_cum.plot(ax=ax, color='g', label='in-sample')
     df_test_cum_rel.plot(ax=ax, color='r', label='out-of-sample')
 
     ax.fill_between(df_test.index, perc[5] + offset, perc[95] + offset, alpha=.3)
