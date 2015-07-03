@@ -191,7 +191,7 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
     df_train = df_rets.loc[df_rets.index < live_start_date]
     df_test = df_rets.loc[df_rets.index >= live_start_date]
     trace_t = bayesian.run_model('t', df_train, df_test=df_test,
-                                 samples=5000)
+                                 samples=2000)
 
     sns.distplot(trace_t['sharpe'], ax=ax_sharpe)
     #ax_sharpe.set_title('Bayesian T-Sharpe Ratio')
@@ -212,7 +212,7 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
     ax_alpha.set_xlabel('Alpha')
     ax_alpha.set_ylabel('Belief')
     sns.distplot(trace_alpha_beta['beta'], ax=ax_beta)
-    #ax_vol.set_title('Beta')
+    #ax_beta.set_title('Beta')
     ax_beta.set_xlabel('Beta')
     ax_beta.set_ylabel('Belief')
 
@@ -224,8 +224,8 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
                  ax=ax_ret_pred_day
     )
     ax_ret_pred_day.axvline(p5, linestyle='--', linewidth=3.)
-    ax_ret_pred_day.set_ylabel('Predicted returns 1 day')
-    ax_ret_pred_day.set_xlabel('Frequency')
+    ax_ret_pred_day.set_xlabel('Predicted returns 1 day')
+    ax_ret_pred_day.set_ylabel('Frequency')
     #import pdb; pdb.set_trace()
 
     week_pred = (np.cumprod(trace_t['returns_missing'][:, :5] + 1, 1) - 1)[:, -1]
@@ -234,8 +234,8 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
                  ax=ax_ret_pred_week
     )
     ax_ret_pred_week.axvline(p5, linestyle='--', linewidth=3.)
-    ax_ret_pred_week.set_ylabel('Predicted cum returns 5 days')
-    ax_ret_pred_week.set_xlabel('Frequency')
+    ax_ret_pred_week.set_xlabel('Predicted cum returns 5 days')
+    ax_ret_pred_week.set_ylabel('Frequency')
 
     ax_cone = plt.subplot(gs[3, :])
 

@@ -36,7 +36,7 @@ def plot_rolling_risk_factors(
 
     if ax is None:
         ax = plt.gca()
-        
+
     num_months_str = '%.0f' % (rolling_beta_window / 21)
 
     ax.set_title(
@@ -479,9 +479,9 @@ def plot_gross_leverage(df_rets, gross_lev, ax=None, **kwargs):
 
     if ax is None:
         ax = plt.gca()
-        
+
     gross_lev.plot(alpha=0.8, lw=0.5, color='g', legend=False, ax=ax, **kwargs)
-    
+
     ax.axhline(
         np.mean(gross_lev.iloc[:, 0]), color='g', linestyle='--', lw=3, alpha=1.0)
     df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
@@ -498,7 +498,7 @@ def plot_exposures(df_rets, df_pos_alloc, ax=None, **kwargs):
         ax = plt.gca()
 
     df_long_short = positions.get_long_short_pos(df_pos_alloc)
-    
+
     if np.any(df_long_short.cash < 0):
         warnings.warn('Negative cash, taking absolute for area plot.')
         df_long_short = df_long_short.abs()
@@ -561,7 +561,7 @@ def show_and_plot_top_positions(df_rets, df_pos_alloc, show_and_plot=2, legend_l
             ax.legend(loc='upper center', frameon=True, bbox_to_anchor=(0.5, -0.14), ncol=5)
         else:
             ax.legend(loc=legend_loc)
-        
+
         df_cum_rets = timeseries.cum_returns(df_rets, starting_value=1)
         ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
         ax.set_ylabel('Exposure by stock')
