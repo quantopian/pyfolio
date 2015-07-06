@@ -152,8 +152,7 @@ def plot_bayes_cone(df_train, df_test, bmark=None, model='t',
 
     ax = _plot_bayes_cone(df_train, df_test, trace['returns_missing'], plot_train_len=plot_train_len, ax=ax)
     ax.text(0.40, 0.90, 'Consistency score: %.1f' % score, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
-    ax.text(0.40, 0.80, 'rets mean correlation: %.1f' % corrco, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
-    ax.text(0.40, 0.70, 'cumrets mean correlation: %.1f' % corrco_cum, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
+
     return score
 
 def mean_corrcoef(predictions,data):
