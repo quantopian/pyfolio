@@ -153,7 +153,8 @@ def plot_bayes_cone(df_train, df_test, bmark=None, model='t',
     ax = _plot_bayes_cone(df_train, df_test, trace['returns_missing'], plot_train_len=plot_train_len, ax=ax)
     ax.text(0.40, 0.90, 'Consistency score: %.1f' % score, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
 
-    return score
+    ax.set_ylabel('Cumulative returns', fontsize=14)
+    return score, trace
 
 def mean_corrcoef(predictions,data):
     # assuming that columns in the predictions correspond to days and the rows to posterior samples
