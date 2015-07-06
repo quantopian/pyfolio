@@ -10,11 +10,11 @@ from .. import timeseries
 class TestDrawdown(TestCase):
     px_list_1 = [100, 120, 100, 80, 70, 80, 120, 130] # Simple
     px_list_2 = [100, 120, 100, 80, 70, 80, 80, 80] # Ends in drawdown
-    dt = pd.date_range('2000-1-1', periods=8, freq='D')
+    dt = pd.date_range('2000-1-3', periods=8, freq='D')
 
     @parameterized.expand([
-        (pd.Series(px_list_1, index=dt), pd.Timestamp('2000-1-2'), pd.Timestamp('2000-1-5'), pd.Timestamp('2000-1-7')),
-        (pd.Series(px_list_2, index=dt), pd.Timestamp('2000-1-2'), pd.Timestamp('2000-1-5'), None)
+        (pd.Series(px_list_1, index=dt), pd.Timestamp('2000-1-4'), pd.Timestamp('2000-1-7'), pd.Timestamp('2000-1-9')),
+        (pd.Series(px_list_2, index=dt), pd.Timestamp('2000-1-4'), pd.Timestamp('2000-1-7'), None)
     ])
     def test_get_max_draw_down(self, px, expected_peak, expected_valley, expected_recovery):
         rets = px.pct_change().iloc[1:]
@@ -26,7 +26,7 @@ class TestDrawdown(TestCase):
         self.assertTrue(pd.isnull(recovery)) if expected_recovery is None else self.assertEqual(recovery, expected_recovery)
 
     @parameterized.expand([
-        (pd.Series(px_list_2, index=dt), pd.Timestamp('2000-1-2'), pd.Timestamp('2000-1-5'), None, None)
+        (pd.Series(px_list_2, index=dt), pd.Timestamp('2000-1-4'), pd.Timestamp('2000-1-7'), None, None)
     ])
     def test_gen_drawdown_table_end_in_draw_down(self, px, expected_peak, expected_valley, expected_recovery, expected_duration):
         rets = px.pct_change().iloc[1:]
@@ -47,7 +47,7 @@ class TestDrawdown(TestCase):
 
 
 class TestCumReturns(TestCase):
-    dt = pd.date_range('2000-1-1', periods=3, freq='D')
+    dt = pd.date_range('2000-1-3', periods=3, freq='D')
 
     @parameterized.expand([
         (pd.Series([.1, -.05, .1], index=dt), pd.Series([1.1, 1.1*.95, 1.1*.95*1.1], index=dt), 1.),
@@ -65,7 +65,7 @@ class TestVariance(TestCase):
         self.assertEqual(timeseries.var_cov_var_normal(P, c, mu, sigma), expected)
 
 class TestNormalize(TestCase):
-    dt = pd.date_range('2000-1-1', periods=8, freq='D')
+    dt = pd.date_range('2000-1-3', periods=8, freq='D')
     px_list = [1.0, 1.2, 1.0, 0.8, 0.7, 0.8, 0.8, 0.8]
 
     @parameterized.expand([
@@ -75,18 +75,18 @@ class TestNormalize(TestCase):
         self.assertTrue(timeseries.normalize(df).equals(expected))
 
 class TestAggregateReturns(TestCase):
-    simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-1', periods=500, freq='D'))
+    simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-3', periods=500, freq='D'))
     @parameterized.expand([
         (simple_rets, 'yearly', [0.3310000000000004, 0.0]),
         (simple_rets[:100], 'monthly', [0.3310000000000004, 0.0, 0.0, 0.0]),
-        (simple_rets[:20], 'weekly', [0.10000000000000009, 0.0, 0.0, 0.2100000000000002])
+        (simple_rets[:20], 'weekly', [0.3310000000000004, 0.0, 0.0])
     ])
     def test_aggregate_rets(self, df_rets, convert_to, expected):
         self.assertEqual(timeseries.aggregate_returns(df_rets, convert_to).values.tolist(), expected)
 
 
 class TestStats(TestCase):
-    simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-1', periods=500, freq='D'))
+    simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-3', periods=500, freq='D'))
 
     @parameterized.expand([
         (simple_rets, True, 'calendar', -84.0),
@@ -106,11 +106,12 @@ class TestStats(TestCase):
 
     @parameterized.expand([
         (simple_rets, True, 'calendar', -84.0),
-        (simple_rets, True, 'compound', -1.0)
+        #(simple_rets[:30], False, 'compound', x)
     ])
     def test_calmer(self, df_rets, inputIsNAV, returns_style, expected):
         self.assertEqual(timeseries.calmer_ratio(df_rets, inputIsNAV=inputIsNAV, returns_style=returns_style), expected)
 
+    
     @parameterized.expand([
         (simple_rets, True, 'calendar', -9.1651513899116779),
         (simple_rets, True, 'compound', -0.10910894511799617)
@@ -131,13 +132,14 @@ class TestStats(TestCase):
     def test_kde(self, bt_ts, oos_ts, transform_style, return_zero_if_exception, expected):
         self.assertEqual(timeseries.out_of_sample_vs_in_sample_returns_kde(bt_ts, oos_ts, transform_style=transform_style, return_zero_if_exception=return_zero_if_exception), expected)
     """
-    """
+
 class TestMultifactor(TestCase):
     simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-1', periods=500, freq='D'))
-
+    """
     @parameterized.expand([
         (simple_rets, simple_rets, 0.5),
         (simple_rets[:100], simple_rets[:100], 0.5)
     ])
     def test_calc_multifactor(self, df_rets, factors, expected):
-        self.assertEqual(timeseries.calc_multifactor(df_rets, factors), expected)"""
+        self.assertEqual(timeseries.calc_multifactor(df_rets, factors), expected)
+    """
