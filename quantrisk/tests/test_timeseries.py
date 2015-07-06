@@ -8,7 +8,7 @@ import pandas.util.testing as pdt
 from .. import timeseries
 
 class TestDrawdown(TestCase):
-    px_list_1 = [100, 120, 100, 80, 70, 80, 120, 130] # Simple
+    px_list_1 = [100, 120, 100, 80, 70, 80, 120, 110] # Simple
     px_list_2 = [100, 120, 100, 80, 70, 80, 80, 80] # Ends in drawdown
     dt = pd.date_range('2000-1-3', periods=8, freq='D')
 
@@ -26,9 +26,10 @@ class TestDrawdown(TestCase):
         self.assertTrue(pd.isnull(recovery)) if expected_recovery is None else self.assertEqual(recovery, expected_recovery)
 
     @parameterized.expand([
-        (pd.Series(px_list_2, index=dt), pd.Timestamp('2000-1-4'), pd.Timestamp('2000-1-7'), None, None)
+        (pd.Series(px_list_2, index=dt), pd.Timestamp('2000-1-4'), pd.Timestamp('2000-1-7'), None, None),
+        (pd.Series(px_list_1, index=dt), pd.Timestamp('2000-1-4'), pd.Timestamp('2000-1-7'), pd.Timestamp('2000-1-9'), 4)
     ])
-    def test_gen_drawdown_table_end_in_draw_down(self, px, expected_peak, expected_valley, expected_recovery, expected_duration):
+    def test_gen_drawdown_table(self, px, expected_peak, expected_valley, expected_recovery, expected_duration):
         rets = px.pct_change().iloc[1:]
 
         drawdowns = timeseries.gen_drawdown_table(rets, top=1)
@@ -42,9 +43,18 @@ class TestDrawdown(TestCase):
     ])
     def test_max_drawdown(self, df_rets, input_is_NAV, expected):
         self.assertEqual(timeseries.max_drawdown(df_rets, input_is_NAV), expected)
+        
+    @parameterized.expand([
+        (pd.Series(px_list_1, index=dt), -0.41666666666666669)
+    ])
+    def test_max_drawdown_underwater(self, underwater, expected):
+        self.assertEqual(timeseries.max_drawdown(underwater), expected)
 
-
-
+    @parameterized.expand([
+        (pd.Series(px_list_1, index=dt), 1, [(pd.Timestamp('2000-01-03 00:00:00'), pd.Timestamp('2000-01-03 00:00:00'), pd.Timestamp('2000-01-03 00:00:00'))])
+    ])
+    def test_top_drawdowns(self, df_rets, top, expected):
+        self.assertEqual(timeseries.get_top_draw_downs(df_rets, top=top), expected)
 
 class TestCumReturns(TestCase):
     dt = pd.date_range('2000-1-3', periods=3, freq='D')
@@ -57,12 +67,14 @@ class TestCumReturns(TestCase):
         output = timeseries.cum_returns(input, starting_value=starting_value)
         pdt.assert_series_equal(output, expected)
 
+
 class TestVariance(TestCase):
     @parameterized.expand([
        (1e7, 0.5, 1, 1, -10000000.0)
     ])
     def test_var_cov_var_normal(self, P, c, mu, sigma, expected):
         self.assertEqual(timeseries.var_cov_var_normal(P, c, mu, sigma), expected)
+
 
 class TestNormalize(TestCase):
     dt = pd.date_range('2000-1-3', periods=8, freq='D')
@@ -73,6 +85,7 @@ class TestNormalize(TestCase):
     ])
     def test_normalize(self, df, expected):
         self.assertTrue(timeseries.normalize(df).equals(expected))
+
 
 class TestAggregateReturns(TestCase):
     simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-3', periods=500, freq='D'))
@@ -87,6 +100,7 @@ class TestAggregateReturns(TestCase):
 
 class TestStats(TestCase):
     simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-3', periods=500, freq='D'))
+    simple_benchmark = pd.Series([0.03]*4+[0]*496, pd.date_range('2000-1-1', periods=500, freq='D'))
 
     @parameterized.expand([
         (simple_rets, True, 'calendar', -84.0),
@@ -111,13 +125,18 @@ class TestStats(TestCase):
     def test_calmer(self, df_rets, inputIsNAV, returns_style, expected):
         self.assertEqual(timeseries.calmer_ratio(df_rets, inputIsNAV=inputIsNAV, returns_style=returns_style), expected)
 
-    
     @parameterized.expand([
         (simple_rets, True, 'calendar', -9.1651513899116779),
         (simple_rets, True, 'compound', -0.10910894511799617)
     ])
     def test_sharpe(self, df_rets, inputIsNAV, returns_style, expected):
         self.assertEqual(timeseries.sharpe_ratio(df_rets, inputIsNAV=inputIsNAV, returns_style=returns_style), expected)
+ 
+    @parameterized.expand([
+        (simple_rets[:5], 2, '[nan, inf, inf, 11.224972160321828, inf]')
+    ])
+    def test_sharpe_2(self, df_rets, rolling_sharpe_window, expected):
+        self.assertEqual(str(timeseries.rolling_sharpe(df_rets, rolling_sharpe_window).values.tolist()), expected)
 
     @parameterized.expand([
         (simple_rets, False, True, 0.017892071568286205)
@@ -125,21 +144,55 @@ class TestStats(TestCase):
     def test_stability_of_timeseries(self, df_rets, logValue, inputIsNAV, expected):
         self.assertEqual(timeseries.stability_of_timeseries(df_rets, logValue=logValue, inputIsNAV=inputIsNAV), expected)
 
-    """"
     @parameterized.expand([
-        (pd.Series([0.997357, 1.006424, 0.993907], pd.date_range('2009-2-2', periods=3, freq='D')), pd.Series([0.992269, 0.995216, 0.994577], pd.date_range('2013-10-7', periods=3, freq='D')), 'scale', True, 0.017892071568286205)
+        (simple_rets[:5], simple_benchmark[:5], 2, 8.024708101613483e-32)
     ])
-    def test_kde(self, bt_ts, oos_ts, transform_style, return_zero_if_exception, expected):
-        self.assertEqual(timeseries.out_of_sample_vs_in_sample_returns_kde(bt_ts, oos_ts, transform_style=transform_style, return_zero_if_exception=return_zero_if_exception), expected)
-    """
+    def test_beta(self, df_rets, benchmark_rets, rolling_window, expected):
+        self.assertEqual(timeseries.rolling_beta(df_rets, benchmark_rets, rolling_window=rolling_window).values.tolist()[2], expected)
+
 
 class TestMultifactor(TestCase):
     simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-1', periods=500, freq='D'))
-    """
+    simple_benchmark_df = pd.DataFrame(pd.Series([0.03]*4+[0]*496, pd.date_range('2000-1-1', periods=500, freq='D')), columns=['bm'])
+
     @parameterized.expand([
-        (simple_rets, simple_rets, 0.5),
-        (simple_rets[:100], simple_rets[:100], 0.5)
+        (simple_rets[:4], simple_benchmark_df[:4], [2.5000000000000004])
     ])
     def test_calc_multifactor(self, df_rets, factors, expected):
-        self.assertEqual(timeseries.calc_multifactor(df_rets, factors), expected)
+        self.assertEqual(timeseries.calc_multifactor(df_rets, factors).values.tolist(), expected)
+
+    @parameterized.expand([
+        (simple_rets[:5], simple_benchmark_df[:5], 2, [0.09991008092716558, 0.002997302427814967])
+    ])
+    def test_multifactor_beta(self, df_rets, benchmark_df, rolling_window, expected):
+        self.assertEqual(timeseries.rolling_multifactor_beta(df_rets, benchmark_df, rolling_window=rolling_window).values.tolist()[2], expected)
+
     """
+    @parameterized.expand([
+        (factors_ts_list, single_ts, factor_names_list, [0.09991008092716558, 0.002997302427814967])
+    ])
+    def test_multifactor_alpha(self, df_rets, benchmark_df, rolling_window, expected):
+        self.assertEqual(timeseries.multi_factor_alpha(factors_ts_list, single_ts, factor_names_list).values.tolist()[2], expected)
+    """
+
+"""
+class TestAlphaBeta(TestCase):
+    simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-3', periods=500, freq='D'))
+    simple_benchmark = pd.Series([0.03]*4+[0]*496, pd.date_range('2000-1-1', periods=500, freq='D'))
+
+    @parameterized.expand([
+        (simple_rets[:200], simple_benchmark[:200], [2.5000000000000004, 2])
+    ])
+    def test_alpha_beta(self, df_rets, benchmark_rets, expected):
+        self.assertEqual(timeseries.calc_alpha_beta(df_rets, benchmark_rets), expected)
+"""
+
+class TestPerfStats(TestCase):
+    simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-3', periods=500, freq='D'))
+    simple_benchmark = pd.Series([0.03]*4+[0]*496, pd.date_range('2000-1-1', periods=500, freq='D'))
+
+    @parameterized.expand([
+        (simple_rets[:200], True, 'compound', False, [[-0.10910894511799617], [9.165151389911681]])
+    ])
+    def test_perf_stats(self, df_rets, inputIsNAV, returns_style, return_as_dict, expected):
+        self.assertEqual(timeseries.perf_stats(df_rets, inputIsNAV=inputIsNAV, returns_style=returns_style, return_as_dict=return_as_dict).values.tolist()[-2:], expected)
