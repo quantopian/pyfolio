@@ -116,7 +116,7 @@ def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=None, ax=None):
 
     ax.fill_between(df_test.index, perc[5] + offset, perc[95] + offset, alpha=.3)
     ax.fill_between(df_test.index, perc[25] + offset, perc[75] + offset, alpha=.6)
-    ax.legend()
+    ax.legend(loc='best')
     ax.set_title('Bayesian Cone')
     ax.set_xlabel('Time')
     ax.set_ylabel('Cumulative Returns')
@@ -138,10 +138,14 @@ def run_model(model, df_train, df_test=None, bmark=None, samples=500):
 
     return trace
 
-def plot_bayes_cone(model, df_train, df_test, bmark, plot_train_len=50, ax=None, samples=500):
+def plot_bayes_cone(df_train, df_test, bmark=None, model='t',
+                    trace=None, plot_train_len=50, ax=None,
+                    samples=500):
     # generate cone
-    trace = run_model(model, df_train, df_test=df_test, bmark=bmark,
-                      samples=samples)
+    if trace is None:
+        trace = run_model(model, df_train, df_test=df_test,
+                          bmark=bmark, samples=samples)
+
     score = compute_consistency_score(df_test, trace['returns_missing'])
     corrco = mean_corrcoef(trace['returns_missing'],df_test)
     corrco_cum = mean_corrcoef(np.cumprod(trace['returns_missing'] + 1, 1),cum_returns(df_test, starting_value=1.))

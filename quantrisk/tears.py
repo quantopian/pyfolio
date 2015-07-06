@@ -186,19 +186,21 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
                                plot_train_len=50):
     plt.figure(figsize=(14, 10*2))
     gs = gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.3)
-    ax_sharpe = plt.subplot(gs[0, 0])
-    ax_vol = plt.subplot(gs[0, 1])
+
+    row = 0
+    ax_sharpe = plt.subplot(gs[row, 0])
+    ax_vol = plt.subplot(gs[row, 1])
 
     df_train = df_rets.loc[df_rets.index < live_start_date]
     df_test = df_rets.loc[df_rets.index >= live_start_date]
     trace_t = bayesian.run_model('t', df_train, df_test=df_test,
                                  samples=2000)
 
-    sns.distplot(trace_t['sharpe'], ax=ax_sharpe)
+    sns.distplot(trace_t['sharpe'][100:], ax=ax_sharpe)
     #ax_sharpe.set_title('Bayesian T-Sharpe Ratio')
     ax_sharpe.set_xlabel('Sharpe Ratio')
     ax_sharpe.set_ylabel('Belief')
-    sns.distplot(trace_t['annual volatility'], ax=ax_vol)
+    sns.distplot(trace_t['annual volatility'][100:], ax=ax_vol)
     #ax_vol.set_title('Annual Volatility')
     ax_vol.set_xlabel('Annual Volatility')
     ax_vol.set_ylabel('Belief')
@@ -206,19 +208,22 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
     bmark = bmark.loc[df_train.index]
     trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
                                           bmark=bmark, samples=2000)
-    ax_alpha = plt.subplot(gs[1, 0])
-    ax_beta = plt.subplot(gs[1, 1])
-    sns.distplot(trace_alpha_beta['alpha'] * np.sqrt(252), ax=ax_alpha)
+
+    row += 1
+    ax_alpha = plt.subplot(gs[row, 0])
+    ax_beta = plt.subplot(gs[row, 1])
+    sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1, ax=ax_alpha)
     #ax_sharpe.set_title('Alpha')
-    ax_alpha.set_xlabel('Alpha')
+    ax_alpha.set_xlabel('Annual Alpha')
     ax_alpha.set_ylabel('Belief')
-    sns.distplot(trace_alpha_beta['beta'], ax=ax_beta)
+    sns.distplot(trace_alpha_beta['beta'][100:], ax=ax_beta)
     #ax_beta.set_title('Beta')
     ax_beta.set_xlabel('Beta')
     ax_beta.set_ylabel('Belief')
 
-    ax_ret_pred_day = plt.subplot(gs[2, 0])
-    ax_ret_pred_week = plt.subplot(gs[2, 1])
+    row += 1
+    ax_ret_pred_day = plt.subplot(gs[row, 0])
+    ax_ret_pred_week = plt.subplot(gs[row, 1])
     day_pred = trace_t['returns_missing'][:, 0]
     p5 = scipy.stats.scoreatpercentile(day_pred, 5)
     sns.distplot(day_pred,
@@ -227,7 +232,11 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
     ax_ret_pred_day.axvline(p5, linestyle='--', linewidth=3.)
     ax_ret_pred_day.set_xlabel('Predicted returns 1 day')
     ax_ret_pred_day.set_ylabel('Frequency')
-    #import pdb; pdb.set_trace()
+    ax_ret_pred_day.text(0.4, 0.9, 'Bayesian VaR = %.2f' % p5,
+                         verticalalignment='bottom',
+                         horizontalalignment='right',
+                         transform=ax_ret_pred_day.transAxes)
+
 
     week_pred = (np.cumprod(trace_t['returns_missing'][:, :5] + 1, 1) - 1)[:, -1]
     p5 = scipy.stats.scoreatpercentile(week_pred, 5)
@@ -237,12 +246,19 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
     ax_ret_pred_week.axvline(p5, linestyle='--', linewidth=3.)
     ax_ret_pred_week.set_xlabel('Predicted cum returns 5 days')
     ax_ret_pred_week.set_ylabel('Frequency')
+    ax_ret_pred_week.text(0.4, 0.9, 'Bayesian VaR = %.2f' % p5,
+                          verticalalignment='bottom',
+                          horizontalalignment='right',
+                          transform=ax_ret_pred_week.transAxes)
 
-    ax_cone = plt.subplot(gs[3, :])
+    row += 1
+    ax_cone = plt.subplot(gs[row, :])
 
-    bayesian._plot_bayes_cone(df_train, df_test,
-                              trace_t['returns_missing'],
-                              ax=ax_cone)
+    bayesian.plot_bayes_cone(df_train, df_test,
+                             trace=trace_t,
+                             ax=ax_cone)
+
+
 
 
 def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
