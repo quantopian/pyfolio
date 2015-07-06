@@ -20,13 +20,12 @@ import seaborn as sns
 
 
 def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0, benchmark_rets=None, benchmark2_rets=None):
-
     """
-    Generate a number of plots that are useful for analyzing the returns of a strategy.
+    Generate a number of plots for analyzing a strategy's returns.
     
     - Fetches benchmarks, then creates the plots on a single figure.
     - Plots: rolling returns (with cone), rolling beta, rolling sharpe, rolling Fama-French risk factors, drawdowns, underwater plot, monthly and annual return plots, daily similarity plots, and return quantile box plot.
-    - This will also display the start and end dates of the strategy, performance statistics, drawdown periods, and the return range.
+    - Will also print the start and end dates of the strategy, performance statistics, drawdown periods, and the return range.
 
     Parameters
     ----------
@@ -147,6 +146,26 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
 
 def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
+    """
+    Generate a number of plots for analyzing a strategy's positions and holdings.
+
+    - Plots: gross leverage, exposures, top positions, and holdings.
+    - Will also print the top positions held.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    df_pos_val : pd.DataFrame
+        The positions that the strategy takes over time.
+    gross_lev : float, optional
+         The sum of long and short exposure per share divided by net asset value.
+
+    Returns
+    -------
+    fig : matplotlib.figure
+        The figure that was plotted on.
+    """
 
     fig = plt.figure(figsize=(14, 4*6))
     gs = gridspec.GridSpec(4, 3, wspace=0.5, hspace=0.5)
@@ -168,6 +187,25 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
     return fig
 
 def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
+    """
+    Generate a number of plots for analyzing a strategy's transactions.
+
+    Plots: turnover, daily volume, and a histogram of daily volume.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    df_pos_val : pd.DataFrame
+        The positions that the strategy takes over time.
+    df_txn : pd.DataFrame
+         A strategy's transactions. See positions.make_transaction_frame(df_txn).
+
+    Returns
+    -------
+    fig : matplotlib.figure
+        The figure that was plotted on.
+    """
 
     fig = plt.figure(figsize=(14, 3*6))
     gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
