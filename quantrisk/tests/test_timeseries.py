@@ -77,9 +77,9 @@ class TestNormalize(TestCase):
 class TestAggregateReturns(TestCase):
     simple_rets = pd.Series([0.1]*3+[0]*497, pd.date_range('2000-1-1', periods=500, freq='D'))
     @parameterized.expand([
-        (simple_rets, 'yearly', [1.3310000000000004, 1.0]),
-        (simple_rets[:100], 'monthly', [1.3310000000000004, 1.0, 1.0, 1.0]),
-        (simple_rets[:20], 'weekly', [1.10000000000000009, 1.0, 1.0, 1.2100000000000002])
+        (simple_rets, 'yearly', [0.3310000000000004, 0.0]),
+        (simple_rets[:100], 'monthly', [0.3310000000000004, 0.0, 0.0, 0.0]),
+        (simple_rets[:20], 'weekly', [0.10000000000000009, 0.0, 0.0, 0.2100000000000002])
     ])
     def test_aggregate_rets(self, df_rets, convert_to, expected):
         self.assertEqual(timeseries.aggregate_returns(df_rets, convert_to).values.tolist(), expected)
