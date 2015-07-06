@@ -154,7 +154,6 @@ def annual_volatility(df_rets, inputIsNAV=True):
 
 def calmer_ratio(df_rets, inputIsNAV=True, returns_style='calendar'):
     temp_max_dd = max_drawdown(df_rets=df_rets, inputIsNAV=inputIsNAV)
-    # print(temp_max_dd)
     if temp_max_dd < 0:
         if inputIsNAV:
             temp = annual_return(df_rets=df_rets,
