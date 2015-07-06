@@ -10,6 +10,7 @@ except ImportError:
     warnings.warn("Could not import bayesian submodule due to missing pymc3 dependency.", ImportWarning)
 
 import numpy as np
+import scipy.stats
 import pandas as pd
 from sklearn import preprocessing
 
