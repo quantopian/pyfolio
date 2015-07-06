@@ -21,6 +21,34 @@ import seaborn as sns
 
 def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0, benchmark_rets=None, benchmark2_rets=None):
 
+    """
+    Generate a number of plots that are useful for analyzing the returns of a strategy.
+    
+    - Fetches benchmarks, then creates the plots on a single figure.
+    - Plots: rolling returns (with cone), rolling beta, rolling sharpe, rolling Fama-French risk factors, drawdowns, underwater plot, monthly and annual return plots, daily similarity plots, and return quantile box plot.
+    - This will also display the start and end dates of the strategy, performance statistics, drawdown periods, and the return range.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    algo_create_date : datetime, optional
+        The point in time when the strategy began live trading, after its backtest period.
+    backtest_days_pct : float, optional
+        The fraction of the returns data that comes from backtesting (versus live trading).
+    cone_std : float, optional
+        The standard deviation of the cone plots.
+    benchmark_rets : pd.Series, optional
+        Daily non-cumulative returns of the first benchmark.
+    benchmark2_rets : pd.Series, optional
+        Daily non-cumulative returns of the second benchmark.
+
+    Returns
+    -------
+    fig : matplotlib.figure
+        The figure that was plotted on.
+    """
+
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
     if benchmark2_rets is None:
@@ -42,7 +70,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     plotting.show_perf_stats(df_rets, algo_create_date, benchmark_rets)
 
-    plt.figure(figsize=(14, 10*6))
+    fig = plt.figure(figsize=(14, 10*6))
     gs = gridspec.GridSpec(10, 3, wspace=0.5, hspace=0.5)
     ax_rolling_returns = plt.subplot(gs[:2, :])
     ax_rolling_beta = plt.subplot(gs[2, :], sharex=ax_rolling_returns)
@@ -115,10 +143,12 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     plotting.plot_return_quantiles(df_rets, df_weekly, df_monthly, ax=ax_return_quantiles)
 
+    return fig
+
 
 def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
 
-    plt.figure(figsize=(14, 4*6))
+    fig = plt.figure(figsize=(14, 4*6))
     gs = gridspec.GridSpec(4, 3, wspace=0.5, hspace=0.5)
     ax_gross_leverage = plt.subplot(gs[0, :])
     ax_exposures = plt.subplot(gs[1, :], sharex=ax_gross_leverage)
@@ -135,10 +165,11 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
 
     plotting.plot_holdings(df_rets, df_pos_alloc, ax=ax_holdings)
 
+    return fig
 
 def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
 
-    plt.figure(figsize=(14, 3*6))
+    fig = plt.figure(figsize=(14, 3*6))
     gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
     ax_turnover = plt.subplot(gs[0, :])
     ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
@@ -150,6 +181,7 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
 
     plotting.plot_volume_per_day_hist(df_txn, ax=ax_daily_volume_hist)
 
+    return fig
 
 def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc='best'):
 
@@ -165,7 +197,7 @@ def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc
 
     num_plots = len(rets_interesting)
     num_rows = int((num_plots+1)/2.0) # 2 plots, 1 row; 3 plots, 2 rows; 4 plots, 2 rows; etc.
-    plt.figure(figsize=(14, num_rows*6.0))
+    fig = plt.figure(figsize=(14, num_rows*6.0))
     gs = gridspec.GridSpec(num_rows, 2, wspace=0.5, hspace=0.5)
 
     for i, (name, rets_period) in enumerate(rets_interesting.iteritems()):
@@ -181,10 +213,11 @@ def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc
         ax.set_title(name, size=14)
         ax.set_ylabel('Returns')
         ax.set_xlabel('Date')
+    return fig
 
 def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
                                plot_train_len=50):
-    plt.figure(figsize=(14, 10*2))
+    fig = plt.figure(figsize=(14, 10*2))
     gs = gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.3)
 
     row = 0
@@ -257,7 +290,7 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
     bayesian.plot_bayes_cone(df_train, df_test,
                              trace=trace_t,
                              ax=ax_cone)
-
+    return fig
 
 
 
