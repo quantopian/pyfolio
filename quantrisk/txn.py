@@ -16,6 +16,22 @@ from collections import defaultdict
 
 
 def create_txn_profits(df_txn):
+    """
+    Compute per-trade profits.
+    
+    Generates a new transactions DataFrame with a profits column
+
+    Parameters
+    ----------
+    df_txn : pd.DataFrame
+        A strategy's transactions. See positions.make_transaction_frame(df_txn).
+
+    Returns
+    -------
+    profits_dts : pd.DataFrame
+        DataFrame containing transactions and their profits, datetimes, amounts, current prices, prior prices, and symbols.
+    """
+
     txn_descr = defaultdict(list)
 
     for symbol, df_txn_sym in df_txn.groupby('symbol'):
