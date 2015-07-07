@@ -367,30 +367,24 @@ def plot_rolling_returns(
 
     if benchmark_rets is not None:
         timeseries.cum_returns(benchmark_rets[df_cum_rets.index], 1.0).plot(
-            ax=ax, lw=2, color='gray', label='', alpha=0.60, **kwargs)
+            lw=2, color='gray', label='S&P500', alpha=0.60, ax=ax, **kwargs)
     if benchmark2_rets is not None:
         timeseries.cum_returns(benchmark2_rets[df_cum_rets.index], 1.0).plot(
-            ax=ax, lw=2, color='gray', label='', alpha=0.35, **kwargs)
+            lw=2, color='gray', label='7-10yr Bond', alpha=0.35, ax=ax, **kwargs)
 
     if (live_start_date is None) or (df_cum_rets.index[-1] <= live_start_date):
-        df_cum_rets.plot(lw=3, color='forestgreen', label='', alpha=0.6, ax=ax, **kwargs)
-        ax.legend(['Algo backtest',
-                   'S&P500',
-                    '7-10yr Bond'],
-                   loc=legend_loc)
+        df_cum_rets.plot(lw=3, color='forestgreen', alpha=0.6,
+                         label='Algo backtest', ax=ax, **kwargs)
+        ax.legend(loc=legend_loc)
     else:
         df_cum_rets[:live_start_date].plot(
-            lw=3, color='forestgreen', label='', alpha=0.6,
-            ax=ax, **kwargs)
+            lw=3, color='forestgreen', alpha=0.6,
+            label='Algo backtest', ax=ax, **kwargs)
         df_cum_rets[live_start_date:].plot(
-            lw=4, color='red', label='', alpha=0.6,
-            ax=ax, **kwargs)
+            lw=4, color='red', alpha=0.6,
+            label='Algo live', ax=ax, **kwargs)
 
-        ax.legend(['Algo backtest',
-                   'Algo LIVE',
-                   'S&P500',
-                   '7-10yr Bond'],
-                  loc=legend_loc)
+        ax.legend(loc=legend_loc)
 
         if cone_std is not None:
             cone_df = timeseries.cone_rolling(df_rets, num_stdev=cone_std, cone_fit_end_date=live_start_date)
