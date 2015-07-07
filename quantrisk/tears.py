@@ -406,7 +406,7 @@ def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
         The sum of long and short exposure per share divided by net asset value.
     algo_create_date : datetime, optional
         The point in time when the strategy began live trading, after its backtest period.
-    beyesian: boolean, optional
+    bayesian: boolean, optional
         If True, causes the generation of a Bayesian tear sheet.
     backtest_days_pct : float, optional
         The fraction of the returns data that comes from backtesting (versus live trading).
