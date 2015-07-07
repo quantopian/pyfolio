@@ -89,8 +89,8 @@ def model_returns_t(data, samples=500):
     return trace
 
 
-def compute_bayes_cone(preds):
-    cum_preds = np.cumprod(preds + 1, 1)
+def compute_bayes_cone(preds, starting_value=1.):
+    cum_preds = np.cumprod(preds + 1, 1) * starting_value
     scoreatpercentile = lambda cum_preds, p: [stats.scoreatpercentile(c, p) for c in cum_preds.T]
     perc = {p: scoreatpercentile(cum_preds, p) for p in (5, 25, 75, 95)}
 
@@ -109,15 +109,14 @@ def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=None, ax=None):
         ax = plt.gca()
 
     df_train_cum = cum_returns(df_train, starting_value=1.)
-    df_test_cum = cum_returns(df_test, starting_value=1.)
+    df_test_cum = cum_returns(df_test, starting_value=df_train_cum.iloc[-1])
     index = np.concatenate([df_train.index, df_test.index])
-    offset = df_train_cum.iloc[-1] - df_test_cum.iloc[0]
 
-    perc = compute_bayes_cone(preds)
+    perc = compute_bayes_cone(preds, starting_value=df_train_cum.iloc[-1])
     # Add indices
     perc = {k: pd.Series(v, index=df_test.index) for k, v in perc.iteritems()}
 
-    df_test_cum_rel = df_test_cum + offset
+    df_test_cum_rel = df_test_cum
     # Stitch together train and test
     df_train_cum.loc[df_test_cum_rel.index[0]] = df_test_cum_rel.iloc[0]
 
@@ -128,8 +127,8 @@ def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=None, ax=None):
     df_train_cum.plot(ax=ax, color='g', label='in-sample')
     df_test_cum_rel.plot(ax=ax, color='r', label='out-of-sample')
 
-    ax.fill_between(df_test.index, perc[5] + offset, perc[95] + offset, alpha=.3)
-    ax.fill_between(df_test.index, perc[25] + offset, perc[75] + offset, alpha=.6)
+    ax.fill_between(df_test.index, perc[5], perc[95], alpha=.3)
+    ax.fill_between(df_test.index, perc[25], perc[75], alpha=.6)
     ax.legend(loc='best')
     ax.set_title('Bayesian Cone')
     ax.set_xlabel('Time')
