@@ -31,7 +31,10 @@ import positions
 
 
 def set_plot_defaults():
-    # the below just sets some nice default plotting/charting colors/styles
+    """
+    Sets default plotting/charting colors/styles.
+    """
+
     matplotlib.style.use('fivethirtyeight')
     sns.set_context("talk", font_scale=1.0)
     sns.set_palette("Set1", 10, 1.0)
@@ -47,6 +50,32 @@ def plot_rolling_risk_factors(
         rolling_beta_window=63 * 2,
         legend_loc='best',
         ax=None, **kwargs):
+
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -121,6 +150,31 @@ def plot_cone_chart(
         oos_color='coral',
         plot_cone_lines=True,
         ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -149,6 +203,31 @@ def plot_cone_chart(
     return ax
 
 def plot_monthly_returns_heatmap(daily_rets_ts, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -174,6 +253,31 @@ def plot_monthly_returns_heatmap(daily_rets_ts, ax=None, **kwargs):
     return ax
 
 def plot_annual_returns(daily_rets_ts, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -205,6 +309,31 @@ def plot_annual_returns(daily_rets_ts, ax=None, **kwargs):
     return ax
 
 def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -239,6 +368,31 @@ def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
 
 
 def plot_holdings(df_rets, df_pos, legend_loc='best', ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -268,6 +422,31 @@ def plot_holdings(df_rets, df_pos, legend_loc='best', ax=None, **kwargs):
 
 
 def plot_drawdown_periods(df_rets, top=10, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -300,6 +479,31 @@ def plot_drawdown_periods(df_rets, top=10, ax=None, **kwargs):
 
 
 def plot_drawdown_underwater(df_rets=None, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -318,6 +522,32 @@ def plot_drawdown_underwater(df_rets=None, ax=None, **kwargs):
 
 
 def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
     df_rets_backtest = df_rets[df_rets.index < algo_create_date]
     df_rets_live = df_rets[df_rets.index > algo_create_date]
 
@@ -370,6 +600,31 @@ def plot_rolling_returns(
                     cone_std=None,
                     legend_loc='best',
                     ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -433,6 +688,31 @@ def plot_rolling_returns(
 
 
 def plot_rolling_beta(df_rets, benchmark_rets, rolling_beta_window=63, legend_loc='best', ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -460,6 +740,31 @@ def plot_rolling_beta(df_rets, benchmark_rets, rolling_beta_window=63, legend_lo
 
 
 def plot_rolling_sharpe(df_rets, rolling_sharpe_window=63 * 2, legend_loc='best', ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -484,6 +789,31 @@ def plot_rolling_sharpe(df_rets, rolling_sharpe_window=63 * 2, legend_loc='best'
 
 
 def plot_gross_leverage(df_rets, gross_lev, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -501,6 +831,31 @@ def plot_gross_leverage(df_rets, gross_lev, ax=None, **kwargs):
 
 
 def plot_exposures(df_rets, df_pos_alloc, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -522,6 +877,32 @@ def plot_exposures(df_rets, df_pos_alloc, ax=None, **kwargs):
 
 
 def show_and_plot_top_positions(df_rets, df_pos_alloc, show_and_plot=2, legend_loc='real_best', ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
     # show_and_plot allows for both showing info and plot, or doing only one.
     # plot:0, show:1, both:2 (default 2).
     df_top_long, df_top_short, df_top_abs = positions.get_top_long_short_abs(
@@ -577,6 +958,31 @@ def show_and_plot_top_positions(df_rets, df_pos_alloc, show_and_plot=2, legend_l
 
 
 def plot_return_quantiles(df_rets, df_weekly, df_monthly, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -589,6 +995,32 @@ def plot_return_quantiles(df_rets, df_weekly, df_monthly, ax=None, **kwargs):
 
 
 def show_return_range(df_rets, df_weekly):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
     var_daily = timeseries.var_cov_var_normal(
         1e7, .05, df_rets.mean(), df_rets.std())
     var_weekly = timeseries.var_cov_var_normal(
@@ -603,6 +1035,31 @@ def show_return_range(df_rets, df_weekly):
 
 
 def plot_turnover(df_rets, df_txn, df_pos_val, legend_loc='best', ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -630,6 +1087,31 @@ def plot_turnover(df_rets, df_txn, df_pos_val, legend_loc='best', ax=None, **kwa
 
 
 def plot_daily_volume(df_rets, df_txn, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -646,6 +1128,31 @@ def plot_daily_volume(df_rets, df_txn, ax=None, **kwargs):
 
 
 def plot_volume_per_day_hist(df_txn, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -656,6 +1163,31 @@ def plot_volume_per_day_hist(df_txn, ax=None, **kwargs):
     return ax
 
 def plot_daily_returns_similarity(df_rets_backtest, df_rets_live, title="Daily Returns Similarity", scale_kws=None, ax=None, **kwargs):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -673,6 +1205,32 @@ def plot_daily_returns_similarity(df_rets_backtest, df_rets_live, title="Daily R
     return ax
 
 def show_worst_drawdown_periods(df_rets, top=5):
+    """
+    Plots rolling Fama-French single factor betas.
+
+    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    risk_factors : pd.DataFrame
+        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes
+        Axis upon which to plot.
+    **kwargs
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
     print '\nWorst Drawdown Periods'
     drawdown_df = timeseries.gen_drawdown_table(df_rets, top=top)
     drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
