@@ -1,3 +1,17 @@
+#
+# Copyright 2015 Quantopian, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from __future__ import division
 
 from . import timeseries
@@ -36,7 +50,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
     backtest_days_pct : float, optional
         The fraction of the returns data that comes from backtesting (versus live trading).
     cone_std : float, optional
-        The standard deviation of the cone plots.
+        The standard deviation to use for the cone plots.
     benchmark_rets : pd.Series, optional
         Daily non-cumulative returns of the first benchmark.
     benchmark2_rets : pd.Series, optional
@@ -222,6 +236,25 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
     return fig
 
 def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc='best'):
+    """
+    Generate a number of returns plots around interesting points in time, like the flash crash and 9/11.
+
+    Plots: returns around the dotcom bubble burst, Lehmann Brothers' failure, 9/11, US downgrade and EU debt crisis, Fukushima meltdown, US housing bubble burst, EZB IR, Great Recession (August 2007, March and September of 2008, Q1 & Q2 2009), flash crash, April and October 2014.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    benchmark_rets : pd.Series, optional
+        Daily non-cumulative returns of a benchmark.
+    legend_loc : plt.legend_loc, optional
+         The legend's location.
+
+    Returns
+    -------
+    fig : matplotlib.figure
+        The figure that was plotted on.
+    """
 
     rets_interesting = timeseries.extract_interesting_date_ranges(df_rets)
     print '\nStress Events'
@@ -253,8 +286,27 @@ def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc
         ax.set_xlabel('Date')
     return fig
 
-def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
-                               plot_train_len=50):
+def create_bayesian_tear_sheet(df_rets, bmark, live_start_date):
+    """
+    Generate a number of Bayesian distributions and a Beyesian cone plot of returns.
+
+    Plots: Sharpe distribution, annual volatility distribution, annual alpha distribution, beta distribution, predicted 1 and 5 day returns distributions, and a cumulative returns cone plot.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    bmark : pd.Series
+        Daily non-cumulative returns of a benchmark.
+    live_start_date : datetime
+        The point in time when the strategy began live trading, after its backtest period.
+
+    Returns
+    -------
+    fig : matplotlib.figure
+        The figure that was plotted on.
+    """
+
     fig = plt.figure(figsize=(14, 10*2))
     gs = gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.3)
 
@@ -333,9 +385,39 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date,
 
 
 def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
-                           gross_lev=None, fetcher_urls='',
+                           gross_lev=None,
                            algo_create_date=None, bayesian=False,
                            backtest_days_pct=0.5, cone_std=1.0):
+    """
+    Generate a number of tear sheets that are useful for analyzing a strategy's performance.
+
+    - Fetches benchmarks if needed.
+    - Creates tear sheets for returns, and significant events. If possible, also creates tear sheets for position analysis, transaction analysis, and Bayesian analysis.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+        Daily returns of the strategy, non-cumulative.
+    df_pos : pd.DataFrame, optional
+        The positions that the strategy takes over time.
+    df_txn : pd.DataFrame, optional
+        A strategy's transactions. See positions.make_transaction_frame(df_txn).
+    gross_lev : float, optional
+        The sum of long and short exposure per share divided by net asset value.
+    algo_create_date : datetime, optional
+        The point in time when the strategy began live trading, after its backtest period.
+    beyesian: boolean, optional
+        If True, causes the generation of a Bayesian tear sheet.
+    backtest_days_pct : float, optional
+        The fraction of the returns data that comes from backtesting (versus live trading).
+    cone_std : float, optional
+        The standard deviation to use for the cone plots.
+
+    Returns
+    -------
+    fig : matplotlib.figure
+        The figure that was plotted on.
+    """
 
     benchmark_rets = utils.get_symbol_rets('SPY')
     benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
