@@ -204,7 +204,7 @@ def get_top_long_short_abs(df_pos, top=10):
 def turnover(transactions_df, backtest_data_df, period='M'):
     """
     Calculates the percent absolute value portfolio turnover.
-    
+
     Parameters
     ----------
     transactions_df : pd.DataFrame
@@ -213,12 +213,13 @@ def turnover(transactions_df, backtest_data_df, period='M'):
         Contains backtest data, like positions.
     period : str, optional
         Takes the same arguments as df.resample.
-        
+
     Returns
     -------
     turnoverpct : pd.DataFrame
         The number of shares traded for a period as a percentage of the total shares in a portfolio.
-    """"
+    """
+
     turnover = transactions_df.apply(
         lambda z: z.apply(lambda r: abs(r))).resample(period, 'sum').sum(axis=1)
     portfolio_value = backtest_data_df.portfolio_value.resample(period, 'mean')
