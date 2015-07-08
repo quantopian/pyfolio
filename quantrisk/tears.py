@@ -33,7 +33,7 @@ import matplotlib.gridspec as gridspec
 import seaborn as sns
 
 
-def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0, benchmark_rets=None, benchmark2_rets=None):
+def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=0.5, cone_std=1.0, benchmark_rets=None, benchmark2_rets=None, return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's returns.
     
@@ -55,11 +55,8 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
         Daily non-cumulative returns of the first benchmark.
     benchmark2_rets : pd.Series, optional
         Daily non-cumulative returns of the second benchmark.
-
-    Returns
-    -------
-    fig : matplotlib.figure
-        The figure that was plotted on.
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
     """
 
     if benchmark_rets is None:
@@ -156,10 +153,11 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     plotting.plot_return_quantiles(df_rets, df_weekly, df_monthly, ax=ax_return_quantiles)
 
-    return fig
+    if return_fig:
+        return fig
 
 
-def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
+def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None, return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's positions and holdings.
 
@@ -174,11 +172,8 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
         The positions that the strategy takes over time.
     gross_lev : float, optional
          The sum of long and short exposure per share divided by net asset value.
-
-    Returns
-    -------
-    fig : matplotlib.figure
-        The figure that was plotted on.
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
     """
 
     fig = plt.figure(figsize=(14, 4*6))
@@ -198,9 +193,11 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None):
 
     plotting.plot_holdings(df_rets, df_pos_alloc, ax=ax_holdings)
 
-    return fig
+    if return_fig:
+        return fig
 
-def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
+
+def create_txn_tear_sheet(df_rets, df_pos_val, df_txn, return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's transactions.
 
@@ -214,11 +211,8 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
         The positions that the strategy takes over time.
     df_txn : pd.DataFrame
          A strategy's transactions. See positions.make_transaction_frame(df_txn).
-
-    Returns
-    -------
-    fig : matplotlib.figure
-        The figure that was plotted on.
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
     """
 
     fig = plt.figure(figsize=(14, 3*6))
@@ -233,9 +227,11 @@ def create_txn_tear_sheet(df_rets, df_pos_val, df_txn):
 
     plotting.plot_volume_per_day_hist(df_txn, ax=ax_daily_volume_hist)
 
-    return fig
+    if return_fig:
+        return fig
 
-def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc='best'):
+
+def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc='best', return_fig=False):
     """
     Generate a number of returns plots around interesting points in time, like the flash crash and 9/11.
 
@@ -249,11 +245,8 @@ def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc
         Daily non-cumulative returns of a benchmark.
     legend_loc : plt.legend_loc, optional
          The legend's location.
-
-    Returns
-    -------
-    fig : matplotlib.figure
-        The figure that was plotted on.
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
     """
 
     rets_interesting = timeseries.extract_interesting_date_ranges(df_rets)
@@ -284,9 +277,12 @@ def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc
         ax.set_title(name, size=14)
         ax.set_ylabel('Returns')
         ax.set_xlabel('Date')
-    return fig
 
-def create_bayesian_tear_sheet(df_rets, bmark, live_start_date):
+    if return_fig:
+        return fig
+
+
+def create_bayesian_tear_sheet(df_rets, bmark, live_start_date, return_fig=False):
     """
     Generate a number of Bayesian distributions and a Beyesian cone plot of returns.
 
@@ -300,11 +296,8 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date):
         Daily non-cumulative returns of a benchmark.
     live_start_date : datetime
         The point in time when the strategy began live trading, after its backtest period.
-
-    Returns
-    -------
-    fig : matplotlib.figure
-        The figure that was plotted on.
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
     """
 
     fig = plt.figure(figsize=(14, 10*2))
@@ -380,8 +373,9 @@ def create_bayesian_tear_sheet(df_rets, bmark, live_start_date):
     bayesian.plot_bayes_cone(df_train, df_test,
                              trace=trace_t,
                              ax=ax_cone)
-    return fig
 
+    if return_fig:
+        return fig
 
 
 def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
@@ -412,11 +406,6 @@ def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
         The fraction of the returns data that comes from backtesting (versus live trading).
     cone_std : float, optional
         The standard deviation to use for the cone plots.
-
-    Returns
-    -------
-    fig : matplotlib.figure
-        The figure that was plotted on.
     """
 
     benchmark_rets = utils.get_symbol_rets('SPY')
