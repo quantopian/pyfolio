@@ -213,6 +213,15 @@ def calmer_ratio(df_rets, returns_style='calendar'):
     else:
         return temp
 
+def omega_ratio(df_rets, annual_return_threshhold=0.0):
+    daily_return_thresh = pow(1+annual_return_threshhold, 1/252) - 1
+    
+    df_rets_less_thresh = df_rets - daily_return_thresh
+    
+    numer = sum(df_rets_less_thresh[ df_rets_less_thresh > 0.0 ] )
+    denom = -1.0 * sum(df_rets_less_thresh[ df_rets_less_thresh < 0.0 ] )
+    
+    return numer / denom
 
 def sharpe_ratio(df_rets, returns_style='calendar'):
     return annual_return(df_rets, style=returns_style) / annual_volatility(df_rets)
@@ -375,6 +384,7 @@ def perf_stats(
         returns_style=returns_style)
     all_stats['stability'] = stability_of_timeseries(df_rets)
     all_stats['max_drawdown'] = max_drawdown(df_rets)
+    all_stats['omega_ratio'] = omega_ratio(df_rets)
 
     if return_as_dict:
         return all_stats
