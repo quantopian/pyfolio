@@ -33,7 +33,7 @@ import datetime
 def var_cov_var_normal(P, c, mu=0, sigma=1):
     """
     Variance-covariance calculation of daily Value-at-Risk in a portfolio.
-    
+
     Parameters
     ----------
     P : float
@@ -42,12 +42,13 @@ def var_cov_var_normal(P, c, mu=0, sigma=1):
         Confidence level.
     mu : float, optional
         Mean.
-        
+
     Returns
     -------
     float
         Variance-covariance.
     """
+
     alpha = sp.stats.norm.ppf(1 - c, mu, sigma)
     return P - P * (alpha + 1)
 
@@ -55,14 +56,14 @@ def var_cov_var_normal(P, c, mu=0, sigma=1):
 def normalize(df_rets, starting_value=1):
     """
     Normalizes a returns timeseries based on the first value.
-    
+
     Parameters
     ----------
     df_rets : pd.Series
        Daily returns of the strategy, non-cumulative.
     starting_value : float, optional
        The starting returns (default 1).
-       
+
     Returns
     -------
     pd.Series
@@ -113,14 +114,14 @@ def cum_returns(df_rets, starting_value=None):
 def aggregate_returns(df_daily_rets, convert_to):
     """
     Aggregates returns by week, month, or year.
-    
+
     Parameters
     ----------
     df_daily_rets : pd.Series
        Daily returns of the strategy, non-cumulative.
     convert_to : str
         Can be 'weekly', 'monthly', or 'yearly'.
-       
+
     Returns
     -------
     pd.Series
@@ -143,17 +144,17 @@ def aggregate_returns(df_daily_rets, convert_to):
 
 def max_drawdown(df_rets):
     """
-    Determines the maximum drawdown of a returns timeseries.
-    
+    Determines the maximum drawdown of a strategy.
+
     Parameters
     ----------
     df_rets : pd.Series
        Daily returns of the strategy, non-cumulative.
-       
+
     Returns
     -------
-    pd.Series
-        Normalized returns.
+    float
+        Maximum drawdown.
     """
 
     if df_rets.size < 1:
@@ -175,17 +176,32 @@ def max_drawdown(df_rets):
 
 
 def annual_return(df_rets, style='calendar'):
-    # if style == 'compound' then return will be calculated in geometric terms: (1+mean(all_daily_returns))^252 - 1
-    # if style == 'calendar' then return will be calculated as ((last_value - start_value)/start_value)/num_of_years
-    # if style == 'arithmetic' then return is simply mean(all_daily_returns)*252
+    """
+    Determines the annual returns of a strategy.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+    style : str, optional
+        - If 'compound', then return will be calculated in geometric terms: (1+mean(all_daily_returns))^252 - 1.
+        - If 'calendar', then return will be calculated as ((last_value - start_value)/start_value)/num_of_years.
+        - Otherwise, return is simply mean(all_daily_returns)*252.
+
+    Returns
+    -------
+    float
+        Annual returns.
+    """
+
     if df_rets.size < 1:
         return np.nan
 
     if style == 'calendar':
         num_years = len(df_rets) / 252
-        temp_NAV = cum_returns(df_rets, starting_value=100)
-        start_value = temp_NAV[0]
-        end_value = temp_NAV[-1]
+        df_cum_rets = cum_returns(df_rets, starting_value=100)
+        start_value = df_cum_rets[0]
+        end_value = df_cum_rets[-1]
         return ((end_value - start_value) / start_value) / num_years
     if style == 'compound':
         return pow((1 + df_rets.mean()), 252) - 1
@@ -194,6 +210,20 @@ def annual_return(df_rets, style='calendar'):
 
 
 def annual_volatility(df_rets):
+    """
+    Determines the annual volatility of a strategy.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+
+    Returns
+    -------
+    float
+        Annual volatility.
+    """
+
     if df_rets.size < 2:
         return np.nan
     
@@ -201,42 +231,106 @@ def annual_volatility(df_rets):
 
 
 def calmer_ratio(df_rets, returns_style='calendar'):
+    """
+    Determines the Calmer ratio, or drawdown ratio, of a strategy.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+
+    Returns
+    -------
+    float
+        Calmer ratio (drawdown ratio).
+    """
+
     temp_max_dd = max_drawdown(df_rets=df_rets)
     if temp_max_dd < 0:
-        temp = annual_return(df_rets=df_rets) / abs(max_drawdown(df_rets=df_rets))
-        
+        temp = annual_return(df_rets=df_rets, style=returns_style) / abs(max_drawdown(df_rets=df_rets))
     else:
         return np.nan
 
     if np.isinf(temp):
         return np.nan
-    else:
-        return temp
+
+    return temp
 
 
 def sharpe_ratio(df_rets, returns_style='calendar'):
+    """
+    Determines the Sharpe ratio of a strategy.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+
+    Returns
+    -------
+    float
+        Sharpe ratio.
+    """
+
     return annual_return(df_rets, style=returns_style) / annual_volatility(df_rets)
 
 
 def stability_of_timeseries(df_rets, logValue=True):
+    """
+    Determines R-squared of a linear fit to the returns.
+
+    Computes an ordinary least squares linear fit, and returns R-squared.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+
+    Returns
+    -------
+    float
+        R-squared.
+    """
+
     if df_rets.size < 2:
         return np.nan
 
     df_cum_rets = cum_returns(df_rets, starting_value=100)
-    tempValues = np.log10(df_cum_rets.values) if logValue else df_cum_rets.values
+    temp_values = np.log10(df_cum_rets.values) if logValue else df_cum_rets.values
     len_df_rets = df_cum_rets.size
 
     X = range(0, len_df_rets)
     X = sm.add_constant(X)
 
-    model = sm.OLS(tempValues, X).fit()
+    model = sm.OLS(temp_values, X).fit()
 
     return model.rsquared
 
 def out_of_sample_vs_in_sample_returns_kde(bt_ts, oos_ts, transform_style='scale', return_zero_if_exception=True):
+    """
+    Determines similarity between two returns timeseries.
+    
+    Typically a backtest frame (in-sample) and live frame (out-of-sample).
 
-    bt_ts_pct = bt_ts.pct_change().dropna()
-    oos_ts_pct = oos_ts.pct_change().dropna()
+    Parameters
+    ----------
+    bt_ts : pd.Series
+       In-sample (backtest) returns of the strategy, non-cumulative.
+    oos_ts : pd.Series
+       Out-of-sample (live trading) returns of the strategy, non-cumulative.
+    transform_style : float, optional
+        'raw', 'scale', 'Normalize_L1', 'Normalize_L2' (default 'scale')
+    return_zero_if_exception : bool, optional
+        If there is an exception, return zero instead of NaN.
+
+    Returns
+    -------
+    float
+        Similarity between returns.
+    """
+
+    bt_ts_pct = bt_ts.dropna()
+    oos_ts_pct = oos_ts.dropna()
 
     bt_ts_r = bt_ts_pct.reshape(len(bt_ts_pct),1)
     oos_ts_r = oos_ts_pct.reshape(len(oos_ts_pct),1)
@@ -277,6 +371,22 @@ def out_of_sample_vs_in_sample_returns_kde(bt_ts, oos_ts, transform_style='scale
     return kde_diff
 
 def calc_multifactor(df_rets, factors):
+    """
+    Computes multiple ordinary least squares linear fits, and returns fit parameters.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+    factors : pd.Series
+        Secondary sets to fit.
+
+    Returns
+    -------
+    pd.DataFrame
+        Fit parameters.
+    """
+
     import statsmodels.api as sm
     factors = factors.loc[df_rets.index]
     factors = sm.add_constant(factors)
@@ -287,6 +397,24 @@ def calc_multifactor(df_rets, factors):
 
 
 def rolling_beta(df_rets, benchmark_rets, rolling_window=63):
+    """
+    Determines the rolling beta of a strategy.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+    benchmark_rets : pd.Series
+        Daily non-cumulative returns of a benchmark.
+    rolling_window : int, optional
+        The size of the rolling window, in days, over which to compute beta (default 63 days).
+
+    Returns
+    -------
+    pd.Series
+        Rolling beta.
+    """
+
     out = pd.Series(index=df_rets.index)
     for beg, end in zip(df_rets.index[0:-rolling_window],
                         df_rets.index[rolling_window:]):
@@ -297,6 +425,24 @@ def rolling_beta(df_rets, benchmark_rets, rolling_window=63):
 
 
 def rolling_multifactor_beta(df_rets, df_multi_factor, rolling_window=63):
+    """
+    Determines the rolling beta of multiple factors.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+    df_multi_factor : pd.DataFrame
+        Other factors over which to compute beta.
+    rolling_window : int, optional
+        The size of the rolling window, in days, over which to compute beta (default 63 days).
+
+    Returns
+    -------
+    pd.DataFrame
+        Rolling betas.
+    """
+
     out = pd.DataFrame(columns=['const'] + list(df_multi_factor.columns),
                        index=df_rets.index)
 
@@ -306,48 +452,6 @@ def rolling_multifactor_beta(df_rets, df_multi_factor, rolling_window=63):
                                         df_multi_factor.loc[beg:end])
 
     return out
-
-
-def multi_factor_alpha(
-        factors_ts_list,
-        single_ts,
-        factor_names_list,
-        input_is_returns=False,
-        annualized=False,
-        annualize_factor=252,
-        show_output=False):
-
-    factors_ts = [i.asfreq(freq='D', normalize=True) for i in factors_ts_list]
-    dep_var = single_ts.asfreq(freq='D', normalize=True)
-
-    if not input_is_returns:
-        factors_ts = [i.pct_change().iloc[1:] for i in factors_ts]
-        dep_var = dep_var.pct_change().iloc[1:]
-
-    factors_align = pd.DataFrame(factors_ts).T.dropna()
-    factors_align.columns = factor_names_list
-
-    if show_output:
-        print factors_align.head(5)
-        print dep_var.head(5)
-
-    if dep_var.shape[0] < 2:
-        return np.nan
-    if factors_align.shape[0] < 2:
-        return np.nan
-
-    factor_regress = pd.ols(y=dep_var, x=factors_align, intercept=True)
-
-    factor_alpha = factor_regress.summary_as_matrix.intercept.beta
-
-    if show_output:
-        print factor_regress.resid
-        print factor_regress.summary_as_matrix
-
-    if annualized:
-        return factor_alpha * annualize_factor
-    else:
-        return factor_alpha
 
 
 def calc_alpha_beta(df_rets, benchmark_rets):
