@@ -447,7 +447,7 @@ def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
     print 'Backtest Months: ' + str(int(len(df_rets_backtest) / 21))
 
     perf_stats_backtest = np.round(timeseries.perf_stats(
-        df_rets_backtest, inputIsNAV=False, returns_style='arithmetic'), 2)
+        df_rets_backtest, returns_style='arithmetic'), 2)
     perf_stats_backtest_ab = np.round(
         timeseries.calc_alpha_beta(df_rets_backtest, benchmark_rets), 2)
     perf_stats_backtest.loc['alpha'] = perf_stats_backtest_ab[0]
@@ -455,7 +455,7 @@ def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
     perf_stats_backtest.columns = ['Backtest']
 
     perf_stats_live = np.round(timeseries.perf_stats(
-        df_rets_live, inputIsNAV=False, returns_style='arithmetic'), 2)
+        df_rets_live, returns_style='arithmetic'), 2)
     perf_stats_live_ab = np.round(
         timeseries.calc_alpha_beta(df_rets_live, benchmark_rets), 2)
     perf_stats_live.loc['alpha'] = perf_stats_live_ab[0]
@@ -463,7 +463,7 @@ def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
     perf_stats_live.columns = ['Out_of_Sample']
 
     perf_stats_all = np.round(timeseries.perf_stats(
-        df_rets, inputIsNAV=False, returns_style='arithmetic'), 2)
+        df_rets, returns_style='arithmetic'), 2)
     perf_stats_all_ab = np.round(
         timeseries.calc_alpha_beta(df_rets, benchmark_rets), 2)
     perf_stats_all.loc['alpha'] = perf_stats_all_ab[0]
