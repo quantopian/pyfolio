@@ -39,7 +39,9 @@ You can also join our [mailing list](https://groups.google.com/forum/#!forum/qua
 
 ## Credits
 
-* Gus Gordon
-* Justin Lent
-* Sepideh Saghedi
-* Thomas Wiecki
+* Gus Gordon (gus@quantopian.com)
+* Justin Lent (justin@quantopian.com)
+* Sepideh Sadeghi (ssadeghi@quantopian.com)
+* Thomas Wiecki (thomas@quantopian.com)
+* Jessica Stauth (jstauth@quantopian.com)
+* Karen Rubin (karen@quantopian.com)
