@@ -170,7 +170,7 @@ def create_position_tear_sheet(df_rets, df_pos_val, gross_lev=None, return_fig=F
         Daily returns of the strategy, non-cumulative.
     df_pos_val : pd.DataFrame
         The positions that the strategy takes over time.
-    gross_lev : float, optional
+    gross_lev : pd.Series, optional
          The sum of long and short exposure per share divided by net asset value.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
@@ -396,7 +396,7 @@ def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
         The positions that the strategy takes over time.
     df_txn : pd.DataFrame, optional
         A strategy's transactions. See positions.make_transaction_frame(df_txn).
-    gross_lev : float, optional
+    gross_lev : pd.Series, optional
         The sum of long and short exposure per share divided by net asset value.
     algo_create_date : datetime, optional
         The point in time when the strategy began live trading, after its backtest period.
