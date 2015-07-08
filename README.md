@@ -41,7 +41,7 @@ You can also join our [mailing list](https://groups.google.com/forum/#!forum/qua
 
 * Gus Gordon (gus@quantopian.com)
 * Justin Lent (justin@quantopian.com)
-* Sepideh Sadeghi (ssadeghi@quantopian.com)
+* Sepideh Sadeghi (sp.sadeghi@gmail.com)
 * Thomas Wiecki (thomas@quantopian.com)
 * Jessica Stauth (jstauth@quantopian.com)
 * Karen Rubin (karen@quantopian.com)
