@@ -142,65 +142,6 @@ def plot_rolling_risk_factors(
         'Multi-factor Alpha (vs. Factors: Small-Cap, High-Growth, Momentum)')
     return ax
 
-def plot_cone_chart(
-        cone_df,
-        warm_up_days_pct,
-        lines_to_plot=['line'],
-        in_sample_color='grey',
-        oos_color='coral',
-        plot_cone_lines=True,
-        ax=None, **kwargs):
-    """
-    Plots rolling Fama-French single factor betas.
-
-    Specifically, plots SMB, HML, and UMD vs. date with a legend.
-
-    Parameters
-    ----------
-    df_rets : pd.Series
-        Daily returns of the strategy, non-cumulative.
-    risk_factors : pd.DataFrame
-        data set containing the risk factors. See utils.load_portfolio_risk_factors.
-    rolling_beta_window : int, optional
-        The days window over which to compute the beta.
-    legend_loc : matplotlib.loc, optional
-        The location of the legend on the plot.
-    ax : matplotlib.Axes
-        Axis upon which to plot.
-    **kwargs
-        Passed to plotting function.
-
-    Returns
-    -------
-    ax : matplotlib.Axes
-        The axes that were plotted on.
-    """
-
-    if ax is None:
-        ax = plt.gca()
-
-    if plot_cone_lines:
-        cone_df[lines_to_plot].plot(
-            alpha=0.3,
-            color='k',
-            ls='-',
-            lw=2,
-            label='',
-            ax=ax, **kwargs)
-
-    warm_up_x_end = int(len(cone_df) * warm_up_days_pct)
-
-    ax.fill_between(
-        cone_df.index[
-            :warm_up_x_end], cone_df.sd_down[
-            :warm_up_x_end], cone_df.sd_up[
-                :warm_up_x_end], color=in_sample_color, alpha=0.15)
-    ax.fill_between(
-        cone_df.index[
-            warm_up_x_end:], cone_df.sd_down[
-            warm_up_x_end:], cone_df.sd_up[
-                warm_up_x_end:], color=oos_color, alpha=0.15)
-    return ax
 
 def plot_monthly_returns_heatmap(daily_rets_ts, ax=None, **kwargs):
     """
