@@ -143,22 +143,14 @@ def plot_rolling_risk_factors(
     return ax
 
 
-def plot_monthly_returns_heatmap(daily_rets_ts, ax=None, **kwargs):
+def plot_monthly_returns_heatmap(df_rets, ax=None, **kwargs):
     """
-    Plots rolling Fama-French single factor betas.
-
-    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+    Plots a heatmap of returns by month.
 
     Parameters
     ----------
     df_rets : pd.Series
         Daily returns of the strategy, non-cumulative.
-    risk_factors : pd.DataFrame
-        data set containing the risk factors. See utils.load_portfolio_risk_factors.
-    rolling_beta_window : int, optional
-        The days window over which to compute the beta.
-    legend_loc : matplotlib.loc, optional
-        The location of the legend on the plot.
     ax : matplotlib.Axes
         Axis upon which to plot.
     **kwargs
@@ -173,7 +165,7 @@ def plot_monthly_returns_heatmap(daily_rets_ts, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    monthly_ret_table = timeseries.aggregate_returns(daily_rets_ts, 'monthly')
+    monthly_ret_table = timeseries.aggregate_returns(df_rets, 'monthly')
     monthly_ret_table = monthly_ret_table.unstack()
     monthly_ret_table = np.round(monthly_ret_table, 3)
 
@@ -188,27 +180,19 @@ def plot_monthly_returns_heatmap(daily_rets_ts, ax=None, **kwargs):
         cbar=False,
         cmap=matplotlib.cm.RdYlGn,
         ax=ax, **kwargs)
-    ax.set_ylabel('Month')
-    ax.set_xlabel('Year')
+    ax.set_ylabel('Year')
+    ax.set_xlabel('Month')
     ax.set_title("Monthly Returns (%)")
     return ax
 
-def plot_annual_returns(daily_rets_ts, ax=None, **kwargs):
+def plot_annual_returns(df_rets, ax=None, **kwargs):
     """
-    Plots rolling Fama-French single factor betas.
-
-    Specifically, plots SMB, HML, and UMD vs. date with a legend.
+    Plots a bar graph of returns by year.
 
     Parameters
     ----------
     df_rets : pd.Series
         Daily returns of the strategy, non-cumulative.
-    risk_factors : pd.DataFrame
-        data set containing the risk factors. See utils.load_portfolio_risk_factors.
-    rolling_beta_window : int, optional
-        The days window over which to compute the beta.
-    legend_loc : matplotlib.loc, optional
-        The location of the legend on the plot.
     ax : matplotlib.Axes
         Axis upon which to plot.
     **kwargs
@@ -229,7 +213,7 @@ def plot_annual_returns(daily_rets_ts, ax=None, **kwargs):
 
     ann_ret_df = pd.DataFrame(
         timeseries.aggregate_returns(
-            daily_rets_ts,
+            df_rets,
             'yearly'))
 
     ax.axvline(
@@ -249,7 +233,7 @@ def plot_annual_returns(daily_rets_ts, ax=None, **kwargs):
     ax.legend(['mean'])
     return ax
 
-def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
+def plot_monthly_returns_dist(df_rets, ax=None, **kwargs):
     """
     Plots rolling Fama-French single factor betas.
 
@@ -283,7 +267,7 @@ def plot_monthly_returns_dist(daily_rets_ts, ax=None, **kwargs):
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
     ax.tick_params(axis='x', which='major', labelsize=10)
 
-    monthly_ret_table = timeseries.aggregate_returns(daily_rets_ts, 'monthly')
+    monthly_ret_table = timeseries.aggregate_returns(df_rets, 'monthly')
     monthly_ret_table = monthly_ret_table.unstack()
     monthly_ret_table = np.round(monthly_ret_table, 3)
     ax.hist(
