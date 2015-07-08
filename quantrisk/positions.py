@@ -217,7 +217,7 @@ def turnover(transactions_df, backtest_data_df, period='M'):
     Returns
     -------
     turnoverpct : pd.DataFrame
-        The number of shares traded for a period as a percentage of the total shares in a portfolio.
+        The number of shares traded for a period as a fraction of total shares.
     """
 
     turnover = transactions_df.apply(

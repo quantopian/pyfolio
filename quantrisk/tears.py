@@ -129,7 +129,8 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     df_weekly = timeseries.aggregate_returns(df_rets, 'weekly')
     df_monthly = timeseries.aggregate_returns(df_rets, 'monthly')
-
+    
+    print '\n'
     plotting.show_return_range(df_rets, df_weekly)
 
     plotting.plot_monthly_returns_heatmap(df_rets, ax=ax_monthly_heatmap)
@@ -138,6 +139,7 @@ def create_returns_tear_sheet(df_rets, algo_create_date=None, backtest_days_pct=
 
     plotting.plot_daily_returns_similarity(df_rets_backtest,
                                            df_rets_live,
+                                           title='Daily Returns Similarity',
                                            ax=ax_daily_similarity_scale)
     plotting.plot_daily_returns_similarity(df_rets_backtest,
                                            df_rets_live,
