@@ -28,17 +28,17 @@ import pandas.io.data as web
 
 def json_to_obj(json):
     """
-    Convert a JSON string to a DataFrame.
+    Converts a JSON string to a DataFrame.
     
     Parameters
     ----------
     json : str
-        Daily returns of the strategy, non-cumulative.
+        Data to convert.
 
     Returns
     -------
     pd.DataFrame
-        A DataFrame containing the JSON data.
+        The converted data.
     """
 
     return pd.json.loads(str(zlib.decompress(json)))
@@ -46,7 +46,7 @@ def json_to_obj(json):
 
 def one_dec_places(x, pos):
     """
-    Used to add 1/10th decimal to plot ticks.
+    Adds 1/10th decimal to plot ticks.
     """
 
     return '%.1f' % x
@@ -54,7 +54,7 @@ def one_dec_places(x, pos):
 
 def percentage(x, pos):
     """
-    Used to add percentage sign to plot ticks.
+    Adds percentage sign to plot ticks.
     """
 
     return '%.0f%%' % x
@@ -70,17 +70,19 @@ def round_two_dec_places(x):
 
 def get_symbol_rets(symbol):
     """
-    Convert a JSON string to a DataFrame.
+    Gets returns for a symbol.
+    
+    Queries Yahoo Finance.
 
     Parameters
     ----------
-    json : str
-        Daily returns of the strategy, non-cumulative.
+    symbol : str
+        Ticker symbol, e.g. APPL.
 
     Returns
     -------
     pd.DataFrame
-        A DataFrame containing the JSON data.
+        Daily returns for the symbol.
     """
 
     px = web.get_data_yahoo(symbol, start='1/1/1970')
@@ -117,7 +119,7 @@ def load_portfolio_risk_factors(filepath_prefix=None):
     Returns
     -------
     five_factors : pd.DataFrame
-        A DataFrame containing the JSON data.
+        Risk factors timeseries.
     """
 
     if filepath_prefix is None:
