@@ -296,7 +296,7 @@ def omega_ratio(df_rets, annual_return_threshhold=0.0):
     
     if denom > 0.0:
         return numer / denom
-    else
+    else:
         return np.nan
 
 def sortino_ratio(df_rets, returns_style='compound'):
@@ -322,7 +322,7 @@ def sortino_ratio(df_rets, returns_style='compound'):
 
     if denom > 0.0:
         return numer / denom
-    else
+    else:
         return np.nan
 
 def sharpe_ratio(df_rets, returns_style='compound'):
@@ -351,7 +351,7 @@ def sharpe_ratio(df_rets, returns_style='compound'):
 
     if denom > 0.0:
         return numer / denom
-    else
+    else:
         return np.nan
 
 def stability_of_timeseries(df_rets, logValue=True):
