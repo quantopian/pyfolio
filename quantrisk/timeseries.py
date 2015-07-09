@@ -266,7 +266,7 @@ def omega_ratio(df_rets, annual_return_threshhold=0.0):
     df_rets : pd.Series
        Daily returns of the strategy, non-cumulative.
     annual_return_threshold : float, optional
-        Threshold over which to consider annual returns.
+        Threshold over which to consider positive vs negative returns. For the ratio, it will be converted to a daily return and compared to df_rets.
     Returns
     -------
     float
@@ -281,6 +281,23 @@ def omega_ratio(df_rets, annual_return_threshhold=0.0):
     denom = -1.0 * sum(df_rets_less_thresh[ df_rets_less_thresh < 0.0 ] )
     
     return numer / denom
+
+def sortino_ratio(df_rets, returns_style='compound'):
+    """
+    Determines the Sortino ratio of a strategy.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+
+    Returns
+    -------
+    float
+        Sortino ratio.
+    """
+
+    return annual_return(df_rets, style=returns_style) / annual_volatility(df_rets[df_rets < 0.0])
 
 def sharpe_ratio(df_rets, returns_style='calendar'):
     """
@@ -542,6 +559,7 @@ def perf_stats(
     all_stats['stability'] = stability_of_timeseries(df_rets)
     all_stats['max_drawdown'] = max_drawdown(df_rets)
     all_stats['omega_ratio'] = omega_ratio(df_rets)
+    all_stats['sortino_ratio'] = sortino_ratio(df_rets)
 
     if return_as_dict:
         return all_stats
