@@ -475,13 +475,6 @@ def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
 
     print perf_stats_both
 
-    diff_pct = timeseries.out_of_sample_vs_in_sample_returns_kde(df_rets_backtest, df_rets_live)
-
-    consistency_pct = int( 100*(1.0 - diff_pct) )
-    print "\n" + str(consistency_pct) + "%" + " :Similarity between Backtest vs. Out-of-Sample (daily returns distribution)\n"
-
-
-
 def plot_rolling_returns(
                     df_rets,
                     benchmark_rets=None,
