@@ -238,7 +238,8 @@ def calmer_ratio(df_rets, returns_style='calendar'):
     ----------
     df_rets : pd.Series
        Daily returns of the strategy, non-cumulative.
-
+    returns_style : str, optional
+        See annual_returns' style
     Returns
     -------
     float
@@ -264,14 +265,14 @@ def omega_ratio(df_rets, annual_return_threshhold=0.0):
     ----------
     df_rets : pd.Series
        Daily returns of the strategy, non-cumulative.
-    annual_return_threshhold : float
-       Annual return threshhold to be converted into a daily return which df_rets will be compared to.
-
+    annual_return_threshold : float, optional
+        Threshold over which to consider annual returns.
     Returns
     -------
     float
         Omega ratio.
     """
+
     daily_return_thresh = pow(1+annual_return_threshhold, 1/252) - 1
     
     df_rets_less_thresh = df_rets - daily_return_thresh
@@ -281,23 +282,6 @@ def omega_ratio(df_rets, annual_return_threshhold=0.0):
     
     return numer / denom
 
-def sortino_ratio(df_rets, returns_style='compound'):
-    """
-    Determines the Sortino ratio of a strategy.
-
-    Parameters
-    ----------
-    df_rets : pd.Series
-       Daily returns of the strategy, non-cumulative.
-
-    Returns
-    -------
-    float
-        Sortino ratio.
-    """
-
-    return annual_return(df_rets, style=returns_style) / annual_volatility(df_rets[df_rets < 0.0])
-
 def sharpe_ratio(df_rets, returns_style='calendar'):
     """
     Determines the Sharpe ratio of a strategy.
@@ -306,7 +290,8 @@ def sharpe_ratio(df_rets, returns_style='calendar'):
     ----------
     df_rets : pd.Series
        Daily returns of the strategy, non-cumulative.
-
+    returns_style : str, optional
+        See annual_returns' style
     Returns
     -------
     float
@@ -496,6 +481,24 @@ def rolling_multifactor_beta(df_rets, df_multi_factor, rolling_window=63):
 
 
 def calc_alpha_beta(df_rets, benchmark_rets):
+    """
+    Calculates both alpha and beta.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+    benchmark_rets : pd.Series
+        Daily non-cumulative returns of a benchmark.
+
+    Returns
+    -------
+    float
+        Alpha.
+    float
+        Beta.
+    """
+
     ret_index = df_rets.index
     beta, alpha = sp.stats.linregress(benchmark_rets.loc[ret_index].values,
                                       df_rets.values)[:2]
@@ -507,6 +510,24 @@ def perf_stats(
         df_rets,
         returns_style='compound',
         return_as_dict=False):
+    """
+    Calculates various performance metrics of a strategy, for use in plotting.show_perf_stats.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+    returns_style : str, optional
+       See annual_returns' style
+    return_as_dict : boolean, optional
+       If True, returns the computed metrics in a dictionary.
+
+    Returns
+    -------
+    dict / pd.DataFrame
+        Performance metrics.
+    """
+
     all_stats = {}
     all_stats['annual_return'] = annual_return(
         df_rets,
@@ -521,7 +542,6 @@ def perf_stats(
     all_stats['stability'] = stability_of_timeseries(df_rets)
     all_stats['max_drawdown'] = max_drawdown(df_rets)
     all_stats['omega_ratio'] = omega_ratio(df_rets)
-    all_stats['sortino_ratio'] = sortino_ratio(df_rets)
 
     if return_as_dict:
         return all_stats
@@ -534,6 +554,26 @@ def perf_stats(
 
 
 def get_max_draw_down_underwater(underwater):
+    """
+    Determines peak, valley, and recovery dates given and 'underwater' DataFrame.
+
+    An underwater DataFrame is a DataFrame that has precomputed rolling drawdown.
+
+    Parameters
+    ----------
+    underwater : pd.Series
+       Underwater returns (rolling drawdown) of a strategy.
+
+    Returns
+    -------
+    peak : datetime
+        The maximum drawdown's peak.
+    valley : datetime
+        The maximum drawdown's valley.
+    recovery : datetime
+        The maximum drawdown's recovery.
+    """
+
     valley = np.argmax(underwater)  # end of the period
     # Find first 0
     peak = underwater[:valley][underwater[:valley] == 0].index[-1]
@@ -546,6 +586,24 @@ def get_max_draw_down_underwater(underwater):
 
 
 def get_max_draw_down(df_rets):
+    """
+    Finds maximum drawdown.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+
+    Returns
+    -------
+    peak : datetime
+        The maximum drawdown's peak.
+    valley : datetime
+        The maximum drawdown's valley.
+    recovery : datetime
+        The maximum drawdown's recovery.
+    """
+
     df_rets = df_rets.copy()
     df_cum = cum_returns(df_rets, 1.0)
     running_max = np.maximum.accumulate(df_cum)
@@ -554,6 +612,22 @@ def get_max_draw_down(df_rets):
 
 
 def get_top_draw_downs(df_rets, top=10):
+    """
+    Finds top drawdowns, sorted by drawdown amount.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+    top : int, optional
+        The amount of top drawdowns to find (default 10).
+
+    Returns
+    -------
+    drawdowns : list
+        List of drawdown peaks, valleys, and recoveries. See get_max_draw_down.
+    """
+
     df_rets = df_rets.copy()
     df_cum = cum_returns(df_rets, 1.0)
     running_max = np.maximum.accumulate(df_cum)
@@ -578,6 +652,22 @@ def get_top_draw_downs(df_rets, top=10):
 
 
 def gen_drawdown_table(df_rets, top=10):
+    """
+    Places top drawdowns in a table.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+    top : int, optional
+        The amount of top drawdowns to find (default 10).
+
+    Returns
+    -------
+    df_drawdowns : pd.DataFrame
+        Information about top drawdowns.
+    """
+
     df_cum = cum_returns(df_rets, 1.0)
     drawdown_periods = get_top_draw_downs(df_rets, top=top)
     df_drawdowns = pd.DataFrame(index=range(top), columns=['net drawdown in %',
@@ -613,6 +703,22 @@ def gen_drawdown_table(df_rets, top=10):
 
 
 def rolling_sharpe(df_rets, rolling_sharpe_window):
+    """
+    Determines the rolling Sharpe ratio of a strategy.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+    rolling_sharpe_window : int
+        Length of rolling window, in days, over which to compute.
+
+    Returns
+    -------
+    pd.Series
+        Rolling Sharpe ratio.
+    """
+
     return pd.rolling_mean(df_rets, rolling_sharpe_window) \
         / pd.rolling_std(df_rets, rolling_sharpe_window) * np.sqrt(252)
 
@@ -626,6 +732,9 @@ def cone_rolling(
                 cone_fit_end_date=None,
                 extend_fit_trend=True,
                 create_future_cone=True):
+    """
+    Computes a rolling cone to place in the cumulative returns plot. See plotting.plot_rolling_returns.
+    """
 
     # if specifying 'cone_fit_end_date' please use a pandas compatible format, e.g. '2015-8-4', 'YYYY-MM-DD'
 
@@ -729,6 +838,16 @@ def cone_rolling(
 
 
 def gen_date_ranges_interesting():
+    """
+    Generates a list of historical event dates that may have had significant impact on markets.
+    See extract_interesting_date_ranges.
+
+    Returns
+    -------
+    periods : OrderedDict
+        Significant events.
+    """
+
     periods = OrderedDict()
     # Dotcom bubble
     periods['Dotcom'] = (pd.Timestamp('20000310'), pd.Timestamp('20000910'))
@@ -773,6 +892,20 @@ def gen_date_ranges_interesting():
 
 
 def extract_interesting_date_ranges(df_rets):
+    """
+    Extracts returns based on interesting events. See gen_date_range_interesting.
+
+    Parameters
+    ----------
+    df_rets : pd.Series
+       Daily returns of the strategy, non-cumulative.
+
+    Returns
+    -------
+    ranges : OrderedDict
+        Date ranges, with returns, of all valid events.
+    """
+
     periods = gen_date_ranges_interesting()
     df_rets_dupe = df_rets.copy()
     df_rets_dupe.index = df_rets_dupe.index.map(pd.Timestamp)
