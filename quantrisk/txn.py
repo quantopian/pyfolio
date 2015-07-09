@@ -47,6 +47,31 @@ def make_transaction_frame(transactions):
     return df
 
 
+def extract_txn_from_get_backtest_obj(backtest):
+    """Extract transaction data from backtest object as returned by
+    get_backtest() on the Quantopian research platform.
+
+    Parameters
+    ----------
+    backtest : qexec.research.backtest.BacktestResult
+        Object returned by get_backtest() on the Quantopian research
+        platform containing all results of a backtest
+
+    Returns
+    -------
+    pd.DataFrame
+        Net positional values, including cash.
+    """
+
+    txn_vol = backtest.transactions.reset_index().groupby('index').apply(lambda ser: (ser['amount'].abs() * ser['price']).sum())
+    txn_amount = backtest.transactions.reset_index().groupby('index')['amount'].apply(lambda ser: ser.abs().sum())
+    df_txn = pd.concat([txn_vol, txn_amount], axis=1)
+    df_txn.columns = ['txn_volume', 'txn_shares']
+    df_txn.index = df_txn.index.normalize()
+
+    return df_txn
+
+
 def create_txn_profits(df_txn):
     """
     Compute per-trade profits.
