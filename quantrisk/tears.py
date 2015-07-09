@@ -64,6 +64,9 @@ def create_returns_tear_sheet(df_rets, live_start_date=None, backtest_days_pct=0
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
+        # If the strategy's history is longer than the benchmark's, limit strategy
+        if df_rets.index[0] < benchmark_rets.index[0]:
+            df_rets = df_rets[df_rets.index > benchmark_rets.index[0]]
     if benchmark2_rets is None:
         benchmark2_rets = utils.get_symbol_rets('IEF')  # 7df_c-10yr Bond ETF.
 
@@ -260,6 +263,9 @@ def create_interesting_times_tear_sheet(df_rets, benchmark_rets=None, legend_loc
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
+        # If the strategy's history is longer than the benchmark's, limit strategy
+        if df_rets.index[0] < benchmark_rets.index[0]:
+            df_rets = df_rets[df_rets.index > benchmark_rets.index[0]]
 
     bmark_interesting = timeseries.extract_interesting_date_ranges(
         benchmark_rets)
@@ -422,6 +428,10 @@ def create_full_tear_sheet(df_rets, df_pos=None, df_txn=None,
 
     benchmark_rets = utils.get_symbol_rets('SPY')
     benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
+    
+    # If the strategy's history is longer than the benchmark's, limit strategy
+    if df_rets.index[0] < benchmark_rets.index[0]:
+        df_rets = df_rets[df_rets.index > benchmark_rets.index[0]]
 
     create_returns_tear_sheet(df_rets, live_start_date=live_start_date, backtest_days_pct=backtest_days_pct, cone_std=cone_std, benchmark_rets=benchmark_rets, benchmark2_rets=benchmark2_rets)
 
