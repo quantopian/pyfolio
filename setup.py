@@ -3,14 +3,14 @@ from setuptools import setup
 import sys
 
 
-DISTNAME = 'quantrisk'
-DESCRIPTION = "QuantRisk"
+DISTNAME = 'pyfolio'
+DESCRIPTION = "pyfolio"
 LONG_DESCRIPTION    = """"""
 MAINTAINER = 'Quantopian Inc'
 MAINTAINER_EMAIL = 'opensource@quantopian.com'
 AUTHOR = 'Quantopian Inc'
 AUTHOR_EMAIL = 'opensource@quantopian.com'
-URL = "https://github.com/quantopian/quantrisk"
+URL = "https://github.com/quantopian/pyfolio"
 LICENSE = "Apache License, Version 2.0"
 VERSION = "0.1"
 
@@ -40,8 +40,8 @@ if __name__ == "__main__":
           license=LICENSE,
           url=URL,
           long_description=LONG_DESCRIPTION,
-          packages=['quantrisk', 'quantrisk.tests'],
-          package_data = {'quantrisk.examples': ['data/*.*']},
+          packages=['pyfolio', 'pyfolio.tests'],
+          package_data = {'pyfolio.examples': ['data/*.*']},
           classifiers=classifiers,
           #install_requires=install_reqs,
           tests_require=test_reqs,

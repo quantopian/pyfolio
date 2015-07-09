@@ -127,8 +127,8 @@ def load_portfolio_risk_factors(filepath_prefix=None):
     """
 
     if filepath_prefix is None:
-        import quantrisk
-        filepath = os.path.join(os.path.dirname(quantrisk.__file__), 'historical_data')
+        import pyfolio
+        filepath = os.path.join(os.path.dirname(pyfolio.__file__), 'historical_data')
     else:
         filepath = filepath_prefix
 
@@ -154,7 +154,7 @@ def extract_rets_pos_txn_from_backtest_obj(backtest):
     platform.
 
     The returned data structures are in a format compatible with the
-    rest of quantrisk and can be directly passed to
+    rest of pyfolio and can be directly passed to
     e.g. tears.create_full_tear_sheet().
 
     Parameters
@@ -176,8 +176,8 @@ def extract_rets_pos_txn_from_backtest_obj(backtest):
     Example (on the Quantopian research platform)
     ---------------------------------------------
     >>> backtest = get_backtest('548f4f3d885aef09019e9c36')
-    >>> df_rets, df_pos, df_txn = quantrisk.utils.extract_rets_pos_txn_from_backtest_obj(backtest)
-    >>> quantrisk.tears.create_full_tear_sheet(df_rets, df_pos, df_txn)
+    >>> df_rets, df_pos, df_txn = pyfolio.utils.extract_rets_pos_txn_from_backtest_obj(backtest)
+    >>> pyfolio.tears.create_full_tear_sheet(df_rets, df_pos, df_txn)
     """
     df_rets = backtest.daily_performance.returns
     df_rets.index = df_rets.index.normalize()
