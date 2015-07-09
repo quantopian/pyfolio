@@ -155,6 +155,10 @@ def max_drawdown(df_rets):
     -------
     float
         Maximum drawdown.
+        
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Drawdown_(economics) for more details.
     """
 
     if df_rets.size < 1:
@@ -240,10 +244,15 @@ def calmar_ratio(df_rets, returns_style='calendar'):
        Daily returns of the strategy, non-cumulative.
     returns_style : str, optional
         See annual_returns' style
+
     Returns
     -------
     float
         Calmar ratio (drawdown ratio).
+        
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Calmar_ratio for more details.
     """
 
     temp_max_dd = max_drawdown(df_rets=df_rets)
@@ -267,10 +276,15 @@ def omega_ratio(df_rets, annual_return_threshhold=0.0):
        Daily returns of the strategy, non-cumulative.
     annual_return_threshold : float, optional
         Threshold over which to consider positive vs negative returns. For the ratio, it will be converted to a daily return and compared to df_rets.
+
     Returns
     -------
     float
         Omega ratio.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Omega_ratio for more details.
     """
 
     daily_return_thresh = pow(1+annual_return_threshhold, 1/252) - 1
@@ -295,6 +309,10 @@ def sortino_ratio(df_rets, returns_style='compound'):
     -------
     float
         Sortino ratio.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Sortino_ratio for more details.
     """
 
     return annual_return(df_rets, style=returns_style) / annual_volatility(df_rets[df_rets < 0.0])
@@ -313,6 +331,10 @@ def sharpe_ratio(df_rets, returns_style='calendar'):
     -------
     float
         Sharpe ratio.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
     return annual_return(df_rets, style=returns_style) / annual_volatility(df_rets)
@@ -456,6 +478,10 @@ def rolling_beta(df_rets, benchmark_rets, rolling_window=63):
     -------
     pd.Series
         Rolling beta.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
     """
 
     out = pd.Series(index=df_rets.index)
@@ -484,6 +510,10 @@ def rolling_multifactor_beta(df_rets, df_multi_factor, rolling_window=63):
     -------
     pd.DataFrame
         Rolling betas.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
     """
 
     out = pd.DataFrame(columns=['const'] + list(df_multi_factor.columns),
@@ -620,6 +650,10 @@ def get_max_drawdown(df_rets):
         The maximum drawdown's valley.
     recovery : datetime
         The maximum drawdown's recovery.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Drawdown_(economics) for more details.
     """
 
     df_rets = df_rets.copy()
@@ -735,6 +769,10 @@ def rolling_sharpe(df_rets, rolling_sharpe_window):
     -------
     pd.Series
         Rolling Sharpe ratio.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
     return pd.rolling_mean(df_rets, rolling_sharpe_window) \
