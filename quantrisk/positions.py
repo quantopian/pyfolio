@@ -73,7 +73,7 @@ def get_portfolio_values(positions):
     Returns
     -------
     pd.DataFrame
-        Net positional values.
+        Net positional values, including cash.
     """
 
     def get_pos_values(pos):
@@ -169,6 +169,31 @@ def get_top_long_short_abs(df_pos, top=10):
     df_top_short = df_min[df_min < 0][:top]
     df_top_abs = df_abs_max[:top]
     return df_top_long, df_top_short, df_top_abs
+
+
+def extract_pos_from_get_backtest_obj(backtest):
+    """Extract position values from backtest object as returned by
+    get_backtest() on the Quantopian research platform.
+
+    Parameters
+    ----------
+    backtest : qexec.research.backtest.BacktestResult
+        Object returned by get_backtest() on the Quantopian research
+        platform containing all results of a backtest
+
+    Returns
+    -------
+    pd.DataFrame
+        Net positional values, including cash.
+    """
+
+    pos = backtest.positions.reset_index().groupby(['index', 'sid']).apply(lambda ser: ser['amount'] * ser['last_sale_price'])
+    pos.index = pos.index.droplevel(2)
+    pos = pos.unstack()
+    pos.index = pos.index.normalize()
+    pos = pos.join(backtest.daily_performance.ending_cash).rename_axis({'ending_cash': 'cash'}, axis='columns')
+
+    return pos
 
 
 def turnover(transactions_df, backtest_data_df, period='M'):
