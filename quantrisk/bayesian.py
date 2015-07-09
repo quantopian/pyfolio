@@ -338,11 +338,3 @@ def plot_bayes_cone(df_train, df_test, bmark=None, model='t',
 
     ax.set_ylabel('Cumulative returns', fontsize=14)
     return score, trace
-
-def mean_corrcoef(predictions,data):
-    # assuming that columns in the predictions correspond to days and the rows to posterior samples
-    reg_corr = []
-    reg_corr = np.array(reg_corr)
-    for i in range(predictions.shape[0]): # for each poseterior sample
-        reg_corr = np.append(reg_corr, np.corrcoef(predictions[i,:], data)[0,1])
-    return np.mean(reg_corr)
