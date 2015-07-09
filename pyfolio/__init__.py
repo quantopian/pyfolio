@@ -2,9 +2,12 @@ import warnings
 
 import utils
 import timeseries
-import plotting
 import positions
 import txn
+import bayesian
+
+from .tears import *
+from .plotting import *
 
 try:
     import bayesian
