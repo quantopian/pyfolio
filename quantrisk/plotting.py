@@ -427,8 +427,7 @@ def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
     Prints some performance metrics of the strategy.
     
     - Shows amount of time the strategy has been run in backtest and out-of-sample (in live trading).
-    - Shows max drawdown, Calmer ratio, annual return, stability, Sharpe ratio, annual volatility, alpha, and beta.
-    -
+    - Shows Omega ratio, max drawdown, Calmar ratio, annual return, stability, Sharpe ratio, annual volatility, alpha, and beta.
 
     Parameters
     ----------

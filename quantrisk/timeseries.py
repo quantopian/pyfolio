@@ -230,9 +230,9 @@ def annual_volatility(df_rets):
     return df_rets.std() * np.sqrt(252)
 
 
-def calmer_ratio(df_rets, returns_style='calendar'):
+def calmar_ratio(df_rets, returns_style='calendar'):
     """
-    Determines the Calmer ratio, or drawdown ratio, of a strategy.
+    Determines the Calmar ratio, or drawdown ratio, of a strategy.
 
     Parameters
     ----------
@@ -243,7 +243,7 @@ def calmer_ratio(df_rets, returns_style='calendar'):
     Returns
     -------
     float
-        Calmer ratio (drawdown ratio).
+        Calmar ratio (drawdown ratio).
     """
 
     temp_max_dd = max_drawdown(df_rets=df_rets)
@@ -536,7 +536,7 @@ def perf_stats(
     all_stats['sharpe_ratio'] = sharpe_ratio(
         df_rets,
         returns_style=returns_style)
-    all_stats['calmar_ratio'] = calmer_ratio(
+    all_stats['calmar_ratio'] = calmar_ratio(
         df_rets,
         returns_style=returns_style)
     all_stats['stability'] = stability_of_timeseries(df_rets)
@@ -553,7 +553,7 @@ def perf_stats(
         return all_stats_df
 
 
-def get_max_draw_down_underwater(underwater):
+def get_max_drawdown_underwater(underwater):
     """
     Determines peak, valley, and recovery dates given and 'underwater' DataFrame.
 
@@ -585,7 +585,7 @@ def get_max_draw_down_underwater(underwater):
     return peak, valley, recovery
 
 
-def get_max_draw_down(df_rets):
+def get_max_drawdown(df_rets):
     """
     Finds maximum drawdown.
 
@@ -608,10 +608,10 @@ def get_max_draw_down(df_rets):
     df_cum = cum_returns(df_rets, 1.0)
     running_max = np.maximum.accumulate(df_cum)
     underwater = (running_max - df_cum) / running_max
-    return get_max_draw_down_underwater(underwater)
+    return get_max_drawdown_underwater(underwater)
 
 
-def get_top_draw_downs(df_rets, top=10):
+def get_top_drawdowns(df_rets, top=10):
     """
     Finds top drawdowns, sorted by drawdown amount.
 
@@ -625,7 +625,7 @@ def get_top_draw_downs(df_rets, top=10):
     Returns
     -------
     drawdowns : list
-        List of drawdown peaks, valleys, and recoveries. See get_max_draw_down.
+        List of drawdown peaks, valleys, and recoveries. See get_max_drawdown.
     """
 
     df_rets = df_rets.copy()
@@ -635,7 +635,7 @@ def get_top_draw_downs(df_rets, top=10):
 
     drawdowns = []
     for t in range(top):
-        peak, valley, recovery = get_max_draw_down_underwater(underwater)
+        peak, valley, recovery = get_max_drawdown_underwater(underwater)
         # Slice out draw-down period
         if not pd.isnull(recovery):
             underwater = pd.concat(
@@ -669,7 +669,7 @@ def gen_drawdown_table(df_rets, top=10):
     """
 
     df_cum = cum_returns(df_rets, 1.0)
-    drawdown_periods = get_top_draw_downs(df_rets, top=top)
+    drawdown_periods = get_top_drawdowns(df_rets, top=top)
     df_drawdowns = pd.DataFrame(index=range(top), columns=['net drawdown in %',
                                                            'peak date',
                                                            'valley date',
