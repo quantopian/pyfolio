@@ -276,15 +276,10 @@ def omega_ratio(df_rets, annual_return_threshhold=0.0):
        Daily returns of the strategy, non-cumulative.
     annual_return_threshold : float, optional
         Threshold over which to consider positive vs negative returns. For the ratio, it will be converted to a daily return and compared to df_rets.
-
     Returns
     -------
     float
         Omega ratio.
-
-    Note
-    -----
-    See https://en.wikipedia.org/wiki/Omega_ratio for more details.
     """
 
     daily_return_thresh = pow(1+annual_return_threshhold, 1/252) - 1
@@ -294,7 +289,10 @@ def omega_ratio(df_rets, annual_return_threshhold=0.0):
     numer = sum(df_rets_less_thresh[ df_rets_less_thresh > 0.0 ] )
     denom = -1.0 * sum(df_rets_less_thresh[ df_rets_less_thresh < 0.0 ] )
     
-    return numer / denom
+    if denom > 0.0:
+        return numer / denom
+    else
+        return np.nan
 
 def sortino_ratio(df_rets, returns_style='compound'):
     """
@@ -309,15 +307,16 @@ def sortino_ratio(df_rets, returns_style='compound'):
     -------
     float
         Sortino ratio.
-
-    Note
-    -----
-    See https://en.wikipedia.org/wiki/Sortino_ratio for more details.
     """
+    numer = annual_return(df_rets, style=returns_style)
+    denom = annual_volatility(df_rets[df_rets < 0.0])
 
-    return annual_return(df_rets, style=returns_style) / annual_volatility(df_rets[df_rets < 0.0])
+    if denom > 0.0:
+        return numer / denom
+    else
+        return np.nan
 
-def sharpe_ratio(df_rets, returns_style='calendar'):
+def sharpe_ratio(df_rets, returns_style='compound'):
     """
     Determines the Sharpe ratio of a strategy.
 
@@ -331,14 +330,15 @@ def sharpe_ratio(df_rets, returns_style='calendar'):
     -------
     float
         Sharpe ratio.
-
-    Note
-    -----
-    See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
-    return annual_return(df_rets, style=returns_style) / annual_volatility(df_rets)
+    numer = annual_return(df_rets, style=returns_style)
+    denom = annual_volatility(df_rets)
 
+    if denom > 0.0:
+        return numer / denom
+    else
+        return np.nan
 
 def stability_of_timeseries(df_rets, logValue=True):
     """
