@@ -17,30 +17,6 @@ import pandas as pd
 import numpy as np
 
 
-def map_transaction(txn):
-    """
-    Maps a single transaction row to a dictionary.
-
-    Parameters
-    ----------
-    txn : pd.DataFrame
-        A single transaction object to convert to a dictionary
-
-    Returns
-    -------
-    dict
-        Mapped transaction.
-    """
-
-    return {'sid': txn['sid']['sid'],
-            'symbol': txn['sid']['symbol'],
-            'price': txn['price'],
-            'order_id': txn['order_id'],
-            'amount': txn['amount'],
-            'commission': txn['commission'],
-            'dt': txn['dt']}
-
-
 def pos_dict_to_df(df_pos):
     """
     Converts a dictionary of positions to a DataFrame of positions.
