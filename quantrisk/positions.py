@@ -60,36 +60,6 @@ def pos_dict_to_df(df_pos):
                       for dt, x in df_pos.iteritems()]).fillna(0)
 
 
-def make_transaction_frame(transactions):
-    """
-    Formats a transaction DataFrame.
-
-    Parameters
-    ----------
-    transactions : pd.DataFrame
-        Contains improperly formatted transactional data.
-
-    Returns
-    -------
-    df : pd.DataFrame
-        Contains transactions.
-    """
-
-    transaction_list = []
-    for dt in transactions.index:
-        txns = transactions.ix[dt]
-        for algo_id in txns.index:
-            algo_txns = txns.ix[algo_id]
-            for algo_txn in algo_txns:
-                txn = map_transaction(algo_txn)
-                txn['algo_id'] = algo_id
-                transaction_list.append(txn)
-    df = pd.DataFrame(sorted(transaction_list, key=lambda x: x['dt']))
-    df['txn_dollars'] = df['amount'] * df['price']
-    df['date_time_utc'] = map(pd.Timestamp, df.dt.values)
-
-    return df
-
 
 def get_portfolio_values(positions):
     """

@@ -14,11 +14,43 @@
 # limitations under the License.
 from collections import defaultdict
 
+import pandas as pd
+
+def make_transaction_frame(transactions):
+    """
+    Formats a transaction DataFrame.
+
+    Parameters
+    ----------
+    transactions : pd.DataFrame
+        Contains improperly formatted transactional data.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Contains transactions.
+    """
+
+    transaction_list = []
+    for dt in transactions.index:
+        txns = transactions.ix[dt]
+        for algo_id in txns.index:
+            algo_txns = txns.ix[algo_id]
+            for algo_txn in algo_txns:
+                txn = map_transaction(algo_txn)
+                txn['algo_id'] = algo_id
+                transaction_list.append(txn)
+    df = pd.DataFrame(sorted(transaction_list, key=lambda x: x['dt']))
+    df['txn_dollars'] = df['amount'] * df['price']
+    df['date_time_utc'] = map(pd.Timestamp, df.dt.values)
+
+    return df
+
 
 def create_txn_profits(df_txn):
     """
     Compute per-trade profits.
-    
+
     Generates a new transactions DataFrame with a profits column
 
     Parameters
