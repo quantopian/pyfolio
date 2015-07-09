@@ -383,7 +383,7 @@ def plot_drawdown_periods(df_rets, top=10, ax=None, **kwargs):
 
     ax.set_title('Top %i Drawdown Periods' % top)
     ax.set_ylabel('Cumulative returns')
-    ax.legend(['Algo'], 'upper left')
+    ax.legend(['Portfolio'], 'upper left')
     ax.set_xlabel('Date')
     return ax
 
@@ -423,7 +423,7 @@ def plot_drawdown_underwater(df_rets, ax=None, **kwargs):
     return ax
 
 
-def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
+def show_perf_stats(df_rets, live_start_date, benchmark_rets):
     """
     Prints some performance metrics of the strategy.
     
@@ -434,14 +434,14 @@ def show_perf_stats(df_rets, algo_create_date, benchmark_rets):
     ----------
     df_rets : pd.Series
         Daily returns of the strategy, non-cumulative.
-    algo_create_date : datetime
+    live_start_date : datetime
         The point in time when the strategy began live trading, after its backtest period.
     benchmark_rets : pd.Series
         Daily non-cumulative returns of a benchmark.
     """
 
-    df_rets_backtest = df_rets[df_rets.index < algo_create_date]
-    df_rets_live = df_rets[df_rets.index > algo_create_date]
+    df_rets_backtest = df_rets[df_rets.index < live_start_date]
+    df_rets_live = df_rets[df_rets.index > live_start_date]
 
     print 'Out-of-Sample Months: ' + str(int(len(df_rets_live) / 21))
     print 'Backtest Months: ' + str(int(len(df_rets_backtest) / 21))
@@ -531,14 +531,14 @@ def plot_rolling_returns(
 
     if (live_start_date is None) or (df_cum_rets.index[-1] <= live_start_date):
         df_cum_rets.plot(lw=3, color='forestgreen', alpha=0.6,
-                         label='Algo backtest', ax=ax, **kwargs)
+                         label='Backtest', ax=ax, **kwargs)
     else:
         df_cum_rets[:live_start_date].plot(
             lw=3, color='forestgreen', alpha=0.6,
-            label='Algo backtest', ax=ax, **kwargs)
+            label='Backtest', ax=ax, **kwargs)
         df_cum_rets[live_start_date:].plot(
             lw=4, color='red', alpha=0.6,
-            label='Algo live', ax=ax, **kwargs)
+            label='Live', ax=ax, **kwargs)
 
         if cone_std is not None:
             cone_df = timeseries.cone_rolling(df_rets, num_stdev=cone_std, cone_fit_end_date=live_start_date)
