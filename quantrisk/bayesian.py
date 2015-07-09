@@ -330,8 +330,6 @@ def plot_bayes_cone(df_train, df_test, bmark=None, model='t',
                           bmark=bmark, samples=samples)
 
     score = compute_consistency_score(df_test, trace['returns_missing'])
-    corrco = mean_corrcoef(trace['returns_missing'],df_test)
-    corrco_cum = mean_corrcoef(np.cumprod(trace['returns_missing'] + 1, 1),cum_returns(df_test, starting_value=1.))
 
     ax = _plot_bayes_cone(df_train, df_test, trace['returns_missing'], plot_train_len=plot_train_len, ax=ax)
     ax.text(0.40, 0.90, 'Consistency score: %.1f' % score, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
