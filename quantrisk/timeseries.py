@@ -276,10 +276,15 @@ def omega_ratio(df_rets, annual_return_threshhold=0.0):
        Daily returns of the strategy, non-cumulative.
     annual_return_threshold : float, optional
         Threshold over which to consider positive vs negative returns. For the ratio, it will be converted to a daily return and compared to df_rets.
+
     Returns
     -------
     float
         Omega ratio.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Omega_ratio for more details.
     """
 
     daily_return_thresh = pow(1+annual_return_threshhold, 1/252) - 1
@@ -307,6 +312,10 @@ def sortino_ratio(df_rets, returns_style='compound'):
     -------
     float
         Sortino ratio.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Sortino_ratio for more details.
     """
     numer = annual_return(df_rets, style=returns_style)
     denom = annual_volatility(df_rets[df_rets < 0.0])
@@ -326,10 +335,15 @@ def sharpe_ratio(df_rets, returns_style='compound'):
        Daily returns of the strategy, non-cumulative.
     returns_style : str, optional
         See annual_returns' style
+
     Returns
     -------
     float
         Sharpe ratio.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
     numer = annual_return(df_rets, style=returns_style)
