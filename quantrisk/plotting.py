@@ -109,13 +109,14 @@ def plot_rolling_risk_factors(
     rolling_beta_SMB.plot(color='steelblue', alpha=0.7, ax=ax, **kwargs)
     rolling_beta_HML.plot(color='orangered', alpha=0.7, ax=ax, **kwargs)
     rolling_beta_UMD.plot(color='forestgreen', alpha=0.7, ax=ax, **kwargs)
-    (rolling_risk_multifactor['const'] * 252).plot(
-        color='forestgreen',
-        alpha=0.5,
-        lw=3,
-        label=False,
-        ax=ax,
-        **kwargs)
+
+    '''(rolling_risk_multifactor['const'] * 252).plot(
+                    color='forestgreen',
+                    alpha=0.5,
+                    lw=3,
+                    label=False,
+                    ax=ax,
+                    **kwargs)'''
 
     ax.axhline(0.0, color='black')
     ax.legend(['Small-Caps (SMB)',
@@ -127,19 +128,19 @@ def plot_rolling_risk_factors(
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    ax.axhline(
-        (rolling_risk_multifactor['const'] * 252).mean(),
-        color='darkgreen',
-        alpha=0.8,
-        lw=3,
-        ls='--')
+    '''ax.axhline(
+                    (rolling_risk_multifactor['const'] * 252).mean(),
+                    color='darkgreen',
+                    alpha=0.8,
+                    lw=3,
+                    ls='--')'''
     ax.axhline(0.0, color='black')
 
-    ax.set_ylabel('Alpha')
+    # ax.set_ylabel('Alpha')
     ax.set_ylim((-.40, .40))
     ax.set_xlabel('Date')
-    ax.set_title(
-        'Multi-factor Alpha (vs. Factors: Small-Cap, High-Growth, Momentum)')
+    '''ax.set_title(
+                    'Multi-factor Alpha (vs. Factors: Small-Cap, High-Growth, Momentum)')'''
     return ax
 
 
