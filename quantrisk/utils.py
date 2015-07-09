@@ -25,11 +25,14 @@ import json
 import zlib
 import pandas.io.data as web
 
+from . import positions
+from . import txn
+
 
 def json_to_obj(json):
     """
     Converts a JSON string to a DataFrame.
-    
+
     Parameters
     ----------
     json : str
@@ -71,7 +74,7 @@ def round_two_dec_places(x):
 def get_symbol_rets(symbol):
     """
     Gets returns for a symbol.
-    
+
     Queries Yahoo Finance.
 
     Parameters
@@ -105,12 +108,13 @@ def vectorize(func):
 
     return wrapper
 
+
 def load_portfolio_risk_factors(filepath_prefix=None):
     """
     Loads historical risk factors -- Mkt-Rf, SMB, HML, Rf, and UMD -- from the 'historical_data' directory.
-    
+
     Loads from F-F_Research_Data_Factors_daily.csv and daily_mom_factor_returns_fixed_dates2.csv.
-    
+
     Parameters
     ----------
     filepath_prefix : str, optional
@@ -142,3 +146,43 @@ def load_portfolio_risk_factors(filepath_prefix=None):
     five_factors = five_factors / 100
 
     return five_factors
+
+
+def extract_rets_pos_txn_from_backtest_obj(backtest):
+    """Extract returns, positions, and transactions from the backtest
+    object returned by get_backtest() on the Quantopian research
+    platform.
+
+    The returned data structures are in a format compatible with the
+    rest of quantrisk and can be directly passed to
+    e.g. tears.create_full_tear_sheet().
+
+    Parameters
+    ----------
+    backtest : qexec.research.backtest.BacktestResult
+        Object returned by get_backtest() on the Quantopian research
+        platform containing all results of a backtest
+
+    Returns
+    -------
+    df_rets : pd.Series
+        Daily returns of backtest
+    df_pos : pd.DataFrame
+        Daily net position values
+    df_txn : pd.DataFrame
+        Daily transaction volume and dollar ammount.
+
+
+    Example (on the Quantopian research platform)
+    ---------------------------------------------
+    >>> backtest = get_backtest('548f4f3d885aef09019e9c36')
+    >>> df_rets, df_pos, df_txn = quantrisk.utils.extract_rets_pos_txn_from_backtest_obj(backtest)
+    >>> quantrisk.tears.create_full_tear_sheet(df_rets, df_pos, df_txn)
+    """
+    df_rets = backtest.daily_performance.returns
+    df_rets.index = df_rets.index.normalize()
+
+    df_pos = positions.extract_pos_from_get_backtest_obj(backtest)
+    df_txn = txn.extract_txn_from_get_backtest_obj(backtest)
+
+    return df_rets, df_pos, df_txn
