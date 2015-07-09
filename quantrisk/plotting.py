@@ -532,7 +532,6 @@ def plot_rolling_returns(
     if (live_start_date is None) or (df_cum_rets.index[-1] <= live_start_date):
         df_cum_rets.plot(lw=3, color='forestgreen', alpha=0.6,
                          label='Algo backtest', ax=ax, **kwargs)
-        ax.legend(loc=legend_loc)
     else:
         df_cum_rets[:live_start_date].plot(
             lw=3, color='forestgreen', alpha=0.6,
@@ -540,8 +539,6 @@ def plot_rolling_returns(
         df_cum_rets[live_start_date:].plot(
             lw=4, color='red', alpha=0.6,
             label='Algo live', ax=ax, **kwargs)
-
-        ax.legend(loc=legend_loc)
 
         if cone_std is not None:
             cone_df = timeseries.cone_rolling(df_rets, num_stdev=cone_std, cone_fit_end_date=live_start_date)
@@ -553,9 +550,9 @@ def plot_rolling_returns(
 
             cone_df_future = cone_df[ cone_df.index > df_rets.index[-1] ]
 
-            cone_df_fit['line'].plot(ax=ax, ls='--', lw=2, color='forestgreen', alpha=0.7, **kwargs)
-            cone_df_live['line'].plot(ax=ax, ls='--', lw=2, color='red', alpha=0.7, **kwargs)
-            cone_df_future['line'].plot(ax=ax, ls='--', lw=2, color='navy', alpha=0.7, **kwargs)
+            cone_df_fit['line'].plot(ax=ax, ls='--', label='Backtest trend', lw=2, color='forestgreen', alpha=0.7, **kwargs)
+            cone_df_live['line'].plot(ax=ax, ls='--', label='Live trend', lw=2, color='red', alpha=0.7, **kwargs)
+            cone_df_future['line'].plot(ax=ax, ls='--', label='Future trend', lw=2, color='navy', alpha=0.7, **kwargs)
 
             ax.fill_between(cone_df_live.index,
                             cone_df_live.sd_down,
@@ -570,6 +567,7 @@ def plot_rolling_returns(
         ax.axhline(1.0, linestyle='--', color='black', lw=2)
         ax.set_ylabel('Cumulative returns')
         ax.set_title('Cumulative Returns')
+        ax.legend(loc=legend_loc)
         ax.set_xlabel('Date')
 
     return ax
