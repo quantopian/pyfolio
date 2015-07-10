@@ -9,6 +9,8 @@ import bayesian
 from .tears import *
 from .plotting import *
 
+__version__ = '0.1.beta'
+
 try:
     import bayesian
 except ImportError:
