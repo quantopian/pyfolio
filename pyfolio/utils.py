@@ -111,7 +111,7 @@ def vectorize(func):
 
 def load_portfolio_risk_factors(filepath_prefix=None):
     """
-    Loads historical risk factors -- Mkt-Rf, SMB, HML, Rf, and UMD -- from the 'historical_data' directory.
+    Loads historical risk factors -- Mkt-Rf, SMB, HML, Rf, and UMD -- from the 'data' directory.
 
     Loads from F-F_Research_Data_Factors_daily.csv and daily_mom_factor_returns_fixed_dates2.csv.
 
@@ -128,7 +128,7 @@ def load_portfolio_risk_factors(filepath_prefix=None):
 
     if filepath_prefix is None:
         import pyfolio
-        filepath = os.path.join(os.path.dirname(pyfolio.__file__), 'historical_data')
+        filepath = os.path.join(os.path.dirname(pyfolio.__file__), 'data')
     else:
         filepath = filepath_prefix
 
