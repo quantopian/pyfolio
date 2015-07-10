@@ -179,7 +179,7 @@ def max_drawdown(df_rets):
     return -1 * MDD
 
 
-def annual_return(df_rets, style='calendar'):
+def annual_return(df_rets, style='compound'):
     """
     Determines the annual returns of a strategy.
 
