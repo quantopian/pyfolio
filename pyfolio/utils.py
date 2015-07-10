@@ -165,24 +165,24 @@ def extract_rets_pos_txn_from_backtest_obj(backtest):
 
     Returns
     -------
-    df_rets : pd.Series
+    returns : pd.Series
         Daily returns of backtest
-    df_pos : pd.DataFrame
+    positions : pd.DataFrame
         Daily net position values
-    df_txn : pd.DataFrame
+    transactions : pd.DataFrame
         Daily transaction volume and dollar ammount.
 
 
     Example (on the Quantopian research platform)
     ---------------------------------------------
     >>> backtest = get_backtest('548f4f3d885aef09019e9c36')
-    >>> df_rets, df_pos, df_txn = pyfolio.utils.extract_rets_pos_txn_from_backtest_obj(backtest)
-    >>> pyfolio.tears.create_full_tear_sheet(df_rets, df_pos, df_txn)
+    >>> returns, positions, transactions = pyfolio.utils.extract_rets_pos_txn_from_backtest_obj(backtest)
+    >>> pyfolio.tears.create_full_tear_sheet(returns, positions, transactions)
     """
-    df_rets = backtest.daily_performance.returns
-    df_rets.index = df_rets.index.normalize()
+    returns = backtest.daily_performance.returns
+    returns.index = returns.index.normalize()
 
-    df_pos = positions.extract_pos_from_get_backtest_obj(backtest)
-    df_txn = txn.extract_txn_from_get_backtest_obj(backtest)
+    positions = positions.extract_pos_from_get_backtest_obj(backtest)
+    transactions = txn.extract_txn_from_get_backtest_obj(backtest)
 
-    return df_rets, df_pos, df_txn
+    return returns, positions, transactions

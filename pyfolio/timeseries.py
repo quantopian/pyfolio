@@ -53,13 +53,13 @@ def var_cov_var_normal(P, c, mu=0, sigma=1):
     return P - P * (alpha + 1)
 
 
-def normalize(df_rets, starting_value=1):
+def normalize(returns, starting_value=1):
     """
     Normalizes a returns timeseries based on the first value.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     starting_value : float, optional
        The starting returns (default 1).
@@ -70,16 +70,16 @@ def normalize(df_rets, starting_value=1):
         Normalized returns.
     """
 
-    return starting_value * (df_rets / df_rets.iloc[0])
+    return starting_value * (returns / returns.iloc[0])
 
 
-def cum_returns(df_rets, starting_value=None):
+def cum_returns(returns, starting_value=None):
     """
     Compute cumulative returns from simple returns.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     starting_value : float, optional
        The starting returns (default 1).
@@ -100,10 +100,10 @@ def cum_returns(df_rets, starting_value=None):
     # df_cum.iloc[0] == starting_value
     # Note that we can't add that ourselves as we don't know which dt
     # to use.
-    if pd.isnull(df_rets.iloc[0]):
-        df_rets.iloc[0] = 0.
+    if pd.isnull(returns.iloc[0]):
+        returns.iloc[0] = 0.
 
-    df_cum = np.exp(np.log(1 + df_rets).cumsum())
+    df_cum = np.exp(np.log(1 + returns).cumsum())
 
     if starting_value is None:
         return df_cum - 1
@@ -142,13 +142,13 @@ def aggregate_returns(df_daily_rets, convert_to):
         ValueError('convert_to must be weekly, monthly or yearly')
 
 
-def max_drawdown(df_rets):
+def max_drawdown(returns):
     """
     Determines the maximum drawdown of a strategy.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
 
     Returns
@@ -161,10 +161,10 @@ def max_drawdown(df_rets):
     See https://en.wikipedia.org/wiki/Drawdown_(economics) for more details.
     """
 
-    if df_rets.size < 1:
+    if returns.size < 1:
         return np.nan
 
-    df_cum_rets = cum_returns(df_rets, starting_value=100)
+    df_cum_rets = cum_returns(returns, starting_value=100)
 
     MDD = 0
     DD = 0
@@ -179,13 +179,13 @@ def max_drawdown(df_rets):
     return -1 * MDD
 
 
-def annual_return(df_rets, style='compound'):
+def annual_return(returns, style='compound'):
     """
     Determines the annual returns of a strategy.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     style : str, optional
         - If 'compound', then return will be calculated in geometric terms: (1+mean(all_daily_returns))^252 - 1.
@@ -198,28 +198,28 @@ def annual_return(df_rets, style='compound'):
         Annual returns.
     """
 
-    if df_rets.size < 1:
+    if returns.size < 1:
         return np.nan
 
     if style == 'calendar':
-        num_years = len(df_rets) / 252
-        df_cum_rets = cum_returns(df_rets, starting_value=100)
+        num_years = len(returns) / 252
+        df_cum_rets = cum_returns(returns, starting_value=100)
         start_value = df_cum_rets[0]
         end_value = df_cum_rets[-1]
         return ((end_value - start_value) / start_value) / num_years
     if style == 'compound':
-        return pow((1 + df_rets.mean()), 252) - 1
+        return pow((1 + returns.mean()), 252) - 1
     else:
-        return df_rets.mean() * 252
+        return returns.mean() * 252
 
 
-def annual_volatility(df_rets):
+def annual_volatility(returns):
     """
     Determines the annual volatility of a strategy.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
 
     Returns
@@ -228,19 +228,19 @@ def annual_volatility(df_rets):
         Annual volatility.
     """
 
-    if df_rets.size < 2:
+    if returns.size < 2:
         return np.nan
     
-    return df_rets.std() * np.sqrt(252)
+    return returns.std() * np.sqrt(252)
 
 
-def calmar_ratio(df_rets, returns_style='calendar'):
+def calmar_ratio(returns, returns_style='calendar'):
     """
     Determines the Calmar ratio, or drawdown ratio, of a strategy.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     returns_style : str, optional
         See annual_returns' style
@@ -255,9 +255,9 @@ def calmar_ratio(df_rets, returns_style='calendar'):
     See https://en.wikipedia.org/wiki/Calmar_ratio for more details.
     """
 
-    temp_max_dd = max_drawdown(df_rets=df_rets)
+    temp_max_dd = max_drawdown(returns=returns)
     if temp_max_dd < 0:
-        temp = annual_return(df_rets=df_rets, style=returns_style) / abs(max_drawdown(df_rets=df_rets))
+        temp = annual_return(returns=returns, style=returns_style) / abs(max_drawdown(returns=returns))
     else:
         return np.nan
 
@@ -266,16 +266,16 @@ def calmar_ratio(df_rets, returns_style='calendar'):
 
     return temp
 
-def omega_ratio(df_rets, annual_return_threshhold=0.0):
+def omega_ratio(returns, annual_return_threshhold=0.0):
     """
     Determines the Omega ratio of a strategy.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     annual_return_threshold : float, optional
-        Threshold over which to consider positive vs negative returns. For the ratio, it will be converted to a daily return and compared to df_rets.
+        Threshold over which to consider positive vs negative returns. For the ratio, it will be converted to a daily return and compared to returns.
 
     Returns
     -------
@@ -289,23 +289,23 @@ def omega_ratio(df_rets, annual_return_threshhold=0.0):
 
     daily_return_thresh = pow(1+annual_return_threshhold, 1/252) - 1
     
-    df_rets_less_thresh = df_rets - daily_return_thresh
+    returns_less_thresh = returns - daily_return_thresh
     
-    numer = sum(df_rets_less_thresh[ df_rets_less_thresh > 0.0 ] )
-    denom = -1.0 * sum(df_rets_less_thresh[ df_rets_less_thresh < 0.0 ] )
+    numer = sum(returns_less_thresh[ returns_less_thresh > 0.0 ] )
+    denom = -1.0 * sum(returns_less_thresh[ returns_less_thresh < 0.0 ] )
     
     if denom > 0.0:
         return numer / denom
     else:
         return np.nan
 
-def sortino_ratio(df_rets, returns_style='compound'):
+def sortino_ratio(returns, returns_style='compound'):
     """
     Determines the Sortino ratio of a strategy.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
 
     Returns
@@ -317,21 +317,21 @@ def sortino_ratio(df_rets, returns_style='compound'):
     -----
     See https://en.wikipedia.org/wiki/Sortino_ratio for more details.
     """
-    numer = annual_return(df_rets, style=returns_style)
-    denom = annual_volatility(df_rets[df_rets < 0.0])
+    numer = annual_return(returns, style=returns_style)
+    denom = annual_volatility(returns[returns < 0.0])
 
     if denom > 0.0:
         return numer / denom
     else:
         return np.nan
 
-def sharpe_ratio(df_rets, returns_style='compound'):
+def sharpe_ratio(returns, returns_style='compound'):
     """
     Determines the Sharpe ratio of a strategy.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     returns_style : str, optional
         See annual_returns' style
@@ -346,15 +346,15 @@ def sharpe_ratio(df_rets, returns_style='compound'):
     See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
-    numer = annual_return(df_rets, style=returns_style)
-    denom = annual_volatility(df_rets)
+    numer = annual_return(returns, style=returns_style)
+    denom = annual_volatility(returns)
 
     if denom > 0.0:
         return numer / denom
     else:
         return np.nan
 
-def stability_of_timeseries(df_rets, logValue=True):
+def stability_of_timeseries(returns, logValue=True):
     """
     Determines R-squared of a linear fit to the returns.
 
@@ -362,7 +362,7 @@ def stability_of_timeseries(df_rets, logValue=True):
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
 
     Returns
@@ -371,14 +371,14 @@ def stability_of_timeseries(df_rets, logValue=True):
         R-squared.
     """
 
-    if df_rets.size < 2:
+    if returns.size < 2:
         return np.nan
 
-    df_cum_rets = cum_returns(df_rets, starting_value=100)
+    df_cum_rets = cum_returns(returns, starting_value=100)
     temp_values = np.log10(df_cum_rets.values) if logValue else df_cum_rets.values
-    len_df_rets = df_cum_rets.size
+    len_returns = df_cum_rets.size
 
-    X = range(0, len_df_rets)
+    X = range(0, len_returns)
     X = sm.add_constant(X)
 
     model = sm.OLS(temp_values, X).fit()
@@ -449,13 +449,13 @@ def out_of_sample_vs_in_sample_returns_kde(bt_ts, oos_ts, transform_style='scale
 
     return kde_diff
 
-def calc_multifactor(df_rets, factors):
+def calc_multifactor(returns, factors):
     """
     Computes multiple ordinary least squares linear fits, and returns fit parameters.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     factors : pd.Series
         Secondary sets to fit.
@@ -467,21 +467,21 @@ def calc_multifactor(df_rets, factors):
     """
 
     import statsmodels.api as sm
-    factors = factors.loc[df_rets.index]
+    factors = factors.loc[returns.index]
     factors = sm.add_constant(factors)
     factors = factors.dropna(axis=0)
-    results = sm.OLS(df_rets[factors.index], factors).fit()
+    results = sm.OLS(returns[factors.index], factors).fit()
 
     return results.params
 
 
-def rolling_beta(df_rets, benchmark_rets, rolling_window=63):
+def rolling_beta(returns, benchmark_rets, rolling_window=63):
     """
     Determines the rolling beta of a strategy.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     benchmark_rets : pd.Series
         Daily non-cumulative returns of a benchmark.
@@ -498,22 +498,22 @@ def rolling_beta(df_rets, benchmark_rets, rolling_window=63):
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
     """
 
-    out = pd.Series(index=df_rets.index)
-    for beg, end in zip(df_rets.index[0:-rolling_window],
-                        df_rets.index[rolling_window:]):
-        out.loc[end] = calc_alpha_beta(df_rets.loc[beg:end],
+    out = pd.Series(index=returns.index)
+    for beg, end in zip(returns.index[0:-rolling_window],
+                        returns.index[rolling_window:]):
+        out.loc[end] = calc_alpha_beta(returns.loc[beg:end],
                                        benchmark_rets.loc[beg:end])[1]
 
     return out
 
 
-def rolling_multifactor_beta(df_rets, df_multi_factor, rolling_window=63):
+def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
     """
     Determines the rolling beta of multiple factors.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     df_multi_factor : pd.DataFrame
         Other factors over which to compute beta.
@@ -531,23 +531,23 @@ def rolling_multifactor_beta(df_rets, df_multi_factor, rolling_window=63):
     """
 
     out = pd.DataFrame(columns=['const'] + list(df_multi_factor.columns),
-                       index=df_rets.index)
+                       index=returns.index)
 
-    for beg, end in zip(df_rets.index[0:-rolling_window],
-                        df_rets.index[rolling_window:]):
-        out.loc[end] = calc_multifactor(df_rets.loc[beg:end],
+    for beg, end in zip(returns.index[0:-rolling_window],
+                        returns.index[rolling_window:]):
+        out.loc[end] = calc_multifactor(returns.loc[beg:end],
                                         df_multi_factor.loc[beg:end])
 
     return out
 
 
-def calc_alpha_beta(df_rets, benchmark_rets):
+def calc_alpha_beta(returns, benchmark_rets):
     """
     Calculates both alpha and beta.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     benchmark_rets : pd.Series
         Daily non-cumulative returns of a benchmark.
@@ -560,15 +560,15 @@ def calc_alpha_beta(df_rets, benchmark_rets):
         Beta.
     """
 
-    ret_index = df_rets.index
+    ret_index = returns.index
     beta, alpha = sp.stats.linregress(benchmark_rets.loc[ret_index].values,
-                                      df_rets.values)[:2]
+                                      returns.values)[:2]
 
     return alpha * 252, beta
 
 
 def perf_stats(
-        df_rets,
+        returns,
         returns_style='compound',
         return_as_dict=False):
     """
@@ -576,7 +576,7 @@ def perf_stats(
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     returns_style : str, optional
        See annual_returns' style
@@ -591,19 +591,19 @@ def perf_stats(
 
     all_stats = {}
     all_stats['annual_return'] = annual_return(
-        df_rets,
+        returns,
         style=returns_style)
-    all_stats['annual_volatility'] = annual_volatility(df_rets)
+    all_stats['annual_volatility'] = annual_volatility(returns)
     all_stats['sharpe_ratio'] = sharpe_ratio(
-        df_rets,
+        returns,
         returns_style=returns_style)
     all_stats['calmar_ratio'] = calmar_ratio(
-        df_rets,
+        returns,
         returns_style=returns_style)
-    all_stats['stability'] = stability_of_timeseries(df_rets)
-    all_stats['max_drawdown'] = max_drawdown(df_rets)
-    all_stats['omega_ratio'] = omega_ratio(df_rets)
-    all_stats['sortino_ratio'] = sortino_ratio(df_rets)
+    all_stats['stability'] = stability_of_timeseries(returns)
+    all_stats['max_drawdown'] = max_drawdown(returns)
+    all_stats['omega_ratio'] = omega_ratio(returns)
+    all_stats['sortino_ratio'] = sortino_ratio(returns)
 
     if return_as_dict:
         return all_stats
@@ -647,13 +647,13 @@ def get_max_drawdown_underwater(underwater):
     return peak, valley, recovery
 
 
-def get_max_drawdown(df_rets):
+def get_max_drawdown(returns):
     """
     Finds maximum drawdown.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
 
     Returns
@@ -670,20 +670,20 @@ def get_max_drawdown(df_rets):
     See https://en.wikipedia.org/wiki/Drawdown_(economics) for more details.
     """
 
-    df_rets = df_rets.copy()
-    df_cum = cum_returns(df_rets, 1.0)
+    returns = returns.copy()
+    df_cum = cum_returns(returns, 1.0)
     running_max = np.maximum.accumulate(df_cum)
     underwater = (running_max - df_cum) / running_max
     return get_max_drawdown_underwater(underwater)
 
 
-def get_top_drawdowns(df_rets, top=10):
+def get_top_drawdowns(returns, top=10):
     """
     Finds top drawdowns, sorted by drawdown amount.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     top : int, optional
         The amount of top drawdowns to find (default 10).
@@ -694,8 +694,8 @@ def get_top_drawdowns(df_rets, top=10):
         List of drawdown peaks, valleys, and recoveries. See get_max_drawdown.
     """
 
-    df_rets = df_rets.copy()
-    df_cum = cum_returns(df_rets, 1.0)
+    returns = returns.copy()
+    df_cum = cum_returns(returns, 1.0)
     running_max = np.maximum.accumulate(df_cum)
     underwater = running_max - df_cum
 
@@ -711,19 +711,19 @@ def get_top_drawdowns(df_rets, top=10):
             underwater = underwater.loc[:peak]
 
         drawdowns.append((peak, valley, recovery))
-        if len(df_rets) == 0:
+        if len(returns) == 0:
             break
 
     return drawdowns
 
 
-def gen_drawdown_table(df_rets, top=10):
+def gen_drawdown_table(returns, top=10):
     """
     Places top drawdowns in a table.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     top : int, optional
         The amount of top drawdowns to find (default 10).
@@ -734,8 +734,8 @@ def gen_drawdown_table(df_rets, top=10):
         Information about top drawdowns.
     """
 
-    df_cum = cum_returns(df_rets, 1.0)
-    drawdown_periods = get_top_drawdowns(df_rets, top=top)
+    df_cum = cum_returns(returns, 1.0)
+    drawdown_periods = get_top_drawdowns(returns, top=top)
     df_drawdowns = pd.DataFrame(index=range(top), columns=['net drawdown in %',
                                                            'peak date',
                                                            'valley date',
@@ -768,13 +768,13 @@ def gen_drawdown_table(df_rets, top=10):
     return df_drawdowns
 
 
-def rolling_sharpe(df_rets, rolling_sharpe_window):
+def rolling_sharpe(returns, rolling_sharpe_window):
     """
     Determines the rolling Sharpe ratio of a strategy.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     rolling_sharpe_window : int
         Length of rolling window, in days, over which to compute.
@@ -789,8 +789,8 @@ def rolling_sharpe(df_rets, rolling_sharpe_window):
     See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
-    return pd.rolling_mean(df_rets, rolling_sharpe_window) \
-        / pd.rolling_std(df_rets, rolling_sharpe_window) * np.sqrt(252)
+    return pd.rolling_mean(returns, rolling_sharpe_window) \
+        / pd.rolling_std(returns, rolling_sharpe_window) * np.sqrt(252)
 
 
 def cone_rolling(
@@ -812,11 +812,11 @@ def cone_rolling(
 
     # create initial linear fit from beginning of timeseries thru warm_up_days or the specified 'cone_fit_end_date'
     if cone_fit_end_date is None:
-        df_rets = input_rets[:warm_up_days]
+        returns = input_rets[:warm_up_days]
     else:
-        df_rets = input_rets[ input_rets.index < cone_fit_end_date]
+        returns = input_rets[ input_rets.index < cone_fit_end_date]
 
-    perf_ts = cum_returns(df_rets, 1)
+    perf_ts = cum_returns(returns, 1)
 
     X = range(0, perf_ts.size)
     X = sm.add_constant(X)
@@ -840,15 +840,15 @@ def cone_rolling(
 
     std_pct = warm_up_std_pct * np.sqrt(std_scale_factor)
 
-    last_backtest_day_index = df_rets.index[-1]
+    last_backtest_day_index = returns.index[-1]
     cone_end_rets = input_rets[ input_rets.index > last_backtest_day_index ]
     new_cone_day_scale_factor = int(1)
     oos_intercept_shift = perf_ts_r.perf[-1] - perf_ts_r.line[-1]
 
     # make the cone for the out-of-sample/live papertrading period
     for i in cone_end_rets.index:
-        df_rets = input_rets[:i]
-        perf_ts = cum_returns(df_rets, 1)
+        returns = input_rets[:i]
+        perf_ts = cum_returns(returns, 1)
 
         if extend_fit_trend:
             line_ols_coef = fit_line_ols_coef
@@ -961,13 +961,13 @@ def gen_date_ranges_interesting():
     return periods
 
 
-def extract_interesting_date_ranges(df_rets):
+def extract_interesting_date_ranges(returns):
     """
     Extracts returns based on interesting events. See gen_date_range_interesting.
 
     Parameters
     ----------
-    df_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, non-cumulative.
 
     Returns
@@ -977,12 +977,12 @@ def extract_interesting_date_ranges(df_rets):
     """
 
     periods = gen_date_ranges_interesting()
-    df_rets_dupe = df_rets.copy()
-    df_rets_dupe.index = df_rets_dupe.index.map(pd.Timestamp)
+    returns_dupe = returns.copy()
+    returns_dupe.index = returns_dupe.index.map(pd.Timestamp)
     ranges = OrderedDict()
     for name, (start, end) in periods.iteritems():
         try:
-            period = df_rets_dupe.loc[start:end]
+            period = returns_dupe.loc[start:end]
             if len(period) == 0:
                 continue
             ranges[name] = period

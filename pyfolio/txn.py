@@ -89,14 +89,14 @@ def extract_txn_from_get_backtest_obj(backtest):
 
     txn_vol = backtest.transactions.reset_index().groupby('index').apply(lambda ser: (ser['amount'].abs() * ser['price']).sum())
     txn_amount = backtest.transactions.reset_index().groupby('index')['amount'].apply(lambda ser: ser.abs().sum())
-    df_txn = pd.concat([txn_vol, txn_amount], axis=1)
-    df_txn.columns = ['txn_volume', 'txn_shares']
-    df_txn.index = df_txn.index.normalize()
+    transactions = pd.concat([txn_vol, txn_amount], axis=1)
+    transactions.columns = ['txn_volume', 'txn_shares']
+    transactions.index = transactions.index.normalize()
 
-    return df_txn
+    return transactions
 
 
-def create_txn_profits(df_txn):
+def create_txn_profits(transactions):
     """
     Compute per-trade profits.
 
@@ -104,8 +104,8 @@ def create_txn_profits(df_txn):
 
     Parameters
     ----------
-    df_txn : pd.DataFrame
-        A strategy's transactions. See positions.make_transaction_frame(df_txn).
+    transactions : pd.DataFrame
+        A strategy's transactions. See positions.make_transaction_frame(transactions).
 
     Returns
     -------
@@ -115,11 +115,11 @@ def create_txn_profits(df_txn):
 
     txn_descr = defaultdict(list)
 
-    for symbol, df_txn_sym in df_txn.groupby('symbol'):
-        df_txn_sym = df_txn_sym.reset_index()
+    for symbol, transactions_sym in transactions.groupby('symbol'):
+        transactions_sym = transactions_sym.reset_index()
 
-        for i, (amount, price, dt) in df_txn_sym.iloc[1:][['amount', 'price', 'date_time_utc']].iterrows():
-            prev_amount, prev_price, prev_dt = df_txn_sym.loc[
+        for i, (amount, price, dt) in transactions_sym.iloc[1:][['amount', 'price', 'date_time_utc']].iterrows():
+            prev_amount, prev_price, prev_dt = transactions_sym.loc[
                 i - 1, ['amount', 'price', 'date_time_utc']]
             profit = (price - prev_price) * -amount
             txn_descr['profits'].append(profit)

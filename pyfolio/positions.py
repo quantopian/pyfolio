@@ -17,13 +17,13 @@ import pandas as pd
 import numpy as np
 
 
-def pos_dict_to_df(df_pos):
+def pos_dict_to_df(positions):
     """
     Converts a dictionary of positions to a DataFrame of positions.
 
     Parameters
     ----------
-    df_pos : dict
+    positions : dict
         Contains positional information where the indices are datetimes and the values are JSON data.
 
     Returns
@@ -33,7 +33,7 @@ def pos_dict_to_df(df_pos):
     """
 
     return pd.concat([pd.DataFrame(json.loads(x), index=[dt])
-                      for dt, x in df_pos.iteritems()]).fillna(0)
+                      for dt, x in positions.iteritems()]).fillna(0)
 
 
 
@@ -63,32 +63,32 @@ def get_portfolio_values(positions):
     return pos_dict_to_df(position_values)
 
 
-def get_portfolio_alloc(df_pos_vals):
+def get_portfolio_alloc(positions_vals):
     """
     Determines a portfolio's allocations.
 
     Parameters
     ----------
-    df_pos_vals : pd.DataFrame
+    positions_vals : pd.DataFrame
         Contains position values or amounts.
 
     Returns
     -------
-    df_pos_alloc : pd.DataFrame
+    positions_alloc : pd.DataFrame
         Positions and their allocations.
     """
 
-    df_pos_alloc = (df_pos_vals.T / df_pos_vals.abs().sum(axis='columns').T).T
-    return df_pos_alloc
+    positions_alloc = (positions_vals.T / positions_vals.abs().sum(axis='columns').T).T
+    return positions_alloc
 
 
-def get_long_short_pos(df_pos, gross_lev=1.):
+def get_long_short_pos(positions, gross_lev=1.):
     """
     Determines the long amount, short amount, and cash of a portfolio.
 
     Parameters
     ----------
-    df_pos : pd.DataFrame
+    positions : pd.DataFrame
         The positions that the strategy takes over time.
     gross_lev : float, optional
         The porfolio's gross leverage (default 1).
@@ -99,11 +99,11 @@ def get_long_short_pos(df_pos, gross_lev=1.):
         Net long, short, and cash positions.
     """
 
-    df_pos_wo_cash = df_pos.drop('cash', axis='columns')
-    df_long = df_pos_wo_cash.apply(lambda x: x[x > 0].sum(), axis='columns')
-    df_short = -df_pos_wo_cash.apply(lambda x: x[x < 0].sum(), axis='columns')
+    positions_wo_cash = positions.drop('cash', axis='columns')
+    df_long = positions_wo_cash.apply(lambda x: x[x > 0].sum(), axis='columns')
+    df_short = -positions_wo_cash.apply(lambda x: x[x < 0].sum(), axis='columns')
     # Shorting positions adds to cash
-    df_cash = df_pos.cash.abs() - df_short
+    df_cash = positions.cash.abs() - df_short
     df_long_short = pd.DataFrame({'long': df_long,
                                   'short': df_short,
                                   'cash': df_cash})
@@ -116,13 +116,13 @@ def get_long_short_pos(df_pos, gross_lev=1.):
     return df_long_short
 
 
-def get_top_long_short_abs(df_pos, top=10):
+def get_top_long_short_abs(positions, top=10):
     """
     Finds the top long, short, and absolute positions.
 
     Parameters
     ----------
-    df_pos : pd.DataFrame
+    positions : pd.DataFrame
         The positions that the strategy takes over time.
     top : int, optional
         How many of each to find (default 10).
@@ -137,10 +137,10 @@ def get_top_long_short_abs(df_pos, top=10):
         Top absolute positions.
     """
 
-    df_pos = df_pos.drop('cash', axis='columns')
-    df_max = df_pos.max().sort(inplace=False, ascending=False)
-    df_min = df_pos.min().sort(inplace=False, ascending=True)
-    df_abs_max = df_pos.abs().max().sort(inplace=False, ascending=False)
+    positions = positions.drop('cash', axis='columns')
+    df_max = positions.max().sort(inplace=False, ascending=False)
+    df_min = positions.min().sort(inplace=False, ascending=True)
+    df_abs_max = positions.abs().max().sort(inplace=False, ascending=False)
     df_top_long = df_max[df_max > 0][:top]
     df_top_short = df_min[df_min < 0][:top]
     df_top_abs = df_abs_max[:top]

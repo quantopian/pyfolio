@@ -37,7 +37,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
 
     Parameters
     ----------
-    df_rets : pandas.Series
+    returns : pandas.Series
         Series of simple returns of an algorithm or stock.
     bmark : pandas.Series
         Series of simple returns of a benchmark like the S&P500.
@@ -97,7 +97,7 @@ def model_returns_normal(data, samples=500):
 
     Parameters
     ----------
-    df_rets : pandas.Series
+    returns : pandas.Series
         Series of simple returns of an algorithm or stock.
     samples : int (optional)
         Number of posterior samples to draw.
@@ -134,7 +134,7 @@ def model_returns_t(data, samples=500):
 
     Parameters
     ----------
-    df_rets : pandas.Series
+    returns : pandas.Series
         Series of simple returns of an algorithm or stock.
     samples : int (optional)
         Number of posterior samples to draw.
