@@ -4,8 +4,7 @@ import sys
 
 
 DISTNAME = 'pyfolio'
-DESCRIPTION = "pyfolio is a Python library for performance and risk analysis of
-financial portfolios"
+DESCRIPTION = "pyfolio is a Python library for performance and risk analysis of financial portfolios"
 LONG_DESCRIPTION = """pyfolio is a Python library for performance and risk analysis of
 financial portfolios."""
 MAINTAINER = 'Quantopian Inc'
