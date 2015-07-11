@@ -18,7 +18,7 @@ import warnings
 
 from . import timeseries
 from . import utils
-from . import positions
+from . import pos
 from . import plotting
 try:
     from . import bayesian
@@ -191,7 +191,7 @@ def create_position_tear_sheet(returns, positions_val, gross_lev=None, return_fi
     ax_top_positions = plt.subplot(gs[2, :], sharex=ax_gross_leverage)
     ax_holdings = plt.subplot(gs[3, :], sharex=ax_gross_leverage)
 
-    positions_alloc = positions.get_portfolio_alloc(positions_val)
+    positions_alloc = pos.get_portfolio_alloc(positions_val)
 
     plotting.plot_gross_leverage(returns, gross_lev, ax=ax_gross_leverage)
 
@@ -218,7 +218,7 @@ def create_txn_tear_sheet(returns, positions_val, transactions, return_fig=False
     positions_val : pd.DataFrame
         The positions that the strategy takes over time.
     transactions : pd.DataFrame
-         A strategy's transactions. See positions.make_transaction_frame(transactions).
+         A strategy's transactions. See pos.make_transaction_frame(transactions).
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
@@ -412,7 +412,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     positions : pd.DataFrame, optional
         The positions that the strategy takes over time.
     transactions : pd.DataFrame, optional
-        A strategy's transactions. See positions.make_transaction_frame(transactions).
+        A strategy's transactions. See pos.make_transaction_frame(transactions).
     gross_lev : pd.Series, optional
         The sum of long and short exposure per share divided by net asset value.
     live_start_date : datetime, optional

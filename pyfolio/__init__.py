@@ -2,7 +2,7 @@ import warnings
 
 import utils
 import timeseries
-import positions
+import pos
 import txn
 import bayesian
 

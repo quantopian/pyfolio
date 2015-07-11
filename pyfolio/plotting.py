@@ -27,7 +27,7 @@ from sklearn import preprocessing
 
 import utils
 import timeseries
-import positions
+import pos
 
 
 def set_plot_defaults():
@@ -699,7 +699,7 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     positions_alloc : pd.DataFrame
-        Portfolio allocation of positions. See positions.get_portfolio_alloc.
+        Portfolio allocation of positions. See pos.get_portfolio_alloc.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -714,7 +714,7 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    df_long_short = positions.get_long_short_pos(positions_alloc)
+    df_long_short = pos.get_long_short_pos(positions_alloc)
 
     if np.any(df_long_short.cash < 0):
         warnings.warn('Negative cash, taking absolute for area plot.')
@@ -739,7 +739,7 @@ def show_and_plot_top_positions(returns, positions_alloc, show_and_plot=2, legen
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     positions_alloc : pd.DataFrame
-        Portfolio allocation of positions. See positions.get_portfolio_alloc.
+        Portfolio allocation of positions. See pos.get_portfolio_alloc.
     show_and_plot : int, optional
         By default, this is 2, and both prints and plots.
         If this is 0, it will only plot; if 1, it will only print.
@@ -757,7 +757,7 @@ def show_and_plot_top_positions(returns, positions_alloc, show_and_plot=2, legen
         The axes that were plotted on.
     """
 
-    df_top_long, df_top_short, df_top_abs = positions.get_top_long_short_abs(
+    df_top_long, df_top_short, df_top_abs = pos.get_top_long_short_abs(
         positions_alloc)
 
     if show_and_plot == 0 or show_and_plot == 2:
@@ -777,7 +777,7 @@ def show_and_plot_top_positions(returns, positions_alloc, show_and_plot=2, legen
         print np.round(pd.DataFrame(df_top_abs)[0].values, 3)
         print"\n"
 
-        _, _, df_top_abs_all = positions.get_top_long_short_abs(
+        _, _, df_top_abs_all = pos.get_top_long_short_abs(
             positions_alloc, top=9999)
         print 'All positions ever held'
         print pd.DataFrame(df_top_abs_all).index.values
@@ -879,7 +879,7 @@ def plot_turnover(returns, transactions, positions_val, legend_loc='best', ax=No
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     transactions : pd.DataFrame
-        A strategy's transactions. See positions.make_transaction_frame(transactions).
+        A strategy's transactions. See pos.make_transaction_frame(transactions).
     positions_val : pd.DataFrame
         The positions that the strategy takes over time.
     legend_loc : matplotlib.loc, optional
@@ -931,7 +931,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     transactions : pd.DataFrame
-        A strategy's transactions. See positions.make_transaction_frame(transactions).
+        A strategy's transactions. See pos.make_transaction_frame(transactions).
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -964,7 +964,7 @@ def plot_volume_per_day_hist(transactions, ax=None, **kwargs):
     Parameters
     ----------
     transactions : pd.DataFrame
-        A strategy's transactions. See positions.make_transaction_frame(transactions).
+        A strategy's transactions. See pos.make_transaction_frame(transactions).
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional

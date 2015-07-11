@@ -25,7 +25,7 @@ import json
 import zlib
 import pandas.io.data as web
 
-from . import positions
+from . import pos
 from . import txn
 
 
@@ -182,7 +182,7 @@ def extract_rets_pos_txn_from_backtest_obj(backtest):
     returns = backtest.daily_performance.returns
     returns.index = returns.index.normalize()
 
-    positions = positions.extract_pos_from_get_backtest_obj(backtest)
+    positions = pos.extract_pos_from_get_backtest_obj(backtest)
     transactions = txn.extract_txn_from_get_backtest_obj(backtest)
 
     return returns, positions, transactions

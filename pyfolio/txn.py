@@ -105,7 +105,7 @@ def create_txn_profits(transactions):
     Parameters
     ----------
     transactions : pd.DataFrame
-        A strategy's transactions. See positions.make_transaction_frame(transactions).
+        A strategy's transactions. See pos.make_transaction_frame(transactions).
 
     Returns
     -------
