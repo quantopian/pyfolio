@@ -66,7 +66,7 @@ def make_transaction_frame(transactions):
                 transaction_list.append(txn)
     df = pd.DataFrame(sorted(transaction_list, key=lambda x: x['dt']))
     df['txn_dollars'] = df['amount'] * df['price']
-    df['date_time_utc'] = map(pd.Timestamp, df.dt.values)
+    df['date_time_utc'] = list(map(pd.Timestamp, df.dt.values))
 
     return df
 

@@ -225,7 +225,7 @@ def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=None, ax=None):
 
     perc = compute_bayes_cone(preds, starting_value=df_train_cum.iloc[-1])
     # Add indices
-    perc = {k: pd.Series(v, index=df_test.index) for k, v in perc.iteritems()}
+    perc = {k: pd.Series(v, index=df_test.index) for k, v in perc.items()}
 
     df_test_cum_rel = df_test_cum
     # Stitch together train and test

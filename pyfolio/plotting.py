@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import division
+
 import warnings
 
 import pandas as pd
@@ -25,9 +25,9 @@ from matplotlib.ticker import FuncFormatter
 
 from sklearn import preprocessing
 
-import utils
-import timeseries
-import pos
+from . import utils
+from . import timeseries
+from . import pos
 
 
 def set_plot_defaults():
@@ -427,8 +427,8 @@ def show_perf_stats(returns, live_start_date, benchmark_rets):
     returns_backtest = returns[returns.index < live_start_date]
     returns_live = returns[returns.index > live_start_date]
 
-    print 'Out-of-Sample Months: ' + str(int(len(returns_live) / 21))
-    print 'Backtest Months: ' + str(int(len(returns_backtest) / 21))
+    print('Out-of-Sample Months: ' + str(int(len(returns_live) / 21)))
+    print('Backtest Months: ' + str(int(len(returns_backtest) / 21)))
 
     perf_stats_backtest = np.round(timeseries.perf_stats(
         returns_backtest, returns_style='arithmetic'), 2)
@@ -457,7 +457,7 @@ def show_perf_stats(returns, live_start_date, benchmark_rets):
     perf_stats_both = perf_stats_backtest.join(perf_stats_live, how='inner')
     perf_stats_both = perf_stats_both.join(perf_stats_all, how='inner')
 
-    print perf_stats_both
+    print(perf_stats_both)
 
 def plot_rolling_returns(
                     returns,
@@ -761,28 +761,28 @@ def show_and_plot_top_positions(returns, positions_alloc, show_and_plot=2, legen
         positions_alloc)
 
     if show_and_plot == 0 or show_and_plot == 2:
-        print"\n"
-        print 'Top 10 long positions of all time (and max%)'
-        print pd.DataFrame(df_top_long).index.values
-        print np.round(pd.DataFrame(df_top_long)[0].values, 3)
-        print"\n"
+        print("\n")
+        print('Top 10 long positions of all time (and max%)')
+        print(pd.DataFrame(df_top_long).index.values)
+        print(np.round(pd.DataFrame(df_top_long)[0].values, 3))
+        print("\n")
 
-        print 'Top 10 short positions of all time (and max%)'
-        print pd.DataFrame(df_top_short).index.values
-        print np.round(pd.DataFrame(df_top_short)[0].values, 3)
-        print"\n"
+        print('Top 10 short positions of all time (and max%)')
+        print(pd.DataFrame(df_top_short).index.values)
+        print(np.round(pd.DataFrame(df_top_short)[0].values, 3))
+        print("\n")
 
-        print 'Top 10 positions of all time (and max%)'
-        print pd.DataFrame(df_top_abs).index.values
-        print np.round(pd.DataFrame(df_top_abs)[0].values, 3)
-        print"\n"
+        print('Top 10 positions of all time (and max%)')
+        print(pd.DataFrame(df_top_abs).index.values)
+        print(np.round(pd.DataFrame(df_top_abs)[0].values, 3))
+        print("\n")
 
         _, _, df_top_abs_all = pos.get_top_long_short_abs(
             positions_alloc, top=9999)
-        print 'All positions ever held'
-        print pd.DataFrame(df_top_abs_all).index.values
-        print np.round(pd.DataFrame(df_top_abs_all)[0].values, 3)
-        print"\n"
+        print('All positions ever held')
+        print(pd.DataFrame(df_top_abs_all).index.values)
+        print(np.round(pd.DataFrame(df_top_abs_all)[0].values, 3))
+        print("\n")
 
     if show_and_plot == 1 or show_and_plot == 2:
 
@@ -864,7 +864,7 @@ def show_return_range(returns, df_weekly):
     var_sigma = pd.Series([two_sigma_daily, two_sigma_weekly],
                           index=['2-sigma returns daily', '2-sigma returns weekly'])
 
-    print np.round(var_sigma, 3)
+    print(np.round(var_sigma, 3))
 
 
 def plot_turnover(returns, transactions, positions_val, legend_loc='best', ax=None, **kwargs):
@@ -1039,10 +1039,10 @@ def show_worst_drawdown_periods(returns, top=5):
         Amount of top drawdowns periods to plot (default 5).
     """
 
-    print '\nWorst Drawdown Periods'
+    print('\nWorst Drawdown Periods')
     drawdown_df = timeseries.gen_drawdown_table(returns, top=top)
     drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
     drawdown_df['valley date'] = pd.to_datetime(drawdown_df['valley date'],unit='D')
     drawdown_df['recovery date'] = pd.to_datetime(drawdown_df['recovery date'],unit='D')
-    drawdown_df['net drawdown in %'] = map( utils.round_two_dec_places, drawdown_df['net drawdown in %'] )
-    print drawdown_df.sort('net drawdown in %', ascending=False)
+    drawdown_df['net drawdown in %'] = list(map( utils.round_two_dec_places, drawdown_df['net drawdown in %'] ))
+    print(drawdown_df.sort('net drawdown in %', ascending=False))

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import division
+
 from collections import OrderedDict
 
 from operator import *
@@ -378,7 +378,7 @@ def stability_of_timeseries(returns, logValue=True):
     temp_values = np.log10(df_cum_rets.values) if logValue else df_cum_rets.values
     len_returns = df_cum_rets.size
 
-    X = range(0, len_returns)
+    X = list(range(0, len_returns))
     X = sm.add_constant(X)
 
     model = sm.OLS(temp_values, X).fit()
@@ -609,8 +609,8 @@ def perf_stats(
         return all_stats
     else:
         all_stats_df = pd.DataFrame(
-            index=all_stats.keys(),
-            data=all_stats.values())
+            index=list(all_stats.keys()),
+            data=list(all_stats.values()))
         all_stats_df.columns = ['perf_stats']
         return all_stats_df
 
@@ -736,7 +736,7 @@ def gen_drawdown_table(returns, top=10):
 
     df_cum = cum_returns(returns, 1.0)
     drawdown_periods = get_top_drawdowns(returns, top=top)
-    df_drawdowns = pd.DataFrame(index=range(top), columns=['net drawdown in %',
+    df_drawdowns = pd.DataFrame(index=list(range(top)), columns=['net drawdown in %',
                                                            'peak date',
                                                            'valley date',
                                                            'recovery date',
@@ -818,14 +818,14 @@ def cone_rolling(
 
     perf_ts = cum_returns(returns, 1)
 
-    X = range(0, perf_ts.size)
+    X = list(range(0, perf_ts.size))
     X = sm.add_constant(X)
-    sm.OLS(perf_ts , range(0,len(perf_ts)))
+    sm.OLS(perf_ts , list(range(0,len(perf_ts))))
     line_ols = sm.OLS(perf_ts.values , X).fit()
     fit_line_ols_coef = line_ols.params[1]
     fit_line_ols_inter = line_ols.params[0]
 
-    x_points = range(0, perf_ts.size)
+    x_points = list(range(0, perf_ts.size))
     x_points = np.array(x_points) * fit_line_ols_coef + fit_line_ols_inter
 
     perf_ts_r = pd.DataFrame(perf_ts)
@@ -854,14 +854,14 @@ def cone_rolling(
             line_ols_coef = fit_line_ols_coef
             line_ols_inter = fit_line_ols_inter
         else:
-            X = range(0, perf_ts.size)
+            X = list(range(0, perf_ts.size))
             X = sm.add_constant(X)
-            sm.OLS(perf_ts , range(0,len(perf_ts)))
+            sm.OLS(perf_ts , list(range(0,len(perf_ts))))
             line_ols = sm.OLS(perf_ts.values , X).fit()
             line_ols_coef = line_ols.params[1]
             line_ols_inter = line_ols.params[0]
 
-        x_points = range(0, perf_ts.size)
+        x_points = list(range(0, perf_ts.size))
         x_points = np.array(x_points) * line_ols_coef + line_ols_inter + oos_intercept_shift
 
         temp_line = x_points
@@ -891,13 +891,13 @@ def cone_rolling(
         future_days_scale_factor = np.linspace(1,extend_ahead_days,extend_ahead_days)
         std_pct = np.sqrt(future_days_scale_factor) * warm_up_std_pct
 
-        x_points = range(perf_ts.size, perf_ts.size + extend_ahead_days)
+        x_points = list(range(perf_ts.size, perf_ts.size + extend_ahead_days))
         x_points = np.array(x_points) * line_ols_coef + line_ols_inter + oos_intercept_shift + future_cone_intercept_shift
         temp_line = x_points
         temp_sd_up = temp_line * ( 1 + num_stdev * std_pct )
         temp_sd_down = temp_line * ( 1 - num_stdev * std_pct )
 
-        future_cone = pd.DataFrame(index=map( np.datetime64, future_cone_dates ), data={'perf':temp_line,
+        future_cone = pd.DataFrame(index=list(map( np.datetime64, future_cone_dates )), data={'perf':temp_line,
                                                                                         'line':temp_line,
                                                                                         'sd_up':temp_sd_up,
                                                                                         'sd_down':temp_sd_down } )
@@ -980,7 +980,7 @@ def extract_interesting_date_ranges(returns):
     returns_dupe = returns.copy()
     returns_dupe.index = returns_dupe.index.map(pd.Timestamp)
     ranges = OrderedDict()
-    for name, (start, end) in periods.iteritems():
+    for name, (start, end) in periods.items():
         try:
             period = returns_dupe.loc[start:end]
             if len(period) == 0:

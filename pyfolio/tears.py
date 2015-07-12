@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import division
+
 
 import warnings
 
@@ -76,13 +76,13 @@ def create_returns_tear_sheet(returns, live_start_date=None, backtest_days_pct=0
 
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
 
-    print "Entire data start date: " + str(df_cum_rets.index[0])
-    print "Entire data end date: " + str(df_cum_rets.index[-1])
+    print("Entire data start date: " + str(df_cum_rets.index[0]))
+    print("Entire data end date: " + str(df_cum_rets.index[-1]))
 
     if live_start_date is None:
             live_start_date = returns.index[int(len(returns)*backtest_days_pct)]
 
-    print '\n'
+    print('\n')
 
     plotting.show_perf_stats(returns, live_start_date, benchmark_rets)
 
@@ -136,7 +136,7 @@ def create_returns_tear_sheet(returns, live_start_date=None, backtest_days_pct=0
     df_weekly = timeseries.aggregate_returns(returns, 'weekly')
     df_monthly = timeseries.aggregate_returns(returns, 'monthly')
     
-    print '\n'
+    print('\n')
     plotting.show_return_range(returns, df_weekly)
 
     plotting.plot_monthly_returns_heatmap(returns, ax=ax_monthly_heatmap)
@@ -258,8 +258,8 @@ def create_interesting_times_tear_sheet(returns, benchmark_rets=None, legend_loc
     """
 
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
-    print '\nStress Events'
-    print np.round(pd.DataFrame(rets_interesting).describe().transpose().loc[:, ['mean', 'min', 'max']], 3)
+    print('\nStress Events')
+    print(np.round(pd.DataFrame(rets_interesting).describe().transpose().loc[:, ['mean', 'min', 'max']], 3))
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
@@ -275,7 +275,7 @@ def create_interesting_times_tear_sheet(returns, benchmark_rets=None, legend_loc
     fig = plt.figure(figsize=(14, num_rows*6.0))
     gs = gridspec.GridSpec(num_rows, 2, wspace=0.5, hspace=0.5)
 
-    for i, (name, rets_period) in enumerate(rets_interesting.iteritems()):
+    for i, (name, rets_period) in enumerate(rets_interesting.items()):
 
         ax = plt.subplot(gs[int(i/2.0), i%2]) # i=0 -> 0, i=1 -> 0, i=2 -> 1 ;; i=0 -> 0, i=1 -> 1, i=2 -> 0
         timeseries.cum_returns(rets_period).plot(

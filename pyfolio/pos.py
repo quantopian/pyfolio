@@ -33,7 +33,7 @@ def pos_dict_to_df(positions):
     """
 
     return pd.concat([pd.DataFrame(json.loads(x), index=[dt])
-                      for dt, x in positions.iteritems()]).fillna(0)
+                      for dt, x in positions.items()]).fillna(0)
 
 
 
