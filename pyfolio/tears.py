@@ -193,7 +193,8 @@ def create_position_tear_sheet(returns, positions_val, gross_lev=None, return_fi
 
     positions_alloc = pos.get_portfolio_alloc(positions_val)
 
-    plotting.plot_gross_leverage(returns, gross_lev, ax=ax_gross_leverage)
+    if gross_lev is not None:
+        plotting.plot_gross_leverage(returns, gross_lev, ax=ax_gross_leverage)
 
     plotting.plot_exposures(returns, positions_alloc, ax=ax_exposures)
 
