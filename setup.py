@@ -44,6 +44,6 @@ if __name__ == "__main__":
           packages=['pyfolio', 'pyfolio.tests'],
           package_data = {'pyfolio': ['data/*.*']},
           classifiers=classifiers,
-          #install_requires=install_reqs,
+          install_requires=install_reqs,
           tests_require=test_reqs,
           test_suite='nose.collector')
