@@ -127,27 +127,30 @@ def get_top_long_short_abs(positions, top=10):
     return df_top_long, df_top_short, df_top_abs
 
 
-def extract_pos_from_get_backtest_obj(backtest):
+def extract_pos(positions, cash):
     """Extract position values from backtest object as returned by
     get_backtest() on the Quantopian research platform.
 
     Parameters
     ----------
-    backtest : qexec.research.backtest.BacktestResult
-        Object returned by get_backtest() on the Quantopian research
-        platform containing all results of a backtest
+    positions : pd.DataFrame
+        timeseries containing one row per symbol (and potentially
+        duplicate datetime indices) and columns for amount and
+        last_sale_price.
+    cash : pd.Series
+        timeseries containing cash in the portfolio.
 
     Returns
     -------
     pd.DataFrame
-        Net positional values, including cash.
+        Net positional values per SID as well as cash.
     """
 
-    pos = backtest.positions.reset_index().groupby(['index', 'sid']).apply(lambda ser: ser['amount'] * ser['last_sale_price'])
+    pos = positions.reset_index().groupby(['index', 'sid']).apply(lambda ser: ser['amount'] * ser['last_sale_price'])
     pos.index = pos.index.droplevel(2)
     pos = pos.unstack()
     pos.index = pos.index.normalize()
-    pos = pos.join(backtest.daily_performance.ending_cash).rename_axis({'ending_cash': 'cash'}, axis='columns')
+    pos = pos.join(cash).rename_axis({'ending_cash': 'cash'}, axis='columns')
 
     return pos
 

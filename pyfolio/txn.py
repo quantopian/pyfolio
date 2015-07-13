@@ -30,9 +30,16 @@ def map_transaction(txn):
     dict
         Mapped transaction.
     """
+    # sid can either be just a single value or a SID descriptor
+    if isinstance(txn['sid'], dict):
+        sid = txn['sid']['sid']
+        symbol = txn['sid']['symbol']
+    else:
+        sid = txn['sid']
+        symbol = None
 
-    return {'sid': txn['sid']['sid'],
-            'symbol': txn['sid']['symbol'],
+    return {'sid': sid,
+            'symbol': None,
             'price': txn['price'],
             'order_id': txn['order_id'],
             'amount': txn['amount'],
@@ -57,43 +64,43 @@ def make_transaction_frame(transactions):
 
     transaction_list = []
     for dt in transactions.index:
-        txns = transactions.ix[dt]
-        for algo_id in txns.index:
-            algo_txns = txns.ix[algo_id]
-            for algo_txn in algo_txns:
-                txn = map_transaction(algo_txn)
-                txn['algo_id'] = algo_id
-                transaction_list.append(txn)
+        txns = transactions.loc[dt]
+        if len(txns) == 0:
+            continue
+
+        for txn in txns:
+            txn = map_transaction(txn)
+            transaction_list.append(txn)
     df = pd.DataFrame(sorted(transaction_list, key=lambda x: x['dt']))
     df['txn_dollars'] = df['amount'] * df['price']
-    df['date_time_utc'] = list(map(pd.Timestamp, df.dt.values))
 
+    df.index = list(map(pd.Timestamp, df.dt.values))
     return df
 
 
-def extract_txn_from_get_backtest_obj(backtest):
-    """Extract transaction data from backtest object as returned by
-    get_backtest() on the Quantopian research platform.
+def get_txn_vol(transactions):
+    """Extract transaction data from
 
     Parameters
     ----------
-    backtest : qexec.research.backtest.BacktestResult
-        Object returned by get_backtest() on the Quantopian research
-        platform containing all results of a backtest
+    transactions : pd.DataFrame
+        timeseries containing one row per symbol (and potentially
+        duplicate datetime indices) and columns for amount and
+        price.
 
     Returns
     -------
     pd.DataFrame
-        Net positional values, including cash.
+        Daily transaction volume and number of shares.
     """
 
-    txn_vol = backtest.transactions.reset_index().groupby('index').apply(lambda ser: (ser['amount'].abs() * ser['price']).sum())
-    txn_amount = backtest.transactions.reset_index().groupby('index')['amount'].apply(lambda ser: ser.abs().sum())
-    transactions = pd.concat([txn_vol, txn_amount], axis=1)
-    transactions.columns = ['txn_volume', 'txn_shares']
-    transactions.index = transactions.index.normalize()
+    txn_vol = transactions.reset_index().groupby('index').apply(lambda ser: (ser['amount'].abs() * ser['price']).sum())
+    txn_amount = transactions.reset_index().groupby('index')['amount'].apply(lambda ser: ser.abs().sum())
+    transactions_out = pd.concat([txn_vol, txn_amount], axis=1)
+    transactions_out.columns = ['txn_volume', 'txn_shares']
+    transactions_out.index = transactions_out.index.normalize()
 
-    return transactions
+    return transactions_out
 
 
 def create_txn_profits(transactions):

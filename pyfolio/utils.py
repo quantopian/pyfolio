@@ -148,6 +148,57 @@ def load_portfolio_risk_factors(filepath_prefix=None):
     return five_factors
 
 
+def extract_rets_pos_txn_from_zipline(backtest):
+    """Extract returns, positions, transactions and leverage from the
+    backtest data structure returned by zipline.TradingAlgorithm.run().
+
+    The returned data structures are in a format compatible with the
+    rest of pyfolio and can be directly passed to
+    e.g. tears.create_full_tear_sheet().
+
+    Parameters
+    ----------
+    backtest : pd.DataFrame
+        DataFrame returned by zipline.TradingAlgorithm.run()
+
+    Returns
+    -------
+    returns : pd.Series
+        Daily returns of backtest
+    positions : pd.DataFrame
+        Daily net position values
+    transactions : pd.DataFrame
+        Daily transaction volume and dollar ammount.
+    gross_lev : pd.Series
+        Daily gross leverage.
+
+
+    Example (on the Quantopian research platform)
+    ---------------------------------------------
+    >>> backtest = my_algo.run()
+    >>> returns, positions, transactions, gross_lev = pyfolio.utils.extract_rets_pos_txn_from_zipline(backtest)
+    >>> pyfolio.tears.create_full_tear_sheet(returns, positions, transactions, gross_lev=gross_lev)
+
+    """
+
+    backtest.index = backtest.index.normalize()
+    returns = backtest.returns
+    gross_lev = backtest.gross_leverage
+    raw_positions = []
+    for dt, pos_row in backtest.positions.iteritems():
+        df = pd.DataFrame(pos_row)
+        df.index = [dt] * len(df)
+        raw_positions.append(df)
+    positions = pd.concat(raw_positions)
+    positions = pos.extract_pos(positions, backtest.ending_cash)
+    transactions_frame = txn.make_transaction_frame(backtest.transactions)
+    transactions = txn.extract_txn(transactions_frame)
+    transactions.index = transactions.index.normalize()
+    transactions.index.tz = None
+
+    return returns, positions, transactions, gross_lev
+
+
 def extract_rets_pos_txn_from_backtest_obj(backtest):
     """Extract returns, positions, and transactions from the backtest
     object returned by get_backtest() on the Quantopian research
@@ -171,18 +222,22 @@ def extract_rets_pos_txn_from_backtest_obj(backtest):
         Daily net position values
     transactions : pd.DataFrame
         Daily transaction volume and dollar ammount.
+    gross_lev : pd.Series
+        Daily gross leverage.
 
 
     Example (on the Quantopian research platform)
     ---------------------------------------------
     >>> backtest = get_backtest('548f4f3d885aef09019e9c36')
-    >>> returns, positions, transactions = pyfolio.utils.extract_rets_pos_txn_from_backtest_obj(backtest)
-    >>> pyfolio.tears.create_full_tear_sheet(returns, positions, transactions)
+    >>> returns, positions, transactions, gross_lev = pyfolio.utils.extract_rets_pos_txn_from_backtest_obj(backtest)
+    >>> pyfolio.tears.create_full_tear_sheet(returns, positions, transactions, gross_lev=gross_lev)
     """
     returns = backtest.daily_performance.returns
     returns.index = returns.index.normalize()
 
-    positions = pos.extract_pos_from_get_backtest_obj(backtest)
-    transactions = txn.extract_txn_from_get_backtest_obj(backtest)
+    positions = pos.extract_pos(backtest.positions,
+                                backtest.daily_performance.ending_cash)
+    transactions = txn.get_txn_vol(backtest.transactions)
+    gross_lev = backtest.daily_performance.gross_leverage
 
-    return returns, positions, transactions
+    return returns, positions, transactions, gross_lev
