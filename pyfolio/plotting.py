@@ -680,10 +680,8 @@ def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
 
     gross_lev.plot(alpha=0.8, lw=0.5, color='g', legend=False, ax=ax, **kwargs)
 
-    ax.axhline(
-        np.mean(gross_lev.iloc[:, 0]), color='g', linestyle='--', lw=3, alpha=1.0)
-    df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
-    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+    ax.axhline(gross_lev.mean(), color='g', linestyle='--', lw=3, alpha=1.0)
+
     ax.set_title('Gross Leverage')
     ax.set_ylabel('Gross Leverage')
     ax.set_xlabel('Date')
