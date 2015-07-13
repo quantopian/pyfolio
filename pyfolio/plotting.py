@@ -50,7 +50,6 @@ def plot_rolling_risk_factors(
         rolling_beta_window=63 * 2,
         legend_loc='best',
         ax=None, **kwargs):
-
     """
     Plots rolling Fama-French single factor betas.
 
@@ -112,9 +111,9 @@ def plot_rolling_risk_factors(
 
     ax.axhline(0.0, color='black')
     ax.legend(['Small-Caps (SMB)',
-                'High-Growth (HML)',
-                'Momentum (UMD)'],
-               loc=legend_loc)
+               'High-Growth (HML)',
+               'Momentum (UMD)'],
+              loc=legend_loc)
     ax.set_ylim((-2.0, 2.0))
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
@@ -170,6 +169,7 @@ def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
     ax.set_title("Monthly Returns (%)")
     return ax
 
+
 def plot_annual_returns(returns, ax=None, **kwargs):
     """
     Plots a bar graph of returns by year.
@@ -218,6 +218,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
     ax.legend(['mean'])
     return ax
 
+
 def plot_monthly_returns_dist(returns, ax=None, **kwargs):
     """
     Plots a distribution of monthly returns.
@@ -248,7 +249,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
     monthly_ret_table = monthly_ret_table.unstack()
     monthly_ret_table = np.round(monthly_ret_table, 3)
     ax.hist(
-        100*monthly_ret_table.dropna().values.flatten(),
+        100 * monthly_ret_table.dropna().values.flatten(),
         color='orangered',
         alpha=0.80,
         bins=20,
@@ -301,7 +302,12 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     df_holdings = positions.apply(lambda x: np.sum(x != 0), axis='columns')
     df_holdings_by_month = df_holdings.resample('1M', how='mean')
     df_holdings.plot(color='steelblue', alpha=0.6, lw=0.5, ax=ax, **kwargs)
-    df_holdings_by_month.plot(color='orangered', alpha=0.5, lw=2, ax=ax, **kwargs)
+    df_holdings_by_month.plot(
+        color='orangered',
+        alpha=0.5,
+        lw=2,
+        ax=ax,
+        **kwargs)
     ax.axhline(
         df_holdings.values.mean(),
         color='steelblue',
@@ -312,9 +318,9 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     ax.set_xlim((returns.index[0], returns.index[-1]))
 
     ax.legend(['Daily holdings',
-                'Average daily holdings, by month',
-                'Average daily holdings, net'],
-               loc=legend_loc)
+               'Average daily holdings, by month',
+               'Average daily holdings, net'],
+              loc=legend_loc)
     ax.set_title('Holdings per Day')
     ax.set_ylabel('Amount of holdings per day')
     ax.set_xlabel('')
@@ -360,10 +366,10 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
         if pd.isnull(recovery):
             recovery = returns.index[-1]
         ax.fill_between((peak, recovery),
-                         lim[0],
-                         lim[1],
-                         alpha=.4,
-                         color=colors[i])
+                        lim[0],
+                        lim[1],
+                        alpha=.4,
+                        color=colors[i])
 
     ax.set_title('Top %i Drawdown Periods' % top)
     ax.set_ylabel('Cumulative returns')
@@ -399,7 +405,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
 
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1.0)
     running_max = np.maximum.accumulate(df_cum_rets)
-    underwater = -100 * ( (running_max - df_cum_rets) / running_max )
+    underwater = -100 * ((running_max - df_cum_rets) / running_max)
     (underwater).plot(ax=ax, kind='area', color='coral', alpha=0.7, **kwargs)
     ax.set_ylabel('Drawdown')
     ax.set_title('Underwater Plot')
@@ -459,14 +465,15 @@ def show_perf_stats(returns, live_start_date, benchmark_rets):
 
     print(perf_stats_both)
 
+
 def plot_rolling_returns(
-                    returns,
-                    benchmark_rets=None,
-                    benchmark2_rets=None,
-                    live_start_date=None,
-                    cone_std=None,
-                    legend_loc='best',
-                    ax=None, **kwargs):
+        returns,
+        benchmark_rets=None,
+        benchmark2_rets=None,
+        live_start_date=None,
+        cone_std=None,
+        legend_loc='best',
+        ax=None, **kwargs):
     """
     Plots cumulative rolling returns versus some benchmarks'.
     Backtest returns are in green, and out-of-sample (live trading) returns are in red.
@@ -525,15 +532,32 @@ def plot_rolling_returns(
             label='Live', ax=ax, **kwargs)
 
         if cone_std is not None:
-            cone_df = timeseries.cone_rolling(returns, num_stdev=cone_std, cone_fit_end_date=live_start_date)
+            cone_df = timeseries.cone_rolling(
+                returns,
+                num_stdev=cone_std,
+                cone_fit_end_date=live_start_date)
 
-            cone_df_fit = cone_df[ cone_df.index < live_start_date]
+            cone_df_fit = cone_df[cone_df.index < live_start_date]
 
-            cone_df_live = cone_df[ cone_df.index > live_start_date]
-            cone_df_live = cone_df_live[ cone_df_live.index < returns.index[-1] ]
+            cone_df_live = cone_df[cone_df.index > live_start_date]
+            cone_df_live = cone_df_live[cone_df_live.index < returns.index[-1]]
 
-            cone_df_fit['line'].plot(ax=ax, ls='--', label='Backtest trend', lw=2, color='forestgreen', alpha=0.7, **kwargs)
-            cone_df_live['line'].plot(ax=ax, ls='--', label='Live trend', lw=2, color='red', alpha=0.7, **kwargs)
+            cone_df_fit['line'].plot(
+                ax=ax,
+                ls='--',
+                label='Backtest trend',
+                lw=2,
+                color='forestgreen',
+                alpha=0.7,
+                **kwargs)
+            cone_df_live['line'].plot(
+                ax=ax,
+                ls='--',
+                label='Live trend',
+                lw=2,
+                color='red',
+                alpha=0.7,
+                **kwargs)
 
             ax.fill_between(cone_df_live.index,
                             cone_df_live.sd_down,
@@ -549,7 +573,8 @@ def plot_rolling_returns(
     return ax
 
 
-def plot_rolling_beta(returns, benchmark_rets, rolling_beta_window=63, legend_loc='best', ax=None, **kwargs):
+def plot_rolling_beta(returns, benchmark_rets,
+                      rolling_beta_window=63, legend_loc='best', ax=None, **kwargs):
     """
     Plots the rolling beta versus date.
 
@@ -594,12 +619,13 @@ def plot_rolling_beta(returns, benchmark_rets, rolling_beta_window=63, legend_lo
 
     ax.set_xlabel('')
     ax.legend(['6-mo',
-                '12-mo'],
-               loc=legend_loc)
+               '12-mo'],
+              loc=legend_loc)
     return ax
 
 
-def plot_rolling_sharpe(returns, rolling_sharpe_window=63 * 2, legend_loc='best', ax=None, **kwargs):
+def plot_rolling_sharpe(
+        returns, rolling_sharpe_window=63 * 2, legend_loc='best', ax=None, **kwargs):
     """
     Plots the rolling Sharpe ratio versus date.
 
@@ -633,14 +659,18 @@ def plot_rolling_sharpe(returns, rolling_sharpe_window=63 * 2, legend_loc='best'
     rolling_sharpe_ts.plot(alpha=.7, lw=3, color='orangered', ax=ax, **kwargs)
 
     ax.set_title('Rolling Sharpe ratio (6-month)')
-    ax.axhline(rolling_sharpe_ts.mean(), color='steelblue', linestyle='--', lw=3)
+    ax.axhline(
+        rolling_sharpe_ts.mean(),
+        color='steelblue',
+        linestyle='--',
+        lw=3)
     ax.axhline(0.0, color='black', linestyle='-', lw=3)
 
     ax.set_ylim((-3.0, 6.0))
     ax.set_ylabel('Sharpe ratio')
     ax.set_xlabel('')
     ax.legend(['Sharpe', 'Average'],
-               loc=legend_loc)
+              loc=legend_loc)
     return ax
 
 
@@ -720,7 +750,8 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     return ax
 
 
-def show_and_plot_top_positions(returns, positions_alloc, show_and_plot=2, legend_loc='real_best', ax=None, **kwargs):
+def show_and_plot_top_positions(
+        returns, positions_alloc, show_and_plot=2, legend_loc='real_best', ax=None, **kwargs):
     """
     Prints and/or plots the exposures of the top 10 held positions of all time.
 
@@ -786,10 +817,13 @@ def show_and_plot_top_positions(returns, positions_alloc, show_and_plot=2, legen
         # Place legend below plot, shrink plot by 20%
         if legend_loc == 'real_best':
             box = ax.get_position()
-            ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+            ax.set_position(
+                [box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
 
             # Put a legend below current axis
-            ax.legend(loc='upper center', frameon=True, bbox_to_anchor=(0.5, -0.14), ncol=5)
+            ax.legend(
+                loc='upper center', frameon=True, bbox_to_anchor=(
+                    0.5, -0.14), ncol=5)
         else:
             ax.legend(loc=legend_loc)
 
@@ -857,7 +891,8 @@ def show_return_range(returns, df_weekly):
     print(np.round(var_sigma, 3))
 
 
-def plot_turnover(returns, transactions, positions_val, legend_loc='best', ax=None, **kwargs):
+def plot_turnover(
+        returns, transactions, positions_val, legend_loc='best', ax=None, **kwargs):
     """
     Plots turnover vs. date.
     Turnover is the number of shares traded for a period as a fraction of total shares.
@@ -891,16 +926,22 @@ def plot_turnover(returns, transactions, positions_val, legend_loc='best', ax=No
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_turnover = transactions.txn_volume / positions_val.abs().sum(axis='columns')
+    df_turnover = transactions.txn_volume / \
+        positions_val.abs().sum(axis='columns')
     df_turnover_by_month = df_turnover.resample('1M', how='mean')
     df_turnover.plot(color='steelblue', alpha=1.0, lw=0.5, ax=ax, **kwargs)
-    df_turnover_by_month.plot(color='orangered', alpha=0.5, lw=2, ax=ax, **kwargs)
+    df_turnover_by_month.plot(
+        color='orangered',
+        alpha=0.5,
+        lw=2,
+        ax=ax,
+        **kwargs)
     ax.axhline(
         df_turnover.mean(), color='steelblue', linestyle='--', lw=3, alpha=1.0)
     ax.legend(['Daily turnover',
-                'Average daily turnover, by month',
-                'Average daily turnover, net'],
-               loc=legend_loc)
+               'Average daily turnover, by month',
+               'Average daily turnover, net'],
+              loc=legend_loc)
     ax.set_title('Daily Turnover')
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
@@ -938,7 +979,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
 
     transactions.txn_shares.plot(alpha=1.0, lw=0.5, ax=ax, **kwargs)
     ax.axhline(transactions.txn_shares.mean(), color='steelblue',
-                linestyle='--', lw=3, alpha=1.0)
+               linestyle='--', lw=3, alpha=1.0)
     ax.set_title('Daily Trading Volume')
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
@@ -975,7 +1016,8 @@ def plot_volume_per_day_hist(transactions, ax=None, **kwargs):
     return ax
 
 
-def plot_daily_returns_similarity(returns_backtest, returns_live, title='', scale_kws=None, ax=None, **kwargs):
+def plot_daily_returns_similarity(
+        returns_backtest, returns_live, title='', scale_kws=None, ax=None, **kwargs):
     """
     Plots overlapping distributions of in-sample (backtest) returns and out-of-sample (live trading) returns.
 
@@ -1015,6 +1057,7 @@ def plot_daily_returns_similarity(returns_backtest, returns_live, title='', scal
 
     return ax
 
+
 def show_worst_drawdown_periods(returns, top=5):
     """
     Prints information about the worst drawdown periods.
@@ -1031,8 +1074,15 @@ def show_worst_drawdown_periods(returns, top=5):
 
     print('\nWorst Drawdown Periods')
     drawdown_df = timeseries.gen_drawdown_table(returns, top=top)
-    drawdown_df['peak date'] = pd.to_datetime(drawdown_df['peak date'],unit='D')
-    drawdown_df['valley date'] = pd.to_datetime(drawdown_df['valley date'],unit='D')
-    drawdown_df['recovery date'] = pd.to_datetime(drawdown_df['recovery date'],unit='D')
-    drawdown_df['net drawdown in %'] = list(map( utils.round_two_dec_places, drawdown_df['net drawdown in %'] ))
+    drawdown_df['peak date'] = pd.to_datetime(
+        drawdown_df['peak date'],
+        unit='D')
+    drawdown_df['valley date'] = pd.to_datetime(
+        drawdown_df['valley date'],
+        unit='D')
+    drawdown_df['recovery date'] = pd.to_datetime(
+        drawdown_df['recovery date'],
+        unit='D')
+    drawdown_df['net drawdown in %'] = list(
+        map(utils.round_two_dec_places, drawdown_df['net drawdown in %']))
     print(drawdown_df.sort('net drawdown in %', ascending=False))

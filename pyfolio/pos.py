@@ -32,7 +32,10 @@ def get_portfolio_alloc(positions_vals):
         Positions and their allocations.
     """
 
-    positions_alloc = (positions_vals.T / positions_vals.abs().sum(axis='columns').T).T
+    positions_alloc = (
+        positions_vals.T /
+        positions_vals.abs().sum(
+            axis='columns').T).T
     return positions_alloc
 
 
@@ -55,7 +58,8 @@ def get_long_short_pos(positions, gross_lev=1.):
 
     positions_wo_cash = positions.drop('cash', axis='columns')
     df_long = positions_wo_cash.apply(lambda x: x[x > 0].sum(), axis='columns')
-    df_short = -positions_wo_cash.apply(lambda x: x[x < 0].sum(), axis='columns')
+    df_short = - \
+        positions_wo_cash.apply(lambda x: x[x < 0].sum(), axis='columns')
     # Shorting positions adds to cash
     df_cash = positions.cash.abs() - df_short
     df_long_short = pd.DataFrame({'long': df_long,
@@ -120,7 +124,8 @@ def extract_pos(positions, cash):
         Net positional values per SID as well as cash.
     """
 
-    pos = positions.reset_index().groupby(['index', 'sid']).apply(lambda ser: ser['amount'] * ser['last_sale_price'])
+    pos = positions.reset_index().groupby(['index', 'sid']).apply(
+        lambda ser: ser['amount'] * ser['last_sale_price'])
     pos.index = pos.index.droplevel(2)
     pos = pos.unstack()
     pos.index = pos.index.normalize()

@@ -16,6 +16,7 @@ from collections import defaultdict
 
 import pandas as pd
 
+
 def map_transaction(txn):
     """
     Maps a single transaction row to a dictionary.
@@ -94,8 +95,12 @@ def get_txn_vol(transactions):
         Daily transaction volume and number of shares.
     """
 
-    txn_vol = transactions.reset_index().groupby('index').apply(lambda ser: (ser['amount'].abs() * ser['price']).sum())
-    txn_amount = transactions.reset_index().groupby('index')['amount'].apply(lambda ser: ser.abs().sum())
+    txn_vol = transactions.reset_index().groupby('index').apply(
+        lambda ser: (
+            ser['amount'].abs() *
+            ser['price']).sum())
+    txn_amount = transactions.reset_index().groupby(
+        'index')['amount'].apply(lambda ser: ser.abs().sum())
     transactions_out = pd.concat([txn_vol, txn_amount], axis=1)
     transactions_out.columns = ['txn_volume', 'txn_shares']
     transactions_out.index = transactions_out.index.normalize()
@@ -125,7 +130,8 @@ def create_txn_profits(transactions):
     for symbol, transactions_sym in transactions.groupby('symbol'):
         transactions_sym = transactions_sym.reset_index()
 
-        for i, (amount, price, dt) in transactions_sym.iloc[1:][['amount', 'price', 'date_time_utc']].iterrows():
+        for i, (amount, price, dt) in transactions_sym.iloc[1:][
+                ['amount', 'price', 'date_time_utc']].iterrows():
             prev_amount, prev_price, prev_dt = transactions_sym.loc[
                 i - 1, ['amount', 'price', 'date_time_utc']]
             profit = (price - prev_price) * -amount

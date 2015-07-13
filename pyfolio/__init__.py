@@ -14,4 +14,6 @@ __version__ = '0.1.beta'
 try:
     from . import bayesian
 except ImportError:
-    warnings.warn("Could not import bayesian submodule due to missing pymc3 dependency.", ImportWarning)
+    warnings.warn(
+        "Could not import bayesian submodule due to missing pymc3 dependency.",
+        ImportWarning)

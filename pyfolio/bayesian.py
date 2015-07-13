@@ -26,6 +26,7 @@ import pymc3 as pm
 
 from .timeseries import cum_returns
 
+
 def model_returns_t_alpha_beta(data, bmark, samples=2000):
     """Run Bayesian alpha-beta-model with T distributed returns.
 
@@ -61,8 +62,11 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
     data_no_missing = data.dropna()
 
     with pm.Model() as model:
-        sigma = pm.HalfCauchy('sigma', beta=1, testval=data_no_missing.values.std())
-        nu = pm.Exponential('nu_minus_two', 1./10., testval=.3)
+        sigma = pm.HalfCauchy(
+            'sigma',
+            beta=1,
+            testval=data_no_missing.values.std())
+        nu = pm.Exponential('nu_minus_two', 1. / 10., testval=.3)
 
         # alpha and beta
         beta_init, alpha_init = sp.stats.linregress(bmark.loc[data_no_missing.index],
@@ -72,7 +76,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         beta_reg = pm.Normal('beta', mu=0, sd=1, testval=beta_init)
 
         returns = pm.T('returns',
-                       nu=nu+2,
+                       nu=nu + 2,
                        mu=alpha_reg + beta_reg * bmark,
                        sd=sigma,
                        observed=data)
@@ -113,10 +117,12 @@ def model_returns_normal(data, samples=500):
         mu = pm.Normal('mean returns', mu=0, sd=.01, testval=data.mean())
         sigma = pm.HalfCauchy('volatility', beta=1, testval=data.std())
         returns = pm.Normal('returns', mu=mu, sd=sigma, observed=data)
-        ann_vol = pm.Deterministic('annual volatility', returns.distribution.variance**.5 * np.sqrt(252))
+        ann_vol = pm.Deterministic(
+            'annual volatility',
+            returns.distribution.variance**.5 *
+            np.sqrt(252))
         sharpe = pm.Deterministic('sharpe',
                                   returns.distribution.mean / returns.distribution.variance**.5 * np.sqrt(252))
-
 
         start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
         step = pm.NUTS(scaling=start)
@@ -150,9 +156,9 @@ def model_returns_t(data, samples=500):
     with pm.Model() as model:
         mu = pm.Normal('mean returns', mu=0, sd=.01, testval=data.mean())
         sigma = pm.HalfCauchy('volatility', beta=1, testval=data.std())
-        nu = pm.Exponential('nu_minus_two', 1./10., testval=3.)
+        nu = pm.Exponential('nu_minus_two', 1. / 10., testval=3.)
 
-        returns = pm.T('returns', nu=nu+2, mu=mu, sd=sigma, observed=data)
+        returns = pm.T('returns', nu=nu + 2, mu=mu, sd=sigma, observed=data)
         ann_vol = pm.Deterministic('annual volatility',
                                    returns.distribution.variance**.5 * np.sqrt(252))
 
@@ -186,10 +192,13 @@ def compute_bayes_cone(preds, starting_value=1.):
     """
 
     cum_preds = np.cumprod(preds + 1, 1) * starting_value
-    scoreatpercentile = lambda cum_preds, p: [stats.scoreatpercentile(c, p) for c in cum_preds.T]
+    scoreatpercentile = lambda cum_preds, p: [
+        stats.scoreatpercentile(
+            c, p) for c in cum_preds.T]
     perc = {p: scoreatpercentile(cum_preds, p) for p in (5, 25, 75, 95)}
 
     return perc
+
 
 def compute_consistency_score(df_test, preds):
     """Compute Bayesian consistency score.
@@ -211,9 +220,18 @@ def compute_consistency_score(df_test, preds):
     df_test_cum = cum_returns(df_test, starting_value=1.)
     cum_preds = np.cumprod(preds + 1, 1)
 
-    q = [sp.stats.percentileofscore(cum_preds[:, i], df_test_cum.iloc[i], kind='weak') for i in range(len(df_test_cum))]
-    # normalize to be from 100 (perfect median line) to 0 (completely outside of cone)
+    q = [
+        sp.stats.percentileofscore(
+            cum_preds[
+                :,
+                i],
+            df_test_cum.iloc[i],
+            kind='weak') for i in range(
+            len(df_test_cum))]
+    # normalize to be from 100 (perfect median line) to 0 (completely outside
+    # of cone)
     return 100 - np.abs(50 - np.mean(q)) / .5
+
 
 def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=None, ax=None):
     if ax is None:
@@ -247,6 +265,7 @@ def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=None, ax=None):
 
     return ax
 
+
 def run_model(model, df_train, df_test=None, bmark=None, samples=500):
     """Run one of the Bayesian models.
 
@@ -273,7 +292,7 @@ def run_model(model, df_train, df_test=None, bmark=None, samples=500):
         of the posterior.
     """
     if model == 'alpha_beta':
-       trace = model_returns_t_alpha_beta(df_train, bmark, samples)
+        trace = model_returns_t_alpha_beta(df_train, bmark, samples)
     elif model == 't':
         period = df_train.index.append(df_test.index)
         rets = pd.Series(df_train, period)
@@ -284,6 +303,7 @@ def run_model(model, df_train, df_test=None, bmark=None, samples=500):
         trace = model_returns_normal(rets, samples)
 
     return trace
+
 
 def plot_bayes_cone(df_train, df_test, bmark=None, model='t',
                     trace=None, plot_train_len=50, ax=None,
@@ -331,8 +351,21 @@ def plot_bayes_cone(df_train, df_test, bmark=None, model='t',
 
     score = compute_consistency_score(df_test, trace['returns_missing'])
 
-    ax = _plot_bayes_cone(df_train, df_test, trace['returns_missing'], plot_train_len=plot_train_len, ax=ax)
-    ax.text(0.40, 0.90, 'Consistency score: %.1f' % score, verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes,)
+    ax = _plot_bayes_cone(
+        df_train,
+        df_test,
+        trace['returns_missing'],
+        plot_train_len=plot_train_len,
+        ax=ax)
+    ax.text(
+        0.40,
+        0.90,
+        'Consistency score: %.1f' %
+        score,
+        verticalalignment='bottom',
+        horizontalalignment='right',
+        transform=ax.transAxes,
+    )
 
     ax.set_ylabel('Cumulative returns', fontsize=14)
     return score, trace
