@@ -242,7 +242,7 @@ def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=None, ax=None):
     ax.fill_between(df_test.index, perc[25], perc[75], alpha=.6)
     ax.legend(loc='best')
     ax.set_title('Bayesian Cone')
-    ax.set_xlabel('Time')
+    ax.set_xlabel('')
     ax.set_ylabel('Cumulative Returns')
 
     return ax

@@ -288,7 +288,7 @@ def create_interesting_times_tear_sheet(returns, benchmark_rets=None, legend_loc
                    loc=legend_loc)
         ax.set_title(name, size=14)
         ax.set_ylabel('Returns')
-        ax.set_xlabel('Date')
+        ax.set_xlabel('')
 
     if return_fig:
         return fig

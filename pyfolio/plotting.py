@@ -123,7 +123,7 @@ def plot_rolling_risk_factors(
     ax.axhline(0.0, color='black')
 
     ax.set_ylim((-.40, .40))
-    ax.set_xlabel('Date')
+    ax.set_xlabel('')
 
     return ax
 
@@ -317,7 +317,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
                loc=legend_loc)
     ax.set_title('Holdings per Day')
     ax.set_ylabel('Amount of holdings per day')
-    ax.set_xlabel('Date')
+    ax.set_xlabel('')
     return ax
 
 
@@ -368,7 +368,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     ax.set_title('Top %i Drawdown Periods' % top)
     ax.set_ylabel('Cumulative returns')
     ax.legend(['Portfolio'], 'upper left')
-    ax.set_xlabel('Date')
+    ax.set_xlabel('')
     return ax
 
 
@@ -403,7 +403,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     (underwater).plot(ax=ax, kind='area', color='coral', alpha=0.7, **kwargs)
     ax.set_ylabel('Drawdown')
     ax.set_title('Underwater Plot')
-    ax.set_xlabel('Date')
+    ax.set_xlabel('')
     return ax
 
 
@@ -532,27 +532,19 @@ def plot_rolling_returns(
             cone_df_live = cone_df[ cone_df.index > live_start_date]
             cone_df_live = cone_df_live[ cone_df_live.index < returns.index[-1] ]
 
-            cone_df_future = cone_df[ cone_df.index > returns.index[-1] ]
-
             cone_df_fit['line'].plot(ax=ax, ls='--', label='Backtest trend', lw=2, color='forestgreen', alpha=0.7, **kwargs)
             cone_df_live['line'].plot(ax=ax, ls='--', label='Live trend', lw=2, color='red', alpha=0.7, **kwargs)
-            cone_df_future['line'].plot(ax=ax, ls='--', label='Future trend', lw=2, color='navy', alpha=0.7, **kwargs)
 
             ax.fill_between(cone_df_live.index,
                             cone_df_live.sd_down,
                             cone_df_live.sd_up,
                             color='red', alpha=0.30)
 
-            ax.fill_between(cone_df_future.index,
-                            cone_df_future.sd_down,
-                            cone_df_future.sd_up,
-                            color='navy', alpha=0.25)
-
         ax.axhline(1.0, linestyle='--', color='black', lw=2)
         ax.set_ylabel('Cumulative returns')
         ax.set_title('Cumulative Returns')
         ax.legend(loc=legend_loc)
-        ax.set_xlabel('Date')
+        ax.set_xlabel('')
 
     return ax
 
@@ -600,7 +592,7 @@ def plot_rolling_beta(returns, benchmark_rets, rolling_beta_window=63, legend_lo
     ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)
     ax.axhline(0.0, color='black', linestyle='-', lw=2)
 
-    ax.set_xlabel('Date')
+    ax.set_xlabel('')
     ax.legend(['6-mo',
                 '12-mo'],
                loc=legend_loc)
@@ -646,7 +638,7 @@ def plot_rolling_sharpe(returns, rolling_sharpe_window=63 * 2, legend_loc='best'
 
     ax.set_ylim((-3.0, 6.0))
     ax.set_ylabel('Sharpe ratio')
-    ax.set_xlabel('Date')
+    ax.set_xlabel('')
     ax.legend(['Sharpe', 'Average'],
                loc=legend_loc)
     return ax
@@ -684,7 +676,7 @@ def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
 
     ax.set_title('Gross Leverage')
     ax.set_ylabel('Gross Leverage')
-    ax.set_xlabel('Date')
+    ax.set_xlabel('')
     return ax
 
 
@@ -724,7 +716,7 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
     ax.set_title("Long/Short/Cash Exposure")
     ax.set_ylabel('Exposure')
-    ax.set_xlabel('Date')
+    ax.set_xlabel('')
     return ax
 
 
@@ -914,7 +906,7 @@ def plot_turnover(returns, transactions, positions_val, legend_loc='best', ax=No
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
     ax.set_ylim((0, 1))
     ax.set_ylabel('Turnover')
-    ax.set_xlabel('Date')
+    ax.set_xlabel('')
     return ax
 
 
@@ -951,7 +943,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
     ax.set_ylabel('Amount of shares traded')
-    ax.set_xlabel('Date')
+    ax.set_xlabel('')
     return ax
 
 
