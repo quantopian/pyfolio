@@ -17,32 +17,6 @@ import pandas as pd
 import numpy as np
 
 
-def get_portfolio_values(positions):
-    """
-    Determines the net positions of a portfolio's state.
-
-    Parameters
-    ----------
-    positions : pd.DataFrame
-        Contains positional data for a given point in time.
-
-    Returns
-    -------
-    pd.DataFrame
-        Net positional values, including cash.
-    """
-
-    def get_pos_values(pos):
-        position_sizes = {
-            i['sid']['symbol']: i['amount'] *
-            i['last_sale_price'] for i in pos.pos}
-        position_sizes['cash'] = pos.cash
-        return json.dumps(position_sizes)
-
-    position_values = positions.apply(get_pos_values, axis='columns')
-    return pos_dict_to_df(position_values)
-
-
 def get_portfolio_alloc(positions_vals):
     """
     Determines a portfolio's allocations.
