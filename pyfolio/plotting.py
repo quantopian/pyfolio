@@ -124,7 +124,7 @@ def plot_rolling_risk_factors(
 
     ax.set_ylim((-.40, .40))
     ax.set_xlabel('Date')
- 
+
     return ax
 
 
@@ -272,7 +272,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
 def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     """
     Plots total amount of stocks with an active position, either short or long.
-    
+
     Displays daily total, daily average per month, and all-time daily average.
 
     Parameters
@@ -410,7 +410,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
 def show_perf_stats(returns, live_start_date, benchmark_rets):
     """
     Prints some performance metrics of the strategy.
-    
+
     - Shows amount of time the strategy has been run in backtest and out-of-sample (in live trading).
     - Shows Omega ratio, max drawdown, Calmar ratio, annual return, stability, Sharpe ratio, annual volatility, alpha, and beta.
 
@@ -470,7 +470,7 @@ def plot_rolling_returns(
     """
     Plots cumulative rolling returns versus some benchmarks'.
     Backtest returns are in green, and out-of-sample (live trading) returns are in red.
-    
+
     Additionally, a linear cone plot may be added to the out-of-sample returns region.
 
     Parameters
@@ -655,7 +655,7 @@ def plot_rolling_sharpe(returns, rolling_sharpe_window=63 * 2, legend_loc='best'
 def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
     """
     Plots gross leverage versus date.
-    
+
     Gross leverage is the sum of long and short exposure per share divided by net asset value.
 
     Parameters
@@ -871,7 +871,7 @@ def plot_turnover(returns, transactions, positions_val, legend_loc='best', ax=No
     """
     Plots turnover vs. date.
     Turnover is the number of shares traded for a period as a fraction of total shares.
-    
+
     Displays daily total, daily average per month, and all-time daily average.
 
     Parameters
@@ -923,7 +923,7 @@ def plot_turnover(returns, transactions, positions_val, legend_loc='best', ax=No
 def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     """
     Plots trading volume per day vs. date.
-    
+
     Also displays all-time daily average.
 
     Parameters
@@ -1028,7 +1028,7 @@ def plot_daily_returns_similarity(returns_backtest, returns_live, title='', scal
 def show_worst_drawdown_periods(returns, top=5):
     """
     Prints information about the worst drawdown periods.
-    
+
     Prints peak dates, valley dates, recovery dates, and net drawdowns.
 
     Parameters

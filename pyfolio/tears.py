@@ -38,7 +38,7 @@ import seaborn as sns
 def create_returns_tear_sheet(returns, live_start_date=None, backtest_days_pct=0.5, cone_std=1.0, benchmark_rets=None, benchmark2_rets=None, return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's returns.
-    
+
     - Fetches benchmarks, then creates the plots on a single figure.
     - Plots: rolling returns (with cone), rolling beta, rolling sharpe, rolling Fama-French risk factors, drawdowns, underwater plot, monthly and annual return plots, daily similarity plots, and return quantile box plot.
     - Will also print the start and end dates of the strategy, performance statistics, drawdown periods, and the return range.
@@ -135,7 +135,7 @@ def create_returns_tear_sheet(returns, live_start_date=None, backtest_days_pct=0
 
     df_weekly = timeseries.aggregate_returns(returns, 'weekly')
     df_monthly = timeseries.aggregate_returns(returns, 'monthly')
-    
+
     print('\n')
     plotting.show_return_range(returns, df_weekly)
 
@@ -428,7 +428,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
 
     benchmark_rets = utils.get_symbol_rets('SPY')
     benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
-    
+
     # If the strategy's history is longer than the benchmark's, limit strategy
     if returns.index[0] < benchmark_rets.index[0]:
         returns = returns[returns.index > benchmark_rets.index[0]]
