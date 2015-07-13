@@ -15,10 +15,13 @@ before_install:
 install:
   - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
   - source activate testenv
-  - conda install --yes ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels
+  - conda install --yes ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8
   - pip install git+https://github.com/Theano/Theano.git
   - pip install git+https://github.com/pymc-devs/pymc3.git
   - python setup.py build_ext --inplace
+
+before_script:
+  - "flake8 pyfolio"
 
 script:
   - nosetests $TESTCMD
