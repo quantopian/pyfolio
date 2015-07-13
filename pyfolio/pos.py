@@ -17,26 +17,6 @@ import pandas as pd
 import numpy as np
 
 
-def pos_dict_to_df(positions):
-    """
-    Converts a dictionary of positions to a DataFrame of positions.
-
-    Parameters
-    ----------
-    positions : dict
-        Contains positional information where the indices are datetimes and the values are JSON data.
-
-    Returns
-    -------
-    pd.DataFrame
-        Contains positional information where the indices are datetimes.
-    """
-
-    return pd.concat([pd.DataFrame(json.loads(x), index=[dt])
-                      for dt, x in positions.items()]).fillna(0)
-
-
-
 def get_portfolio_values(positions):
     """
     Determines the net positions of a portfolio's state.
