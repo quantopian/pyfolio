@@ -109,9 +109,11 @@ def vectorize(func):
 
 def load_portfolio_risk_factors(filepath_prefix=None):
     """
-    Loads historical risk factors -- Mkt-Rf, SMB, HML, Rf, and UMD -- from the 'data' directory.
+    Loads historical risk factors -- Mkt-Rf, SMB, HML, Rf,
+    and UMD -- from the 'data' directory.
 
-    Loads from F-F_Research_Data_Factors_daily.csv and daily_mom_factor_returns_fixed_dates2.csv.
+    Loads from F-F_Research_Data_Factors_daily.csv and
+    daily_mom_factor_returns_fixed_dates2.csv.
 
     Parameters
     ----------
@@ -133,7 +135,8 @@ def load_portfolio_risk_factors(filepath_prefix=None):
     factors = pd.read_csv(os.path.join(
         filepath, 'F-F_Research_Data_Factors_daily.csv'), index_col=0)
     mom = pd.read_csv(os.path.join(
-        filepath, 'daily_mom_factor_returns_fixed_dates2.csv'), index_col=0, parse_dates=True)
+        filepath, 'daily_mom_factor_returns_fixed_dates2.csv'),
+                      index_col=0, parse_dates=True)
 
     factors.index = [datetime.fromtimestamp(
         time.mktime(time.strptime(str(t), "%Y%m%d"))) for t in factors.index]
@@ -174,8 +177,10 @@ def extract_rets_pos_txn_from_zipline(backtest):
     Example (on the Quantopian research platform)
     ---------------------------------------------
     >>> backtest = my_algo.run()
-    >>> returns, positions, transactions, gross_lev = pyfolio.utils.extract_rets_pos_txn_from_zipline(backtest)
-    >>> pyfolio.tears.create_full_tear_sheet(returns, positions, transactions, gross_lev=gross_lev)
+    >>> returns, positions, transactions, gross_lev =
+    >>>     pyfolio.utils.extract_rets_pos_txn_from_zipline(backtest)
+    >>> pyfolio.tears.create_full_tear_sheet(returns,
+    >>>     positions, transactions, gross_lev=gross_lev)
 
     """
 
@@ -227,8 +232,10 @@ def extract_rets_pos_txn_from_backtest_obj(backtest):
     Example (on the Quantopian research platform)
     ---------------------------------------------
     >>> backtest = get_backtest('548f4f3d885aef09019e9c36')
-    >>> returns, positions, transactions, gross_lev = pyfolio.utils.extract_rets_pos_txn_from_backtest_obj(backtest)
-    >>> pyfolio.tears.create_full_tear_sheet(returns, positions, transactions, gross_lev=gross_lev)
+    >>> returns, positions, transactions, gross_lev =
+    >>>     pyfolio.utils.extract_rets_pos_txn_from_backtest_obj(backtest)
+    >>> pyfolio.tears.create_full_tear_sheet(returns,
+    >>>     positions, transactions, gross_lev=gross_lev)
     """
     returns = backtest.daily_performance.returns
     returns.index = returns.index.normalize()

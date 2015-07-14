@@ -66,8 +66,9 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         nu = pm.Exponential('nu_minus_two', 1. / 10., testval=.3)
 
         # alpha and beta
-        beta_init, alpha_init = sp.stats.linregress(bmark.loc[data_no_missing.index],
-                                                    data_no_missing)[:2]
+        beta_init, alpha_init = sp.stats.linregress(
+                                    bmark.loc[data_no_missing.index],
+                                    data_no_missing)[:2]
 
         alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alpha_init)
         beta_reg = pm.Normal('beta', mu=0, sd=1, testval=beta_init)
@@ -91,11 +92,6 @@ def model_returns_normal(data, samples=500):
     T-distributed and thus has a 3rd parameter (nu) that controls the
     mass in the tails.
 
-    In addition to these parameters, the annual Sharpe ratio is
-    computed by dividing the mean by the standard deviation of the
-    returns distribution; and the annual volatility is computed by
-    computing the standard deviation of the returns distribution.
-
     Parameters
     ----------
     returns : pandas.Series
@@ -114,12 +110,6 @@ def model_returns_normal(data, samples=500):
         mu = pm.Normal('mean returns', mu=0, sd=.01, testval=data.mean())
         sigma = pm.HalfCauchy('volatility', beta=1, testval=data.std())
         returns = pm.Normal('returns', mu=mu, sd=sigma, observed=data)
-        ann_vol = pm.Deterministic(
-            'annual volatility',
-            returns.distribution.variance**.5 *
-            np.sqrt(252))
-        sharpe = pm.Deterministic('sharpe',
-                                  returns.distribution.mean / returns.distribution.variance**.5 * np.sqrt(252))
 
         start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
         step = pm.NUTS(scaling=start)
@@ -129,11 +119,6 @@ def model_returns_normal(data, samples=500):
 
 def model_returns_t(data, samples=500):
     """Run Bayesian model assuming returns are normally distributed.
-
-    In addition to these parameters, the annual Sharpe ratio is
-    computed by dividing the mean by the standard deviation of the
-    returns distribution; and the annual volatility is computed by
-    computing the standard deviation of the returns distribution.
 
     Parameters
     ----------
@@ -156,11 +141,6 @@ def model_returns_t(data, samples=500):
         nu = pm.Exponential('nu_minus_two', 1. / 10., testval=3.)
 
         returns = pm.T('returns', nu=nu + 2, mu=mu, sd=sigma, observed=data)
-        ann_vol = pm.Deterministic('annual volatility',
-                                   returns.distribution.variance**.5 * np.sqrt(252))
-
-        sharpe = pm.Deterministic('sharpe',
-                                  returns.distribution.mean / returns.distribution.variance**.5 * np.sqrt(252))
 
         start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
         step = pm.NUTS(scaling=start)
@@ -230,13 +210,14 @@ def compute_consistency_score(returns_test, preds):
     return 100 - np.abs(50 - np.mean(q)) / .5
 
 
-def _plot_bayes_cone(returns_train, returns_test, preds, plot_train_len=None, ax=None):
+def _plot_bayes_cone(returns_train, returns_test,
+                     preds, plot_train_len=None, ax=None):
     if ax is None:
         ax = plt.gca()
 
     returns_train_cum = cum_returns(returns_train, starting_value=1.)
-    returns_test_cum = cum_returns(returns_test, starting_value=returns_train_cum.iloc[-1])
-    index = np.concatenate([returns_train.index, returns_test.index])
+    returns_test_cum = cum_returns(returns_test,
+                                   starting_value=returns_train_cum.iloc[-1])
 
     perc = compute_bayes_cone(preds, starting_value=returns_train_cum.iloc[-1])
     # Add indices
@@ -244,7 +225,8 @@ def _plot_bayes_cone(returns_train, returns_test, preds, plot_train_len=None, ax
 
     returns_test_cum_rel = returns_test_cum
     # Stitch together train and test
-    returns_train_cum.loc[returns_test_cum_rel.index[0]] = returns_test_cum_rel.iloc[0]
+    returns_train_cum.loc[returns_test_cum_rel.index[0]] 
+        = returns_test_cum_rel.iloc[0]
 
     # Plotting
     if plot_train_len is not None:
@@ -263,7 +245,8 @@ def _plot_bayes_cone(returns_train, returns_test, preds, plot_train_len=None, ax
     return ax
 
 
-def run_model(model, returns_train, returns_test=None, bmark=None, samples=500):
+def run_model(model, returns_train, returns_test=None,
+              bmark=None, samples=500):
     """Run one of the Bayesian models.
 
     Parameters

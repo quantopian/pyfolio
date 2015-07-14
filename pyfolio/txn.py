@@ -117,12 +117,14 @@ def create_txn_profits(transactions):
     Parameters
     ----------
     transactions : pd.DataFrame
-        A strategy's transactions. See pos.make_transaction_frame(transactions).
+        A strategy's transactions.
+        See pos.make_transaction_frame(transactions).
 
     Returns
     -------
     profits_dts : pd.DataFrame
-        DataFrame containing transactions and their profits, datetimes, amounts, current prices, prior prices, and symbols.
+        DataFrame containing transactions and their profits, datetimes,
+        amounts, current prices, prior prices, and symbols.
     """
 
     txn_descr = defaultdict(list)

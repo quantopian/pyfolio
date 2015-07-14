@@ -30,30 +30,37 @@ except ImportError:
 import numpy as np
 import scipy.stats
 import pandas as pd
-from sklearn import preprocessing
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
 
 
-def create_returns_tear_sheet(returns, live_start_date=None, backtest_days_pct=0.5,
-                              cone_std=1.0, benchmark_rets=None, benchmark2_rets=None, return_fig=False):
+def create_returns_tear_sheet(returns, live_start_date=None,
+                              backtest_days_pct=0.5, cone_std=1.0,
+                              benchmark_rets=None, benchmark2_rets=None,
+                              return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's returns.
 
     - Fetches benchmarks, then creates the plots on a single figure.
-    - Plots: rolling returns (with cone), rolling beta, rolling sharpe, rolling Fama-French risk factors, drawdowns, underwater plot, monthly and annual return plots, daily similarity plots, and return quantile box plot.
-    - Will also print the start and end dates of the strategy, performance statistics, drawdown periods, and the return range.
+    - Plots: rolling returns (with cone), rolling beta, rolling sharpe,
+        rolling Fama-French risk factors, drawdowns, underwater plot, monthly
+        and annual return plots, daily similarity plots,
+        and return quantile box plot.
+    - Will also print the start and end dates of the strategy,
+        performance statistics, drawdown periods, and the return range.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     live_start_date : datetime, optional
-        The point in time when the strategy began live trading, after its backtest period.
+        The point in time when the strategy began live trading,
+        after its backtest period.
     backtest_days_pct : float, optional
-        The fraction of the returns data that comes from backtesting (versus live trading).
+        The fraction of the returns data that comes from
+        backtesting (versus live trading).
          - Only used if live_start_date is left blank.
     cone_std : float, optional
         The standard deviation to use for the cone plots.
@@ -146,20 +153,20 @@ def create_returns_tear_sheet(returns, live_start_date=None, backtest_days_pct=0
     plotting.plot_monthly_returns_dist(returns, ax=ax_monthly_dist)
 
     plotting.plot_daily_returns_similarity(returns_backtest,
-                                           returns_live,
-                                           title='Daily Returns Similarity',
-                                           ax=ax_daily_similarity_scale)
+                   returns_live,
+                   title='Daily Returns Similarity',
+                   ax=ax_daily_similarity_scale)
     plotting.plot_daily_returns_similarity(returns_backtest,
-                                           returns_live,
-                                           scale_kws={'with_std': False},
-                                           title='Similarity without\nvariance normalization',
-                                           ax=ax_daily_similarity_no_var)
+                   returns_live,
+                   scale_kws={'with_std': False},
+                   title='Similarity without\nvariance normalization',
+                   ax=ax_daily_similarity_no_var)
     plotting.plot_daily_returns_similarity(returns_backtest,
-                                           returns_live,
-                                           scale_kws={'with_std': False,
-                                                      'with_mean': False},
-                                           title='Similarity without variance\nand mean normalization',
-                                           ax=ax_daily_similarity_no_var_no_mean)
+                   returns_live,
+                   scale_kws={'with_std': False,
+                              'with_mean': False},
+                   title='Similarity without variance\nand mean normalization',
+                   ax=ax_daily_similarity_no_var_no_mean)
 
     plotting.plot_return_quantiles(
         returns,
@@ -174,7 +181,8 @@ def create_returns_tear_sheet(returns, live_start_date=None, backtest_days_pct=0
 def create_position_tear_sheet(
         returns, positions_val, gross_lev=None, return_fig=False):
     """
-    Generate a number of plots for analyzing a strategy's positions and holdings.
+    Generate a number of plots for analyzing a
+    strategy's positions and holdings.
 
     - Plots: gross leverage, exposures, top positions, and holdings.
     - Will also print the top positions held.
@@ -186,7 +194,8 @@ def create_position_tear_sheet(
     positions_val : pd.DataFrame
         The positions that the strategy takes over time.
     gross_lev : pd.Series, optional
-         The sum of long and short exposure per share divided by net asset value.
+         The sum of long and short exposure per share
+         divided by net asset value.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
@@ -230,7 +239,8 @@ def create_txn_tear_sheet(
     positions_val : pd.DataFrame
         The positions that the strategy takes over time.
     transactions : pd.DataFrame
-         A strategy's transactions. See pos.make_transaction_frame(transactions).
+         A strategy's transactions.
+         See pos.make_transaction_frame(transactions).
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
@@ -258,9 +268,13 @@ def create_txn_tear_sheet(
 def create_interesting_times_tear_sheet(
         returns, benchmark_rets=None, legend_loc='best', return_fig=False):
     """
-    Generate a number of returns plots around interesting points in time, like the flash crash and 9/11.
+    Generate a number of returns plots around interesting points in time,
+    like the flash crash and 9/11.
 
-    Plots: returns around the dotcom bubble burst, Lehmann Brothers' failure, 9/11, US downgrade and EU debt crisis, Fukushima meltdown, US housing bubble burst, EZB IR, Great Recession (August 2007, March and September of 2008, Q1 & Q2 2009), flash crash, April and October 2014.
+    Plots: returns around the dotcom bubble burst, Lehmann Brothers' failure,
+    9/11, US downgrade and EU debt crisis, Fukushima meltdown, US housing
+    bubble burst, EZB IR, Great Recession (August 2007, March and September
+    of 2008, Q1 & Q2 2009), flash crash, April and October 2014.
 
     Parameters
     ----------
@@ -314,12 +328,15 @@ def create_interesting_times_tear_sheet(
         return fig
 
 
-def create_bayesian_tear_sheet(
-        returns, bmark, live_start_date=None, backtest_days_pct=0.5, return_fig=False):
+def create_bayesian_tear_sheet(returns, bmark, live_start_date=None,
+                               backtest_days_pct=0.5, return_fig=False):
     """
-    Generate a number of Bayesian distributions and a Beyesian cone plot of returns.
+    Generate a number of Bayesian distributions and a Bayesian
+    cone plot of returns.
 
-    Plots: Sharpe distribution, annual volatility distribution, annual alpha distribution, beta distribution, predicted 1 and 5 day returns distributions, and a cumulative returns cone plot.
+    Plots: Sharpe distribution, annual volatility distribution,
+    annual alpha distribution, beta distribution, predicted 1 and 5
+    day returns distributions, and a cumulative returns cone plot.
 
     Parameters
     ----------
@@ -328,9 +345,11 @@ def create_bayesian_tear_sheet(
     bmark : pd.Series
         Daily non-cumulative returns of a benchmark.
     live_start_date : datetime, optional
-        The point in time when the strategy began live trading, after its backtest period.
+        The point in time when the strategy began live
+        trading, after its backtest period.
     backtest_days_pct : float, optional
-        The fraction of the returns data that comes from backtesting (versus live trading).
+        The fraction of the returns data that comes from
+        backtesting (versus live trading).
          - Only used if live_start_date is left blank.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
@@ -352,11 +371,11 @@ def create_bayesian_tear_sheet(
                                  samples=2000)
 
     sns.distplot(trace_t['sharpe'][100:], ax=ax_sharpe)
-    #ax_sharpe.set_title('Bayesian T-Sharpe Ratio')
+    # ax_sharpe.set_title('Bayesian T-Sharpe Ratio')
     ax_sharpe.set_xlabel('Sharpe Ratio')
     ax_sharpe.set_ylabel('Belief')
     sns.distplot(trace_t['annual volatility'][100:], ax=ax_vol)
-    #ax_vol.set_title('Annual Volatility')
+    # ax_vol.set_title('Annual Volatility')
     ax_vol.set_xlabel('Annual Volatility')
     ax_vol.set_ylabel('Belief')
 
@@ -422,10 +441,13 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
                            live_start_date=None, bayesian=False,
                            backtest_days_pct=0.5, cone_std=1.0):
     """
-    Generate a number of tear sheets that are useful for analyzing a strategy's performance.
+    Generate a number of tear sheets that are useful
+    for analyzing a strategy's performance.
 
     - Fetches benchmarks if needed.
-    - Creates tear sheets for returns, and significant events. If possible, also creates tear sheets for position analysis, transaction analysis, and Bayesian analysis.
+    - Creates tear sheets for returns, and significant events.
+        If possible, also creates tear sheets for position analysis,
+        transaction analysis, and Bayesian analysis.
 
     Parameters
     ----------
@@ -434,15 +456,19 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     positions : pd.DataFrame, optional
         The positions that the strategy takes over time.
     transactions : pd.DataFrame, optional
-        A strategy's transactions. See pos.make_transaction_frame(transactions).
+        A strategy's transactions.
+        See pos.make_transaction_frame(transactions).
     gross_lev : pd.Series, optional
-        The sum of long and short exposure per share divided by net asset value.
+        The sum of long and short exposure per share
+        divided by net asset value.
     live_start_date : datetime, optional
-        The point in time when the strategy began live trading, after its backtest period.
+        The point in time when the strategy began live trading,
+        after its backtest period.
     bayesian: boolean, optional
         If True, causes the generation of a Bayesian tear sheet.
     backtest_days_pct : float, optional
-        The fraction of the returns data that comes from backtesting (versus live trading).
+        The fraction of the returns data that comes from
+        backtesting (versus live trading).
          - Only used if live_start_date is left blank.
     cone_std : float, optional
         The standard deviation to use for the cone plots.

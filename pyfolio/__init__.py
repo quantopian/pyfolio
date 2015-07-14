@@ -1,5 +1,3 @@
-__version__ = '0.1.beta'
-
 import warnings
 
 from . import utils
@@ -16,3 +14,5 @@ except ImportError:
     warnings.warn(
         "Could not import bayesian submodule due to missing pymc3 dependency.",
         ImportWarning)
+
+__version__ = '0.1.beta'
