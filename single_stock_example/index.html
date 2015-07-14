@@ -120,43 +120,51 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
+        <li class="main active"><a href="#single-stock-analysis-example-in-pyfolio">Single stock analysis example in pyfolio</a></li>
+        
+            <li><a href="#here-is-a-simple-example-where-we-produce-a-set-of-plots-called-a-tear-sheet-for-a-stock">Here is a simple example where we produce a set of plots, called a tear sheet, for a stock.</a></li>
+        
+            <li><a href="#first-import-pyfolio">First, import pyfolio.</a></li>
+        
+            <li><a href="#next-fetch-the-daily-returns-for-a-stock">Next, fetch the daily returns for a stock</a></li>
+        
+            <li><a href="#finally-create-a-full-tear-sheet-for-the-single-stock">Finally, create a full tear sheet for the single stock.</a></li>
+        
+    
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<pre><code># Here is a simple example where we produce a set of plots, called a tear sheet, for a single stock.
-
-
-%matplotlib inline
+<h1 id="single-stock-analysis-example-in-pyfolio">Single stock analysis example in pyfolio</h1>
+<h3 id="here-is-a-simple-example-where-we-produce-a-set-of-plots-called-a-tear-sheet-for-a-stock">Here is a simple example where we produce a set of plots, called a tear sheet, for a stock.</h3>
+<h3 id="first-import-pyfolio">First, import pyfolio.</h3>
+<pre><code>%matplotlib inline
 import pyfolio as pf
-
-
-stock_rets = pf.utils.get_symbol_rets('FB') # Fetch the daily returns for a stock
-
-
-# Create a full tear sheet for the single stock.
-# This will show statistics and plots about returns and shock events.
-# Set the first 80% of the stock's history to be in-sample (controls the cone plot).
-# The Bayesian tear sheet is also enabled.
-pf.create_full_tear_sheet(stock_rets, backtest_days_pct=0.8, bayesian=False)
+</code></pre>
+<h3 id="next-fetch-the-daily-returns-for-a-stock">Next, fetch the daily returns for a stock</h3>
+<pre><code>stock_rets = pf.utils.get_symbol_rets('FB')
+</code></pre>
+<h3 id="finally-create-a-full-tear-sheet-for-the-single-stock">Finally, create a full tear sheet for the single stock.</h3>
+<p>This will show charts about returns and shock events. As an example, we set the first 80% of the stock's history to be in-sample, which controls the cone plot. The Bayesian tear sheet is also enabled.</p>
+<pre><code>pf.create_full_tear_sheet(stock_rets, backtest_days_pct=0.8, bayesian=True)
 
 Entire data start date: 2012-05-21 00:00:00
-Entire data end date: 2015-07-10 00:00:00
+Entire data end date: 2015-07-13 00:00:00
 
 
 Out-of-Sample Months: 7
 Backtest Months: 30
                    Backtest  Out_of_Sample  All_History
-sortino_ratio          1.53           2.70         1.56
-omega_ratio            1.16           1.25         1.17
+sortino_ratio          1.54           3.04         1.60
+omega_ratio            1.16           1.28         1.17
 max_drawdown          -0.48          -0.09        -0.48
-calmar_ratio           0.79           3.34         0.76
-annual_return          0.38           0.31         0.36
+calmar_ratio           0.79           3.70         0.77
+annual_return          0.38           0.34         0.37
 stability              0.84           0.54         0.87
-sharpe_ratio           0.77           1.38         0.81
+sharpe_ratio           0.78           1.52         0.83
 annual_volatility      0.49           0.22         0.45
-alpha                  0.17           0.27         0.19
-beta                   0.97           1.03         0.98
+alpha                  0.17           0.29         0.19
+beta                   0.97           1.04         0.98
 
 Worst Drawdown Periods
    net drawdown in %  peak date valley date recovery date duration
@@ -172,17 +180,23 @@ Worst Drawdown Periods
 dtype: float64
 
 Stress Events
+
+/opt/miniconda/lib/python2.7/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
+  warnings.warn(message, mplDeprecation, stacklevel=1)
+/opt/miniconda/lib/python2.7/site-packages/theano/scan_module/scan_perform_ext.py:133: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility
+  from scan_perform.scan_perform import *
+
+
+
                mean    min    max
 EZB IR Event  0.002 -0.091  0.077
 Apr14         0.001 -0.052  0.073
 Oct14        -0.002 -0.061  0.046
-
-
-/opt/miniconda/lib/python2.7/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
-  warnings.warn(message, mplDeprecation, stacklevel=1)
+ [-----------------100%-----------------] 2000 of 2000 complete in 4.5 sec
 </code></pre>
-<p><img alt="png" src="../single_stock_example_files/single_stock_example_3_2.png" /></p>
-<p><img alt="png" src="../single_stock_example_files/single_stock_example_3_3.png" /></p></div>
+<p><img alt="png" src="../single_stock_example_files/single_stock_example_7_3.png" /></p>
+<p><img alt="png" src="../single_stock_example_files/single_stock_example_7_4.png" /></p>
+<p><img alt="png" src="../single_stock_example_files/single_stock_example_7_5.png" /></p></div>
             
         </div>
 

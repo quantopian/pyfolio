@@ -120,43 +120,53 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
+        <li class="main active"><a href="#zipline-algorithm-analysis-example-in-pyfolio">Zipline algorithm analysis example in pyfolio</a></li>
+        
+            <li><a href="#here-is-an-example-where-we-run-an-algorithm-with-zipline-then-produce-tear-sheets-for-that-algorithm">Here is an example where we run an algorithm with zipline, then produce tear sheets for that algorithm.</a></li>
+        
+            <li><a href="#import-pyfolio-along-with-the-necessary-modules-for-running-our-zipline-backtest">Import pyfolio, along with the necessary modules for running our zipline backtest.</a></li>
+        
+            <li><a href="#run-our-zipline-algorithm-this-algorithm-can-also-be-adjusted-to-execute-a-modified-or-completely-different-trading-strategy">Run our zipline algorithm. This algorithm can also be adjusted to execute a modified, or completely different, trading strategy.</a></li>
+        
+            <li><a href="#extract-the-relevant-information-from-the-zipline-backtest-object">Extract the relevant information from the zipline backtest object</a></li>
+        
+            <li><a href="#just-make-a-plot-of-the-top-10-drawdown-periods">Just make a plot of the top 10 drawdown periods.</a></li>
+        
+            <li><a href="#create-a-full-tear-sheet-for-our-algorithm-as-an-example-pretend-the-first-80-was-a-backtest-and-the-last-20-was-live-trading">Create a full tear sheet for our algorithm. As an example, pretend the first 80% was a backtest and the last 20% was live trading.</a></li>
+        
+    
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<pre><code># Here is an example where we run an algorithm with zipline,
-# then produce every tear sheet for that algorithm.
+<h1 id="zipline-algorithm-analysis-example-in-pyfolio">Zipline algorithm analysis example in pyfolio</h1>
+<h3 id="here-is-an-example-where-we-run-an-algorithm-with-zipline-then-produce-tear-sheets-for-that-algorithm">Here is an example where we run an algorithm with zipline, then produce tear sheets for that algorithm.</h3>
+<h3 id="import-pyfolio-along-with-the-necessary-modules-for-running-our-zipline-backtest">Import pyfolio, along with the necessary modules for running our zipline backtest.</h3>
+<pre><code>%matplotlib inline
+import pyfolio as pf
 
-
-%matplotlib inline
-from datetime import datetime
-import pytz
 
 import numpy as np
 import pandas as pd
 
-# Import Zipline, the open source backester
-import zipline
-from zipline import TradingAlgorithm
-from zipline.data.loader import load_bars_from_yahoo
-from zipline.api import order_target, symbol, history, add_history, schedule_function, date_rules, time_rules
-
-
-import pyfolio as pf
-
-
-# Zipline trading algorithm
-# Taken from zipline.examples.olmar
 import sys
 import logbook
 import numpy as np
 from datetime import datetime
 import pytz
 
+# Import Zipline, the open source backtester
+import zipline
+from zipline import TradingAlgorithm
+from zipline.data.loader import load_bars_from_yahoo
+from zipline.api import order_target, symbol, history, add_history, schedule_function, date_rules, time_rules
 from zipline.algorithm import TradingAlgorithm
 from zipline.utils.factory import load_from_yahoo
 from zipline.finance import commission
-
+</code></pre>
+<h3 id="run-our-zipline-algorithm-this-algorithm-can-also-be-adjusted-to-execute-a-modified-or-completely-different-trading-strategy">Run our zipline algorithm. This algorithm can also be adjusted to execute a modified, or completely different, trading strategy.</h3>
+<pre><code># Zipline trading algorithm
+# Taken from zipline.examples.olmar
 zipline_logging = logbook.NestedSetup([
     logbook.NullHandler(level=logbook.DEBUG, bubble=True),
     logbook.StreamHandler(sys.stdout, level=logbook.INFO),
@@ -314,19 +324,28 @@ DELL
 GPS
 INTC
 MMM
-[2015-07-13 18:26:46.823994] INFO: Performance: Simulated 1511 trading days out of 1511.
-[2015-07-13 18:26:46.824636] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
-[2015-07-13 18:26:46.825097] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
+[2015-07-14 15:23:15.661201] INFO: Performance: Simulated 1511 trading days out of 1511.
+[2015-07-14 15:23:15.661830] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
+[2015-07-14 15:23:15.662387] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
+</code></pre>
+<h3 id="extract-the-relevant-information-from-the-zipline-backtest-object">Extract the relevant information from the zipline backtest object</h3>
+<pre><code>returns, positions, transactions, gross_lev = pf.utils.extract_rets_pos_txn_from_zipline(backtest)
+</code></pre>
+<h3 id="just-make-a-plot-of-the-top-10-drawdown-periods">Just make a plot of the top 10 drawdown periods.</h3>
+<pre><code>pf.plot_drawdown_periods(returns).set_xlabel('Date')
+
+/opt/miniconda/lib/python2.7/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
+  warnings.warn(message, mplDeprecation, stacklevel=1)
 
 
 
-# Extract the relevant information from the zipline backtest object
-returns, positions, transactions, gross_lev = pf.utils.extract_rets_pos_txn_from_zipline(backtest)
 
 
-# Create a full tear sheet, with Bayesian plots, for our algorithm
-# As an example, pretend the first 80% was a backtest and the last 20% was live trading
-pf.create_full_tear_sheet(returns, 
+&lt;matplotlib.text.Text at 0x7f7954cef110&gt;
+</code></pre>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_10_2.png" /></p>
+<h3 id="create-a-full-tear-sheet-for-our-algorithm-as-an-example-pretend-the-first-80-was-a-backtest-and-the-last-20-was-live-trading">Create a full tear sheet for our algorithm. As an example, pretend the first 80% was a backtest and the last 20% was live trading.</h3>
+<pre><code>pf.create_full_tear_sheet(returns, 
                           positions=positions, 
                           transactions=transactions,
                           gross_lev=gross_lev, bayesian=True, backtest_days_pct=0.8)
@@ -371,14 +390,6 @@ Sept08  -0.006 -0.043  0.040
 2009Q2   0.007 -0.038  0.062
 
 
-
-/opt/miniconda/lib/python2.7/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
-  warnings.warn(message, mplDeprecation, stacklevel=1)
-/opt/miniconda/lib/python2.7/site-packages/theano/scan_module/scan_perform_ext.py:133: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility
-  from scan_perform.scan_perform import *
-
-
-
 Top 10 long positions of all time (and max%)
 [2 6 1 3 0 5 4]
 [ 0.993  0.911  0.845  0.717  0.709  0.666  0.62 ]
@@ -399,13 +410,16 @@ All positions ever held
 [ 0.993  0.911  0.845  0.717  0.709  0.666  0.62 ]
 
 
- [-----------------100%-----------------] 2000 of 2000 complete in 5.0 sec
+ [-----------------100%-----------------] 2000 of 2000 complete in 5.3 sec
+
+/opt/miniconda/lib/python2.7/site-packages/theano/scan_module/scan_perform_ext.py:133: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility
+  from scan_perform.scan_perform import *
 </code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_4_3.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_4_4.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_4_5.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_4_6.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_4_7.png" /></p></div>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_2.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_3.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_4.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_5.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_6.png" /></p></div>
             
         </div>
 
