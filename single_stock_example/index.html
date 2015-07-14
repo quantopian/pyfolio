@@ -122,13 +122,11 @@
     
         <li class="main active"><a href="#single-stock-analysis-example-in-pyfolio">Single stock analysis example in pyfolio</a></li>
         
-            <li><a href="#here-is-a-simple-example-where-we-produce-a-set-of-plots-called-a-tear-sheet-for-a-stock">Here is a simple example where we produce a set of plots, called a tear sheet, for a stock.</a></li>
+            <li><a href="#import-pyfolio">Import pyfolio</a></li>
         
-            <li><a href="#first-import-pyfolio">First, import pyfolio.</a></li>
+            <li><a href="#fetch-the-daily-returns-for-a-stock">Fetch the daily returns for a stock</a></li>
         
-            <li><a href="#next-fetch-the-daily-returns-for-a-stock">Next, fetch the daily returns for a stock</a></li>
-        
-            <li><a href="#finally-create-a-full-tear-sheet-for-the-single-stock">Finally, create a full tear sheet for the single stock.</a></li>
+            <li><a href="#create-a-full-tear-sheet-for-the-single-stock">Create a full tear sheet for the single stock</a></li>
         
     
     </ul>
@@ -136,15 +134,15 @@
                 <div class="col-md-9" role="main">
 
 <h1 id="single-stock-analysis-example-in-pyfolio">Single stock analysis example in pyfolio</h1>
-<h3 id="here-is-a-simple-example-where-we-produce-a-set-of-plots-called-a-tear-sheet-for-a-stock">Here is a simple example where we produce a set of plots, called a tear sheet, for a stock.</h3>
-<h3 id="first-import-pyfolio">First, import pyfolio.</h3>
+<p>Here's a simple example where we produce a set of plots, called a tear sheet, for a stock.</p>
+<h2 id="import-pyfolio">Import pyfolio</h2>
 <pre><code>%matplotlib inline
 import pyfolio as pf
 </code></pre>
-<h3 id="next-fetch-the-daily-returns-for-a-stock">Next, fetch the daily returns for a stock</h3>
+<h2 id="fetch-the-daily-returns-for-a-stock">Fetch the daily returns for a stock</h2>
 <pre><code>stock_rets = pf.utils.get_symbol_rets('FB')
 </code></pre>
-<h3 id="finally-create-a-full-tear-sheet-for-the-single-stock">Finally, create a full tear sheet for the single stock.</h3>
+<h2 id="create-a-full-tear-sheet-for-the-single-stock">Create a full tear sheet for the single stock</h2>
 <p>This will show charts about returns and shock events. As an example, we set the first 80% of the stock's history to be in-sample, which controls the cone plot. The Bayesian tear sheet is also enabled.</p>
 <pre><code>pf.create_full_tear_sheet(stock_rets, backtest_days_pct=0.8, bayesian=True)
 
@@ -192,7 +190,7 @@ Stress Events
 EZB IR Event  0.002 -0.091  0.077
 Apr14         0.001 -0.052  0.073
 Oct14        -0.002 -0.061  0.046
- [-----------------100%-----------------] 2000 of 2000 complete in 4.5 sec
+ [-----------------100%-----------------] 2000 of 2000 complete in 4.7 sec
 </code></pre>
 <p><img alt="png" src="../single_stock_example_files/single_stock_example_7_3.png" /></p>
 <p><img alt="png" src="../single_stock_example_files/single_stock_example_7_4.png" /></p>

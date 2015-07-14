@@ -122,17 +122,15 @@
     
         <li class="main active"><a href="#zipline-algorithm-analysis-example-in-pyfolio">Zipline algorithm analysis example in pyfolio</a></li>
         
-            <li><a href="#here-is-an-example-where-we-run-an-algorithm-with-zipline-then-produce-tear-sheets-for-that-algorithm">Here is an example where we run an algorithm with zipline, then produce tear sheets for that algorithm.</a></li>
+            <li><a href="#imports">Imports</a></li>
         
-            <li><a href="#import-pyfolio-along-with-the-necessary-modules-for-running-our-zipline-backtest">Import pyfolio, along with the necessary modules for running our zipline backtest.</a></li>
+            <li><a href="#run-our-zipline-algorithm">Run our zipline algorithm</a></li>
         
-            <li><a href="#run-our-zipline-algorithm-this-algorithm-can-also-be-adjusted-to-execute-a-modified-or-completely-different-trading-strategy">Run our zipline algorithm. This algorithm can also be adjusted to execute a modified, or completely different, trading strategy.</a></li>
+            <li><a href="#extract-metrics">Extract metrics</a></li>
         
-            <li><a href="#extract-the-relevant-information-from-the-zipline-backtest-object">Extract the relevant information from the zipline backtest object</a></li>
+            <li><a href="#single-plot-example">Single plot example</a></li>
         
-            <li><a href="#just-make-a-plot-of-the-top-10-drawdown-periods">Just make a plot of the top 10 drawdown periods.</a></li>
-        
-            <li><a href="#create-a-full-tear-sheet-for-our-algorithm-as-an-example-pretend-the-first-80-was-a-backtest-and-the-last-20-was-live-trading">Create a full tear sheet for our algorithm. As an example, pretend the first 80% was a backtest and the last 20% was live trading.</a></li>
+            <li><a href="#full-tear-sheet-example">Full tear sheet example</a></li>
         
     
     </ul>
@@ -140,8 +138,9 @@
                 <div class="col-md-9" role="main">
 
 <h1 id="zipline-algorithm-analysis-example-in-pyfolio">Zipline algorithm analysis example in pyfolio</h1>
-<h3 id="here-is-an-example-where-we-run-an-algorithm-with-zipline-then-produce-tear-sheets-for-that-algorithm">Here is an example where we run an algorithm with zipline, then produce tear sheets for that algorithm.</h3>
-<h3 id="import-pyfolio-along-with-the-necessary-modules-for-running-our-zipline-backtest">Import pyfolio, along with the necessary modules for running our zipline backtest.</h3>
+<p>Here's an example where we run an algorithm with zipline, then produce tear sheets for that algorithm.</p>
+<h2 id="imports">Imports</h2>
+<p>Import pyfolio, along with the necessary modules for running our zipline backtest.</p>
 <pre><code>%matplotlib inline
 import pyfolio as pf
 
@@ -164,7 +163,8 @@ from zipline.algorithm import TradingAlgorithm
 from zipline.utils.factory import load_from_yahoo
 from zipline.finance import commission
 </code></pre>
-<h3 id="run-our-zipline-algorithm-this-algorithm-can-also-be-adjusted-to-execute-a-modified-or-completely-different-trading-strategy">Run our zipline algorithm. This algorithm can also be adjusted to execute a modified, or completely different, trading strategy.</h3>
+<h2 id="run-our-zipline-algorithm">Run our zipline algorithm</h2>
+<p>This algorithm can also be adjusted to execute a modified, or completely different, trading strategy.</p>
 <pre><code># Zipline trading algorithm
 # Taken from zipline.examples.olmar
 zipline_logging = logbook.NestedSetup([
@@ -324,15 +324,17 @@ DELL
 GPS
 INTC
 MMM
-[2015-07-14 15:23:15.661201] INFO: Performance: Simulated 1511 trading days out of 1511.
-[2015-07-14 15:23:15.661830] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
-[2015-07-14 15:23:15.662387] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
+[2015-07-14 20:56:01.136902] INFO: Performance: Simulated 1511 trading days out of 1511.
+[2015-07-14 20:56:01.137554] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
+[2015-07-14 20:56:01.138004] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
 </code></pre>
-<h3 id="extract-the-relevant-information-from-the-zipline-backtest-object">Extract the relevant information from the zipline backtest object</h3>
+<h2 id="extract-metrics">Extract metrics</h2>
+<p>Get the returns, positions, and transactions from the zipline backtest object.</p>
 <pre><code>returns, positions, transactions, gross_lev = pf.utils.extract_rets_pos_txn_from_zipline(backtest)
 </code></pre>
-<h3 id="just-make-a-plot-of-the-top-10-drawdown-periods">Just make a plot of the top 10 drawdown periods.</h3>
-<pre><code>pf.plot_drawdown_periods(returns).set_xlabel('Date')
+<h2 id="single-plot-example">Single plot example</h2>
+<p>Make one plot of the top 5 drawdown periods.</p>
+<pre><code>pf.plot_drawdown_periods(returns, top=5).set_xlabel('Date')
 
 /opt/miniconda/lib/python2.7/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
   warnings.warn(message, mplDeprecation, stacklevel=1)
@@ -341,10 +343,11 @@ MMM
 
 
 
-&lt;matplotlib.text.Text at 0x7f7954cef110&gt;
+&lt;matplotlib.text.Text at 0x7fa783b6b110&gt;
 </code></pre>
 <p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_10_2.png" /></p>
-<h3 id="create-a-full-tear-sheet-for-our-algorithm-as-an-example-pretend-the-first-80-was-a-backtest-and-the-last-20-was-live-trading">Create a full tear sheet for our algorithm. As an example, pretend the first 80% was a backtest and the last 20% was live trading.</h3>
+<h2 id="full-tear-sheet-example">Full tear sheet example</h2>
+<p>Create a full tear sheet for our algorithm. As an example, pretend the first 80% was a backtest and the last 20% was live trading.</p>
 <pre><code>pf.create_full_tear_sheet(returns, 
                           positions=positions, 
                           transactions=transactions,
@@ -410,7 +413,7 @@ All positions ever held
 [ 0.993  0.911  0.845  0.717  0.709  0.666  0.62 ]
 
 
- [-----------------100%-----------------] 2000 of 2000 complete in 5.3 sec
+ [-----------------100%-----------------] 2000 of 2000 complete in 5.2 sec
 
 /opt/miniconda/lib/python2.7/site-packages/theano/scan_module/scan_perform_ext.py:133: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility
   from scan_perform.scan_perform import *
