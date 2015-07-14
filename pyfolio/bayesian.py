@@ -291,7 +291,7 @@ def run_model(model, returns_train, returns_test=None, bmark=None, samples=500):
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
     """
-    if returns_test is not None
+    if returns_test is not None:
         period = returns_train.index.append(returns_test.index)
         rets = pd.Series(returns_train, period)
     else:
