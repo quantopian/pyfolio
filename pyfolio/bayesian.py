@@ -42,7 +42,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         Series of simple returns of an algorithm or stock.
     bmark : pandas.Series
         Series of simple returns of a benchmark like the S&P500.
-        If bmark has more recent returns than df_train, these dates
+        If bmark has more recent returns than returns_train, these dates
         will be treated as missing values and predictions will be
         generated for them taking market correlations into account.
     samples : int (optional)
@@ -200,12 +200,12 @@ def compute_bayes_cone(preds, starting_value=1.):
     return perc
 
 
-def compute_consistency_score(df_test, preds):
+def compute_consistency_score(returns_test, preds):
     """Compute Bayesian consistency score.
 
     Parameters
     ----------
-    df_test : pd.Series
+    returns_test : pd.Series
         Observed cumulative returns.
     preds : numpy.array
         Multiple (simulated) cumulative returns.
@@ -213,11 +213,11 @@ def compute_consistency_score(df_test, preds):
     Returns
     -------
     Consistency score
-        Score from 100 (df_test perfectly on the median line of the
-        Bayesian cone spanned by preds) to 0 (df_test completely
+        Score from 100 (returns_test perfectly on the median line of the
+        Bayesian cone spanned by preds) to 0 (returns_test completely
         outside of Bayesian cone.)
     """
-    df_test_cum = cum_returns(df_test, starting_value=1.)
+    returns_test_cum = cum_returns(returns_test, starting_value=1.)
     cum_preds = np.cumprod(preds + 1, 1)
 
     q = [
@@ -225,39 +225,39 @@ def compute_consistency_score(df_test, preds):
             cum_preds[
                 :,
                 i],
-            df_test_cum.iloc[i],
+            returns_test_cum.iloc[i],
             kind='weak') for i in range(
-            len(df_test_cum))]
+            len(returns_test_cum))]
     # normalize to be from 100 (perfect median line) to 0 (completely outside
     # of cone)
     return 100 - np.abs(50 - np.mean(q)) / .5
 
 
-def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=None, ax=None):
+def _plot_bayes_cone(returns_train, returns_test, preds, plot_train_len=None, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    df_train_cum = cum_returns(df_train, starting_value=1.)
-    df_test_cum = cum_returns(df_test, starting_value=df_train_cum.iloc[-1])
-    index = np.concatenate([df_train.index, df_test.index])
+    returns_train_cum = cum_returns(returns_train, starting_value=1.)
+    returns_test_cum = cum_returns(returns_test, starting_value=returns_train_cum.iloc[-1])
+    index = np.concatenate([returns_train.index, returns_test.index])
 
-    perc = compute_bayes_cone(preds, starting_value=df_train_cum.iloc[-1])
+    perc = compute_bayes_cone(preds, starting_value=returns_train_cum.iloc[-1])
     # Add indices
-    perc = {k: pd.Series(v, index=df_test.index) for k, v in perc.items()}
+    perc = {k: pd.Series(v, index=returns_test.index) for k, v in perc.items()}
 
-    df_test_cum_rel = df_test_cum
+    returns_test_cum_rel = returns_test_cum
     # Stitch together train and test
-    df_train_cum.loc[df_test_cum_rel.index[0]] = df_test_cum_rel.iloc[0]
+    returns_train_cum.loc[returns_test_cum_rel.index[0]] = returns_test_cum_rel.iloc[0]
 
     # Plotting
     if plot_train_len is not None:
-        df_train_cum = df_train_cum.iloc[-plot_train_len:]
+        returns_train_cum = returns_train_cum.iloc[-plot_train_len:]
 
-    df_train_cum.plot(ax=ax, color='g', label='in-sample')
-    df_test_cum_rel.plot(ax=ax, color='r', label='out-of-sample')
+    returns_train_cum.plot(ax=ax, color='g', label='in-sample')
+    returns_test_cum_rel.plot(ax=ax, color='r', label='out-of-sample')
 
-    ax.fill_between(df_test.index, perc[5], perc[95], alpha=.3)
-    ax.fill_between(df_test.index, perc[25], perc[75], alpha=.6)
+    ax.fill_between(returns_test.index, perc[5], perc[95], alpha=.3)
+    ax.fill_between(returns_test.index, perc[25], perc[75], alpha=.6)
     ax.legend(loc='best')
     ax.set_title('Bayesian Cone')
     ax.set_xlabel('')
@@ -266,22 +266,22 @@ def _plot_bayes_cone(df_train, df_test, preds, plot_train_len=None, ax=None):
     return ax
 
 
-def run_model(model, df_train, df_test=None, bmark=None, samples=500):
+def run_model(model, returns_train, returns_test=None, bmark=None, samples=500):
     """Run one of the Bayesian models.
 
     Parameters
     ----------
     model : {'alpha_beta', 't', 'normal'}
         Which model to run
-    df_train : pd.Series
+    returns_train : pd.Series
         Timeseries of simple returns
-    df_test : pd.Series (optional)
-        Out-of-sample returns. Datetimes in df_test will be added to
-        df_train as missing values and predictions will be generated
+    returns_test : pd.Series (optional)
+        Out-of-sample returns. Datetimes in returns_test will be added to
+        returns_train as missing values and predictions will be generated
         for them.
     bmark : pd.Series (optional)
         Only used for alpha_beta to estimate regression coefficients.
-        If bmark has more recent returns than df_train, these dates
+        If bmark has more recent returns than returns_train, these dates
         will be treated as missing values and predictions will be
         generated for them taking market correlations into account.
 
@@ -291,36 +291,38 @@ def run_model(model, df_train, df_test=None, bmark=None, samples=500):
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
     """
+    if returns_test is not None
+        period = returns_train.index.append(returns_test.index)
+        rets = pd.Series(returns_train, period)
+    else:
+        rets = returns_test
+
     if model == 'alpha_beta':
-        trace = model_returns_t_alpha_beta(df_train, bmark, samples)
+        trace = model_returns_t_alpha_beta(returns_train, bmark, samples)
     elif model == 't':
-        period = df_train.index.append(df_test.index)
-        rets = pd.Series(df_train, period)
         trace = model_returns_t(rets, samples)
     elif model == 'normal':
-        period = df_train.index.append(df_test.index)
-        rets = pd.Series(df_train, period)
         trace = model_returns_normal(rets, samples)
 
     return trace
 
 
-def plot_bayes_cone(df_train, df_test, bmark=None, model='t',
+def plot_bayes_cone(returns_train, returns_test, bmark=None, model='t',
                     trace=None, plot_train_len=50, ax=None,
                     samples=500):
     """Generate cumulative returns plot with Bayesian cone.
 
     Parameters
     ----------
-    df_train : pd.Series
+    returns_train : pd.Series
         Timeseries of simple returns
-    df_test : pd.Series
-        Out-of-sample returns. Datetimes in df_test will be added to
-        df_train as missing values and predictions will be generated
+    returns_test : pd.Series
+        Out-of-sample returns. Datetimes in returns_test will be added to
+        returns_train as missing values and predictions will be generated
         for them.
     bmark : pd.Series (optional)
         Only used for alpha_beta to estimate regression coefficients.
-        If bmark has more recent returns than df_train, these dates
+        If bmark has more recent returns than returns_train, these dates
         will be treated as missing values and predictions will be
         generated for them taking market correlations into account.
     model : {None, 'alpha_beta', 't', 'normal'} (optional)
@@ -328,7 +330,7 @@ def plot_bayes_cone(df_train, df_test, bmark=None, model='t',
     trace : pymc3.sampling.BaseTrace (optional)
         Trace of a previously run model.
     plot_train_len : int (optional)
-        How many data points to plot of df_train. Useful to zoom in on
+        How many data points to plot of returns_train. Useful to zoom in on
         the prediction if there is a long backtest period.
     ax : matplotlib.Axis (optional)
         Axes upon which to plot.
@@ -346,14 +348,14 @@ def plot_bayes_cone(df_train, df_test, bmark=None, model='t',
 
     # generate cone
     if trace is None:
-        trace = run_model(model, df_train, df_test=df_test,
+        trace = run_model(model, returns_train, returns_test=returns_test,
                           bmark=bmark, samples=samples)
 
-    score = compute_consistency_score(df_test, trace['returns_missing'])
+    score = compute_consistency_score(returns_test, trace['returns_missing'])
 
     ax = _plot_bayes_cone(
-        df_train,
-        df_test,
+        returns_train,
+        returns_test,
         trace['returns_missing'],
         plot_train_len=plot_train_len,
         ax=ax)
