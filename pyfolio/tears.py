@@ -348,7 +348,7 @@ def create_bayesian_tear_sheet(
 
     df_train = returns.loc[returns.index < live_start_date]
     df_test = returns.loc[returns.index >= live_start_date]
-    trace_t = bayesian.run_model('t', df_train, df_test=df_test,
+    trace_t = bayesian.run_model('t', df_train, returns_test=df_test,
                                  samples=2000)
 
     sns.distplot(trace_t['sharpe'][100:], ax=ax_sharpe)
