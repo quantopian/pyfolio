@@ -1,0 +1,9 @@
+site_name: pyfolio
+repo_url: https://github.com/quantopian/pyfolio
+site_author: Quantopian Inc.
+
+pages:
+- Overview: 'index.md'
+- Tutorial:
+  - 'Single stock': 'single_stock_example.md'
+  - 'Zipline algorithm': 'zipline_algo_example.md'
