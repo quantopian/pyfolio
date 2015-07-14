@@ -295,7 +295,7 @@ def run_model(model, returns_train, returns_test=None, bmark=None, samples=500):
         period = returns_train.index.append(returns_test.index)
         rets = pd.Series(returns_train, period)
     else:
-        rets = returns_test
+        rets = returns_train
 
     if model == 'alpha_beta':
         trace = model_returns_t_alpha_beta(returns_train, bmark, samples)
