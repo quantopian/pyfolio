@@ -40,7 +40,7 @@ def map_transaction(txn):
         symbol = None
 
     return {'sid': sid,
-            'symbol': None,
+            'symbol': symbol,
             'price': txn['price'],
             'order_id': txn['order_id'],
             'amount': txn['amount'],

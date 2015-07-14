@@ -17,10 +17,7 @@ import pandas as pd
 import scipy as sp
 from scipy import stats
 
-import seaborn as sns
 import matplotlib.pyplot as plt
-
-import theano.tensor as T
 
 import pymc3 as pm
 
