@@ -58,7 +58,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
 
     data_no_missing = data.dropna()
 
-    with pm.Model() as model:
+    with pm.Model():
         sigma = pm.HalfCauchy(
             'sigma',
             beta=1,
@@ -67,17 +67,17 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
 
         # alpha and beta
         beta_init, alpha_init = sp.stats.linregress(
-                                    bmark.loc[data_no_missing.index],
-                                    data_no_missing)[:2]
+            bmark.loc[data_no_missing.index],
+            data_no_missing)[:2]
 
         alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alpha_init)
         beta_reg = pm.Normal('beta', mu=0, sd=1, testval=beta_init)
 
-        returns = pm.T('returns',
-                       nu=nu + 2,
-                       mu=alpha_reg + beta_reg * bmark,
-                       sd=sigma,
-                       observed=data)
+        pm.T('returns',
+             nu=nu + 2,
+             mu=alpha_reg + beta_reg * bmark,
+             sd=sigma,
+             observed=data)
         start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
         step = pm.NUTS(scaling=start)
         trace = pm.sample(samples, step, start=start)
@@ -106,10 +106,19 @@ def model_returns_normal(data, samples=500):
         of the posterior.
 
     """
-    with pm.Model() as model:
+    with pm.Model():
         mu = pm.Normal('mean returns', mu=0, sd=.01, testval=data.mean())
         sigma = pm.HalfCauchy('volatility', beta=1, testval=data.std())
         returns = pm.Normal('returns', mu=mu, sd=sigma, observed=data)
+        pm.Deterministic(
+            'annual volatility',
+            returns.distribution.variance**.5 *
+            np.sqrt(252))
+        pm.Deterministic(
+            'sharpe',
+            returns.distribution.mean /
+            returns.distribution.variance**.5 *
+            np.sqrt(252))
 
         start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
         step = pm.NUTS(scaling=start)
@@ -135,12 +144,18 @@ def model_returns_t(data, samples=500):
 
     """
 
-    with pm.Model() as model:
+    with pm.Model():
         mu = pm.Normal('mean returns', mu=0, sd=.01, testval=data.mean())
         sigma = pm.HalfCauchy('volatility', beta=1, testval=data.std())
         nu = pm.Exponential('nu_minus_two', 1. / 10., testval=3.)
 
         returns = pm.T('returns', nu=nu + 2, mu=mu, sd=sigma, observed=data)
+        pm.Deterministic('annual volatility',
+                         returns.distribution.variance**.5 * np.sqrt(252))
+
+        pm.Deterministic('sharpe', returns.distribution.mean /
+                         returns.distribution.variance**.5 *
+                         np.sqrt(252))
 
         start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
         step = pm.NUTS(scaling=start)
@@ -197,14 +212,10 @@ def compute_consistency_score(returns_test, preds):
     returns_test_cum = cum_returns(returns_test, starting_value=1.)
     cum_preds = np.cumprod(preds + 1, 1)
 
-    q = [
-        sp.stats.percentileofscore(
-            cum_preds[
-                :,
-                i],
-            returns_test_cum.iloc[i],
-            kind='weak') for i in range(
-            len(returns_test_cum))]
+    q = [sp.stats.percentileofscore(cum_preds[:, i],
+                                    returns_test_cum.iloc[i],
+                                    kind='weak')
+         for i in range(len(returns_test_cum))]
     # normalize to be from 100 (perfect median line) to 0 (completely outside
     # of cone)
     return 100 - np.abs(50 - np.mean(q)) / .5
@@ -225,8 +236,8 @@ def _plot_bayes_cone(returns_train, returns_test,
 
     returns_test_cum_rel = returns_test_cum
     # Stitch together train and test
-    returns_train_cum.loc[returns_test_cum_rel.index[0]] 
-        = returns_test_cum_rel.iloc[0]
+    returns_train_cum.loc[returns_test_cum_rel.index[0]] = \
+        returns_test_cum_rel.iloc[0]
 
     # Plotting
     if plot_train_len is not None:
