@@ -950,18 +950,18 @@ def gen_date_ranges_interesting():
     # 9/11
     periods['9/11'] = (pd.Timestamp('20010911'), pd.Timestamp('20011011'))
 
-    # 05/08/11	US down grade and European Debt Crisis 2011
+    # 05/08/11  US down grade and European Debt Crisis 2011
     periods[
         'US downgrade/European Debt Crisis'] = (pd.Timestamp('20110805'), pd.Timestamp('20110905'))
 
-    # 16/03/11	Fukushima melt down 2011
+    # 16/03/11  Fukushima melt down 2011
     periods['Fukushima'] = (pd.Timestamp('20110316'), pd.Timestamp('20110416'))
 
-    # 01/08/03	US Housing Bubble 2003
+    # 01/08/03  US Housing Bubble 2003
     periods['US Housing'] = (
         pd.Timestamp('20030108'), pd.Timestamp('20030208'))
 
-    # 06/09/12	EZB IR Event 2012
+    # 06/09/12  EZB IR Event 2012
     periods['EZB IR Event'] = (
         pd.Timestamp('20120910'), pd.Timestamp('20121010'))
 
@@ -1013,6 +1013,7 @@ def extract_interesting_date_ranges(returns):
 
     return ranges
 
+
 def portfolio_returns(holdings_returns, exclude_non_overlapping=True):
     """
     Generates an equal-weight portfolio.
@@ -1025,7 +1026,7 @@ def portfolio_returns(holdings_returns, exclude_non_overlapping=True):
     exclude_non_overlapping : boolean, optional
        If True, timeseries returned will include values only for dates available across all holdings_returns timeseries 
        If False, 0% returns will be assumed for a holding until it has valid data        
-       
+
     Returns
     -------
     pd.Series
@@ -1034,10 +1035,10 @@ def portfolio_returns(holdings_returns, exclude_non_overlapping=True):
     port = holdings_returns[0]
     for i in range(1, len(holdings_returns)):
         port = port + holdings_returns[i]
-    
+
     if exclude_non_overlapping:
         port = port.dropna()
     else:
         port = port.fillna(0)
-        
+
     return port / len(holdings_returns)
