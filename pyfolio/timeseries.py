@@ -479,14 +479,8 @@ def calc_multifactor(returns, factors):
     pd.DataFrame
         Fit parameters.
     """
-
-    import statsmodels.api as sm
-    factors = factors.loc[returns.index]
-    factors = sm.add_constant(factors)
-    factors = factors.dropna(axis=0)
-    results = sm.OLS(returns[factors.index], factors).fit()
-
-    return results.params
+    model = pd.ols(y=returns, x=factors)
+    return model.beta
 
 
 def rolling_beta(returns, benchmark_rets, rolling_window=63):
@@ -512,13 +506,9 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
     """
 
-    out = pd.Series(index=returns.index)
-    for beg, end in zip(returns.index[0:-rolling_window],
-                        returns.index[rolling_window:]):
-        out.loc[end] = calc_alpha_beta(returns.loc[beg:end],
-                                       benchmark_rets.loc[beg:end])[1]
-
-    return out
+    model = pd.ols(y=returns, x=benchmark_rets,
+                   window=rolling_window, window_type='rolling')
+    return model.beta['x']
 
 
 def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
@@ -543,16 +533,9 @@ def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
     -----
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
     """
-
-    out = pd.DataFrame(columns=['const'] + list(df_multi_factor.columns),
-                       index=returns.index)
-
-    for beg, end in zip(returns.index[0:-rolling_window],
-                        returns.index[rolling_window:]):
-        out.loc[end] = calc_multifactor(returns.loc[beg:end],
-                                        df_multi_factor.loc[beg:end])
-
-    return out
+    model = pd.ols(y=returns, x=df_multi_factor,
+                   window=rolling_window, window_type='rolling')
+    return model.beta
 
 
 def calc_alpha_beta(returns, benchmark_rets):
@@ -573,10 +556,8 @@ def calc_alpha_beta(returns, benchmark_rets):
     float
         Beta.
     """
-
-    ret_index = returns.index
-    beta, alpha = sp.stats.linregress(benchmark_rets.loc[ret_index].values,
-                                      returns.values)[:2]
+    model = pd.ols(y=returns, x=benchmark_rets)
+    beta, alpha = model.beta
 
     return alpha * 252, beta
 

@@ -1,4 +1,4 @@
-from unittest import TestCase
+import unittest
 from nose_parameterized import parameterized
 
 import numpy as np
@@ -8,7 +8,7 @@ import pandas.util.testing as pdt
 from .. import timeseries
 
 
-class TestDrawdown(TestCase):
+class TestDrawdown(unittest.TestCase):
     px_list_1 = np.array(
         [100, 120, 100, 80, 70, 110, 180, 150]) / 100.  # Simple
     px_list_2 = np.array(
@@ -130,7 +130,7 @@ class TestDrawdown(TestCase):
             expected)
 
 
-class TestCumReturns(TestCase):
+class TestCumReturns(unittest.TestCase):
     dt = pd.date_range('2000-1-3', periods=3, freq='D')
 
     @parameterized.expand([
@@ -144,7 +144,7 @@ class TestCumReturns(TestCase):
         pdt.assert_series_equal(output, expected)
 
 
-class TestVariance(TestCase):
+class TestVariance(unittest.TestCase):
 
     @parameterized.expand([
         (1e7, 0.5, 1, 1, -10000000.0)
@@ -159,7 +159,7 @@ class TestVariance(TestCase):
             expected)
 
 
-class TestNormalize(TestCase):
+class TestNormalize(unittest.TestCase):
     dt = pd.date_range('2000-1-3', periods=8, freq='D')
     px_list = [1.0, 1.2, 1.0, 0.8, 0.7, 0.8, 0.8, 0.8]
 
@@ -171,7 +171,7 @@ class TestNormalize(TestCase):
         self.assertTrue(timeseries.normalize(df).equals(expected))
 
 
-class TestAggregateReturns(TestCase):
+class TestAggregateReturns(unittest.TestCase):
     simple_rets = pd.Series(
         [0.1] * 3 + [0] * 497,
         pd.date_range(
@@ -192,7 +192,7 @@ class TestAggregateReturns(TestCase):
             expected)
 
 
-class TestStats(TestCase):
+class TestStats(unittest.TestCase):
     simple_rets = pd.Series(
         [0.1] * 3 + [0] * 497,
         pd.date_range(
@@ -266,7 +266,7 @@ class TestStats(TestCase):
             expected)
 
 
-class TestMultifactor(TestCase):
+class TestMultifactor(unittest.TestCase):
     simple_rets = pd.Series(
         [0.1] * 3 + [0] * 497,
         pd.date_range(
@@ -309,7 +309,7 @@ class TestMultifactor(TestCase):
             expected)
 
 
-class TestPerfStats(TestCase):
+class TestPerfStats(unittest.TestCase):
     simple_rets = pd.Series(
         [0.1] * 3 + [0] * 497,
         pd.date_range(
