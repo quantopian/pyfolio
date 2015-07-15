@@ -1012,3 +1012,32 @@ def extract_interesting_date_ranges(returns):
             continue
 
     return ranges
+
+def portfolio_returns(holdings_returns, exclude_non_overlapping=True):
+    """
+    Generates an equal-weight portfolio.
+
+    Parameters
+    ----------
+    holdings_returns : list
+       List containing each individual holding's daily returns of the strategy, non-cumulative.
+
+    exclude_non_overlapping : boolean, optional
+       If True, timeseries returned will include values only for dates available across all holdings_returns timeseries 
+       If False, 0% returns will be assumed for a holding until it has valid data        
+       
+    Returns
+    -------
+    pd.Series
+        Equal-weight returns timeseries.
+    """
+    port = holdings_returns[0]
+    for i in range(1, len(holdings_returns)):
+        port = port + holdings_returns[i]
+    
+    if exclude_non_overlapping:
+        port = port.dropna()
+    else:
+        port = port.fillna(0)
+        
+    return port / len(holdings_returns)
