@@ -183,10 +183,11 @@ def compute_bayes_cone(preds, starting_value=1.):
 
     """
 
-    cum_preds = np.cumprod(preds + 1, 1) * starting_value
-    scoreatpercentile = lambda cum_preds, p: [
-        stats.scoreatpercentile(
+    def scoreatpercentile(cum_preds, p):
+        return [stats.scoreatpercentile(
             c, p) for c in cum_preds.T]
+
+    cum_preds = np.cumprod(preds + 1, 1) * starting_value
     perc = {p: scoreatpercentile(cum_preds, p) for p in (5, 25, 75, 95)}
 
     return perc
