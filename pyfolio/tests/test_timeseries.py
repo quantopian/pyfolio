@@ -38,13 +38,15 @@ class TestDrawdown(TestCase):
             peak,
             expected_peak)
         self.assertTrue(
-            pd.isnull(valley)) if expected_valley is None else self.assertEqual(
-            valley,
-            expected_valley)
+            pd.isnull(valley)) if expected_valley is None else \
+            self.assertEqual(
+                valley,
+                expected_valley)
         self.assertTrue(
-            pd.isnull(recovery)) if expected_recovery is None else self.assertEqual(
-            recovery,
-            expected_recovery)
+            pd.isnull(recovery)) if expected_recovery is None else \
+            self.assertEqual(
+                recovery,
+                expected_recovery)
 
     @parameterized.expand([
         (pd.Series(px_list_2,
@@ -60,8 +62,9 @@ class TestDrawdown(TestCase):
          pd.Timestamp('2000-1-9'),
          4)
     ])
-    def test_gen_drawdown_table(
-            self, px, expected_peak, expected_valley, expected_recovery, expected_duration):
+    def test_gen_drawdown_table(self, px, expected_peak,
+                                expected_valley, expected_recovery,
+                                expected_duration):
         rets = px.pct_change().iloc[1:]
 
         drawdowns = timeseries.gen_drawdown_table(rets, top=1)
@@ -69,38 +72,25 @@ class TestDrawdown(TestCase):
             pd.isnull(
                 drawdowns.loc[
                     0,
-                    'peak date'])) if expected_peak is None else self.assertEqual(
-            drawdowns.loc[
-                0,
-                'peak date'],
-            expected_peak)
+                    'peak date'])) if expected_peak is None \
+            else self.assertEqual(drawdowns.loc[0, 'peak date'],
+                                  expected_peak)
         self.assertTrue(
             pd.isnull(
-                drawdowns.loc[
-                    0,
-                    'valley date'])) if expected_valley is None else self.assertEqual(
-            drawdowns.loc[
-                0,
-                'valley date'],
-            expected_valley)
+                drawdowns.loc[0, 'valley date'])) \
+            if expected_valley is None else self.assertEqual(
+                drawdowns.loc[0, 'valley date'],
+                expected_valley)
         self.assertTrue(
             pd.isnull(
-                drawdowns.loc[
-                    0,
-                    'recovery date'])) if expected_recovery is None else self.assertEqual(
-            drawdowns.loc[
-                0,
-                'recovery date'],
-            expected_recovery)
+                drawdowns.loc[0, 'recovery date'])) \
+            if expected_recovery is None else self.assertEqual(
+                drawdowns.loc[0, 'recovery date'],
+                expected_recovery)
         self.assertTrue(
-            pd.isnull(
-                drawdowns.loc[
-                    0,
-                    'duration'])) if expected_duration is None else self.assertEqual(
-            drawdowns.loc[
-                0,
-                'duration'],
-            expected_duration)
+            pd.isnull(drawdowns.loc[0, 'duration'])) \
+            if expected_duration is None else self.assertEqual(
+                drawdowns.loc[0, 'duration'], expected_duration)
 
     @parameterized.expand([
         (pd.Series(px_list_1 - 1, index=dt), -0.44000000000000011)
@@ -332,7 +322,8 @@ class TestPerfStats(TestCase):
     ])
     def test_perf_stats(
             self, df_rets, returns_style, return_as_dict, expected):
-        self.assertEqual(timeseries.perf_stats(df_rets,
-                                               returns_style=returns_style,
-                                               return_as_dict=return_as_dict).values.tolist()[-2:],
-                         expected)
+        self.assertEqual(timeseries.perf_stats(
+            df_rets,
+            returns_style=returns_style,
+            return_as_dict=return_as_dict).values.tolist()[-2:],
+            expected)
