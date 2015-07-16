@@ -295,6 +295,9 @@ def run_model(model, returns_train, returns_test=None,
         trace = model_returns_t(rets, samples)
     elif model == 'normal':
         trace = model_returns_normal(rets, samples)
+    else:
+        raise NotImplementedError(
+            'Model {} not found. Use alpha_beta, t, or normal.'.format(model))
 
     return trace
 
