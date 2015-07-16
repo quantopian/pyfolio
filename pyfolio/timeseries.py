@@ -131,7 +131,9 @@ def aggregate_returns(df_daily_rets, convert_to):
     cumulate_returns = lambda x: cum_returns(x)[-1]
     if convert_to == 'weekly':
         return df_daily_rets.groupby(
-            [lambda x: x.year, lambda x: x.month, lambda x: x.isocalendar()[1]]).apply(cumulate_returns)
+            [lambda x: x.year,
+             lambda x: x.month,
+             lambda x: x.isocalendar()[1]]).apply(cumulate_returns)
     elif convert_to == 'monthly':
         return df_daily_rets.groupby(
             [lambda x: x.year, lambda x: x.month]).apply(cumulate_returns)
@@ -258,7 +260,8 @@ def calmar_ratio(returns, returns_style='calendar'):
     temp_max_dd = max_drawdown(returns=returns)
     if temp_max_dd < 0:
         temp = annual_return(
-            returns=returns, style=returns_style) / abs(max_drawdown(returns=returns))
+            returns=returns,
+            style=returns_style) / abs(max_drawdown(returns=returns))
     else:
         return np.nan
 
@@ -719,7 +722,8 @@ def get_top_drawdowns(returns, top=10):
         # Slice out draw-down period
         if not pd.isnull(recovery):
             underwater = pd.concat(
-                [underwater.loc[:peak].iloc[:-1], underwater.loc[recovery:].iloc[1:]])
+                [underwater.loc[:peak].iloc[:-1],
+                 underwater.loc[recovery:].iloc[1:]])
         else:
             # drawdown has not ended yet
             underwater = underwater.loc[:peak]
@@ -750,11 +754,12 @@ def gen_drawdown_table(returns, top=10):
 
     df_cum = cum_returns(returns, 1.0)
     drawdown_periods = get_top_drawdowns(returns, top=top)
-    df_drawdowns = pd.DataFrame(index=list(range(top)), columns=['net drawdown in %',
-                                                                 'peak date',
-                                                                 'valley date',
-                                                                 'recovery date',
-                                                                 'duration'])
+    df_drawdowns = pd.DataFrame(index=list(range(top)),
+                                columns=['net drawdown in %',
+                                         'peak date',
+                                         'valley date',
+                                         'recovery date',
+                                         'duration'])
 
     for i, (peak, valley, recovery) in enumerate(drawdown_periods):
         if pd.isnull(recovery):
@@ -891,10 +896,11 @@ def cone_rolling(
         temp_sd_up = temp_line * (1 + num_stdev * std_pct)
         temp_sd_down = temp_line * (1 - num_stdev * std_pct)
 
-        new_daily_cone = pd.DataFrame(index=[i], data={'perf': perf_ts[i],
-                                                       'line': temp_line[-1],
-                                                       'sd_up': temp_sd_up[-1],
-                                                       'sd_down': temp_sd_down[-1]})
+        new_daily_cone = pd.DataFrame(index=[i],
+                                      data={'perf': perf_ts[i],
+                                            'line': temp_line[-1],
+                                            'sd_up': temp_sd_up[-1],
+                                            'sd_down': temp_sd_down[-1]})
 
         perf_ts_r = perf_ts_r.append(new_daily_cone)
         new_cone_day_scale_factor += 1
@@ -919,10 +925,12 @@ def cone_rolling(
         temp_sd_up = temp_line * (1 + num_stdev * std_pct)
         temp_sd_down = temp_line * (1 - num_stdev * std_pct)
 
-        future_cone = pd.DataFrame(index=list(map(np.datetime64, future_cone_dates)), data={'perf': temp_line,
-                                                                                            'line': temp_line,
-                                                                                            'sd_up': temp_sd_up,
-                                                                                            'sd_down': temp_sd_down})
+        future_cone = pd.DataFrame(index=list(map(np.datetime64,
+                                                  future_cone_dates)),
+                                   data={'perf': temp_line,
+                                         'line': temp_line,
+                                         'sd_up': temp_sd_up,
+                                         'sd_down': temp_sd_down})
 
         perf_ts_r = perf_ts_r.append(future_cone)
 
@@ -952,7 +960,8 @@ def gen_date_ranges_interesting():
 
     # 05/08/11  US down grade and European Debt Crisis 2011
     periods[
-        'US downgrade/European Debt Crisis'] = (pd.Timestamp('20110805'), pd.Timestamp('20110905'))
+        'US downgrade/European Debt Crisis'] = (pd.Timestamp('20110805'),
+                                                pd.Timestamp('20110905'))
 
     # 16/03/11  Fukushima melt down 2011
     periods['Fukushima'] = (pd.Timestamp('20110316'), pd.Timestamp('20110416'))
