@@ -48,3 +48,5 @@ You can also join our [mailing list](https://groups.google.com/forum/#!forum/pyf
 * Thomas Wiecki (thomas@quantopian.com)
 * Jessica Stauth (jstauth@quantopian.com)
 * Karen Rubin (karen@quantopian.com)
+
+For a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.
