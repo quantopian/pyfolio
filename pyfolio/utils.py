@@ -94,8 +94,8 @@ def get_symbol_rets(symbol):
 
 
 def vectorize(func):
-    """
-    Decorator so that functions can be written to work on Series but may still be called with DataFrames.
+    """Decorator so that functions can be written to work on Series but
+    may still be called with DataFrames.
     """
 
     def wrapper(df, *args, **kwargs):

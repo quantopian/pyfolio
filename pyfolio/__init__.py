@@ -5,8 +5,8 @@ from . import timeseries
 from . import pos
 from . import txn
 
-from .tears import *
-from .plotting import *
+from .tears import *  # noqa
+from .plotting import *  # noqa
 
 try:
     from . import bayesian
@@ -16,3 +16,4 @@ except ImportError:
         ImportWarning)
 
 __version__ = '0.1.beta'
+__all__ = ['utils', 'timeseries', 'pos', 'txn', 'bayesian']

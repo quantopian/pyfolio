@@ -91,7 +91,8 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     print("Entire data end date: " + str(df_cum_rets.index[-1]))
 
     if live_start_date is None:
-        live_start_date = returns.index[int(len(returns) * backtest_days_pct)]
+        live_start_date = returns.index[int(len(returns) *
+                                            backtest_days_pct)]
 
     print('\n')
 
@@ -152,21 +153,24 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     plotting.plot_annual_returns(returns, ax=ax_annual_returns)
     plotting.plot_monthly_returns_dist(returns, ax=ax_monthly_dist)
 
-    plotting.plot_daily_returns_similarity(returns_backtest,
-                   returns_live,
-                   title='Daily Returns Similarity',
-                   ax=ax_daily_similarity_scale)
-    plotting.plot_daily_returns_similarity(returns_backtest,
-                   returns_live,
-                   scale_kws={'with_std': False},
-                   title='Similarity without\nvariance normalization',
-                   ax=ax_daily_similarity_no_var)
-    plotting.plot_daily_returns_similarity(returns_backtest,
-                   returns_live,
-                   scale_kws={'with_std': False,
-                              'with_mean': False},
-                   title='Similarity without variance\nand mean normalization',
-                   ax=ax_daily_similarity_no_var_no_mean)
+    plotting.plot_daily_returns_similarity(
+        returns_backtest,
+        returns_live,
+        title='Daily Returns Similarity',
+        ax=ax_daily_similarity_scale)
+    plotting.plot_daily_returns_similarity(
+        returns_backtest,
+        returns_live,
+        scale_kws={'with_std': False},
+        title='Similarity without\nvariance normalization',
+        ax=ax_daily_similarity_no_var)
+    plotting.plot_daily_returns_similarity(
+        returns_backtest,
+        returns_live,
+        scale_kws={'with_std': False,
+                   'with_mean': False},
+        title='Similarity without variance\nand mean normalization',
+        ax=ax_daily_similarity_no_var_no_mean)
 
     plotting.plot_return_quantiles(
         returns,
