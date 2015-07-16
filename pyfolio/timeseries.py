@@ -15,24 +15,18 @@
 
 from collections import OrderedDict
 
-from operator import *
-from collections import *
-
 import pandas as pd
 import numpy as np
 import scipy as sp
 import scipy.stats as stats
-import scipy.signal as signal
 from sklearn import preprocessing
 
 import statsmodels.api as sm
 
-import datetime
-
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
-    """
-    Variance-covariance calculation of daily Value-at-Risk in a portfolio.
+    """Variance-covariance calculation of daily Value-at-Risk in a
+    portfolio.
 
     Parameters
     ----------
@@ -47,6 +41,7 @@ def var_cov_var_normal(P, c, mu=0, sigma=1):
     -------
     float
         Variance-covariance.
+
     """
 
     alpha = sp.stats.norm.ppf(1 - c, mu, sigma)
@@ -128,7 +123,9 @@ def aggregate_returns(df_daily_rets, convert_to):
         Aggregated returns.
     """
 
-    cumulate_returns = lambda x: cum_returns(x)[-1]
+    def cumulate_returns(x):
+        return cum_returns(x)[-1]
+
     if convert_to == 'weekly':
         return df_daily_rets.groupby(
             [lambda x: x.year,
@@ -182,22 +179,24 @@ def max_drawdown(returns):
 
 
 def annual_return(returns, style='compound'):
-    """
-    Determines the annual returns of a strategy.
+    """Determines the annual returns of a strategy.
 
     Parameters
     ----------
     returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     style : str, optional
-        - If 'compound', then return will be calculated in geometric terms: (1+mean(all_daily_returns))^252 - 1.
-        - If 'calendar', then return will be calculated as ((last_value - start_value)/start_value)/num_of_years.
+        - If 'compound', then return will be calculated in geometric
+          terms: (1+mean(all_daily_returns))^252 - 1.
+        - If 'calendar', then return will be calculated as
+          ((last_value - start_value)/start_value)/num_of_years.
         - Otherwise, return is simply mean(all_daily_returns)*252.
 
     Returns
     -------
     float
         Annual returns.
+
     """
 
     if returns.size < 1:
@@ -272,15 +271,16 @@ def calmar_ratio(returns, returns_style='calendar'):
 
 
 def omega_ratio(returns, annual_return_threshhold=0.0):
-    """
-    Determines the Omega ratio of a strategy.
+    """Determines the Omega ratio of a strategy.
 
     Parameters
     ----------
     returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     annual_return_threshold : float, optional
-        Threshold over which to consider positive vs negative returns. For the ratio, it will be converted to a daily return and compared to returns.
+        Threshold over which to consider positive vs negative
+        returns. For the ratio, it will be converted to a daily return
+        and compared to returns.
 
     Returns
     -------
@@ -290,7 +290,8 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
     Note
     -----
     See https://en.wikipedia.org/wiki/Omega_ratio for more details.
-    """
+
+"""
 
     daily_return_thresh = pow(1 + annual_return_threshhold, 1 / 252) - 1
 
@@ -363,10 +364,10 @@ def sharpe_ratio(returns, returns_style='compound'):
 
 
 def stability_of_timeseries(returns, logValue=True):
-    """
-    Determines R-squared of a linear fit to the returns.
+    """Determines R-squared of a linear fit to the returns.
 
-    Computes an ordinary least squares linear fit, and returns R-squared.
+    Computes an ordinary least squares linear fit, and returns
+    R-squared.
 
     Parameters
     ----------
@@ -377,6 +378,7 @@ def stability_of_timeseries(returns, logValue=True):
     -------
     float
         R-squared.
+
     """
 
     if returns.size < 2:
@@ -397,19 +399,21 @@ def stability_of_timeseries(returns, logValue=True):
 
 def out_of_sample_vs_in_sample_returns_kde(
         bt_ts, oos_ts, transform_style='scale', return_zero_if_exception=True):
-    """
-    Determines similarity between two returns timeseries.
+    """Determines similarity between two returns timeseries.
 
-    Typically a backtest frame (in-sample) and live frame (out-of-sample).
+    Typically a backtest frame (in-sample) and live frame
+    (out-of-sample).
 
     Parameters
     ----------
     bt_ts : pd.Series
        In-sample (backtest) returns of the strategy, non-cumulative.
     oos_ts : pd.Series
-       Out-of-sample (live trading) returns of the strategy, non-cumulative.
+       Out-of-sample (live trading) returns of the strategy,
+       non-cumulative.
     transform_style : float, optional
-        'raw', 'scale', 'Normalize_L1', 'Normalize_L2' (default 'scale')
+        'raw', 'scale', 'Normalize_L1', 'Normalize_L2' (default
+        'scale')
     return_zero_if_exception : bool, optional
         If there is an exception, return zero instead of NaN.
 
@@ -417,6 +421,7 @@ def out_of_sample_vs_in_sample_returns_kde(
     -------
     float
         Similarity between returns.
+
     """
 
     bt_ts_pct = bt_ts.dropna()
@@ -467,8 +472,8 @@ def out_of_sample_vs_in_sample_returns_kde(
 
 
 def calc_multifactor(returns, factors):
-    """
-    Computes multiple ordinary least squares linear fits, and returns fit parameters.
+    """Computes multiple ordinary least squares linear fits, and returns
+    fit parameters.
 
     Parameters
     ----------
@@ -481,6 +486,7 @@ def calc_multifactor(returns, factors):
     -------
     pd.DataFrame
         Fit parameters.
+
     """
 
     import statsmodels.api as sm
@@ -493,8 +499,7 @@ def calc_multifactor(returns, factors):
 
 
 def rolling_beta(returns, benchmark_rets, rolling_window=63):
-    """
-    Determines the rolling beta of a strategy.
+    """Determines the rolling beta of a strategy.
 
     Parameters
     ----------
@@ -503,7 +508,8 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     benchmark_rets : pd.Series
         Daily non-cumulative returns of a benchmark.
     rolling_window : int, optional
-        The size of the rolling window, in days, over which to compute beta (default 63 days).
+        The size of the rolling window, in days, over which to compute
+        beta (default 63 days).
 
     Returns
     -------
@@ -513,6 +519,7 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     Note
     -----
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
+
     """
 
     out = pd.Series(index=returns.index)
@@ -525,8 +532,7 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
 
 
 def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
-    """
-    Determines the rolling beta of multiple factors.
+    """Determines the rolling beta of multiple factors.
 
     Parameters
     ----------
@@ -535,7 +541,8 @@ def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
     df_multi_factor : pd.DataFrame
         Other factors over which to compute beta.
     rolling_window : int, optional
-        The size of the rolling window, in days, over which to compute beta (default 63 days).
+        The size of the rolling window, in days, over which to compute
+        beta (default 63 days).
 
     Returns
     -------
@@ -544,7 +551,9 @@ def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
 
     Note
     -----
+
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
+
     """
 
     out = pd.DataFrame(columns=['const'] + list(df_multi_factor.columns),
@@ -588,8 +597,8 @@ def perf_stats(
         returns,
         returns_style='compound',
         return_as_dict=False):
-    """
-    Calculates various performance metrics of a strategy, for use in plotting.show_perf_stats.
+    """Calculates various performance metrics of a strategy, for use in
+    plotting.show_perf_stats.
 
     Parameters
     ----------
@@ -604,6 +613,7 @@ def perf_stats(
     -------
     dict / pd.DataFrame
         Performance metrics.
+
     """
 
     all_stats = {}
@@ -633,10 +643,11 @@ def perf_stats(
 
 
 def get_max_drawdown_underwater(underwater):
-    """
-    Determines peak, valley, and recovery dates given and 'underwater' DataFrame.
+    """Determines peak, valley, and recovery dates given and 'underwater'
+    DataFrame.
 
-    An underwater DataFrame is a DataFrame that has precomputed rolling drawdown.
+    An underwater DataFrame is a DataFrame that has precomputed
+    rolling drawdown.
 
     Parameters
     ----------
@@ -651,6 +662,7 @@ def get_max_drawdown_underwater(underwater):
         The maximum drawdown's valley.
     recovery : datetime
         The maximum drawdown's recovery.
+
     """
 
     valley = np.argmax(underwater)  # end of the period
@@ -821,8 +833,8 @@ def cone_rolling(
         cone_fit_end_date=None,
         extend_fit_trend=True,
         create_future_cone=True):
-    """
-    Computes a rolling cone to place in the cumulative returns plot. See plotting.plot_rolling_returns.
+    """Computes a rolling cone to place in the cumulative returns
+    plot. See plotting.plot_rolling_returns.
     """
 
     # if specifying 'cone_fit_end_date' please use a pandas compatible format,
@@ -938,14 +950,15 @@ def cone_rolling(
 
 
 def gen_date_ranges_interesting():
-    """
-    Generates a list of historical event dates that may have had significant impact on markets.
-    See extract_interesting_date_ranges.
+    """Generates a list of historical event dates that may have had
+    significant impact on markets.  See
+    extract_interesting_date_ranges.
 
     Returns
     -------
     periods : OrderedDict
         Significant events.
+
     """
 
     periods = OrderedDict()
@@ -993,8 +1006,8 @@ def gen_date_ranges_interesting():
 
 
 def extract_interesting_date_ranges(returns):
-    """
-    Extracts returns based on interesting events. See gen_date_range_interesting.
+    """Extracts returns based on interesting events. See
+    gen_date_range_interesting.
 
     Parameters
     ----------
@@ -1005,6 +1018,7 @@ def extract_interesting_date_ranges(returns):
     -------
     ranges : OrderedDict
         Date ranges, with returns, of all valid events.
+
     """
 
     periods = gen_date_ranges_interesting()
@@ -1024,17 +1038,18 @@ def extract_interesting_date_ranges(returns):
 
 
 def portfolio_returns(holdings_returns, exclude_non_overlapping=True):
-    """
-    Generates an equal-weight portfolio.
+    """Generates an equal-weight portfolio.
 
     Parameters
     ----------
     holdings_returns : list
-       List containing each individual holding's daily returns of the strategy, non-cumulative.
+       List containing each individual holding's daily returns of the
+       strategy, non-cumulative.
 
     exclude_non_overlapping : boolean, optional
-       If True, timeseries returned will include values only for dates available across all holdings_returns timeseries 
-       If False, 0% returns will be assumed for a holding until it has valid data        
+       If True, timeseries returned will include values only for dates
+       available across all holdings_returns timeseries If False, 0%
+       returns will be assumed for a holding until it has valid data
 
     Returns
     -------
