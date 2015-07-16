@@ -50,8 +50,7 @@ def plot_rolling_risk_factors(
         rolling_beta_window=63 * 2,
         legend_loc='best',
         ax=None, **kwargs):
-    """
-    Plots rolling Fama-French single factor betas.
+    """Plots rolling Fama-French single factor betas.
 
     Specifically, plots SMB, HML, and UMD vs. date with a legend.
 
@@ -60,7 +59,8 @@ def plot_rolling_risk_factors(
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     risk_factors : pd.DataFrame
-        data set containing the risk factors. See utils.load_portfolio_risk_factors.
+        data set containing the risk factors. See
+        utils.load_portfolio_risk_factors.
     rolling_beta_window : int, optional
         The days window over which to compute the beta.
     legend_loc : matplotlib.loc, optional
@@ -74,6 +74,7 @@ def plot_rolling_risk_factors(
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
+
     """
 
     if ax is None:
@@ -86,11 +87,6 @@ def plot_rolling_risk_factors(
         num_months_str +
         '-month)')
     ax.set_ylabel('beta')
-
-    rolling_risk_multifactor = timeseries.rolling_multifactor_beta(
-        returns,
-        risk_factors.loc[:, ['SMB', 'HML', 'UMD']],
-        rolling_window=rolling_beta_window)
 
     rolling_beta_SMB = timeseries.rolling_beta(
         returns,
@@ -149,7 +145,8 @@ def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    monthly_ret_table = timeseries.aggregate_returns(returns, 'monthly')
+    monthly_ret_table = timeseries.aggregate_returns(returns,
+                                                     'monthly')
     monthly_ret_table = monthly_ret_table.unstack()
     monthly_ret_table = np.round(monthly_ret_table, 3)
 
@@ -271,10 +268,11 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
 
 
 def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
-    """
-    Plots total amount of stocks with an active position, either short or long.
+    """Plots total amount of stocks with an active position, either short
+    or long.
 
-    Displays daily total, daily average per month, and all-time daily average.
+    Displays daily total, daily average per month, and all-time daily
+    average.
 
     Parameters
     ----------
@@ -293,6 +291,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
+
     """
 
     if ax is None:
@@ -379,8 +378,8 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
 
 
 def plot_drawdown_underwater(returns, ax=None, **kwargs):
-    """
-    Plots how far underwaterr returns are over time, or plots current drawdown vs. date.
+    """Plots how far underwaterr returns are over time, or plots current
+    drawdown vs. date.
 
     Parameters
     ----------
@@ -395,6 +394,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
+
     """
 
     if ax is None:
@@ -414,20 +414,24 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
 
 
 def show_perf_stats(returns, live_start_date, benchmark_rets):
-    """
-    Prints some performance metrics of the strategy.
+    """Prints some performance metrics of the strategy.
 
-    - Shows amount of time the strategy has been run in backtest and out-of-sample (in live trading).
-    - Shows Omega ratio, max drawdown, Calmar ratio, annual return, stability, Sharpe ratio, annual volatility, alpha, and beta.
+    - Shows amount of time the strategy has been run in backtest and
+      out-of-sample (in live trading).
+
+    - Shows Omega ratio, max drawdown, Calmar ratio, annual return,
+      stability, Sharpe ratio, annual volatility, alpha, and beta.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     live_start_date : datetime
-        The point in time when the strategy began live trading, after its backtest period.
+        The point in time when the strategy began live trading, after
+        its backtest period.
     benchmark_rets : pd.Series
         Daily non-cumulative returns of a benchmark.
+
     """
 
     returns_backtest = returns[returns.index < live_start_date]
@@ -474,11 +478,13 @@ def plot_rolling_returns(
         cone_std=None,
         legend_loc='best',
         ax=None, **kwargs):
-    """
-    Plots cumulative rolling returns versus some benchmarks'.
-    Backtest returns are in green, and out-of-sample (live trading) returns are in red.
+    """Plots cumulative rolling returns versus some benchmarks'.
 
-    Additionally, a linear cone plot may be added to the out-of-sample returns region.
+    Backtest returns are in green, and out-of-sample (live trading)
+    returns are in red.
+
+    Additionally, a linear cone plot may be added to the out-of-sample
+    returns region.
 
     Parameters
     ----------
@@ -489,9 +495,11 @@ def plot_rolling_returns(
     benchmark2_rets : pd.Series, optional
         Daily non-cumulative returns of the second benchmark.
     live_start_date : datetime, optional
-        The point in time when the strategy began live trading, after its backtest period.
+        The point in time when the strategy began live trading, after
+        its backtest period.
     cone_std : float, optional
-        When defined, enables the cone plot. The standard deviation to use for the cone plots.
+        When defined, enables the cone plot. The standard deviation to
+        use for the cone plots.
     legend_loc : matplotlib.loc, optional
         The location of the legend on the plot.
     ax : matplotlib.Axes, optional
@@ -503,7 +511,8 @@ def plot_rolling_returns(
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
-    """
+
+"""
 
     if ax is None:
         ax = plt.gca()
@@ -517,10 +526,13 @@ def plot_rolling_returns(
         timeseries.cum_returns(benchmark_rets[df_cum_rets.index], 1.0).plot(
             lw=2, color='gray', label='S&P500', alpha=0.60, ax=ax, **kwargs)
     if benchmark2_rets is not None:
-        timeseries.cum_returns(benchmark2_rets[df_cum_rets.index], 1.0).plot(
-            lw=2, color='gray', label='7-10yr Bond', alpha=0.35, ax=ax, **kwargs)
+        timeseries.cum_returns(benchmark2_rets[df_cum_rets.index],
+                               1.0).plot(lw=2, color='gray',
+                                         label='7-10yr Bond',
+                                         alpha=0.35, ax=ax, **kwargs)
 
-    if (live_start_date is None) or (df_cum_rets.index[-1] <= live_start_date):
+    if (live_start_date is None) or (df_cum_rets.index[-1] <=
+                                     live_start_date):
         df_cum_rets.plot(lw=3, color='forestgreen', alpha=0.6,
                          label='Backtest', ax=ax, **kwargs)
     else:
@@ -573,8 +585,8 @@ def plot_rolling_returns(
     return ax
 
 
-def plot_rolling_beta(returns, benchmark_rets,
-                      rolling_beta_window=63, legend_loc='best', ax=None, **kwargs):
+def plot_rolling_beta(returns, benchmark_rets, rolling_beta_window=63,
+                      legend_loc='best', ax=None, **kwargs):
     """
     Plots the rolling beta versus date.
 
@@ -624,8 +636,8 @@ def plot_rolling_beta(returns, benchmark_rets,
     return ax
 
 
-def plot_rolling_sharpe(
-        returns, rolling_sharpe_window=63 * 2, legend_loc='best', ax=None, **kwargs):
+def plot_rolling_sharpe(returns, rolling_sharpe_window=63 * 2,
+                        legend_loc='best', ax=None, **kwargs):
     """
     Plots the rolling Sharpe ratio versus date.
 
@@ -656,7 +668,8 @@ def plot_rolling_sharpe(
 
     rolling_sharpe_ts = timeseries.rolling_sharpe(
         returns, rolling_sharpe_window)
-    rolling_sharpe_ts.plot(alpha=.7, lw=3, color='orangered', ax=ax, **kwargs)
+    rolling_sharpe_ts.plot(alpha=.7, lw=3, color='orangered', ax=ax,
+                           **kwargs)
 
     ax.set_title('Rolling Sharpe ratio (6-month)')
     ax.axhline(
@@ -675,17 +688,18 @@ def plot_rolling_sharpe(
 
 
 def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
-    """
-    Plots gross leverage versus date.
+    """Plots gross leverage versus date.
 
-    Gross leverage is the sum of long and short exposure per share divided by net asset value.
+    Gross leverage is the sum of long and short exposure per share
+    divided by net asset value.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     gross_lev : pd.Series
-        The sum of long and short exposure per share divided by net asset value.
+        The sum of long and short exposure per share divided by net
+        asset value.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -695,14 +709,17 @@ def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
-    """
+
+"""
 
     if ax is None:
         ax = plt.gca()
 
-    gross_lev.plot(alpha=0.8, lw=0.5, color='g', legend=False, ax=ax, **kwargs)
+    gross_lev.plot(alpha=0.8, lw=0.5, color='g', legend=False, ax=ax,
+                   **kwargs)
 
-    ax.axhline(gross_lev.mean(), color='g', linestyle='--', lw=3, alpha=1.0)
+    ax.axhline(gross_lev.mean(), color='g', linestyle='--', lw=3,
+               alpha=1.0)
 
     ax.set_title('Gross Leverage')
     ax.set_ylabel('Gross Leverage')
@@ -711,15 +728,15 @@ def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
 
 
 def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
-    """
-    Plots a cake chart of long, short, and cash exposure.
+    """Plots a cake chart of long, short, and cash exposure.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     positions_alloc : pd.DataFrame
-        Portfolio allocation of positions. See pos.get_portfolio_alloc.
+        Portfolio allocation of positions. See
+        pos.get_portfolio_alloc.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -729,7 +746,8 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
-    """
+
+"""
 
     if ax is None:
         ax = plt.gca()
@@ -750,10 +768,12 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     return ax
 
 
-def show_and_plot_top_positions(
-        returns, positions_alloc, show_and_plot=2, legend_loc='real_best', ax=None, **kwargs):
-    """
-    Prints and/or plots the exposures of the top 10 held positions of all time.
+def show_and_plot_top_positions(returns, positions_alloc,
+                                show_and_plot=2,
+                                legend_loc='real_best', ax=None,
+                                **kwargs):
+    """Prints and/or plots the exposures of the top 10 held positions of
+    all time.
 
     Parameters
     ----------
@@ -776,6 +796,7 @@ def show_and_plot_top_positions(
     -------
     ax : matplotlib.Axes, conditional
         The axes that were plotted on.
+
     """
 
     df_top_long, df_top_short, df_top_abs = pos.get_top_long_short_abs(
@@ -811,14 +832,14 @@ def show_and_plot_top_positions(
             ax = plt.gca()
 
         positions_alloc[df_top_abs.index].plot(
-            title='Portfolio Allocation Over Time, Only Top 10 Holdings', alpha=0.4,
-            ax=ax, **kwargs)
+            title='Portfolio Allocation Over Time, Only Top 10 Holdings',
+            alpha=0.4, ax=ax, **kwargs)
 
         # Place legend below plot, shrink plot by 20%
         if legend_loc == 'real_best':
             box = ax.get_position()
-            ax.set_position(
-                [box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+            ax.set_position([box.x0, box.y0 + box.height * 0.1,
+                             box.width, box.height * 0.9])
 
             # Put a legend below current axis
             ax.legend(
@@ -834,8 +855,8 @@ def show_and_plot_top_positions(
 
 
 def plot_return_quantiles(returns, df_weekly, df_monthly, ax=None, **kwargs):
-    """
-    Creates a box plot of daily, weekly, and monthly return distributions.
+    """Creates a box plot of daily, weekly, and monthly return
+    distributions.
 
     Parameters
     ----------
@@ -854,6 +875,7 @@ def plot_return_quantiles(returns, df_weekly, df_monthly, ax=None, **kwargs):
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
+
     """
 
     if ax is None:
@@ -878,33 +900,33 @@ def show_return_range(returns, df_weekly):
         Weekly returns of the strategy, non-cumulative.
     """
 
-    var_daily = timeseries.var_cov_var_normal(
-        1e7, .05, returns.mean(), returns.std())
-    var_weekly = timeseries.var_cov_var_normal(
-        1e7, .05, df_weekly.mean(), df_weekly.std())
     two_sigma_daily = returns.mean() - 2 * returns.std()
     two_sigma_weekly = df_weekly.mean() - 2 * df_weekly.std()
 
     var_sigma = pd.Series([two_sigma_daily, two_sigma_weekly],
-                          index=['2-sigma returns daily', '2-sigma returns weekly'])
+                          index=['2-sigma returns daily',
+                                 '2-sigma returns weekly'])
 
     print(np.round(var_sigma, 3))
 
 
-def plot_turnover(
-        returns, transactions, positions_val, legend_loc='best', ax=None, **kwargs):
-    """
-    Plots turnover vs. date.
-    Turnover is the number of shares traded for a period as a fraction of total shares.
+def plot_turnover(returns, transactions, positions_val,
+                  legend_loc='best', ax=None, **kwargs):
+    """Plots turnover vs. date.
 
-    Displays daily total, daily average per month, and all-time daily average.
+    Turnover is the number of shares traded for a period as a fraction
+    of total shares.
+
+    Displays daily total, daily average per month, and all-time daily
+    average.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     transactions : pd.DataFrame
-        A strategy's transactions. See pos.make_transaction_frame(transactions).
+        A strategy's transactions. See
+        pos.make_transaction_frame(transactions).
     positions_val : pd.DataFrame
         The positions that the strategy takes over time.
     legend_loc : matplotlib.loc, optional
@@ -918,6 +940,7 @@ def plot_turnover(
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
+
     """
 
     if ax is None:
@@ -952,8 +975,7 @@ def plot_turnover(
 
 
 def plot_daily_volume(returns, transactions, ax=None, **kwargs):
-    """
-    Plots trading volume per day vs. date.
+    """Plots trading volume per day vs. date.
 
     Also displays all-time daily average.
 
@@ -962,7 +984,8 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
     transactions : pd.DataFrame
-        A strategy's transactions. See pos.make_transaction_frame(transactions).
+        A strategy's transactions. See
+        pos.make_transaction_frame(transactions).
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -972,6 +995,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
+
     """
 
     if ax is None:
@@ -989,13 +1013,13 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
 
 
 def plot_volume_per_day_hist(transactions, ax=None, **kwargs):
-    """
-    Plots a histogram of trading volume per day.
+    """Plots a histogram of trading volume per day.
 
     Parameters
     ----------
     transactions : pd.DataFrame
-        A strategy's transactions. See pos.make_transaction_frame(transactions).
+        A strategy's transactions. See
+        pos.make_transaction_frame(transactions).
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -1005,6 +1029,7 @@ def plot_volume_per_day_hist(transactions, ax=None, **kwargs):
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
+
     """
 
     if ax is None:
@@ -1016,10 +1041,11 @@ def plot_volume_per_day_hist(transactions, ax=None, **kwargs):
     return ax
 
 
-def plot_daily_returns_similarity(
-        returns_backtest, returns_live, title='', scale_kws=None, ax=None, **kwargs):
-    """
-    Plots overlapping distributions of in-sample (backtest) returns and out-of-sample (live trading) returns.
+def plot_daily_returns_similarity(returns_backtest, returns_live,
+                                  title='', scale_kws=None, ax=None,
+                                  **kwargs):
+    """Plots overlapping distributions of in-sample (backtest) returns
+    and out-of-sample (live trading) returns.
 
     Parameters
     ----------
@@ -1040,6 +1066,7 @@ def plot_daily_returns_similarity(
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
+
     """
 
     if ax is None:
@@ -1059,10 +1086,10 @@ def plot_daily_returns_similarity(
 
 
 def show_worst_drawdown_periods(returns, top=5):
-    """
-    Prints information about the worst drawdown periods.
+    """Prints information about the worst drawdown periods.
 
-    Prints peak dates, valley dates, recovery dates, and net drawdowns.
+    Prints peak dates, valley dates, recovery dates, and net
+    drawdowns.
 
     Parameters
     ----------
@@ -1070,6 +1097,7 @@ def show_worst_drawdown_periods(returns, top=5):
         Daily returns of the strategy, non-cumulative.
     top : int, optional
         Amount of top drawdowns periods to plot (default 5).
+
     """
 
     print('\nWorst Drawdown Periods')
