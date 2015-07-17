@@ -97,8 +97,8 @@ class TestDrawdown(TestCase):
     @parameterized.expand([
         (pd.Series(px_list_1 - 1, index=dt), -0.44000000000000011)
     ])
-    def test_max_drawdown(self, df_rets, expected):
-        self.assertEqual(timeseries.max_drawdown(df_rets), expected)
+    def test_max_drawdown(self, returns, expected):
+        self.assertEqual(timeseries.max_drawdown(returns), expected)
 
     @parameterized.expand([
         (pd.Series(px_list_1 - 1, index=dt), -0.44000000000000011)
@@ -114,10 +114,10 @@ class TestDrawdown(TestCase):
            pd.Timestamp('2000-01-03 00:00:00'),
            pd.Timestamp('2000-01-03 00:00:00'))])
     ])
-    def test_top_drawdowns(self, df_rets, top, expected):
+    def test_top_drawdowns(self, returns, top, expected):
         self.assertEqual(
             timeseries.get_top_drawdowns(
-                df_rets,
+                returns,
                 top=top),
             expected)
 
@@ -159,8 +159,8 @@ class TestNormalize(TestCase):
         (pd.Series(np.array(px_list) * 100, index=dt),
          pd.Series(px_list, index=dt))
     ])
-    def test_normalize(self, df, expected):
-        self.assertTrue(timeseries.normalize(df).equals(expected))
+    def test_normalize(self, returns, expected):
+        self.assertTrue(timeseries.normalize(returns).equals(expected))
 
 
 class TestAggregateReturns(TestCase):
@@ -176,10 +176,10 @@ class TestAggregateReturns(TestCase):
         (simple_rets[:100], 'monthly', [0.3310000000000004, 0.0, 0.0, 0.0]),
         (simple_rets[:20], 'weekly', [0.3310000000000004, 0.0, 0.0])
     ])
-    def test_aggregate_rets(self, df_rets, convert_to, expected):
+    def test_aggregate_rets(self, returns, convert_to, expected):
         self.assertEqual(
             timeseries.aggregate_returns(
-                df_rets,
+                returns,
                 convert_to).values.tolist(),
             expected)
 
@@ -207,10 +207,10 @@ class TestStats(TestCase):
         (simple_rets, 'calendar', 0.10584000000000014),
         (simple_rets, 'compound', 0.16317653888658334)
     ])
-    def test_annual_ret(self, df_rets, style, expected):
+    def test_annual_ret(self, returns, style, expected):
         self.assertEqual(
             timeseries.annual_return(
-                df_rets,
+                returns,
                 style=style),
             expected)
 
@@ -218,44 +218,44 @@ class TestStats(TestCase):
         (simple_rets, 0.12271674212427248),
         (simple_rets, 0.12271674212427248)
     ])
-    def test_annual_volatility(self, df_rets, expected):
-        self.assertEqual(timeseries.annual_volatility(df_rets), expected)
+    def test_annual_volatility(self, returns, expected):
+        self.assertEqual(timeseries.annual_volatility(returns), expected)
 
     @parameterized.expand([
         (simple_rets, 'calendar', 0.8624740045072119),
         (simple_rets, 'compound', 1.3297007080039505)
     ])
-    def test_sharpe(self, df_rets, returns_style, expected):
+    def test_sharpe(self, returns, returns_style, expected):
         self.assertEqual(
             timeseries.sharpe_ratio(
-                df_rets,
+                returns,
                 returns_style=returns_style),
             expected)
 
     @parameterized.expand([
         (simple_rets[:5], 2, '[nan, inf, inf, 11.224972160321828, inf]')
     ])
-    def test_sharpe_2(self, df_rets, rolling_sharpe_window, expected):
+    def test_sharpe_2(self, returns, rolling_sharpe_window, expected):
         self.assertEqual(str(timeseries.rolling_sharpe(
-            df_rets, rolling_sharpe_window).values.tolist()), expected)
+            returns, rolling_sharpe_window).values.tolist()), expected)
 
     @parameterized.expand([
         (simple_rets, True, 0.010766923838471554)
     ])
-    def test_stability_of_timeseries(self, df_rets, logValue, expected):
+    def test_stability_of_timeseries(self, returns, logValue, expected):
         self.assertEqual(
             timeseries.stability_of_timeseries(
-                df_rets,
+                returns,
                 logValue=logValue),
             expected)
 
     @parameterized.expand([
         (simple_rets[:5], simple_benchmark[:5], 2, 8.024708101613483e-32)
     ])
-    def test_beta(self, df_rets, benchmark_rets, rolling_window, expected):
+    def test_beta(self, returns, benchmark_rets, rolling_window, expected):
         self.assertEqual(
             timeseries.rolling_beta(
-                df_rets,
+                returns,
                 benchmark_rets,
                 rolling_window=rolling_window).values.tolist()[2],
             expected)
@@ -266,10 +266,10 @@ class TestStats(TestCase):
         (pd.Series(px_list,
                    index=dt), 'arithmetic', 84.000000000000014)
     ])
-    def test_calmar(self, df_rets, returns_style, expected):
+    def test_calmar(self, returns, returns_style, expected):
         self.assertEqual(
             timeseries.calmar_ratio(
-                df_rets,
+                returns,
                 returns_style=returns_style),
             expected)
 
@@ -277,10 +277,10 @@ class TestStats(TestCase):
         (pd.Series(px_list,
                    index=dt), 0.0, 2.0)
     ])
-    def test_omega(self, df_rets, annual_return_threshhold, expected):
+    def test_omega(self, returns, annual_return_threshhold, expected):
         self.assertEqual(
             timeseries.omega_ratio(
-                df_rets,
+                returns,
                 annual_return_threshhold=annual_return_threshhold),
             expected)
 
@@ -288,10 +288,10 @@ class TestStats(TestCase):
         (-simple_rets[:5], 'calendar', -458003439.10738045),
         (-simple_rets[:5], 'arithmetic', -723163324.90639055)
     ])
-    def test_sortino(self, df_rets, returns_style, expected):
+    def test_sortino(self, returns, returns_style, expected):
         self.assertEqual(
             timeseries.sortino_ratio(
-                df_rets,
+                returns,
                 returns_style=returns_style),
             expected)
 
@@ -303,7 +303,7 @@ class TestMultifactor(TestCase):
             '2000-1-1',
             periods=500,
             freq='D'))
-    simple_benchmark_df = pd.DataFrame(
+    simple_benchmark_rets = pd.DataFrame(
         pd.Series(
             [0.03] * 4 + [0] * 496,
             pd.date_range(
@@ -313,27 +313,27 @@ class TestMultifactor(TestCase):
         columns=['bm'])
 
     @parameterized.expand([
-        (simple_rets[:4], simple_benchmark_df[:4], [2.5000000000000004])
+        (simple_rets[:4], simple_benchmark_rets[:4], [2.5000000000000004])
     ])
-    def test_calc_multifactor(self, df_rets, factors, expected):
+    def test_calc_multifactor(self, returns, factors, expected):
         self.assertEqual(
             timeseries.calc_multifactor(
-                df_rets,
+                returns,
                 factors).values.tolist(),
             expected)
 
     @parameterized.expand([
         (simple_rets[:5],
-         simple_benchmark_df[:5],
+         simple_benchmark_rets[:5],
          2,
          [0.09991008092716558,
             0.002997302427814967])
     ])
     def test_multifactor_beta(
-            self, df_rets, benchmark_df, rolling_window, expected):
+            self, returns, simple_benchmark_rets, rolling_window, expected):
         self.assertEqual(
             timeseries.rolling_multifactor_beta(
-                df_rets,
-                benchmark_df,
+                returns,
+                simple_benchmark_rets,
                 rolling_window=rolling_window).values.tolist()[2],
             expected)
