@@ -197,11 +197,14 @@ class TestStats(TestCase):
             '2000-1-1',
             periods=500,
             freq='D'))
+    px_list = np.array(
+        [10, -10, 10]) / 100.  # Ends in drawdown
+    dt = pd.date_range('2000-1-3', periods=3, freq='D')
 
     @parameterized.expand([
-        (simple_rets, 'calendar', 0.2100000000000003),
+        (simple_rets, 'calendar', 0.10584000000000014),
         (simple_rets, 'compound', 0.16317653888658334),
-        (simple_rets, 'calendar', 0.2100000000000003),
+        (simple_rets, 'calendar', 0.10584000000000014),
         (simple_rets, 'compound', 0.16317653888658334)
     ])
     def test_annual_ret(self, df_rets, style, expected):
@@ -219,7 +222,7 @@ class TestStats(TestCase):
         self.assertEqual(timeseries.annual_volatility(df_rets), expected)
 
     @parameterized.expand([
-        (simple_rets, 'calendar', 1.7112579454508172),
+        (simple_rets, 'calendar', 0.8624740045072119),
         (simple_rets, 'compound', 1.3297007080039505)
     ])
     def test_sharpe(self, df_rets, returns_style, expected):
@@ -255,6 +258,41 @@ class TestStats(TestCase):
                 df_rets,
                 benchmark_rets,
                 rolling_window=rolling_window).values.tolist()[2],
+            expected)
+
+    @parameterized.expand([
+        (pd.Series(px_list,
+                   index=dt), 'calendar', -8.3999999999999559),
+        (pd.Series(px_list,
+                   index=dt), 'arithmetic', 84.000000000000014)
+    ])
+    def test_calmar(self, df_rets, returns_style, expected):
+        self.assertEqual(
+            timeseries.calmar_ratio(
+                df_rets,
+                returns_style=returns_style),
+            expected)
+
+    @parameterized.expand([
+        (pd.Series(px_list,
+                   index=dt), 0.0, 2.0)
+    ])
+    def test_omega(self, df_rets, annual_return_threshhold, expected):
+        self.assertEqual(
+            timeseries.omega_ratio(
+                df_rets,
+                annual_return_threshhold=annual_return_threshhold),
+            expected)
+
+    @parameterized.expand([
+        (-simple_rets[:5], 'calendar', -458003439.10738045),
+        (-simple_rets[:5], 'arithmetic', -723163324.90639055)
+    ])
+    def test_sortino(self, df_rets, returns_style, expected):
+        self.assertEqual(
+            timeseries.sortino_ratio(
+                df_rets,
+                returns_style=returns_style),
             expected)
 
 
@@ -298,34 +336,4 @@ class TestMultifactor(TestCase):
                 df_rets,
                 benchmark_df,
                 rolling_window=rolling_window).values.tolist()[2],
-            expected)
-
-
-class TestPerfStats(TestCase):
-    simple_rets = pd.Series(
-        [0.1] * 3 + [0] * 497,
-        pd.date_range(
-            '2000-1-3',
-            periods=500,
-            freq='D'))
-    simple_benchmark = pd.Series(
-        [0.03] * 4 + [0] * 496,
-        pd.date_range(
-            '2000-1-1',
-            periods=500,
-            freq='D'))
-
-    @parameterized.expand([
-        (simple_rets[:200],
-         'compound',
-         False,
-         [[2.3725348560541226],
-            [0.1934427576894844]])
-    ])
-    def test_perf_stats(
-            self, df_rets, returns_style, return_as_dict, expected):
-        self.assertEqual(timeseries.perf_stats(
-            df_rets,
-            returns_style=returns_style,
-            return_as_dict=return_as_dict).values.tolist()[-2:],
             expected)
