@@ -204,7 +204,7 @@ def annual_return(returns, style='compound'):
         return np.nan
 
     if style == 'calendar':
-        num_years = len(returns) / 252
+        num_years = len(returns) / 252.0
         df_cum_rets = cum_returns(returns, starting_value=100)
         start_value = df_cum_rets[0]
         end_value = df_cum_rets[-1]
