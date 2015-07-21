@@ -22,7 +22,7 @@ import numpy as np
 import zlib
 import pandas.io.data as web
 
-from requests import get
+import urllib2
 import zipfile
 from StringIO import StringIO
 import os.path
@@ -129,15 +129,15 @@ def load_portfolio_risk_factors():
     # If it's been more than two days since we updated, redownload CSVs
     if time.time() - os.path.getmtime('data/factors.h5') > 60*60*24*2:
         try:
-            umd_request = get('http://mba.tuck.dartmouth.edu/pages/faculty/'
-                              'ken.french/ftp/F-F_Momentum_Factor_daily_CSV'
-                              '.zip')
-            factors_request = get('http://mba.tuck.dartmouth.edu/pages/'
-                                  'faculty/ken.french/ftp/F-F_Research_'
-                                  'Data_Factors_daily_CSV.zip')
+            umd_req = urllib2.urlopen('http://mba.tuck.dartmouth.edu/page'
+                                      's/faculty/ken.french/ftp/F-F_Momentum'
+                                      '_Factor_daily_CSV.zip')
+            factors_req = urllib2.urlopen('http://mba.tuck.dartmouth.edu/pag'
+                                          'es/faculty/ken.french/ftp/F-F_Re'
+                                          'search_Data_Factors_daily_CSV.zip')
 
-            umd_zip = zipfile.ZipFile(StringIO(umd_request.content), 'r')
-            factors_zip = zipfile.ZipFile(StringIO(factors_request.content),
+            umd_zip = zipfile.ZipFile(StringIO(umd_req.read()), 'r')
+            factors_zip = zipfile.ZipFile(StringIO(factors_req.read()),
                                           'r')
             umd_csv = umd_zip.read('F-F_Momentum_Factor_daily.CSV')
             umd_csv = umd_csv.split('\r\n\r\n')[2]
