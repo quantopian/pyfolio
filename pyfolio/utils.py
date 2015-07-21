@@ -22,10 +22,16 @@ import numpy as np
 import zlib
 import pandas.io.data as web
 
-import urllib2
 import zipfile
-from StringIO import StringIO
 import os.path
+
+try:
+    # For Python 3.0 and later
+    from urllib.request import urlopen
+    from io import StringIO
+except:
+    from urllib2 import urlopen
+    from StringIO import StringIO
 
 from . import pos
 from . import txn
@@ -129,12 +135,12 @@ def load_portfolio_risk_factors():
     # If it's been more than two days since we updated, redownload CSVs
     if time.time() - os.path.getmtime('data/factors.h5') > 60*60*24*2:
         try:
-            umd_req = urllib2.urlopen('http://mba.tuck.dartmouth.edu/page'
-                                      's/faculty/ken.french/ftp/F-F_Momentum'
-                                      '_Factor_daily_CSV.zip')
-            factors_req = urllib2.urlopen('http://mba.tuck.dartmouth.edu/pag'
-                                          'es/faculty/ken.french/ftp/F-F_Re'
-                                          'search_Data_Factors_daily_CSV.zip')
+            umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
+                              's/faculty/ken.french/ftp/F-F_Momentum'
+                              '_Factor_daily_CSV.zip')
+            factors_req = urlopen('http://mba.tuck.dartmouth.edu/pag'
+                                  'es/faculty/ken.french/ftp/F-F_Re'
+                                  'search_Data_Factors_daily_CSV.zip')
 
             umd_zip = zipfile.ZipFile(StringIO(umd_req.read()), 'r')
             factors_zip = zipfile.ZipFile(StringIO(factors_req.read()),
