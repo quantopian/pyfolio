@@ -16,12 +16,22 @@ from __future__ import division
 import os
 
 from datetime import datetime
-import time
 
 import pandas as pd
 import numpy as np
 import zlib
 import pandas.io.data as web
+
+import zipfile
+import os.path
+
+try:
+    # For Python 3.0 and later
+    from urllib.request import urlopen
+    from io import StringIO
+except:
+    from urllib2 import urlopen
+    from StringIO import StringIO
 
 from . import pos
 from . import txn
@@ -109,16 +119,10 @@ def vectorize(func):
 
 def load_portfolio_risk_factors(filepath_prefix=None):
     """
-    Loads historical risk factors -- Mkt-Rf, SMB, HML, Rf,
-    and UMD -- from the 'data' directory.
+    Loads risk factors Mkt-Rf, SMB, HML, Rf, and UMD.
 
-    Loads from F-F_Research_Data_Factors_daily.csv and
-    daily_mom_factor_returns_fixed_dates2.csv.
-
-    Parameters
-    ----------
-    filepath_prefix : str, optional
-        Used to specify an exact location of the data.
+    Data is stored in HDF5 file. If the data is more than 2
+    days old, redownload from Dartmouth.
 
     Returns
     -------
@@ -128,23 +132,44 @@ def load_portfolio_risk_factors(filepath_prefix=None):
 
     if filepath_prefix is None:
         import pyfolio
-        filepath = os.path.join(os.path.dirname(pyfolio.__file__), 'data')
+        filepath = os.path.join(os.path.dirname(pyfolio.__file__),
+                                'data/factors.h5')
     else:
         filepath = filepath_prefix
 
-    factors = pd.read_csv(os.path.join(
-        filepath, 'F-F_Research_Data_Factors_daily.csv'), index_col=0)
-    mom = pd.read_csv(os.path.join(
-        filepath, 'daily_mom_factor_returns_fixed_dates2.csv'),
-                      index_col=0, parse_dates=True)
+    five_factors = None
 
-    factors.index = [datetime.fromtimestamp(
-        time.mktime(time.strptime(str(t), "%Y%m%d"))) for t in factors.index]
+    # If it's been more than two days since we updated, redownload CSVs
+    if datetime.now() - pd.to_datetime(os.path.getmtime(filepath),
+                                       unit='s') > pd.Timedelta(days=2):
+        try:
+            umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
+                              's/faculty/ken.french/ftp/F-F_Momentum'
+                              '_Factor_daily_CSV.zip')
+            factors_req = urlopen('http://mba.tuck.dartmouth.edu/pag'
+                                  'es/faculty/ken.french/ftp/F-F_Re'
+                                  'search_Data_Factors_daily_CSV.zip')
 
-    five_factors = factors.join(mom)
-    # transform the returns from percent space to raw values (to be consistent
-    # with our portoflio returns values)
-    five_factors = five_factors / 100
+            umd_zip = zipfile.ZipFile(StringIO(umd_req.read()), 'r')
+            factors_zip = zipfile.ZipFile(StringIO(factors_req.read()),
+                                          'r')
+            umd_csv = umd_zip.read('F-F_Momentum_Factor_daily.CSV')
+            umd_csv = umd_csv.split('\r\n\r\n')[2]
+            factors_csv = factors_zip.read('F-F_Research_Data_'
+                                           'Factors_daily.CSV')
+            factors_csv = factors_csv.split('\r\n\r\n')[1]
+
+            factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
+            umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')
+
+            five_factors = factors.join(umd)
+            five_factors = five_factors / 100
+            five_factors.to_hdf(filepath, 'df')
+        except Exception as e:
+            print('Unable to download factors: %s' % e)
+
+    if not isinstance(five_factors, pd.DataFrame):
+        five_factors = pd.read_hdf(filepath, 'df')
 
     return five_factors
 
