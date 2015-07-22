@@ -15,7 +15,7 @@
 from __future__ import division
 import os
 
-import time
+from datetime import datetime
 
 import pandas as pd
 import numpy as np
@@ -133,7 +133,8 @@ def load_portfolio_risk_factors():
     five_factors = None
 
     # If it's been more than two days since we updated, redownload CSVs
-    if time.time() - os.path.getmtime('data/factors.h5') > 60*60*24*2:
+    if datetime.now() - pd.to_datetime(os.path.getmtime('data/factors.h5'),
+                                       unit='s') > pd.Timedelta(days=2):
         try:
             umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
                               's/faculty/ken.french/ftp/F-F_Momentum'
