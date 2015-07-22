@@ -13,7 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import division
-import os
+from os.path import (
+    abspath,
+    dirname,
+    getmtime,
+    join,
+)
 
 from datetime import datetime
 
@@ -23,7 +28,6 @@ import zlib
 import pandas.io.data as web
 
 import zipfile
-import os.path
 
 try:
     # For Python 3.0 and later
@@ -35,6 +39,14 @@ except:
 
 from . import pos
 from . import txn
+
+
+def pyfolio_root():
+    return dirname(abspath(__file__))
+
+
+def data_path(name):
+    return join(pyfolio_root(), 'data', name)
 
 
 def json_to_obj(json):
@@ -131,16 +143,14 @@ def load_portfolio_risk_factors(filepath_prefix=None):
     """
 
     if filepath_prefix is None:
-        import pyfolio
-        filepath = os.path.join(os.path.dirname(pyfolio.__file__),
-                                'data/factors.h5')
+        filepath = data_path('factors.h5')
     else:
         filepath = filepath_prefix
 
     five_factors = None
 
     # If it's been more than two days since we updated, redownload CSVs
-    if datetime.now() - pd.to_datetime(os.path.getmtime(filepath),
+    if datetime.now() - pd.to_datetime(getmtime(filepath),
                                        unit='s') > pd.Timedelta(days=2):
         try:
             umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
