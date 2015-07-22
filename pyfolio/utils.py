@@ -117,7 +117,7 @@ def vectorize(func):
     return wrapper
 
 
-def load_portfolio_risk_factors():
+def load_portfolio_risk_factors(filepath_prefix=None):
     """
     Loads risk factors Mkt-Rf, SMB, HML, Rf, and UMD.
 
@@ -130,10 +130,17 @@ def load_portfolio_risk_factors():
         Risk factors timeseries.
     """
 
+    if filepath_prefix is None:
+        import pyfolio
+        filepath = os.path.join(os.path.dirname(pyfolio.__file__),
+                                'data/factors.h5')
+    else:
+        filepath = filepath_prefix
+
     five_factors = None
 
     # If it's been more than two days since we updated, redownload CSVs
-    if datetime.now() - pd.to_datetime(os.path.getmtime('data/factors.h5'),
+    if datetime.now() - pd.to_datetime(os.path.getmtime(filepath),
                                        unit='s') > pd.Timedelta(days=2):
         try:
             umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
@@ -157,12 +164,12 @@ def load_portfolio_risk_factors():
 
             five_factors = factors.join(umd)
             five_factors = five_factors / 100
-            five_factors.to_hdf('data/factors.h5', 'df')
+            five_factors.to_hdf(filepath, 'df')
         except Exception as e:
             print('Unable to download factors: %s' % e)
 
     if not isinstance(five_factors, pd.DataFrame):
-        five_factors = pd.read_hdf('data/factors.h5', 'df')
+        five_factors = pd.read_hdf(filepath, 'df')
 
     return five_factors
 
