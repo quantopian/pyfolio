@@ -416,7 +416,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     return ax
 
 
-def show_perf_stats(returns, live_start_date=None, benchmark_rets):
+def show_perf_stats(returns, benchmark_rets, live_start_date=None):
     """Prints some performance metrics of the strategy.
 
     - Shows amount of time the strategy has been run in backtest and
