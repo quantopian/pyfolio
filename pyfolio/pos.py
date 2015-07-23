@@ -31,12 +31,10 @@ def get_portfolio_alloc(positions_vals):
     positions_alloc : pd.DataFrame
         Positions and their allocations.
     """
-
-    positions_alloc = (
-        positions_vals.T /
-        positions_vals.abs().sum(
-            axis='columns').T).T
-    return positions_alloc
+    return positions_vals.divide(
+        positions_vals.abs().sum(axis='columns'),
+        axis='rows'
+    )
 
 
 def get_long_short_pos(positions, gross_lev=1.):
