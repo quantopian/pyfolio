@@ -151,7 +151,13 @@ def load_portfolio_risk_factors(filepath_prefix=None):
 
     # If it's been more than two days since we updated, redownload CSVs
     if datetime.now() - pd.to_datetime(getmtime(filepath),
-                                       unit='s') > pd.Timedelta(days=2):
+                                       unit='s') < pd.Timedelta(days=2):    
+        try:
+            five_factors = pd.read_hdf(filepath, 'df')
+        except:
+            pass
+
+    if not isinstance(five_factors, pd.DataFrame):
         try:
             umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
                               's/faculty/ken.french/ftp/F-F_Momentum'
@@ -172,14 +178,12 @@ def load_portfolio_risk_factors(filepath_prefix=None):
             factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
             umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')
 
-            five_factors = factors.join(umd)
+            five_factors = factors.join(umd).dropna(axis=0)
             five_factors = five_factors / 100
+            
             five_factors.to_hdf(filepath, 'df')
-        except Exception as e:
-            print('Unable to download factors: %s' % e)
-
-    if not isinstance(five_factors, pd.DataFrame):
-        five_factors = pd.read_hdf(filepath, 'df')
+        except:
+            pass
 
     return five_factors
 
