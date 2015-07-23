@@ -121,15 +121,17 @@ def extract_pos(positions, cash):
     pd.DataFrame
         Net positional values per SID as well as cash.
     """
+    positions = positions.copy()
+    positions['values'] = positions.amount * positions.last_sale_price
+    cash.name = 'cash'
 
-    pos = positions.reset_index().groupby(['index', 'sid']).apply(
-        lambda ser: ser['amount'] * ser['last_sale_price'])
-    pos.index = pos.index.droplevel(2)
-    pos = pos.unstack()
-    pos.index = pos.index.normalize()
-    pos = pos.join(cash).rename_axis({'ending_cash': 'cash'}, axis='columns')
+    values = positions.reset_index().pivot(index='index',
+                                           columns='sid',
+                                           values='values')
 
-    return pos
+    values = values.join(cash)
+
+    return values
 
 
 def turnover(transactions_df, backtest_data_df, period='M'):
