@@ -416,7 +416,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     return ax
 
 
-def show_perf_stats(returns, live_start_date, benchmark_rets):
+def show_perf_stats(returns, live_start_date=None, benchmark_rets):
     """Prints some performance metrics of the strategy.
 
     - Shows amount of time the strategy has been run in backtest and
@@ -429,7 +429,7 @@ def show_perf_stats(returns, live_start_date, benchmark_rets):
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
-    live_start_date : datetime
+    live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
     benchmark_rets : pd.Series
@@ -437,10 +437,30 @@ def show_perf_stats(returns, live_start_date, benchmark_rets):
 
     """
 
-    returns_backtest = returns[returns.index < live_start_date]
-    returns_live = returns[returns.index > live_start_date]
+    if live_start_date is not None:
+        returns_backtest = returns[returns.index < live_start_date]
+        returns_live = returns[returns.index > live_start_date]
 
-    print('Out-of-Sample Months: ' + str(int(len(returns_live) / 21)))
+        perf_stats_live = np.round(timeseries.perf_stats(
+            returns_live, returns_style='arithmetic'), 2)
+        perf_stats_live_ab = np.round(
+            timeseries.calc_alpha_beta(returns_live, benchmark_rets), 2)
+        perf_stats_live.loc['alpha'] = perf_stats_live_ab[0]
+        perf_stats_live.loc['beta'] = perf_stats_live_ab[1]
+        perf_stats_live.columns = ['Out_of_Sample']
+
+        perf_stats_all = np.round(timeseries.perf_stats(
+            returns, returns_style='arithmetic'), 2)
+        perf_stats_all_ab = np.round(
+            timeseries.calc_alpha_beta(returns, benchmark_rets), 2)
+        perf_stats_all.loc['alpha'] = perf_stats_all_ab[0]
+        perf_stats_all.loc['beta'] = perf_stats_all_ab[1]
+        perf_stats_all.columns = ['All_History']
+
+        print('Out-of-Sample Months: ' + str(int(len(returns_live) / 21)))
+    else:
+        returns_backtest = returns
+
     print('Backtest Months: ' + str(int(len(returns_backtest) / 21)))
 
     perf_stats_backtest = np.round(timeseries.perf_stats(
@@ -451,24 +471,9 @@ def show_perf_stats(returns, live_start_date, benchmark_rets):
     perf_stats_backtest.loc['beta'] = perf_stats_backtest_ab[1]
     perf_stats_backtest.columns = ['Backtest']
 
-    perf_stats_live = np.round(timeseries.perf_stats(
-        returns_live, returns_style='arithmetic'), 2)
-    perf_stats_live_ab = np.round(
-        timeseries.calc_alpha_beta(returns_live, benchmark_rets), 2)
-    perf_stats_live.loc['alpha'] = perf_stats_live_ab[0]
-    perf_stats_live.loc['beta'] = perf_stats_live_ab[1]
-    perf_stats_live.columns = ['Out_of_Sample']
-
-    perf_stats_all = np.round(timeseries.perf_stats(
-        returns, returns_style='arithmetic'), 2)
-    perf_stats_all_ab = np.round(
-        timeseries.calc_alpha_beta(returns, benchmark_rets), 2)
-    perf_stats_all.loc['alpha'] = perf_stats_all_ab[0]
-    perf_stats_all.loc['beta'] = perf_stats_all_ab[1]
-    perf_stats_all.columns = ['All_History']
-
-    perf_stats_both = perf_stats_backtest.join(perf_stats_live, how='inner')
-    perf_stats_both = perf_stats_both.join(perf_stats_all, how='inner')
+    if live_start_date is not None:
+        perf_stats_both = perf_stats_backtest.join(perf_stats_live, how='inner')
+        perf_stats_both = perf_stats_both.join(perf_stats_all, how='inner')
 
     print(perf_stats_both)
 
