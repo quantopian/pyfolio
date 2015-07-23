@@ -220,13 +220,22 @@ def plot_best(trace=None, data_train=None, data_test=None, samples=1000, burn=20
     ax1.legend(loc=0)
     sns.distplot(trace['difference of means'], ax=ax2)
     ax2.axvline(0, linestyle='-', color='k')
-    ax2.axvline(stats.scoreatpercentile(trace[burn:]['difference of means'], 2.5), linestyle='--', color='b')
-    ax2.axvline(stats.scoreatpercentile(trace[burn:]['difference of means'], 97.5), linestyle='--', color='b')
+    ax2.axvline(
+        stats.scoreatpercentile(trace['difference of means'], 2.5),
+        linestyle='--', color='b', label='2.5 and 97.5 percentiles')
+    ax2.axvline(
+        stats.scoreatpercentile(trace['difference of means'], 97.5),
+        linestyle='--', color='b')
+    ax2.legend(loc=0)
 
     sns.distplot(trace['effect size'], ax=ax3)
     ax3.axvline(0, linestyle='-', color='k')
-    ax3.axvline(stats.scoreatpercentile(trace['effect size'], 2.5), linestyle='--', color='b')
-    ax3.axvline(stats.scoreatpercentile(trace['effect size'], 97.5), linestyle='--', color='b')
+    ax3.axvline(
+        stats.scoreatpercentile(trace['effect size'], 2.5),
+        linestyle='--', color='b')
+    ax3.axvline(
+        stats.scoreatpercentile(trace['effect size'], 97.5),
+        linestyle='--', color='b')
     ax1.set_xlabel('mean')
     ax2.set_xlabel('difference of means')
     ax3.set_xlabel('effect size')
