@@ -165,6 +165,73 @@ def model_returns_t(data, samples=500):
     return trace
 
 
+def model_best(y1, y2, samples=1000):
+    """Bayesian Estimation Supersedes the T-Test
+
+    This model replicates the example used in:
+
+    Kruschke, John. (2012) Bayesian estimation supersedes the t
+    test. Journal of Experimental Psychology: General.
+
+    The original pymc2 implementation was written by Andrew Straw and
+    can be found here: https://github.com/strawlab/best
+
+    Ported to PyMC3 by Thomas Wiecki (c) 2015.
+    """
+
+    y = np.concatenate((y1, y2))
+
+    mu_m = np.mean(y)
+    mu_p = 0.000001 * 1 / np.std(y)**2
+
+    sigma_low = np.std(y)/1000
+    sigma_high = np.std(y)*1000
+    with pm.Model() as model:
+        group1_mean = pm.Normal('group1_mean', mu=mu_m, tau=mu_p, testval=y1.mean())
+        group2_mean = pm.Normal('group2_mean', mu=mu_m, tau=mu_p, testval=y2.mean())
+        group1_std = pm.Uniform('group1_std', lower=sigma_low, upper=sigma_high, testval=y1.std())
+        group2_std = pm.Uniform('group2_std', lower=sigma_low, upper=sigma_high, testval=y2.std())
+        nu = pm.Exponential('nu_minus_one', 1/29.) + 1
+
+        group1 = pm.T('drug', nu=nu, mu=group1_mean, lam=group1_std**-2, observed=y1)
+        group2 = pm.T('placebo', nu=nu, mu=group2_mean, lam=group2_std**-2, observed=y2)
+
+        diff_of_means = pm.Deterministic('difference of means', group1_mean - group2_mean)
+        diff_of_stds = pm.Deterministic('difference of stds', group1_std - group2_std)
+        effect_size = pm.Deterministic('effect size', diff_of_means / pm.sqrt((group1_std**2 + group2_std**2) / 2))
+
+        step = pm.NUTS()
+
+        trace = pm.sample(samples, step)
+    return trace
+
+
+def plot_best(trace=None, data_train=None, data_test=None, samples=1000, burn=200):
+    if trace is None:
+        if (data_train is not None) or (data_test is not None):
+            raise ValueError('Either pass trace or data_train and data_test')
+        trace = model_best(data_train, data_test, samples=samples)
+
+    trace = trace[burn:]
+
+    fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(16, 4))
+    sns.distplot(trace['group1_mean'], ax=ax1, label='backtest')
+    sns.distplot(trace['group2_mean'], ax=ax1, label='forward')
+    ax1.legend(loc=0)
+    sns.distplot(trace['difference of means'], ax=ax2)
+    ax2.axvline(0, linestyle='-', color='k')
+    ax2.axvline(stats.scoreatpercentile(trace[burn:]['difference of means'], 2.5), linestyle='--', color='b')
+    ax2.axvline(stats.scoreatpercentile(trace[burn:]['difference of means'], 97.5), linestyle='--', color='b')
+
+    sns.distplot(trace['effect size'], ax=ax3)
+    ax3.axvline(0, linestyle='-', color='k')
+    ax3.axvline(stats.scoreatpercentile(trace['effect size'], 2.5), linestyle='--', color='b')
+    ax3.axvline(stats.scoreatpercentile(trace['effect size'], 97.5), linestyle='--', color='b')
+    ax1.set_xlabel('mean')
+    ax2.set_xlabel('difference of means')
+    ax3.set_xlabel('effect size')
+
+
 def compute_bayes_cone(preds, starting_value=1.):
     """Compute 5, 25, 75 and 95 percentiles of cumulative returns, used
     for the Bayesian cone.
@@ -265,7 +332,7 @@ def run_model(model, returns_train, returns_test=None,
 
     Parameters
     ----------
-    model : {'alpha_beta', 't', 'normal'}
+    model : {'alpha_beta', 't', 'normal', 'best'}
         Which model to run
     returns_train : pd.Series
         Timeseries of simple returns
@@ -297,9 +364,11 @@ def run_model(model, returns_train, returns_test=None,
         trace = model_returns_t(rets, samples)
     elif model == 'normal':
         trace = model_returns_normal(rets, samples)
+    elif model == 'best':
+        trace = model_best(returns_train, returns_test, samples=samples)
     else:
         raise NotImplementedError(
-            'Model {} not found. Use alpha_beta, t, or normal.'.format(model))
+            'Model {} not found. Use alpha_beta, t, normal, or best.'.format(model))
 
     return trace
 
