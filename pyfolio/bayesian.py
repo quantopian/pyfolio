@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 from scipy import stats
+import seaborn as sns
 
 import matplotlib.pyplot as plt
 
@@ -186,19 +187,29 @@ def model_best(y1, y2, samples=1000):
 
     sigma_low = np.std(y)/1000
     sigma_high = np.std(y)*1000
-    with pm.Model() as model:
-        group1_mean = pm.Normal('group1_mean', mu=mu_m, tau=mu_p, testval=y1.mean())
-        group2_mean = pm.Normal('group2_mean', mu=mu_m, tau=mu_p, testval=y2.mean())
-        group1_std = pm.Uniform('group1_std', lower=sigma_low, upper=sigma_high, testval=y1.std())
-        group2_std = pm.Uniform('group2_std', lower=sigma_low, upper=sigma_high, testval=y2.std())
+    with pm.Model():
+        group1_mean = pm.Normal('group1_mean', mu=mu_m, tau=mu_p,
+                                testval=y1.mean())
+        group2_mean = pm.Normal('group2_mean', mu=mu_m, tau=mu_p,
+                                testval=y2.mean())
+        group1_std = pm.Uniform('group1_std', lower=sigma_low,
+                                upper=sigma_high, testval=y1.std())
+        group2_std = pm.Uniform('group2_std', lower=sigma_low,
+                                upper=sigma_high, testval=y2.std())
         nu = pm.Exponential('nu_minus_one', 1/29.) + 1
 
-        group1 = pm.T('drug', nu=nu, mu=group1_mean, lam=group1_std**-2, observed=y1)
-        group2 = pm.T('placebo', nu=nu, mu=group2_mean, lam=group2_std**-2, observed=y2)
+        pm.T('group1', nu=nu, mu=group1_mean,
+             lam=group1_std**-2, observed=y1)
+        pm.T('group2', nu=nu, mu=group2_mean,
+             lam=group2_std**-2, observed=y2)
 
-        diff_of_means = pm.Deterministic('difference of means', group1_mean - group2_mean)
-        diff_of_stds = pm.Deterministic('difference of stds', group1_std - group2_std)
-        effect_size = pm.Deterministic('effect size', diff_of_means / pm.sqrt((group1_std**2 + group2_std**2) / 2))
+        diff_of_means = pm.Deterministic('difference of means',
+                                         group1_mean - group2_mean)
+        pm.Deterministic('difference of stds',
+                         group1_std - group2_std)
+        pm.Deterministic('effect size', diff_of_means /
+                         pm.sqrt((group1_std**2 +
+                                  group2_std**2) / 2))
 
         step = pm.NUTS()
 
@@ -206,7 +217,8 @@ def model_best(y1, y2, samples=1000):
     return trace
 
 
-def plot_best(trace=None, data_train=None, data_test=None, samples=1000, burn=200):
+def plot_best(trace=None, data_train=None, data_test=None,
+              samples=1000, burn=200):
     if trace is None:
         if (data_train is not None) or (data_test is not None):
             raise ValueError('Either pass trace or data_train and data_test')
@@ -377,7 +389,8 @@ def run_model(model, returns_train, returns_test=None,
         trace = model_best(returns_train, returns_test, samples=samples)
     else:
         raise NotImplementedError(
-            'Model {} not found. Use alpha_beta, t, normal, or best.'.format(model))
+            'Model {} not found.'
+            'Use alpha_beta, t, normal, or best.'.format(model))
 
     return trace
 
