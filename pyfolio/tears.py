@@ -37,7 +37,7 @@ import seaborn as sns
 
 
 def create_returns_tear_sheet(returns, live_start_date=None,
-                              backtest_days_pct=None, cone_std=1.0,
+                              cone_std=1.0,
                               benchmark_rets=None, benchmark2_rets=None,
                               return_fig=False):
     """
@@ -58,10 +58,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period.
-    backtest_days_pct : float, optional
-        The fraction of the returns data that comes from
-        backtesting (versus live trading).
-         - Only used if live_start_date is left blank.
     cone_std : float, optional
         The standard deviation to use for the cone plots.
     benchmark_rets : pd.Series, optional
@@ -88,13 +84,10 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     print("Entire data start date: " + str(df_cum_rets.index[0]))
     print("Entire data end date: " + str(df_cum_rets.index[-1]))
 
-    elif live_start_date is None and backtest_days_pct is not None:
-        live_start_date = returns.index[int(len(returns) *
-                                            backtest_days_pct)]
-
     print('\n')
 
-    plotting.show_perf_stats(returns, benchmark_rets, live_start_date=live_start_date)
+    plotting.show_perf_stats(returns, benchmark_rets,
+                             live_start_date=live_start_date)
 
     if live_start_date is not None:
         vertical_sections = 10
@@ -338,8 +331,8 @@ def create_interesting_times_tear_sheet(
         return fig
 
 
-def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date=None,
-                               backtest_days_pct=0.5, return_fig=False):
+def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
+                               return_fig=False):
     """
     Generate a number of Bayesian distributions and a Bayesian
     cone plot of returns.
@@ -357,16 +350,9 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date=None,
     live_start_date : datetime, optional
         The point in time when the strategy began live
         trading, after its backtest period.
-    backtest_days_pct : float, optional
-        The fraction of the returns data that comes from
-        backtesting (versus live trading).
-         - Only used if live_start_date is left blank.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
-
-    if live_start_date is None:
-        live_start_date = returns.index[int(len(returns) * backtest_days_pct)]
 
     fig = plt.figure(figsize=(14, 10 * 2))
     gs = gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.3)
@@ -450,7 +436,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
                            benchmark_rets=None, benchmark2_rets=None,
                            gross_lev=None,
                            live_start_date=None, bayesian=False,
-                           backtest_days_pct=None, cone_std=1.0):
+                           cone_std=1.0):
     """
     Generate a number of tear sheets that are useful
     for analyzing a strategy's performance.
@@ -477,17 +463,13 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         after its backtest period.
     bayesian: boolean, optional
         If True, causes the generation of a Bayesian tear sheet.
-    backtest_days_pct : float, optional
-        The fraction of the returns data that comes from
-        backtesting (versus live trading).
-         - Only used if live_start_date is left blank.
     cone_std : float, optional
         The standard deviation to use for the cone plots.
     """
-    
+
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
-        
+
     if benchmark2_rets is None:
         benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
 
@@ -498,7 +480,6 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     create_returns_tear_sheet(
         returns,
         live_start_date=live_start_date,
-        backtest_days_pct=backtest_days_pct,
         cone_std=cone_std,
         benchmark_rets=benchmark_rets,
         benchmark2_rets=benchmark2_rets)
@@ -511,9 +492,6 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         if transactions is not None:
             create_txn_tear_sheet(returns, positions, transactions)
 
-    if bayesian and (backtest_days_pct is not None or live_start_date is not None):
-        create_bayesian_tear_sheet(
-            returns,
-            benchmark_rets,
-            live_start_date=live_start_date,
-            backtest_days_pct=backtest_days_pct)
+    if bayesian and live_start_date is not None:
+        create_bayesian_tear_sheet(returns, benchmark_rets,
+                                   live_start_date=live_start_date)

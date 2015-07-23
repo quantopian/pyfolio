@@ -472,8 +472,10 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
     perf_stats_backtest.columns = ['Backtest']
 
     if live_start_date is not None:
-        perf_stats_both = perf_stats_backtest.join(perf_stats_live, how='inner')
-        perf_stats_both = perf_stats_both.join(perf_stats_all, how='inner')
+        perf_stats_both = perf_stats_backtest.join(perf_stats_live,
+                                                   how='inner')
+        perf_stats_both = perf_stats_both.join(perf_stats_all,
+                                               how='inner')
 
     print(perf_stats_both)
 
