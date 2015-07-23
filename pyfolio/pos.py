@@ -121,6 +121,7 @@ def extract_pos(positions, cash):
     pd.DataFrame
         Net positional values per SID as well as cash.
     """
+    positions = positions.copy()
     positions['values'] = positions.amount * positions.last_sale_price
     cash.name = 'cash'
 
