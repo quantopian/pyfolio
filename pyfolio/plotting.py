@@ -90,20 +90,20 @@ def plot_rolling_risk_factors(
     rolling_risk_multifactor = timeseries.rolling_multifactor_beta(
         returns,
         risk_factors.loc[:, ['SMB', 'HML', 'UMD']],
-        rolling_window=rolling_beta_window)
+        window=rolling_beta_window)
 
     rolling_beta_SMB = timeseries.rolling_beta(
         returns,
         risk_factors['SMB'],
-        rolling_window=rolling_beta_window)
+        window=rolling_beta_window)
     rolling_beta_HML = timeseries.rolling_beta(
         returns,
         risk_factors['HML'],
-        rolling_window=rolling_beta_window)
+        window=rolling_beta_window)
     rolling_beta_UMD = timeseries.rolling_beta(
         returns,
         risk_factors['UMD'],
-        rolling_window=rolling_beta_window)
+        window=rolling_beta_window)
 
     rolling_beta_SMB.plot(color='steelblue', alpha=0.7, ax=ax, **kwargs)
     rolling_beta_HML.plot(color='orangered', alpha=0.7, ax=ax, **kwargs)
@@ -608,10 +608,10 @@ def plot_rolling_beta(returns, benchmark_rets,
     ax.set_title("Rolling Portfolio Beta to S&P 500")
     ax.set_ylabel('Beta')
     rb_1 = timeseries.rolling_beta(
-        returns, benchmark_rets, rolling_window=rolling_beta_window * 2)
+        returns, benchmark_rets, window=rolling_beta_window * 2)['x']
     rb_1.plot(color='steelblue', lw=3, alpha=0.6, ax=ax, **kwargs)
     rb_2 = timeseries.rolling_beta(
-        returns, benchmark_rets, rolling_window=rolling_beta_window * 3)
+        returns, benchmark_rets, window=rolling_beta_window * 3)['x']
     rb_2.plot(color='grey', lw=3, alpha=0.4, ax=ax, **kwargs)
     ax.set_ylim((-2.5, 2.5))
     ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)

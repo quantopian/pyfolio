@@ -30,6 +30,38 @@ import statsmodels.api as sm
 import datetime
 
 
+def regression(y, x, add_constant=True):
+    """
+    Generalized regression calculation that
+    returns the ols model for situations where
+    other statistical values are needed.
+
+    :param y: Series/DataFrame; dependent variable
+    :param x: Series/DataFrame; independent variable(s)
+    :param add_constant: if True a constant term will be added
+                         to the regression model.
+    :return: pandas.stats.ols.OLS; regression model
+    """
+    return pd.ols(y=y, x=x, intercept=add_constant)
+
+
+def rolling_regression(y, x, window, add_constant=True):
+    """
+    Generalized regression calculation that
+    returns the ols model for situations where
+    other statistical values are needed.
+
+    :param y: Series/DataFrame; dependent variable
+    :param x: Series/DataFrame; independent variable(s)
+    :param window: int; number of bars used in the regression window
+    :param add_constant: if True a constant term will be added
+                         to the regression model.
+    :return: pandas.stats.ols.OLS; regression model
+    """
+    return pd.ols(y=y, x=x, window=window,
+                  window_type='rolling', intercept=add_constant)
+
+
 def var_cov_var_normal(P, c, mu=0, sigma=1):
     """
     Variance-covariance calculation of daily Value-at-Risk in a portfolio.
@@ -277,7 +309,8 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
     returns : pd.Series
        Daily returns of the strategy, non-cumulative.
     annual_return_threshold : float, optional
-        Threshold over which to consider positive vs negative returns. For the ratio, it will be converted to a daily return and compared to returns.
+        Threshold over which to consider positive vs negative returns.
+        For the ratio, it will be converted to a daily return and compared to returns.
 
     Returns
     -------
@@ -359,7 +392,7 @@ def sharpe_ratio(returns, returns_style='compound'):
         return np.nan
 
 
-def stability_of_timeseries(returns, logValue=True):
+def stability_of_timeseries(returns, logValue=True, return_ols_model=False):
     """
     Determines R-squared of a linear fit to the returns.
 
@@ -384,12 +417,13 @@ def stability_of_timeseries(returns, logValue=True):
         df_cum_rets.values) if logValue else df_cum_rets.values
     len_returns = df_cum_rets.size
 
-    X = list(range(0, len_returns))
-    X = sm.add_constant(X)
+    X = pd.Series(range(len_returns), index=returns.index)
 
-    model = sm.OLS(temp_values, X).fit()
-
-    return model.rsquared
+    model = regression(temp_values, X, add_constant=True)
+    # TODO: should adjusted rsquared be used?
+    if return_ols_model:
+        return model.r2, model
+    return model.r2
 
 
 def out_of_sample_vs_in_sample_returns_kde(
@@ -458,12 +492,12 @@ def out_of_sample_vs_in_sample_returns_kde(
             return np.nan
 
     kde_diff = sum(abs(scipy_kde_test - scipy_kde_train)) / \
-        (sum(scipy_kde_train) + sum(scipy_kde_test))
+               (sum(scipy_kde_train) + sum(scipy_kde_test))
 
     return kde_diff
 
 
-def calc_multifactor(returns, factors):
+def calc_multifactor(returns, factors, add_constant=True, return_ols_model=False):
     """
     Computes multiple ordinary least squares linear fits, and returns fit parameters.
 
@@ -479,11 +513,14 @@ def calc_multifactor(returns, factors):
     pd.DataFrame
         Fit parameters.
     """
-    model = pd.ols(y=returns, x=factors)
+    model = regression(returns, factors, add_constant=add_constant)
+    if return_ols_model:
+        return model.beta, model
     return model.beta
 
 
-def rolling_beta(returns, benchmark_rets, rolling_window=63):
+def rolling_beta(returns, benchmark_rets, window=63,
+                 add_constant=True, return_ols_model=False):
     """
     Determines the rolling beta of a strategy.
 
@@ -506,12 +543,14 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
     """
 
-    model = pd.ols(y=returns, x=benchmark_rets,
-                   window=rolling_window, window_type='rolling')
-    return model.beta['x']
+    model = rolling_regression(returns, benchmark_rets, window, add_constant=add_constant)
+    if return_ols_model:
+        return model.beta, model
+    return model.beta
 
 
-def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
+def rolling_multifactor_beta(returns, df_multi_factor, window=63,
+                             add_constant=True, return_ols_model=False):
     """
     Determines the rolling beta of multiple factors.
 
@@ -533,12 +572,13 @@ def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
     -----
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
     """
-    model = pd.ols(y=returns, x=df_multi_factor,
-                   window=rolling_window, window_type='rolling')
+    model = rolling_regression(returns, df_multi_factor, window, add_constant=add_constant)
+    if return_ols_model:
+        return model.beta, model
     return model.beta
 
 
-def calc_alpha_beta(returns, benchmark_rets):
+def calc_alpha_beta(returns, benchmark_rets, return_ols_model=False):
     """
     Calculates both alpha and beta.
 
@@ -556,8 +596,11 @@ def calc_alpha_beta(returns, benchmark_rets):
     float
         Beta.
     """
-    model = pd.ols(y=returns, x=benchmark_rets)
+    model = regression(returns, benchmark_rets, add_constant=True)
+
     beta, alpha = model.beta
+    if return_ols_model:
+        return alpha * 252, beta, model
 
     return alpha * 252, beta
 
@@ -748,7 +791,7 @@ def gen_drawdown_table(returns, top=10):
         df_drawdowns.loc[i, 'valley date'] = valley
         df_drawdowns.loc[i, 'recovery date'] = recovery
         df_drawdowns.loc[i, 'net drawdown in %'] = (
-            (df_cum.loc[peak] - df_cum.loc[valley]) / df_cum.loc[peak]) * 100
+                                                       (df_cum.loc[peak] - df_cum.loc[valley]) / df_cum.loc[peak]) * 100
 
     df_drawdowns['peak date'] = pd.to_datetime(
         df_drawdowns['peak date'],
@@ -785,7 +828,7 @@ def rolling_sharpe(returns, rolling_sharpe_window):
     """
 
     return pd.rolling_mean(returns, rolling_sharpe_window) \
-        / pd.rolling_std(returns, rolling_sharpe_window) * np.sqrt(252)
+           / pd.rolling_std(returns, rolling_sharpe_window) * np.sqrt(252)
 
 
 def cone_rolling(
@@ -815,12 +858,10 @@ def cone_rolling(
 
     perf_ts = cum_returns(returns, 1)
 
-    X = list(range(0, perf_ts.size))
-    X = sm.add_constant(X)
-    sm.OLS(perf_ts, list(range(0, len(perf_ts))))
-    line_ols = sm.OLS(perf_ts.values, X).fit()
-    fit_line_ols_coef = line_ols.params[1]
-    fit_line_ols_inter = line_ols.params[0]
+    X = pd.Series(range(perf_ts.size), index=perf_ts.index)
+
+    line_ols = regression(perf_ts, X, add_constant=True)
+    fit_line_ols_coef, fit_line_ols_inter = line_ols.beta
 
     x_points = list(range(0, perf_ts.size))
     x_points = np.array(x_points) * fit_line_ols_coef + fit_line_ols_inter
@@ -851,21 +892,19 @@ def cone_rolling(
             line_ols_coef = fit_line_ols_coef
             line_ols_inter = fit_line_ols_inter
         else:
-            X = list(range(0, perf_ts.size))
-            X = sm.add_constant(X)
+            X = pd.Series(range(perf_ts.size), index=perf_ts.index)
             sm.OLS(perf_ts, list(range(0, len(perf_ts))))
-            line_ols = sm.OLS(perf_ts.values, X).fit()
-            line_ols_coef = line_ols.params[1]
-            line_ols_inter = line_ols.params[0]
+            line_ols = regression(perf_ts, X, add_constant=True)
+            line_ols_coef, line_ols_inter = line_ols.beta
 
         x_points = list(range(0, perf_ts.size))
         x_points = np.array(x_points) * line_ols_coef + \
-            line_ols_inter + oos_intercept_shift
+                   line_ols_inter + oos_intercept_shift
 
         temp_line = x_points
         if update_std_oos_rolling:
             std_pct = np.sqrt(new_cone_day_scale_factor) * \
-                np.std(perf_ts.pct_change().dropna())
+                      np.std(perf_ts.pct_change().dropna())
         else:
             std_pct = np.sqrt(new_cone_day_scale_factor) * warm_up_std_pct
 
@@ -895,7 +934,7 @@ def cone_rolling(
 
         x_points = list(range(perf_ts.size, perf_ts.size + extend_ahead_days))
         x_points = np.array(x_points) * line_ols_coef + line_ols_inter + \
-            oos_intercept_shift + future_cone_intercept_shift
+                   oos_intercept_shift + future_cone_intercept_shift
         temp_line = x_points
         temp_sd_up = temp_line * (1 + num_stdev * std_pct)
         temp_sd_down = temp_line * (1 - num_stdev * std_pct)
