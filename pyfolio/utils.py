@@ -172,7 +172,7 @@ def load_portfolio_risk_factors(filepath_prefix=None):
             factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
             umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')
 
-            five_factors = factors.join(umd)
+            five_factors = factors.join(umd).dropna(axis=0)
             five_factors = five_factors / 100
             five_factors.to_hdf(filepath, 'df')
         except Exception as e:

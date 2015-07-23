@@ -46,7 +46,7 @@ def set_plot_defaults():
 
 def plot_rolling_risk_factors(
         returns,
-        risk_factors,
+        risk_factors=None,
         rolling_beta_window=63 * 2,
         legend_loc='best',
         ax=None, **kwargs):
@@ -58,7 +58,7 @@ def plot_rolling_risk_factors(
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
-    risk_factors : pd.DataFrame
+    risk_factors : pd.DataFrame, optional
         data set containing the risk factors. See
         utils.load_portfolio_risk_factors.
     rolling_beta_window : int, optional
@@ -79,6 +79,9 @@ def plot_rolling_risk_factors(
 
     if ax is None:
         ax = plt.gca()
+
+    if risk_factors is None:
+        risk_factors = utils.load_portfolio_risk_factors()
 
     num_months_str = '%.0f' % (rolling_beta_window / 21)
 

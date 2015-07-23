@@ -81,8 +81,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     if benchmark2_rets is None:
         benchmark2_rets = utils.get_symbol_rets('IEF')  # 7df_c-10yr Bond ETF.
 
-    risk_factors = utils.load_portfolio_risk_factors().dropna(axis=0)
-
     plotting.set_plot_defaults()
 
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
@@ -129,7 +127,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         returns, ax=ax_rolling_sharpe)
 
     plotting.plot_rolling_risk_factors(
-        returns, risk_factors, ax=ax_rolling_risk)
+        returns, ax=ax_rolling_risk)
 
     # Drawdowns
     plotting.plot_drawdown_periods(
@@ -478,9 +476,12 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     cone_std : float, optional
         The standard deviation to use for the cone plots.
     """
-
-    benchmark_rets = utils.get_symbol_rets('SPY')
-    benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
+    
+    if benchmark_rets is None:
+        benchmark_rets = utils.get_symbol_rets('SPY')
+        
+    if benchmark2_rets is None:
+        benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
 
     # If the strategy's history is longer than the benchmark's, limit strategy
     if returns.index[0] < benchmark_rets.index[0]:
