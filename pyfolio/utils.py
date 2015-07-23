@@ -151,7 +151,7 @@ def load_portfolio_risk_factors(filepath_prefix=None):
 
     # If it's been more than two days since we updated, redownload CSVs
     if datetime.now() - pd.to_datetime(getmtime(filepath),
-                                       unit='s') < pd.Timedelta(days=2):    
+                                       unit='s') < pd.Timedelta(days=2):
         try:
             five_factors = pd.read_hdf(filepath, 'df')
         except:
@@ -180,7 +180,7 @@ def load_portfolio_risk_factors(filepath_prefix=None):
 
             five_factors = factors.join(umd).dropna(axis=0)
             five_factors = five_factors / 100
-            
+
             five_factors.to_hdf(filepath, 'df')
         except:
             pass
