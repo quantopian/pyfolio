@@ -332,7 +332,7 @@ def create_interesting_times_tear_sheet(
         return fig
 
 
-def create_bayesian_tear_sheet(returns, bmark, live_start_date=None,
+def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date=None,
                                backtest_days_pct=0.5, return_fig=False):
     """
     Generate a number of Bayesian distributions and a Bayesian
@@ -346,7 +346,7 @@ def create_bayesian_tear_sheet(returns, bmark, live_start_date=None,
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
-    bmark : pd.Series
+    benchmark_rets : pd.Series
         Daily non-cumulative returns of a benchmark.
     live_start_date : datetime, optional
         The point in time when the strategy began live
@@ -383,9 +383,9 @@ def create_bayesian_tear_sheet(returns, bmark, live_start_date=None,
     ax_vol.set_xlabel('Annual Volatility')
     ax_vol.set_ylabel('Belief')
 
-    bmark = bmark.loc[df_train.index]
+    benchmark_rets = benchmark_rets.loc[df_train.index]
     trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
-                                          bmark=bmark, samples=2000)
+                                          bmark=benchmark_rets, samples=2000)
 
     row += 1
     ax_alpha = plt.subplot(gs[row, 0])
@@ -441,6 +441,7 @@ def create_bayesian_tear_sheet(returns, bmark, live_start_date=None,
 
 
 def create_full_tear_sheet(returns, positions=None, transactions=None,
+                           benchmark_rets=None, benchmark2_rets=None,
                            gross_lev=None,
                            live_start_date=None, bayesian=False,
                            backtest_days_pct=0.5, cone_std=1.0):
