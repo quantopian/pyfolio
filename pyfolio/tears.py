@@ -138,9 +138,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
     plotting.show_worst_drawdown_periods(returns)
 
-    returns_backtest = returns[returns.index < live_start_date]
-    returns_live = returns[returns.index > live_start_date]
-
     df_weekly = timeseries.aggregate_returns(returns, 'weekly')
     df_monthly = timeseries.aggregate_returns(returns, 'monthly')
 
@@ -158,6 +155,9 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         ax=ax_return_quantiles)
 
     if live_start_date is not None:
+        returns_backtest = returns[returns.index < live_start_date]
+        returns_live = returns[returns.index > live_start_date]
+
         plotting.plot_daily_returns_similarity(
             returns_backtest,
             returns_live,
