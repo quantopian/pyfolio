@@ -473,9 +473,9 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
 
     if live_start_date is not None:
         perf_stats = perf_stats.join(perf_stats_live,
-                                                   how='inner')
+                                     how='inner')
         perf_stats = perf_stats.join(perf_stats_all,
-                                               how='inner')
+                                     how='inner')
 
     print(perf_stats)
 
@@ -483,7 +483,6 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
 def plot_rolling_returns(
         returns,
         benchmark_rets=None,
-        benchmark2_rets=None,
         live_start_date=None,
         cone_std=None,
         legend_loc='best',
@@ -502,8 +501,6 @@ def plot_rolling_returns(
         Daily returns of the strategy, non-cumulative.
     benchmark_rets : pd.Series, optional
         Daily non-cumulative returns of the first benchmark.
-    benchmark2_rets : pd.Series, optional
-        Daily non-cumulative returns of the second benchmark.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
@@ -535,11 +532,6 @@ def plot_rolling_returns(
     if benchmark_rets is not None:
         timeseries.cum_returns(benchmark_rets[df_cum_rets.index], 1.0).plot(
             lw=2, color='gray', label='S&P500', alpha=0.60, ax=ax, **kwargs)
-    if benchmark2_rets is not None:
-        timeseries.cum_returns(benchmark2_rets[df_cum_rets.index],
-                               1.0).plot(lw=2, color='gray',
-                                         label='7-10yr Bond',
-                                         alpha=0.35, ax=ax, **kwargs)
 
     if (live_start_date is None) or (df_cum_rets.index[-1] <=
                                      live_start_date):

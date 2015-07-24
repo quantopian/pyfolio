@@ -38,7 +38,7 @@ import seaborn as sns
 
 def create_returns_tear_sheet(returns, live_start_date=None,
                               cone_std=1.0,
-                              benchmark_rets=None, benchmark2_rets=None,
+                              benchmark_rets=None,
                               return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's returns.
@@ -62,8 +62,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         The standard deviation to use for the cone plots.
     benchmark_rets : pd.Series, optional
         Daily non-cumulative returns of the first benchmark.
-    benchmark2_rets : pd.Series, optional
-        Daily non-cumulative returns of the second benchmark.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
@@ -74,8 +72,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         # strategy
         if returns.index[0] < benchmark_rets.index[0]:
             returns = returns[returns.index > benchmark_rets.index[0]]
-    if benchmark2_rets is None:
-        benchmark2_rets = utils.get_symbol_rets('IEF')  # 7df_c-10yr Bond ETF.
 
     plotting.set_plot_defaults()
 
@@ -115,7 +111,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     plotting.plot_rolling_returns(
         returns,
         benchmark_rets=benchmark_rets,
-        benchmark2_rets=benchmark2_rets,
         live_start_date=live_start_date,
         cone_std=cone_std,
         ax=ax_rolling_returns)
@@ -433,7 +428,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
 
 
 def create_full_tear_sheet(returns, positions=None, transactions=None,
-                           benchmark_rets=None, benchmark2_rets=None,
+                           benchmark_rets=None,
                            gross_lev=None,
                            live_start_date=None, bayesian=False,
                            cone_std=1.0):
@@ -470,9 +465,6 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
 
-    if benchmark2_rets is None:
-        benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
-
     # If the strategy's history is longer than the benchmark's, limit strategy
     if returns.index[0] < benchmark_rets.index[0]:
         returns = returns[returns.index > benchmark_rets.index[0]]
@@ -481,8 +473,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         returns,
         live_start_date=live_start_date,
         cone_std=cone_std,
-        benchmark_rets=benchmark_rets,
-        benchmark2_rets=benchmark2_rets)
+        benchmark_rets=benchmark_rets)
 
     create_interesting_times_tear_sheet(returns, benchmark_rets=benchmark_rets)
 
