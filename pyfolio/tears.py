@@ -105,12 +105,12 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     ax_monthly_heatmap = plt.subplot(gs[7, 0])
     ax_annual_returns = plt.subplot(gs[7, 1])
     ax_monthly_dist = plt.subplot(gs[7, 2])
-    ax_return_quantiles = plt.subplot(gs[9, :])
+    ax_return_quantiles = plt.subplot(gs[8, :])
 
     if live_start_date is not None:
-        ax_daily_similarity_scale = plt.subplot(gs[8, 0])
-        ax_daily_similarity_no_var = plt.subplot(gs[8, 1])
-        ax_daily_similarity_no_var_no_mean = plt.subplot(gs[8, 2])
+        ax_daily_similarity_scale = plt.subplot(gs[9, 0])
+        ax_daily_similarity_no_var = plt.subplot(gs[9, 1])
+        ax_daily_similarity_no_var_no_mean = plt.subplot(gs[9, 2])
 
     plotting.plot_rolling_returns(
         returns,

@@ -463,21 +463,21 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
 
     print('Backtest Months: ' + str(int(len(returns_backtest) / 21)))
 
-    perf_stats_backtest = np.round(timeseries.perf_stats(
+    perf_stats = np.round(timeseries.perf_stats(
         returns_backtest, returns_style='arithmetic'), 2)
-    perf_stats_backtest_ab = np.round(
+    perf_stats_ab = np.round(
         timeseries.calc_alpha_beta(returns_backtest, benchmark_rets), 2)
-    perf_stats_backtest.loc['alpha'] = perf_stats_backtest_ab[0]
-    perf_stats_backtest.loc['beta'] = perf_stats_backtest_ab[1]
-    perf_stats_backtest.columns = ['Backtest']
+    perf_stats.loc['alpha'] = perf_stats_ab[0]
+    perf_stats.loc['beta'] = perf_stats_ab[1]
+    perf_stats.columns = ['Backtest']
 
     if live_start_date is not None:
-        perf_stats_both = perf_stats_backtest.join(perf_stats_live,
+        perf_stats = perf_stats.join(perf_stats_live,
                                                    how='inner')
-        perf_stats_both = perf_stats_both.join(perf_stats_all,
+        perf_stats = perf_stats.join(perf_stats_all,
                                                how='inner')
 
-    print(perf_stats_both)
+    print(perf_stats)
 
 
 def plot_rolling_returns(
@@ -586,11 +586,11 @@ def plot_rolling_returns(
                             cone_df_live.sd_up,
                             color='red', alpha=0.30)
 
-        ax.axhline(1.0, linestyle='--', color='black', lw=2)
-        ax.set_ylabel('Cumulative returns')
-        ax.set_title('Cumulative Returns')
-        ax.legend(loc=legend_loc)
-        ax.set_xlabel('')
+    ax.axhline(1.0, linestyle='--', color='black', lw=2)
+    ax.set_ylabel('Cumulative returns')
+    ax.set_title('Cumulative Returns')
+    ax.legend(loc=legend_loc)
+    ax.set_xlabel('')
 
     return ax
 
