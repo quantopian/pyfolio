@@ -95,7 +95,7 @@ def get_symbol_rets(symbol):
     """
     Gets returns for a symbol.
 
-    Queries Yahoo Finance.
+    Queries Yahoo Finance. Attempts to cache SPY in HDF5.
 
     Parameters
     ----------
@@ -108,10 +108,29 @@ def get_symbol_rets(symbol):
         Daily returns for the symbol.
     """
 
-    px = web.get_data_yahoo(symbol, start='1/1/1970')
-    px = pd.DataFrame.rename(px, columns={'Adj Close': 'AdjClose'})
-    px.columns.name = symbol
-    rets = px.AdjClose.pct_change().dropna()
+    rets = None
+    if symbol == 'SPY':
+        filepath = data_path('spy.h5')
+        try:
+            # If it's been less than a day since we got benchmark
+            if datetime.now()-pd.to_datetime(getmtime(filepath),
+                                             unit='s') < pd.Timedelta(days=1):
+                rets = pd.read_hdf(filepath, 'df')
+        except:
+            pass
+
+    if rets is None:
+        px = web.get_data_yahoo(symbol, start='1/1/1970')
+        px = pd.DataFrame.rename(px, columns={'Adj Close': 'AdjClose'})
+        px.columns.name = symbol
+        rets = px.AdjClose.pct_change().dropna()
+
+        if symbol == 'SPY':
+            try:
+                rets.to_hdf(filepath, 'df')
+            except:
+                pass
+
     return rets
 
 
@@ -149,7 +168,7 @@ def load_portfolio_risk_factors(filepath_prefix=None):
 
     five_factors = None
 
-    # If it's been more than two days since we updated, redownload CSVs
+    # If it's been less than two days since we updated
     if datetime.now() - pd.to_datetime(getmtime(filepath),
                                        unit='s') < pd.Timedelta(days=2):
         try:

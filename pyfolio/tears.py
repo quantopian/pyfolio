@@ -37,8 +37,8 @@ import seaborn as sns
 
 
 def create_returns_tear_sheet(returns, live_start_date=None,
-                              backtest_days_pct=0.5, cone_std=1.0,
-                              benchmark_rets=None, benchmark2_rets=None,
+                              cone_std=1.0,
+                              benchmark_rets=None,
                               return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's returns.
@@ -58,16 +58,10 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period.
-    backtest_days_pct : float, optional
-        The fraction of the returns data that comes from
-        backtesting (versus live trading).
-         - Only used if live_start_date is left blank.
     cone_std : float, optional
         The standard deviation to use for the cone plots.
     benchmark_rets : pd.Series, optional
         Daily non-cumulative returns of the first benchmark.
-    benchmark2_rets : pd.Series, optional
-        Daily non-cumulative returns of the second benchmark.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
@@ -78,10 +72,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         # strategy
         if returns.index[0] < benchmark_rets.index[0]:
             returns = returns[returns.index > benchmark_rets.index[0]]
-    if benchmark2_rets is None:
-        benchmark2_rets = utils.get_symbol_rets('IEF')  # 7df_c-10yr Bond ETF.
-
-    risk_factors = utils.load_portfolio_risk_factors().dropna(axis=0)
 
     plotting.set_plot_defaults()
 
@@ -90,16 +80,18 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     print("Entire data start date: " + str(df_cum_rets.index[0]))
     print("Entire data end date: " + str(df_cum_rets.index[-1]))
 
-    if live_start_date is None:
-        live_start_date = returns.index[int(len(returns) *
-                                            backtest_days_pct)]
-
     print('\n')
 
-    plotting.show_perf_stats(returns, live_start_date, benchmark_rets)
+    plotting.show_perf_stats(returns, benchmark_rets,
+                             live_start_date=live_start_date)
 
-    fig = plt.figure(figsize=(14, 10 * 6))
-    gs = gridspec.GridSpec(10, 3, wspace=0.5, hspace=0.5)
+    if live_start_date is not None:
+        vertical_sections = 10
+    else:
+        vertical_sections = 9
+
+    fig = plt.figure(figsize=(14, vertical_sections * 6))
+    gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
     ax_rolling_returns = plt.subplot(gs[:2, :])
     ax_rolling_beta = plt.subplot(gs[2, :], sharex=ax_rolling_returns)
     ax_rolling_sharpe = plt.subplot(gs[3, :], sharex=ax_rolling_returns)
@@ -109,15 +101,16 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     ax_monthly_heatmap = plt.subplot(gs[7, 0])
     ax_annual_returns = plt.subplot(gs[7, 1])
     ax_monthly_dist = plt.subplot(gs[7, 2])
-    ax_daily_similarity_scale = plt.subplot(gs[8, 0])
-    ax_daily_similarity_no_var = plt.subplot(gs[8, 1])
-    ax_daily_similarity_no_var_no_mean = plt.subplot(gs[8, 2])
-    ax_return_quantiles = plt.subplot(gs[9, :])
+    ax_return_quantiles = plt.subplot(gs[8, :])
+
+    if live_start_date is not None:
+        ax_daily_similarity_scale = plt.subplot(gs[9, 0])
+        ax_daily_similarity_no_var = plt.subplot(gs[9, 1])
+        ax_daily_similarity_no_var_no_mean = plt.subplot(gs[9, 2])
 
     plotting.plot_rolling_returns(
         returns,
         benchmark_rets=benchmark_rets,
-        benchmark2_rets=benchmark2_rets,
         live_start_date=live_start_date,
         cone_std=cone_std,
         ax=ax_rolling_returns)
@@ -129,7 +122,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         returns, ax=ax_rolling_sharpe)
 
     plotting.plot_rolling_risk_factors(
-        returns, risk_factors, ax=ax_rolling_risk)
+        returns, ax=ax_rolling_risk)
 
     # Drawdowns
     plotting.plot_drawdown_periods(
@@ -139,9 +132,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         returns=returns, ax=ax_underwater)
 
     plotting.show_worst_drawdown_periods(returns)
-
-    returns_backtest = returns[returns.index < live_start_date]
-    returns_live = returns[returns.index > live_start_date]
 
     df_weekly = timeseries.aggregate_returns(returns, 'weekly')
     df_monthly = timeseries.aggregate_returns(returns, 'monthly')
@@ -153,30 +143,34 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     plotting.plot_annual_returns(returns, ax=ax_annual_returns)
     plotting.plot_monthly_returns_dist(returns, ax=ax_monthly_dist)
 
-    plotting.plot_daily_returns_similarity(
-        returns_backtest,
-        returns_live,
-        title='Daily Returns Similarity',
-        ax=ax_daily_similarity_scale)
-    plotting.plot_daily_returns_similarity(
-        returns_backtest,
-        returns_live,
-        scale_kws={'with_std': False},
-        title='Similarity without\nvariance normalization',
-        ax=ax_daily_similarity_no_var)
-    plotting.plot_daily_returns_similarity(
-        returns_backtest,
-        returns_live,
-        scale_kws={'with_std': False,
-                   'with_mean': False},
-        title='Similarity without variance\nand mean normalization',
-        ax=ax_daily_similarity_no_var_no_mean)
-
     plotting.plot_return_quantiles(
         returns,
         df_weekly,
         df_monthly,
         ax=ax_return_quantiles)
+
+    if live_start_date is not None:
+        returns_backtest = returns[returns.index < live_start_date]
+        returns_live = returns[returns.index > live_start_date]
+
+        plotting.plot_daily_returns_similarity(
+            returns_backtest,
+            returns_live,
+            title='Daily Returns Similarity',
+            ax=ax_daily_similarity_scale)
+        plotting.plot_daily_returns_similarity(
+            returns_backtest,
+            returns_live,
+            scale_kws={'with_std': False},
+            title='Similarity without\nvariance normalization',
+            ax=ax_daily_similarity_no_var)
+        plotting.plot_daily_returns_similarity(
+            returns_backtest,
+            returns_live,
+            scale_kws={'with_std': False,
+                       'with_mean': False},
+            title='Similarity without variance\nand mean normalization',
+            ax=ax_daily_similarity_no_var_no_mean)
 
     if return_fig:
         return fig
@@ -332,8 +326,8 @@ def create_interesting_times_tear_sheet(
         return fig
 
 
-def create_bayesian_tear_sheet(returns, bmark, live_start_date=None,
-                               backtest_days_pct=0.5, return_fig=False):
+def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
+                               return_fig=False):
     """
     Generate a number of Bayesian distributions and a Bayesian
     cone plot of returns.
@@ -346,21 +340,14 @@ def create_bayesian_tear_sheet(returns, bmark, live_start_date=None,
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
-    bmark : pd.Series
+    benchmark_rets : pd.Series
         Daily non-cumulative returns of a benchmark.
     live_start_date : datetime, optional
         The point in time when the strategy began live
         trading, after its backtest period.
-    backtest_days_pct : float, optional
-        The fraction of the returns data that comes from
-        backtesting (versus live trading).
-         - Only used if live_start_date is left blank.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
-
-    if live_start_date is None:
-        live_start_date = returns.index[int(len(returns) * backtest_days_pct)]
 
     fig = plt.figure(figsize=(14, 10 * 2))
     gs = gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.3)
@@ -383,9 +370,9 @@ def create_bayesian_tear_sheet(returns, bmark, live_start_date=None,
     ax_vol.set_xlabel('Annual Volatility')
     ax_vol.set_ylabel('Belief')
 
-    bmark = bmark.loc[df_train.index]
+    benchmark_rets = benchmark_rets.loc[df_train.index]
     trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
-                                          bmark=bmark, samples=2000)
+                                          bmark=benchmark_rets, samples=2000)
 
     row += 1
     ax_alpha = plt.subplot(gs[row, 0])
@@ -441,9 +428,10 @@ def create_bayesian_tear_sheet(returns, bmark, live_start_date=None,
 
 
 def create_full_tear_sheet(returns, positions=None, transactions=None,
+                           benchmark_rets=None,
                            gross_lev=None,
                            live_start_date=None, bayesian=False,
-                           backtest_days_pct=0.5, cone_std=1.0):
+                           cone_std=1.0):
     """
     Generate a number of tear sheets that are useful
     for analyzing a strategy's performance.
@@ -470,16 +458,12 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         after its backtest period.
     bayesian: boolean, optional
         If True, causes the generation of a Bayesian tear sheet.
-    backtest_days_pct : float, optional
-        The fraction of the returns data that comes from
-        backtesting (versus live trading).
-         - Only used if live_start_date is left blank.
     cone_std : float, optional
         The standard deviation to use for the cone plots.
     """
 
-    benchmark_rets = utils.get_symbol_rets('SPY')
-    benchmark2_rets = utils.get_symbol_rets('IEF')  # 7-10yr Bond ETF.
+    if benchmark_rets is None:
+        benchmark_rets = utils.get_symbol_rets('SPY')
 
     # If the strategy's history is longer than the benchmark's, limit strategy
     if returns.index[0] < benchmark_rets.index[0]:
@@ -488,10 +472,8 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     create_returns_tear_sheet(
         returns,
         live_start_date=live_start_date,
-        backtest_days_pct=backtest_days_pct,
         cone_std=cone_std,
-        benchmark_rets=benchmark_rets,
-        benchmark2_rets=benchmark2_rets)
+        benchmark_rets=benchmark_rets)
 
     create_interesting_times_tear_sheet(returns, benchmark_rets=benchmark_rets)
 
@@ -501,9 +483,6 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         if transactions is not None:
             create_txn_tear_sheet(returns, positions, transactions)
 
-    if bayesian:
-        create_bayesian_tear_sheet(
-            returns,
-            benchmark_rets,
-            live_start_date=live_start_date,
-            backtest_days_pct=backtest_days_pct)
+    if bayesian and live_start_date is not None:
+        create_bayesian_tear_sheet(returns, benchmark_rets,
+                                   live_start_date=live_start_date)

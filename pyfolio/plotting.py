@@ -46,7 +46,7 @@ def set_plot_defaults():
 
 def plot_rolling_risk_factors(
         returns,
-        risk_factors,
+        risk_factors=None,
         rolling_beta_window=63 * 2,
         legend_loc='best',
         ax=None, **kwargs):
@@ -58,7 +58,7 @@ def plot_rolling_risk_factors(
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
-    risk_factors : pd.DataFrame
+    risk_factors : pd.DataFrame, optional
         data set containing the risk factors. See
         utils.load_portfolio_risk_factors.
     rolling_beta_window : int, optional
@@ -79,6 +79,9 @@ def plot_rolling_risk_factors(
 
     if ax is None:
         ax = plt.gca()
+
+    if risk_factors is None:
+        risk_factors = utils.load_portfolio_risk_factors()
 
     num_months_str = '%.0f' % (rolling_beta_window / 21)
 
@@ -413,7 +416,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     return ax
 
 
-def show_perf_stats(returns, live_start_date, benchmark_rets):
+def show_perf_stats(returns, benchmark_rets, live_start_date=None):
     """Prints some performance metrics of the strategy.
 
     - Shows amount of time the strategy has been run in backtest and
@@ -426,7 +429,7 @@ def show_perf_stats(returns, live_start_date, benchmark_rets):
     ----------
     returns : pd.Series
         Daily returns of the strategy, non-cumulative.
-    live_start_date : datetime
+    live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
     benchmark_rets : pd.Series
@@ -434,46 +437,52 @@ def show_perf_stats(returns, live_start_date, benchmark_rets):
 
     """
 
-    returns_backtest = returns[returns.index < live_start_date]
-    returns_live = returns[returns.index > live_start_date]
+    if live_start_date is not None:
+        returns_backtest = returns[returns.index < live_start_date]
+        returns_live = returns[returns.index > live_start_date]
 
-    print('Out-of-Sample Months: ' + str(int(len(returns_live) / 21)))
+        perf_stats_live = np.round(timeseries.perf_stats(
+            returns_live, returns_style='arithmetic'), 2)
+        perf_stats_live_ab = np.round(
+            timeseries.calc_alpha_beta(returns_live, benchmark_rets), 2)
+        perf_stats_live.loc['alpha'] = perf_stats_live_ab[0]
+        perf_stats_live.loc['beta'] = perf_stats_live_ab[1]
+        perf_stats_live.columns = ['Out_of_Sample']
+
+        perf_stats_all = np.round(timeseries.perf_stats(
+            returns, returns_style='arithmetic'), 2)
+        perf_stats_all_ab = np.round(
+            timeseries.calc_alpha_beta(returns, benchmark_rets), 2)
+        perf_stats_all.loc['alpha'] = perf_stats_all_ab[0]
+        perf_stats_all.loc['beta'] = perf_stats_all_ab[1]
+        perf_stats_all.columns = ['All_History']
+
+        print('Out-of-Sample Months: ' + str(int(len(returns_live) / 21)))
+    else:
+        returns_backtest = returns
+
     print('Backtest Months: ' + str(int(len(returns_backtest) / 21)))
 
-    perf_stats_backtest = np.round(timeseries.perf_stats(
+    perf_stats = np.round(timeseries.perf_stats(
         returns_backtest, returns_style='arithmetic'), 2)
-    perf_stats_backtest_ab = np.round(
+    perf_stats_ab = np.round(
         timeseries.calc_alpha_beta(returns_backtest, benchmark_rets), 2)
-    perf_stats_backtest.loc['alpha'] = perf_stats_backtest_ab[0]
-    perf_stats_backtest.loc['beta'] = perf_stats_backtest_ab[1]
-    perf_stats_backtest.columns = ['Backtest']
+    perf_stats.loc['alpha'] = perf_stats_ab[0]
+    perf_stats.loc['beta'] = perf_stats_ab[1]
+    perf_stats.columns = ['Backtest']
 
-    perf_stats_live = np.round(timeseries.perf_stats(
-        returns_live, returns_style='arithmetic'), 2)
-    perf_stats_live_ab = np.round(
-        timeseries.calc_alpha_beta(returns_live, benchmark_rets), 2)
-    perf_stats_live.loc['alpha'] = perf_stats_live_ab[0]
-    perf_stats_live.loc['beta'] = perf_stats_live_ab[1]
-    perf_stats_live.columns = ['Out_of_Sample']
+    if live_start_date is not None:
+        perf_stats = perf_stats.join(perf_stats_live,
+                                     how='inner')
+        perf_stats = perf_stats.join(perf_stats_all,
+                                     how='inner')
 
-    perf_stats_all = np.round(timeseries.perf_stats(
-        returns, returns_style='arithmetic'), 2)
-    perf_stats_all_ab = np.round(
-        timeseries.calc_alpha_beta(returns, benchmark_rets), 2)
-    perf_stats_all.loc['alpha'] = perf_stats_all_ab[0]
-    perf_stats_all.loc['beta'] = perf_stats_all_ab[1]
-    perf_stats_all.columns = ['All_History']
-
-    perf_stats_both = perf_stats_backtest.join(perf_stats_live, how='inner')
-    perf_stats_both = perf_stats_both.join(perf_stats_all, how='inner')
-
-    print(perf_stats_both)
+    print(perf_stats)
 
 
 def plot_rolling_returns(
         returns,
         benchmark_rets=None,
-        benchmark2_rets=None,
         live_start_date=None,
         cone_std=None,
         legend_loc='best',
@@ -492,8 +501,6 @@ def plot_rolling_returns(
         Daily returns of the strategy, non-cumulative.
     benchmark_rets : pd.Series, optional
         Daily non-cumulative returns of the first benchmark.
-    benchmark2_rets : pd.Series, optional
-        Daily non-cumulative returns of the second benchmark.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
@@ -525,11 +532,6 @@ def plot_rolling_returns(
     if benchmark_rets is not None:
         timeseries.cum_returns(benchmark_rets[df_cum_rets.index], 1.0).plot(
             lw=2, color='gray', label='S&P500', alpha=0.60, ax=ax, **kwargs)
-    if benchmark2_rets is not None:
-        timeseries.cum_returns(benchmark2_rets[df_cum_rets.index],
-                               1.0).plot(lw=2, color='gray',
-                                         label='7-10yr Bond',
-                                         alpha=0.35, ax=ax, **kwargs)
 
     if (live_start_date is None) or (df_cum_rets.index[-1] <=
                                      live_start_date):
@@ -576,11 +578,11 @@ def plot_rolling_returns(
                             cone_df_live.sd_up,
                             color='red', alpha=0.30)
 
-        ax.axhline(1.0, linestyle='--', color='black', lw=2)
-        ax.set_ylabel('Cumulative returns')
-        ax.set_title('Cumulative Returns')
-        ax.legend(loc=legend_loc)
-        ax.set_xlabel('')
+    ax.axhline(1.0, linestyle='--', color='black', lw=2)
+    ax.set_ylabel('Cumulative returns')
+    ax.set_title('Cumulative Returns')
+    ax.legend(loc=legend_loc)
+    ax.set_xlabel('')
 
     return ax
 
