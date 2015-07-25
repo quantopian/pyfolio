@@ -114,8 +114,8 @@ def get_symbol_rets(symbol):
         filepath = data_path('spy.h5')
         try:
             # If it's been less than a day since we got benchmark
-            if datetime.now() - pd.to_datetime(getmtime(filepath),
-                                               unit='s') < pd.Timedelta(days=1):
+            if datetime.now() - pd.to_datetime(
+                    getmtime(filepath), unit='s') < pd.Timedelta(days=1):
                 rets = pd.read_hdf(filepath, 'df')
         except:
             pass
