@@ -29,9 +29,11 @@ from . import utils
 from . import timeseries
 from . import pos
 
+from functools import wraps
 
 def plotting_context(func):
     """Decorator to set plotting context during function call."""
+    @wraps(func)
     def call_w_context(*args, **kwargs):
         set_context = kwargs.pop('set_context', True)
         if set_context:
