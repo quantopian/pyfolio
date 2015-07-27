@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from __future__ import division
 from os.path import (
     abspath,
@@ -113,8 +114,8 @@ def get_symbol_rets(symbol):
         filepath = data_path('spy.h5')
         try:
             # If it's been less than a day since we got benchmark
-            if datetime.now()-pd.to_datetime(getmtime(filepath),
-                                             unit='s') < pd.Timedelta(days=1):
+            if datetime.now() - pd.to_datetime(
+                    getmtime(filepath), unit='s') < pd.Timedelta(days=1):
                 rets = pd.read_hdf(filepath, 'df')
         except:
             pass
@@ -256,51 +257,5 @@ def extract_rets_pos_txn_from_zipline(backtest):
     transactions = txn.get_txn_vol(transactions_frame)
     transactions.index = transactions.index.normalize()
     transactions.index.tz = None
-
-    return returns, positions, transactions, gross_lev
-
-
-def extract_rets_pos_txn_from_backtest_obj(backtest):
-    """Extract returns, positions, and transactions from the backtest
-    object returned by get_backtest() on the Quantopian research
-    platform.
-
-    The returned data structures are in a format compatible with the
-    rest of pyfolio and can be directly passed to
-    e.g. tears.create_full_tear_sheet().
-
-    Parameters
-    ----------
-    backtest : qexec.research.backtest.BacktestResult
-        Object returned by get_backtest() on the Quantopian research
-        platform containing all results of a backtest
-
-    Returns
-    -------
-    returns : pd.Series
-        Daily returns of backtest
-    positions : pd.DataFrame
-        Daily net position values
-    transactions : pd.DataFrame
-        Daily transaction volume and dollar ammount.
-    gross_lev : pd.Series
-        Daily gross leverage.
-
-
-    Example (on the Quantopian research platform)
-    ---------------------------------------------
-    >>> backtest = get_backtest('548f4f3d885aef09019e9c36')
-    >>> returns, positions, transactions, gross_lev =
-    >>>     pyfolio.utils.extract_rets_pos_txn_from_backtest_obj(backtest)
-    >>> pyfolio.tears.create_full_tear_sheet(returns,
-    >>>     positions, transactions, gross_lev=gross_lev)
-    """
-    returns = backtest.daily_performance.returns
-    returns.index = returns.index.normalize()
-
-    positions = pos.extract_pos(backtest.positions,
-                                backtest.daily_performance.ending_cash)
-    transactions = txn.get_txn_vol(backtest.transactions)
-    gross_lev = backtest.daily_performance.gross_leverage
 
     return returns, positions, transactions, gross_lev
