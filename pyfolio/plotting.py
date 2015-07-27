@@ -30,18 +30,21 @@ from . import timeseries
 from . import pos
 
 
-def set_plot_defaults():
-    """
-    Sets default plotting/charting colors/styles.
-    """
+def set_context(context='notebook', font_scale=1.5, rc=None):
+    if rc is None:
+        rc = {}
 
-    matplotlib.style.use('fivethirtyeight')
-    sns.set_context("talk", font_scale=1.0)
-    sns.set_palette("Set1", 10, 1.0)
-    matplotlib.style.use('bmh')
-    matplotlib.rcParams['lines.linewidth'] = 1.5
-    matplotlib.rcParams['axes.facecolor'] = '0.995'
-    matplotlib.rcParams['figure.facecolor'] = '0.97'
+    rc_default = {'lines.linewidth': 1.5,
+                  'axes.facecolor': '0.995',
+                  'figure.facecolor': '0.97'}
+
+    # Add defaults if they do not exist
+    for name, val in rc_default.iteritems():
+        if name not in rc:
+            rc[name] = val
+
+    return sns.plotting_context(context=context, font_scale=font_scale,
+                                rc=rc)
 
 
 def plot_rolling_risk_factors(

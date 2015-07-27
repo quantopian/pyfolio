@@ -39,7 +39,7 @@ import seaborn as sns
 def create_returns_tear_sheet(returns, live_start_date=None,
                               cone_std=1.0,
                               benchmark_rets=None,
-                              return_fig=False):
+                              return_fig=False, set_context=True):
     """
     Generate a number of plots for analyzing a strategy's returns.
 
@@ -64,7 +64,13 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         Daily non-cumulative returns of the first benchmark.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
+    set_context : boolean, optional
+        If True, set default plotting style context.
     """
+
+    if set_context:
+        context = plotting.set_context()
+        context.__enter__()
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
@@ -72,8 +78,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         # strategy
         if returns.index[0] < benchmark_rets.index[0]:
             returns = returns[returns.index > benchmark_rets.index[0]]
-
-    plotting.set_plot_defaults()
 
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
 
@@ -172,12 +176,16 @@ def create_returns_tear_sheet(returns, live_start_date=None,
             title='Similarity without variance\nand mean normalization',
             ax=ax_daily_similarity_no_var_no_mean)
 
+    if set_context:
+        context.__exit__()
+
     if return_fig:
         return fig
 
 
 def create_position_tear_sheet(
-        returns, positions_val, gross_lev=None, return_fig=False):
+        returns, positions_val, gross_lev=None, return_fig=False,
+        set_context=True):
     """
     Generate a number of plots for analyzing a
     strategy's positions and holdings.
@@ -196,7 +204,13 @@ def create_position_tear_sheet(
          divided by net asset value.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
+    set_context : boolean, optional
+        If True, set default plotting style context.
     """
+
+    if set_context:
+        context = plotting.set_context()
+        context.__enter__()
 
     fig = plt.figure(figsize=(14, 4 * 6))
     gs = gridspec.GridSpec(4, 3, wspace=0.5, hspace=0.5)
@@ -219,12 +233,16 @@ def create_position_tear_sheet(
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
+    if set_context:
+        context.__exit__()
+
     if return_fig:
         return fig
 
 
 def create_txn_tear_sheet(
-        returns, positions_val, transactions, return_fig=False):
+        returns, positions_val, transactions, return_fig=False,
+        set_context=True):
     """
     Generate a number of plots for analyzing a strategy's transactions.
 
@@ -241,7 +259,13 @@ def create_txn_tear_sheet(
          See pos.make_transaction_frame(transactions).
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
+    set_context : boolean, optional
+        If True, set default plotting style context.
     """
+
+    if set_context:
+        context = plotting.set_context()
+        context.__enter__()
 
     fig = plt.figure(figsize=(14, 3 * 6))
     gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
@@ -259,12 +283,16 @@ def create_txn_tear_sheet(
 
     plotting.plot_volume_per_day_hist(transactions, ax=ax_daily_volume_hist)
 
+    if set_context:
+        context.__exit__()
+
     if return_fig:
         return fig
 
 
 def create_interesting_times_tear_sheet(
-        returns, benchmark_rets=None, legend_loc='best', return_fig=False):
+        returns, benchmark_rets=None, legend_loc='best', return_fig=False,
+        set_context=True):
     """
     Generate a number of returns plots around interesting points in time,
     like the flash crash and 9/11.
@@ -284,7 +312,13 @@ def create_interesting_times_tear_sheet(
          The legend's location.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
+    set_context : boolean, optional
+        If True, set default plotting style context.
     """
+
+    if set_context:
+        context = plotting.set_context()
+        context.__enter__()
 
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
     print('\nStress Events')
@@ -322,12 +356,15 @@ def create_interesting_times_tear_sheet(
         ax.set_ylabel('Returns')
         ax.set_xlabel('')
 
+    if set_context:
+        context.__exit__()
+
     if return_fig:
         return fig
 
 
 def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
-                               return_fig=False):
+                               return_fig=False, set_context=True):
     """
     Generate a number of Bayesian distributions and a Bayesian
     cone plot of returns.
@@ -347,7 +384,13 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
         trading, after its backtest period.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
+    set_context : boolean, optional
+        If True, set default plotting style context.
     """
+
+    if set_context:
+        context = plotting.set_context()
+        context.__enter__()
 
     fig = plt.figure(figsize=(14, 10 * 2))
     gs = gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.3)
@@ -423,6 +466,9 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
                              trace=trace_t,
                              ax=ax_cone)
 
+    if set_context:
+        context.__exit__()
+
     if return_fig:
         return fig
 
@@ -431,7 +477,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
                            benchmark_rets=None,
                            gross_lev=None,
                            live_start_date=None, bayesian=False,
-                           cone_std=1.0):
+                           cone_std=1.0, set_context=True):
     """
     Generate a number of tear sheets that are useful
     for analyzing a strategy's performance.
@@ -460,6 +506,8 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         If True, causes the generation of a Bayesian tear sheet.
     cone_std : float, optional
         The standard deviation to use for the cone plots.
+    set_context : boolean, optional
+        If True, set default plotting style context.
     """
 
     if benchmark_rets is None:
@@ -473,16 +521,24 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         returns,
         live_start_date=live_start_date,
         cone_std=cone_std,
-        benchmark_rets=benchmark_rets)
+        benchmark_rets=benchmark_rets,
+        set_context=set_context
+    )
 
-    create_interesting_times_tear_sheet(returns, benchmark_rets=benchmark_rets)
+    create_interesting_times_tear_sheet(returns,
+                                        benchmark_rets=benchmark_rets,
+                                        set_context=set_context)
 
     if positions is not None:
-        create_position_tear_sheet(returns, positions, gross_lev=gross_lev)
+        create_position_tear_sheet(returns, positions,
+                                   gross_lev=gross_lev,
+                                   set_context=set_context)
 
         if transactions is not None:
-            create_txn_tear_sheet(returns, positions, transactions)
+            create_txn_tear_sheet(returns, positions, transactions,
+                                  set_context=set_context)
 
     if bayesian and live_start_date is not None:
         create_bayesian_tear_sheet(returns, benchmark_rets,
-                                   live_start_date=live_start_date)
+                                   live_start_date=live_start_date,
+                                   set_context=set_context)
