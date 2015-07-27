@@ -20,6 +20,7 @@ from os.path import (
     getmtime,
     join,
 )
+import warnings
 
 from datetime import datetime
 
@@ -117,8 +118,9 @@ def get_symbol_rets(symbol):
             if datetime.now() - pd.to_datetime(
                     getmtime(filepath), unit='s') < pd.Timedelta(days=1):
                 rets = pd.read_hdf(filepath, 'df')
-        except:
-            pass
+        except Exception as e:
+            warnings.warn('Failed to load SPY from local, ' +
+                          'downloading from Yahoo instead: %s' % e)
 
     if rets is None:
         px = web.get_data_yahoo(symbol, start='1/1/1970')
@@ -129,8 +131,8 @@ def get_symbol_rets(symbol):
         if symbol == 'SPY':
             try:
                 rets.to_hdf(filepath, 'df')
-            except:
-                pass
+            except Exception as e:
+                warnings.warn('Failed to save SPY locally: %s' % e)
 
     return rets
 
@@ -174,37 +176,36 @@ def load_portfolio_risk_factors(filepath_prefix=None):
                                        unit='s') < pd.Timedelta(days=2):
         try:
             five_factors = pd.read_hdf(filepath, 'df')
-        except:
-            pass
+        except Exception as e:
+            warnings.warn('Failed to load risk factors from local, ' +
+                          'downloading from Dartmouth instead: %s' % e)
 
     if not isinstance(five_factors, pd.DataFrame):
+        umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
+                          's/faculty/ken.french/ftp/F-F_Momentum'
+                          '_Factor_daily_CSV.zip')
+        factors_req = urlopen('http://mba.tuck.dartmouth.edu/pag'
+                              'es/faculty/ken.french/ftp/F-F_Re'
+                              'search_Data_Factors_daily_CSV.zip')
+
+        umd_zip = zipfile.ZipFile(StringIO(umd_req.read()), 'r')
+        factors_zip = zipfile.ZipFile(StringIO(factors_req.read()),
+                                      'r')
+        umd_csv = umd_zip.read('F-F_Momentum_Factor_daily.CSV')
+        umd_csv = umd_csv.split('\r\n\r\n')[2]
+        factors_csv = factors_zip.read('F-F_Research_Data_'
+                                       'Factors_daily.CSV')
+        factors_csv = factors_csv.split('\r\n\r\n')[1]
+
+        factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
+        umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')
+
+        five_factors = factors.join(umd).dropna(axis=0)
+        five_factors = five_factors / 100
         try:
-            umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
-                              's/faculty/ken.french/ftp/F-F_Momentum'
-                              '_Factor_daily_CSV.zip')
-            factors_req = urlopen('http://mba.tuck.dartmouth.edu/pag'
-                                  'es/faculty/ken.french/ftp/F-F_Re'
-                                  'search_Data_Factors_daily_CSV.zip')
-
-            umd_zip = zipfile.ZipFile(StringIO(umd_req.read()), 'r')
-            factors_zip = zipfile.ZipFile(StringIO(factors_req.read()),
-                                          'r')
-            umd_csv = umd_zip.read('F-F_Momentum_Factor_daily.CSV')
-            umd_csv = umd_csv.split('\r\n\r\n')[2]
-            factors_csv = factors_zip.read('F-F_Research_Data_'
-                                           'Factors_daily.CSV')
-            factors_csv = factors_csv.split('\r\n\r\n')[1]
-
-            factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
-            umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')
-
-            five_factors = factors.join(umd).dropna(axis=0)
-            five_factors = five_factors / 100
-
             five_factors.to_hdf(filepath, 'df')
-        except:
-            pass
-
+        except Exception as e:
+            warnings.warn('Failed to save risk factors locally: %s' % e)
     return five_factors
 
 
