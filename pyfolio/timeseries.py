@@ -410,7 +410,7 @@ def sharpe_ratio(returns, returns_style='compound'):
         return np.nan
 
 
-def stability_of_timeseries(returns, logValue=True, return_ols_model=False):
+def stability_of_timeseries(returns, logValue=True):
     """
     Determines R-squared of a linear fit to the returns.
 
@@ -439,8 +439,6 @@ def stability_of_timeseries(returns, logValue=True, return_ols_model=False):
 
     model = regression(temp_values, X, add_constant=True)
     # TODO: should adjusted rsquared be used?
-    if return_ols_model:
-        return model.r2, model
     return model.r2
 
 
@@ -515,7 +513,7 @@ def out_of_sample_vs_in_sample_returns_kde(
     return kde_diff
 
 
-def calc_multifactor(returns, factors, add_constant=True, return_ols_model=False):
+def calc_multifactor(returns, factors, add_constant=True):
     """
     Computes multiple ordinary least squares linear fits, and returns fit parameters.
 
@@ -532,13 +530,10 @@ def calc_multifactor(returns, factors, add_constant=True, return_ols_model=False
         Fit parameters.
     """
     model = regression(returns, factors, add_constant=add_constant)
-    if return_ols_model:
-        return model.beta, model
     return model.beta
 
 
-def rolling_beta(returns, benchmark_rets, window=63,
-                 add_constant=True, return_ols_model=False):
+def rolling_beta(returns, benchmark_rets, window=63, add_constant=True):
     """
     Determines the rolling beta of a strategy.
 
@@ -561,14 +556,13 @@ def rolling_beta(returns, benchmark_rets, window=63,
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
     """
 
-    model = rolling_regression(returns, benchmark_rets, window, add_constant=add_constant)
-    if return_ols_model:
-        return model.beta, model
+    model = rolling_regression(returns, benchmark_rets,
+                               window, add_constant=add_constant)
     return model.beta
 
 
-def rolling_multifactor_beta(returns, df_multi_factor, window=63,
-                             add_constant=True, return_ols_model=False):
+def rolling_multifactor_beta(returns, df_multi_factor,
+                             window=63, add_constant=True):
     """
     Determines the rolling beta of multiple factors.
 
@@ -590,13 +584,12 @@ def rolling_multifactor_beta(returns, df_multi_factor, window=63,
     -----
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
     """
-    model = rolling_regression(returns, df_multi_factor, window, add_constant=add_constant)
-    if return_ols_model:
-        return model.beta, model
+    model = rolling_regression(returns, df_multi_factor,
+                               window, add_constant=add_constant)
     return model.beta
 
 
-def calc_alpha_beta(returns, benchmark_rets, return_ols_model=False):
+def calc_alpha_beta(returns, benchmark_rets):
     """
     Calculates both alpha and beta.
 
@@ -615,10 +608,7 @@ def calc_alpha_beta(returns, benchmark_rets, return_ols_model=False):
         Beta.
     """
     model = regression(returns, benchmark_rets, add_constant=True)
-
     beta, alpha = model.beta
-    if return_ols_model:
-        return alpha * 252, beta, model
 
     return alpha * 252, beta
 
