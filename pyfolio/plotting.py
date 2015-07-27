@@ -37,7 +37,7 @@ def plotting_context(func):
         if set_context:
             with context():
                 return func(*args, **kwargs)
-        else: # call without context
+        else:
             return func(*args, **kwargs)
     return call_w_context
 

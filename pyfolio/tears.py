@@ -37,6 +37,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
 
+
 @plotting_context
 def create_returns_tear_sheet(returns, live_start_date=None,
                               cone_std=1.0,
@@ -177,6 +178,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     if return_fig:
         return fig
 
+
 @plotting_context
 def create_position_tear_sheet(
         returns, positions_val, gross_lev=None, return_fig=False):
@@ -226,6 +228,7 @@ def create_position_tear_sheet(
     if return_fig:
         return fig
 
+
 @plotting_context
 def create_txn_tear_sheet(
         returns, positions_val, transactions, return_fig=False):
@@ -249,7 +252,6 @@ def create_txn_tear_sheet(
         If True, set default plotting style context.
     """
 
-
     fig = plt.figure(figsize=(14, 3 * 6))
     gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
     ax_turnover = plt.subplot(gs[0, :])
@@ -268,6 +270,7 @@ def create_txn_tear_sheet(
 
     if return_fig:
         return fig
+
 
 @plotting_context
 def create_interesting_times_tear_sheet(
@@ -332,6 +335,7 @@ def create_interesting_times_tear_sheet(
 
     if return_fig:
         return fig
+
 
 @plotting_context
 def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
@@ -435,6 +439,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
 
     if return_fig:
         return fig
+
 
 def create_full_tear_sheet(returns, positions=None, transactions=None,
                            benchmark_rets=None,
