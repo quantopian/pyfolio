@@ -29,8 +29,24 @@ from . import utils
 from . import timeseries
 from . import pos
 
+from contextlib import contextmanager
 
-def set_context(context='notebook', font_scale=1.5, rc=None):
+@contextmanager
+def nullctx():
+    "No-op contextmanager"
+    yield
+
+
+def plotting_context(func):
+    """Decorator to set plotting context during function call."""
+    def call_w_context(*args, **kwargs):
+        set_context = kwargs.pop('set_context', True)
+        with context() if set_context else nullctx():
+            return func(*args, **kwargs)
+    return call_w_context
+
+
+def context(context='notebook', font_scale=1.5, rc=None):
     if rc is None:
         rc = {}
 
@@ -39,9 +55,8 @@ def set_context(context='notebook', font_scale=1.5, rc=None):
                   'figure.facecolor': '0.97'}
 
     # Add defaults if they do not exist
-    for name, val in rc_default.iteritems():
-        if name not in rc:
-            rc[name] = val
+    for name, val in rc_default.items():
+        rc.setdefault(name, val)
 
     return sns.plotting_context(context=context, font_scale=font_scale,
                                 rc=rc)
