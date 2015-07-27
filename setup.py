@@ -6,7 +6,16 @@ import sys
 DISTNAME = 'pyfolio'
 DESCRIPTION = "pyfolio is a Python library for performance and risk analysis of financial portfolios"
 LONG_DESCRIPTION = """pyfolio is a Python library for performance and risk analysis of
-financial portfolios."""
+financial portfolios developed by `Quantopian Inc`_. It works well with the
+`Zipline`_ open source backtesting library.
+
+At the core of pyfolio is a so-called tear sheet that consists of
+various individual plots that provide a comprehensive performance
+overview of a portfolio.
+
+.. _Quantopian Inc: https://www.quantopian.com
+.. _Zipline: http://zipline.io
+"""
 MAINTAINER = 'Quantopian Inc'
 MAINTAINER_EMAIL = 'opensource@quantopian.com'
 AUTHOR = 'Quantopian Inc'
