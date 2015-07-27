@@ -22,12 +22,10 @@ import pandas as pd
 import numpy as np
 import scipy as sp
 import scipy.stats as stats
-import scipy.signal as signal
 from sklearn import preprocessing
 
 import statsmodels.api as sm
 
-import datetime
 
 
 def regression(y, x, add_constant=True):
@@ -36,27 +34,47 @@ def regression(y, x, add_constant=True):
     returns the ols model for situations where
     other statistical values are needed.
 
-    :param y: Series/DataFrame; dependent variable
-    :param x: Series/DataFrame; independent variable(s)
-    :param add_constant: if True a constant term will be added
-                         to the regression model.
-    :return: pandas.stats.ols.OLS; regression model
+    Parameters
+    ----------
+    y : Series/DataFrame
+        dependent variable
+    x : Series/DataFrame
+        independent variable(s)
+    add_constant : boolean <default=True>
+        if True a constant term is added
+        to the regression model.
+
+    returns
+    -------
+    pandas.stats.ols.OLS
+        regression model
     """
     return pd.ols(y=y, x=x, intercept=add_constant)
 
 
 def rolling_regression(y, x, window, add_constant=True):
     """
-    Generalized regression calculation that
+    Generalized rolling regression calculation that
     returns the ols model for situations where
     other statistical values are needed.
 
-    :param y: Series/DataFrame; dependent variable
-    :param x: Series/DataFrame; independent variable(s)
-    :param window: int; number of bars used in the regression window
-    :param add_constant: if True a constant term will be added
-                         to the regression model.
-    :return: pandas.stats.ols.OLS; regression model
+    Parameters
+    ----------
+    y : Series/DataFrame
+        dependent variable
+    x : Series/DataFrame
+        independent variable(s)
+    window : int
+        lookback window length used in
+        the rolling regression
+    add_constant : boolean <default=True>
+        if True a constant term is added
+        to the regression model.
+
+    returns
+    -------
+    pandas.stats.ols.OLS
+        regression model
     """
     return pd.ols(y=y, x=x, window=window,
                   window_type='rolling', intercept=add_constant)
