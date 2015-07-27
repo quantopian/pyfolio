@@ -29,19 +29,69 @@ from . import utils
 from . import timeseries
 from . import pos
 
+from functools import wraps
 
-def set_plot_defaults():
-    """
-    Sets default plotting/charting colors/styles.
-    """
 
-    matplotlib.style.use('fivethirtyeight')
-    sns.set_context("talk", font_scale=1.0)
-    sns.set_palette("Set1", 10, 1.0)
-    matplotlib.style.use('bmh')
-    matplotlib.rcParams['lines.linewidth'] = 1.5
-    matplotlib.rcParams['axes.facecolor'] = '0.995'
-    matplotlib.rcParams['figure.facecolor'] = '0.97'
+def plotting_context(func):
+    """Decorator to set plotting context during function call."""
+    @wraps(func)
+    def call_w_context(*args, **kwargs):
+        set_context = kwargs.pop('set_context', True)
+        if set_context:
+            with context():
+                return func(*args, **kwargs)
+        else:
+            return func(*args, **kwargs)
+    return call_w_context
+
+
+def context(context='notebook', font_scale=1.5, rc=None):
+    """Create pyfolio default plotting style context.
+
+    Under the hood, calls and returns seaborn.plotting_context() with
+    some custom settings. Usually you would use in a with-context.
+
+    Parameters
+    ----------
+    context : str, optional
+        Name of seaborn context.
+    font_scale : float, optional
+        Scale font by factor font_scale.
+    rc : dict, optional
+        Config flags.
+        By default, {'lines.linewidth': 1.5,
+                     'axes.facecolor': '0.995',
+                     'figure.facecolor': '0.97'}
+        is being used and will be added to any
+        rc passed in, unless explicitly overriden.
+
+    Returns
+    -------
+    seaborn plotting context
+
+    Example
+    -------
+    >>> with pyfolio.plotting.context(font_scale=2):
+    >>>    pyfolio.create_full_tear_sheet()
+
+    See also
+    --------
+    For more information, see seaborn.plotting_context().
+
+"""
+    if rc is None:
+        rc = {}
+
+    rc_default = {'lines.linewidth': 1.5,
+                  'axes.facecolor': '0.995',
+                  'figure.facecolor': '0.97'}
+
+    # Add defaults if they do not exist
+    for name, val in rc_default.items():
+        rc.setdefault(name, val)
+
+    return sns.plotting_context(context=context, font_scale=font_scale,
+                                rc=rc)
 
 
 def plot_rolling_risk_factors(
