@@ -263,13 +263,42 @@ def extract_rets_pos_txn_from_zipline(backtest):
 
 
 SETTINGS = {
+    # Settings dict to store functions/values that may
+    # need to be overridden depending on the users environment
     'returns_func': default_returns_func
 }
 
 
 def register_return_func(func):
+    """
+    Registers the function that will be called for
+    retrieving returns data.
+
+    Parameters
+    ----------
+    func : function
+        A function that accepts a symbol and
+        returns a pandas.Series of asset returns.
+
+    Returns
+    -------
+    None
+    """
     SETTINGS['returns_func'] = func
 
 
 def get_symbol_rets(symbol):
+    """
+    Calls the currently registered 'returns_func'
+
+    Parameters
+    ----------
+    symbol : str
+        the symbol for the desired asset return series
+
+    Returns
+    -------
+    pandas.Series
+        the series returned by the current 'returns_func'
+    """
     return SETTINGS['returns_func'](symbol)
