@@ -9,6 +9,8 @@ import pandas.util.testing as pdt
 
 from .. import timeseries
 
+DECIMAL_PLACES = 8
+
 
 class TestDrawdown(TestCase):
     px_list_1 = np.array(
@@ -219,18 +221,19 @@ class TestStats(TestCase):
         (simple_rets, 0.12271674212427248)
     ])
     def test_annual_volatility(self, returns, expected):
-        self.assertEqual(timeseries.annual_volatility(returns), expected)
+        self.assertAlmostEqual(timeseries.annual_volatility(returns),
+                               expected, DECIMAL_PLACES)
 
     @parameterized.expand([
         (simple_rets, 'calendar', 0.8624740045072119),
         (simple_rets, 'compound', 1.3297007080039505)
     ])
     def test_sharpe(self, returns, returns_style, expected):
-        self.assertEqual(
+        self.assertAlmostEqual(
             timeseries.sharpe_ratio(
                 returns,
                 returns_style=returns_style),
-            expected)
+            expected, DECIMAL_PLACES)
 
     @parameterized.expand([
         (simple_rets[:5], 2, '[nan, inf, inf, 11.224972160321828, inf]')
@@ -243,11 +246,11 @@ class TestStats(TestCase):
         (simple_rets, True, 0.010766923838471554)
     ])
     def test_stability_of_timeseries(self, returns, logValue, expected):
-        self.assertEqual(
+        self.assertAlmostEqual(
             timeseries.stability_of_timeseries(
                 returns,
                 logValue=logValue),
-            expected)
+            expected, DECIMAL_PLACES)
 
     @parameterized.expand([
         (simple_rets[:5], simple_benchmark[:5], 2, 8.024708101613483e-32)
