@@ -30,6 +30,7 @@ import pandas.io.data as web
 
 import zipfile
 
+
 try:
     # For Python 3.0 and later
     from urllib.request import urlopen
@@ -92,7 +93,7 @@ def round_two_dec_places(x):
     return np.round(x, 2)
 
 
-def get_symbol_rets(symbol):
+def default_returns_func(symbol):
     """
     Gets returns for a symbol.
 
@@ -259,3 +260,16 @@ def extract_rets_pos_txn_from_zipline(backtest):
     transactions.index.tz = None
 
     return returns, positions, transactions, gross_lev
+
+
+SETTINGS = {
+    'returns_func': default_returns_func
+}
+
+def register_return_func(func):
+    SETTINGS['returns_func'] = func
+
+
+def get_symbol_rets(symbol):
+    return SETTINGS['returns_func'](symbol)
+
