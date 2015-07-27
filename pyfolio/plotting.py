@@ -29,19 +29,15 @@ from . import utils
 from . import timeseries
 from . import pos
 
-from contextlib import contextmanager
-
-@contextmanager
-def nullctx():
-    "No-op contextmanager"
-    yield
-
 
 def plotting_context(func):
     """Decorator to set plotting context during function call."""
     def call_w_context(*args, **kwargs):
         set_context = kwargs.pop('set_context', True)
-        with context() if set_context else nullctx():
+        if set_context:
+            with context():
+                return func(*args, **kwargs)
+        else: # call without context
             return func(*args, **kwargs)
     return call_w_context
 
