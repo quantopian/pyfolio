@@ -266,10 +266,10 @@ SETTINGS = {
     'returns_func': default_returns_func
 }
 
+
 def register_return_func(func):
     SETTINGS['returns_func'] = func
 
 
 def get_symbol_rets(symbol):
     return SETTINGS['returns_func'](symbol)
-
