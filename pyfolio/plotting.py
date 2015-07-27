@@ -31,6 +31,7 @@ from . import pos
 
 from functools import wraps
 
+
 def plotting_context(func):
     """Decorator to set plotting context during function call."""
     @wraps(func)
