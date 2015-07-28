@@ -38,17 +38,17 @@ classifiers = ['Development Status :: 4 - Beta',
 
 install_reqs = [
     'funcsigs>=0.4',
-    'matplotlib>=1.4.3',
+    'matplotlib>=1.4.0',
     'mock>=1.1.2',
-    'numpy>=1.9.2',
-    'pandas>=0.16.2',
+    'numpy>=1.9.1',
+    'pandas>=0.15.0',
     'pyparsing>=2.0.3',
     'python-dateutil>=2.4.2',
-    'pytz>=2015.4',
-    'scikit-learn>=0.16.1',
-    'scipy>=0.15.1',
+    'pytz>=2014.10',
+    'scikit-learn>=0.15.0',
+    'scipy>=0.14.0',
     'seaborn>=0.6.0',
-    'statsmodels>=0.6.1',
+    'statsmodels>=0.5.0',
     'wsgiref>=0.1.2']
 
 extras_reqs = {
