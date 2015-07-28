@@ -94,10 +94,10 @@ def round_two_dec_places(x):
     return np.round(x, 2)
 
 
-def normalize_date(dt):
+def get_utc_date(dt):
     """
-    returns the timestamp/DatetimeIndex
-    normalized to midnight UTC time
+    returns the UTC representation
+    of a timestamp or DatetimeIndex
 
     Parameters
     ----------
@@ -108,7 +108,7 @@ def normalize_date(dt):
     Returns
     -------
     same dtype as dt
-        the date(s) normalized to midnight UTC
+        UTC representation of the input date(s)
     """
     try:
         dt = dt.tz_localize(pytz.UTC)
@@ -140,7 +140,7 @@ def default_returns_func(symbol):
             if datetime.now() - pd.to_datetime(
                     getmtime(filepath), unit='s') < pd.Timedelta(days=1):
                 rets = pd.read_hdf(filepath, 'df')
-                rets.index = normalize_date(rets.index)
+                rets.index = get_utc_date(rets.index)
         except:
             pass
 
@@ -148,7 +148,7 @@ def default_returns_func(symbol):
         px = web.get_data_yahoo(symbol, start='1/1/1970')
         px = pd.DataFrame.rename(px, columns={'Adj Close': 'AdjClose'})
         px.columns.name = symbol
-        px.index = normalize_date(px.index)
+        px.index = get_utc_date(px.index)
         rets = px.AdjClose.pct_change().dropna()
 
         if symbol == 'SPY':
