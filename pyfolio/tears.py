@@ -32,7 +32,6 @@ except ImportError:
 import numpy as np
 import scipy.stats
 import pandas as pd
-import pytz
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
