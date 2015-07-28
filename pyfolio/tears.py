@@ -38,6 +38,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
 
+from . utils import normalize_date
+
 
 @plotting_context
 def create_returns_tear_sheet(returns, live_start_date=None,
@@ -76,8 +78,8 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         benchmark_rets = utils.get_symbol_rets('SPY')
         # If the strategy's history is longer than the benchmark's, limit
         # strategy
-        benchmark_start = benchmark_rets.index[0].astimezone(pytz.UTC)
-        returns_start = returns.index[0].astimezone(pytz.UTC)
+        benchmark_start = normalize_date(benchmark_rets.index[0])
+        returns_start = normalize_date(returns.index[0])
         if returns_start < benchmark_start:
             returns = returns[returns.index > benchmark_rets.index[0]]
 
@@ -309,8 +311,8 @@ def create_interesting_times_tear_sheet(
         benchmark_rets = utils.get_symbol_rets('SPY')
         # If the strategy's history is longer than the benchmark's, limit
         # strategy
-        benchmark_start = benchmark_rets.index[0].astimezone(pytz.UTC)
-        returns_start = returns.index[0].astimezone(pytz.UTC)
+        benchmark_start = normalize_date(benchmark_rets.index[0])
+        returns_start = normalize_date(returns.index[0])
         if returns_start < benchmark_start:
             returns = returns[returns.index > benchmark_rets.index[0]]
 
@@ -487,8 +489,8 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         benchmark_rets = utils.get_symbol_rets('SPY')
 
     # If the strategy's history is longer than the benchmark's, limit strategy
-    benchmark_start = benchmark_rets.index[0].astimezone(pytz.UTC)
-    returns_start = returns.index[0].astimezone(pytz.UTC)
+    benchmark_start = normalize_date(benchmark_rets.index[0])
+    returns_start = normalize_date(returns.index[0])
     if returns_start < benchmark_start:
         returns = returns[returns.index > benchmark_rets.index[0]]
 

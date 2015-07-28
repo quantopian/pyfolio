@@ -22,6 +22,7 @@ from os.path import (
 )
 
 from datetime import datetime
+import pytz
 
 import pandas as pd
 import numpy as np
@@ -93,6 +94,29 @@ def round_two_dec_places(x):
     return np.round(x, 2)
 
 
+def normalize_date(dt):
+    """
+    returns the timestamp/DatetimeIndex
+    normalized to midnight UTC time
+
+    Parameters
+    ----------
+
+    dt : pandas.Timestamp or pandas.DatetimeIndex
+        The date(s) to be converted
+
+    Returns
+    -------
+    same dtype as dt
+        the date(s) normalized to midnight UTC
+    """
+    try:
+        dt = dt.tz_localize(pytz.UTC)
+    except TypeError:
+        dt = dt.tz_convert(pytz.UTC)
+    return dt.normalize()
+
+
 def default_returns_func(symbol):
     """
     Gets returns for a symbol.
@@ -116,6 +140,7 @@ def default_returns_func(symbol):
             if datetime.now() - pd.to_datetime(
                     getmtime(filepath), unit='s') < pd.Timedelta(days=1):
                 rets = pd.read_hdf(filepath, 'df')
+                rets.index = normalize_date(rets.index)
         except:
             pass
 
@@ -123,6 +148,7 @@ def default_returns_func(symbol):
         px = web.get_data_yahoo(symbol, start='1/1/1970')
         px = pd.DataFrame.rename(px, columns={'Adj Close': 'AdjClose'})
         px.columns.name = symbol
+        px.index = normalize_date(px.index)
         rets = px.AdjClose.pct_change().dropna()
 
         if symbol == 'SPY':
