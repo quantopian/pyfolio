@@ -30,6 +30,8 @@ import pandas.io.data as web
 
 import zipfile
 
+import functools
+
 
 try:
     # For Python 3.0 and later
@@ -93,17 +95,18 @@ def round_two_dec_places(x):
     return np.round(x, 2)
 
 
-def default_returns_func(symbol):
+def default_returns_func(symbol, default_kwargs=None):
     """
     Gets returns for a symbol.
-
     Queries Yahoo Finance. Attempts to cache SPY in HDF5.
-
     Parameters
     ----------
     symbol : str
         Ticker symbol, e.g. APPL.
-
+    default_kwargs : dict
+        currently ignored but exists for
+        compatability with the required
+        returns_func signature.
     Returns
     -------
     pd.DataFrame
@@ -262,29 +265,37 @@ def extract_rets_pos_txn_from_zipline(backtest):
     return returns, positions, transactions, gross_lev
 
 
-SETTINGS = {
-    # Settings dict to store functions/values that may
-    # need to be overridden depending on the users environment
-    'returns_func': default_returns_func
-}
+# Settings dict to store functions/values that may
+# need to be overridden depending on the users environment
+SETTINGS = {}
 
 
-def register_return_func(func):
+def register_return_func(func, default_kwargs=None):
     """
-    Registers the function that will be called for
+    Registers the 'returns_func' that will be called for
     retrieving returns data.
 
     Parameters
     ----------
     func : function
-        A function that accepts a symbol and
-        returns a pandas.Series of asset returns.
+        A function that returns a pandas Series of asset returns.
+        The signature of the function must be as follows
+
+        >>> func(symbol, default_kwargs=None)
+
+        Where symbol is a single positional argument
+        and kwargs is a dictionary of additional keyword arguments.
+
+    default_kwargs: dict or None
+        Additional keyword arguments passed
+        to 'func' when retrieving returns data.
 
     Returns
     -------
     None
     """
-    SETTINGS['returns_func'] = func
+    returns_func = functools.partial(func, default_kwargs=default_kwargs)
+    SETTINGS['returns_func'] = returns_func
 
 
 def get_symbol_rets(symbol):
@@ -293,8 +304,10 @@ def get_symbol_rets(symbol):
 
     Parameters
     ----------
-    symbol : str
-        the symbol for the desired asset return series
+    symbol : object
+        An identifier for the asset whose return
+        series is desired.
+        e.g. ticker symbol or database ID
 
     Returns
     -------
@@ -302,3 +315,6 @@ def get_symbol_rets(symbol):
         the series returned by the current 'returns_func'
     """
     return SETTINGS['returns_func'](symbol)
+
+
+register_return_func(default_returns_func)
