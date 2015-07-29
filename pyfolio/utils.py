@@ -243,6 +243,8 @@ def extract_rets_pos_txn_from_zipline(backtest):
     """
 
     backtest.index = backtest.index.normalize()
+    if backtest.index.tzinfo is None:
+        backtest.index = backtest.index.tz_localize('UTC')
     returns = backtest.returns
     gross_lev = backtest.gross_leverage
     raw_positions = []
@@ -255,7 +257,6 @@ def extract_rets_pos_txn_from_zipline(backtest):
     transactions_frame = txn.make_transaction_frame(backtest.transactions)
     transactions = txn.get_txn_vol(transactions_frame)
     transactions.index = transactions.index.normalize()
-    transactions.index.tz = None
 
     return returns, positions, transactions, gross_lev
 
