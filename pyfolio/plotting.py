@@ -107,7 +107,7 @@ def plot_rolling_risk_factors(
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     risk_factors : pd.DataFrame, optional
         data set containing the risk factors. See
         utils.load_portfolio_risk_factors.
@@ -183,7 +183,7 @@ def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -227,7 +227,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -276,7 +276,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -330,7 +330,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     positions : pd.DataFrame, optional
         The positions that the strategy takes over time.
     legend_loc : matplotlib.loc, optional
@@ -386,7 +386,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     top : int, optional
         Amount of top drawdowns periods to plot (default 10).
     ax : matplotlib.Axes, optional
@@ -437,7 +437,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -478,12 +478,12 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
     benchmark_rets : pd.Series
-        Daily non-cumulative returns of a benchmark.
+        Daily noncumulative returns of a benchmark.
 
     """
 
@@ -548,9 +548,9 @@ def plot_rolling_returns(
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     benchmark_rets : pd.Series, optional
-        Daily non-cumulative returns of the first benchmark.
+        Daily noncumulative returns of the first benchmark.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
@@ -645,9 +645,9 @@ def plot_rolling_beta(returns, benchmark_rets, rolling_beta_window=63,
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     benchmark_rets : pd.Series, optional
-        Daily non-cumulative returns of a benchmark.
+        Daily noncumulative returns of a benchmark.
     rolling_beta_window : int, optional
         The days window over which to compute the beta.
     legend_loc : matplotlib.loc, optional
@@ -696,7 +696,7 @@ def plot_rolling_sharpe(returns, rolling_sharpe_window=63 * 2,
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     rolling_sharpe_window : int, optional
         The days window over which to compute the sharpe ratio.
     legend_loc : matplotlib.loc, optional
@@ -748,7 +748,7 @@ def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     gross_lev : pd.Series
         The sum of long and short exposure per share divided by net
         asset value.
@@ -785,7 +785,7 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     positions_alloc : pd.DataFrame
         Portfolio allocation of positions. See
         pos.get_portfolio_alloc.
@@ -830,7 +830,7 @@ def show_and_plot_top_positions(returns, positions_alloc,
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     positions_alloc : pd.DataFrame
         Portfolio allocation of positions. See pos.get_portfolio_alloc.
     show_and_plot : int, optional
@@ -913,11 +913,11 @@ def plot_return_quantiles(returns, df_weekly, df_monthly, ax=None, **kwargs):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     df_weekly : pd.Series
-        Weekly returns of the strategy, non-cumulative.
+        Weekly returns of the strategy, noncumulative.
     df_monthly : pd.Series
-        Monthly returns of the strategy, non-cumulative.
+        Monthly returns of the strategy, noncumulative.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -947,9 +947,9 @@ def show_return_range(returns, df_weekly):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     df_weekly : pd.Series
-        Weekly returns of the strategy, non-cumulative.
+        Weekly returns of the strategy, noncumulative.
     """
 
     two_sigma_daily = returns.mean() - 2 * returns.std()
@@ -975,7 +975,7 @@ def plot_turnover(returns, transactions, positions_val,
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     transactions : pd.DataFrame
         A strategy's transactions. See
         pos.make_transaction_frame(transactions).
@@ -1034,7 +1034,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     transactions : pd.DataFrame
         A strategy's transactions. See
         pos.make_transaction_frame(transactions).
@@ -1102,9 +1102,9 @@ def plot_daily_returns_similarity(returns_backtest, returns_live,
     Parameters
     ----------
     returns_backtest : pd.Series
-        Daily returns of the strategy's backtest, non-cumulative.
+        Daily returns of the strategy's backtest, noncumulative.
     returns_live : pd.Series
-        Daily returns of the strategy's live trading, non-cumulative.
+        Daily returns of the strategy's live trading, noncumulative.
     title : str, optional
         The title to use for the plot.
     scale_kws : dict, optional
@@ -1146,7 +1146,7 @@ def show_worst_drawdown_periods(returns, top=5):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     top : int, optional
         Amount of top drawdowns periods to plot (default 5).
 

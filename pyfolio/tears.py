@@ -55,7 +55,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     positions : pd.DataFrame, optional
         The positions that the strategy takes over time.
     transactions : pd.DataFrame, optional
@@ -128,14 +128,14 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period.
     cone_std : float, optional
         The standard deviation to use for the cone plots.
     benchmark_rets : pd.Series, optional
-        Daily non-cumulative returns of the first benchmark.
+        Daily noncumulative returns of the first benchmark.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
@@ -263,7 +263,7 @@ def create_position_tear_sheet(
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     positions_val : pd.DataFrame
         The positions that the strategy takes over time.
     gross_lev : pd.Series, optional
@@ -311,7 +311,7 @@ def create_txn_tear_sheet(
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     positions_val : pd.DataFrame
         The positions that the strategy takes over time.
     transactions : pd.DataFrame
@@ -358,9 +358,9 @@ def create_interesting_times_tear_sheet(
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     benchmark_rets : pd.Series, optional
-        Daily non-cumulative returns of a benchmark.
+        Daily noncumulative returns of a benchmark.
     legend_loc : plt.legend_loc, optional
          The legend's location.
     return_fig : boolean, optional
@@ -422,9 +422,9 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
     benchmark_rets : pd.Series
-        Daily non-cumulative returns of a benchmark.
+        Daily noncumulative returns of a benchmark.
     live_start_date : datetime, optional
         The point in time when the strategy began live
         trading, after its backtest period.
