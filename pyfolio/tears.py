@@ -32,7 +32,6 @@ except ImportError:
 import numpy as np
 import scipy.stats
 import pandas as pd
-import pytz
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -76,9 +75,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         benchmark_rets = utils.get_symbol_rets('SPY')
         # If the strategy's history is longer than the benchmark's, limit
         # strategy
-        benchmark_start = benchmark_rets.index[0].astimezone(pytz.UTC)
-        returns_start = returns.index[0].astimezone(pytz.UTC)
-        if returns_start < benchmark_start:
+        if returns.index[0] < benchmark_rets.index[0]:
             returns = returns[returns.index > benchmark_rets.index[0]]
 
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
@@ -309,9 +306,7 @@ def create_interesting_times_tear_sheet(
         benchmark_rets = utils.get_symbol_rets('SPY')
         # If the strategy's history is longer than the benchmark's, limit
         # strategy
-        benchmark_start = benchmark_rets.index[0].astimezone(pytz.UTC)
-        returns_start = returns.index[0].astimezone(pytz.UTC)
-        if returns_start < benchmark_start:
+        if returns.index[0] < benchmark_rets.index[0]:
             returns = returns[returns.index > benchmark_rets.index[0]]
 
     bmark_interesting = timeseries.extract_interesting_date_ranges(
@@ -487,9 +482,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         benchmark_rets = utils.get_symbol_rets('SPY')
 
     # If the strategy's history is longer than the benchmark's, limit strategy
-    benchmark_start = benchmark_rets.index[0].astimezone(pytz.UTC)
-    returns_start = returns.index[0].astimezone(pytz.UTC)
-    if returns_start < benchmark_start:
+    if returns.index[0] < benchmark_rets.index[0]:
         returns = returns[returns.index > benchmark_rets.index[0]]
 
     create_returns_tear_sheet(
