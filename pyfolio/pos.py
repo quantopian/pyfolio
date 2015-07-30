@@ -17,13 +17,13 @@ from __future__ import division
 import pandas as pd
 
 
-def get_portfolio_alloc(positions_vals):
+def get_portfolio_alloc(positions):
     """
     Determines a portfolio's allocations.
 
     Parameters
     ----------
-    positions_vals : pd.DataFrame
+    positions : pd.DataFrame
         Contains position values or amounts.
 
     Returns
@@ -31,8 +31,8 @@ def get_portfolio_alloc(positions_vals):
     positions_alloc : pd.DataFrame
         Positions and their allocations.
     """
-    return positions_vals.divide(
-        positions_vals.abs().sum(axis='columns'),
+    return positions.divide(
+        positions.abs().sum(axis='columns'),
         axis='rows'
     )
 
@@ -119,7 +119,8 @@ def extract_pos(positions, cash):
     Returns
     -------
     pd.DataFrame
-        Net positional values per SID as well as cash.
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
     """
     positions = positions.copy()
     positions['values'] = positions.amount * positions.last_sale_price

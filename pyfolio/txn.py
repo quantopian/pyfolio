@@ -26,7 +26,7 @@ def map_transaction(txn):
     Parameters
     ----------
     txn : pd.DataFrame
-        A single transaction object to convert to a dictionary
+        A single transaction object to convert to a dictionary.
 
     Returns
     -------
@@ -62,7 +62,8 @@ def make_transaction_frame(transactions):
     Returns
     -------
     df : pd.DataFrame
-        Contains transactions.
+        Daily transaction volume and dollar ammount.
+         - See full explanation in tears.create_full_tear_sheet.
     """
 
     transaction_list = []
@@ -82,12 +83,12 @@ def make_transaction_frame(transactions):
 
 
 def get_txn_vol(transactions):
-    """Extract transaction data from
+    """Extract daily transaction data from set of transaction objects.
 
     Parameters
     ----------
     transactions : pd.DataFrame
-        timeseries containing one row per symbol (and potentially
+        Time series containing one row per symbol (and potentially
         duplicate datetime indices) and columns for amount and
         price.
 
@@ -95,6 +96,7 @@ def get_txn_vol(transactions):
     -------
     pd.DataFrame
         Daily transaction volume and number of shares.
+         - See full explanation in tears.create_full_tear_sheet.
     """
 
     txn_vol = transactions.reset_index().groupby('index').apply(
@@ -119,8 +121,8 @@ def create_txn_profits(transactions):
     Parameters
     ----------
     transactions : pd.DataFrame
-        A strategy's transactions.
-        See pos.make_transaction_frame(transactions).
+        Daily transaction volume and number of shares.
+         - See full explanation in tears.create_full_tear_sheet.
 
     Returns
     -------

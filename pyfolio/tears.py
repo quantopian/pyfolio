@@ -38,6 +38,105 @@ import matplotlib.gridspec as gridspec
 import seaborn as sns
 
 
+def create_full_tear_sheet(returns, positions=None, transactions=None,
+                           benchmark_rets=None,
+                           gross_lev=None,
+                           live_start_date=None, bayesian=False,
+                           cone_std=1.0, set_context=True):
+    """
+    Generate a number of tear sheets that are useful
+    for analyzing a strategy's performance.
+
+    - Fetches benchmarks if needed.
+    - Creates tear sheets for returns, and significant events.
+        If possible, also creates tear sheets for position analysis,
+        transaction analysis, and Bayesian analysis.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - Time series with decimal returns.
+         - Example:
+            2015-07-16    -0.012143
+            2015-07-17    0.045350
+            2015-07-20    0.030957
+            2015-07-21    0.004902
+    positions : pd.DataFrame, optional
+        Daily net position values.
+         - Time series of dollar amount invested in each position and cash.
+         - Days where stocks are not held can be represented by 0 or NaN.
+         - Example:
+            index         'AAPL'         'MSFT'          cash
+            2004-01-09    13939.3800     -14012.9930     711.5585
+            2004-01-12    14492.6300     -14624.8700     27.1821
+            2004-01-13    -13853.2800    13653.6400      -43.6375
+    transactions : pd.DataFrame, optional
+        Daily transaction volume and dollar ammount.
+        -  Time series of dollar amount of transactions per day,
+            and number of shares traded per day.
+        - Example:
+            index         txn_volume      txn_shares
+            2004-01-09    99288.441805    6361
+            2004-01-12    1226.039520     102
+            2004-01-13    752.354630      73
+    gross_lev : pd.Series, optional
+        The leverage of a strategy.
+         - Time series of the sum of long and short exposure per share
+            divided by net asset value.
+         - Example:
+            2009-12-04    0.999932
+            2009-12-07    0.999783
+            2009-12-08    0.999880
+            2009-12-09    1.000283
+    live_start_date : datetime, optional
+        The point in time when the strategy began live trading,
+        after its backtest period.
+    bayesian: boolean, optional
+        If True, causes the generation of a Bayesian tear sheet.
+    cone_std : float, optional
+        The standard deviation to use for the cone plots.
+         - The cone is a normal distribution with this standard deviation
+             centered around a linear regression.
+    set_context : boolean, optional
+        If True, set default plotting style context.
+         - See plotting.context().
+    """
+
+    if benchmark_rets is None:
+        benchmark_rets = utils.get_symbol_rets('SPY')
+
+    # If the strategy's history is longer than the benchmark's, limit strategy
+    if returns.index[0] < benchmark_rets.index[0]:
+        returns = returns[returns.index > benchmark_rets.index[0]]
+
+    create_returns_tear_sheet(
+        returns,
+        live_start_date=live_start_date,
+        cone_std=cone_std,
+        benchmark_rets=benchmark_rets,
+        set_context=set_context
+    )
+
+    create_interesting_times_tear_sheet(returns,
+                                        benchmark_rets=benchmark_rets,
+                                        set_context=set_context)
+
+    if positions is not None:
+        create_position_tear_sheet(returns, positions,
+                                   gross_lev=gross_lev,
+                                   set_context=set_context)
+
+        if transactions is not None:
+            create_txn_tear_sheet(returns, positions, transactions,
+                                  set_context=set_context)
+
+    if bayesian and live_start_date is not None:
+        create_bayesian_tear_sheet(returns, benchmark_rets,
+                                   live_start_date=live_start_date,
+                                   set_context=set_context)
+
+
 @plotting_context
 def create_returns_tear_sheet(returns, live_start_date=None,
                               cone_std=1.0,
@@ -57,14 +156,18 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period.
     cone_std : float, optional
         The standard deviation to use for the cone plots.
+         - The cone is a normal distribution with this standard deviation
+             centered around a linear regression.
     benchmark_rets : pd.Series, optional
-        Daily non-cumulative returns of the first benchmark.
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
@@ -181,7 +284,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
 @plotting_context
 def create_position_tear_sheet(
-        returns, positions_val, gross_lev=None, return_fig=False):
+        returns, positions, gross_lev=None, return_fig=False):
     """
     Generate a number of plots for analyzing a
     strategy's positions and holdings.
@@ -192,12 +295,14 @@ def create_position_tear_sheet(
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
-    positions_val : pd.DataFrame
-        The positions that the strategy takes over time.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in create_full_tear_sheet.
     gross_lev : pd.Series, optional
-         The sum of long and short exposure per share
-         divided by net asset value.
+        The leverage of a strategy.
+         - See full explanation in create_full_tear_sheet.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
@@ -211,7 +316,7 @@ def create_position_tear_sheet(
     ax_top_positions = plt.subplot(gs[2, :], sharex=ax_gross_leverage)
     ax_holdings = plt.subplot(gs[3, :], sharex=ax_gross_leverage)
 
-    positions_alloc = pos.get_portfolio_alloc(positions_val)
+    positions_alloc = pos.get_portfolio_alloc(positions)
 
     if gross_lev is not None:
         plotting.plot_gross_leverage(returns, gross_lev, ax=ax_gross_leverage)
@@ -231,7 +336,7 @@ def create_position_tear_sheet(
 
 @plotting_context
 def create_txn_tear_sheet(
-        returns, positions_val, transactions, return_fig=False):
+        returns, positions, transactions, return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's transactions.
 
@@ -240,12 +345,14 @@ def create_txn_tear_sheet(
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
-    positions_val : pd.DataFrame
-        The positions that the strategy takes over time.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in create_full_tear_sheet.
     transactions : pd.DataFrame
-         A strategy's transactions.
-         See pos.make_transaction_frame(transactions).
+         Daily transaction volume and dollar ammount.
+         - See full explanation in create_full_tear_sheet.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
@@ -261,7 +368,7 @@ def create_txn_tear_sheet(
     plotting.plot_turnover(
         returns,
         transactions,
-        positions_val,
+        positions,
         ax=ax_turnover)
 
     plotting.plot_daily_volume(returns, transactions, ax=ax_daily_volume)
@@ -287,9 +394,11 @@ def create_interesting_times_tear_sheet(
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
     benchmark_rets : pd.Series, optional
-        Daily non-cumulative returns of a benchmark.
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
     legend_loc : plt.legend_loc, optional
          The legend's location.
     return_fig : boolean, optional
@@ -351,9 +460,11 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
     benchmark_rets : pd.Series
-        Daily non-cumulative returns of a benchmark.
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
     live_start_date : datetime, optional
         The point in time when the strategy began live
         trading, after its backtest period.
@@ -439,74 +550,3 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
 
     if return_fig:
         return fig
-
-
-def create_full_tear_sheet(returns, positions=None, transactions=None,
-                           benchmark_rets=None,
-                           gross_lev=None,
-                           live_start_date=None, bayesian=False,
-                           cone_std=1.0, set_context=True):
-    """
-    Generate a number of tear sheets that are useful
-    for analyzing a strategy's performance.
-
-    - Fetches benchmarks if needed.
-    - Creates tear sheets for returns, and significant events.
-        If possible, also creates tear sheets for position analysis,
-        transaction analysis, and Bayesian analysis.
-
-    Parameters
-    ----------
-    returns : pd.Series
-        Daily returns of the strategy, non-cumulative.
-    positions : pd.DataFrame, optional
-        The positions that the strategy takes over time.
-    transactions : pd.DataFrame, optional
-        A strategy's transactions.
-        See pos.make_transaction_frame(transactions).
-    gross_lev : pd.Series, optional
-        The sum of long and short exposure per share
-        divided by net asset value.
-    live_start_date : datetime, optional
-        The point in time when the strategy began live trading,
-        after its backtest period.
-    bayesian: boolean, optional
-        If True, causes the generation of a Bayesian tear sheet.
-    cone_std : float, optional
-        The standard deviation to use for the cone plots.
-    set_context : boolean, optional
-        If True, set default plotting style context.
-    """
-
-    if benchmark_rets is None:
-        benchmark_rets = utils.get_symbol_rets('SPY')
-
-    # If the strategy's history is longer than the benchmark's, limit strategy
-    if returns.index[0] < benchmark_rets.index[0]:
-        returns = returns[returns.index > benchmark_rets.index[0]]
-
-    create_returns_tear_sheet(
-        returns,
-        live_start_date=live_start_date,
-        cone_std=cone_std,
-        benchmark_rets=benchmark_rets,
-        set_context=set_context
-    )
-
-    create_interesting_times_tear_sheet(returns,
-                                        benchmark_rets=benchmark_rets,
-                                        set_context=set_context)
-
-    if positions is not None:
-        create_position_tear_sheet(returns, positions,
-                                   gross_lev=gross_lev,
-                                   set_context=set_context)
-
-        if transactions is not None:
-            create_txn_tear_sheet(returns, positions, transactions,
-                                  set_context=set_context)
-
-    if bayesian and live_start_date is not None:
-        create_bayesian_tear_sheet(returns, benchmark_rets,
-                                   live_start_date=live_start_date,
-                                   set_context=set_context)

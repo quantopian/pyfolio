@@ -56,7 +56,8 @@ def normalize(returns, starting_value=1):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     starting_value : float, optional
        The starting returns (default 1).
 
@@ -76,7 +77,8 @@ def cum_returns(returns, starting_value=None):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     starting_value : float, optional
        The starting returns (default 1).
 
@@ -114,7 +116,8 @@ def aggregate_returns(df_daily_rets, convert_to):
     Parameters
     ----------
     df_daily_rets : pd.Series
-       Daily returns of the strategy, non-cumulative.
+       Daily returns of the strategy, noncumulative.
+        - See full explanation in tears.create_full_tear_sheet (returns).
     convert_to : str
         Can be 'weekly', 'monthly', or 'yearly'.
 
@@ -149,7 +152,8 @@ def max_drawdown(returns):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
 
     Returns
     -------
@@ -185,7 +189,8 @@ def annual_return(returns, style='compound'):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     style : str, optional
         - If 'compound', then return will be calculated in geometric
           terms: (1+mean(all_daily_returns))^252 - 1.
@@ -222,7 +227,8 @@ def annual_volatility(returns):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
 
     Returns
     -------
@@ -243,7 +249,8 @@ def calmar_ratio(returns, returns_style='calendar'):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     returns_style : str, optional
         See annual_returns' style
 
@@ -277,7 +284,8 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     annual_return_threshold : float, optional
         Threshold over which to consider positive vs negative
         returns. For the ratio, it will be converted to a daily return
@@ -314,7 +322,8 @@ def sortino_ratio(returns, returns_style='compound'):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
 
     Returns
     -------
@@ -341,7 +350,8 @@ def sharpe_ratio(returns, returns_style='compound'):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     returns_style : str, optional
         See annual_returns' style
 
@@ -364,7 +374,7 @@ def sharpe_ratio(returns, returns_style='compound'):
         return np.nan
 
 
-def stability_of_timeseries(returns, logValue=True):
+def stability_of_timeseries(returns):
     """Determines R-squared of a linear fit to the returns.
 
     Computes an ordinary least squares linear fit, and returns
@@ -373,7 +383,8 @@ def stability_of_timeseries(returns, logValue=True):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
 
     Returns
     -------
@@ -386,14 +397,13 @@ def stability_of_timeseries(returns, logValue=True):
         return np.nan
 
     df_cum_rets = cum_returns(returns, starting_value=100)
-    temp_values = np.log10(
-        df_cum_rets.values) if logValue else df_cum_rets.values
+    df_cum_rets_log = np.log10(df_cum_rets.values)
     len_returns = df_cum_rets.size
 
     X = list(range(0, len_returns))
     X = sm.add_constant(X)
 
-    model = sm.OLS(temp_values, X).fit()
+    model = sm.OLS(df_cum_rets_log, X).fit()
 
     return model.rsquared
 
@@ -408,10 +418,12 @@ def out_of_sample_vs_in_sample_returns_kde(
     Parameters
     ----------
     bt_ts : pd.Series
-       In-sample (backtest) returns of the strategy, non-cumulative.
+       In-sample (backtest) returns of the strategy, noncumulative.
+        - See full explanation in tears.create_full_tear_sheet (returns).
     oos_ts : pd.Series
        Out-of-sample (live trading) returns of the strategy,
-       non-cumulative.
+       noncumulative.
+        - See full explanation in tears.create_full_tear_sheet (returns).
     transform_style : float, optional
         'raw', 'scale', 'Normalize_L1', 'Normalize_L2' (default
         'scale')
@@ -479,7 +491,8 @@ def calc_multifactor(returns, factors):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     factors : pd.Series
         Secondary sets to fit.
 
@@ -505,9 +518,11 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     benchmark_rets : pd.Series
-        Daily non-cumulative returns of a benchmark.
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
     rolling_window : int, optional
         The size of the rolling window, in days, over which to compute
         beta (default 63 days).
@@ -538,7 +553,8 @@ def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     df_multi_factor : pd.DataFrame
         Other factors over which to compute beta.
     rolling_window : int, optional
@@ -575,9 +591,11 @@ def calc_alpha_beta(returns, benchmark_rets):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     benchmark_rets : pd.Series
-        Daily non-cumulative returns of a benchmark.
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
 
     Returns
     -------
@@ -604,7 +622,8 @@ def perf_stats(
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     returns_style : str, optional
        See annual_returns' style
     return_as_dict : boolean, optional
@@ -684,7 +703,8 @@ def get_max_drawdown(returns):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
 
     Returns
     -------
@@ -714,7 +734,8 @@ def get_top_drawdowns(returns, top=10):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     top : int, optional
         The amount of top drawdowns to find (default 10).
 
@@ -755,7 +776,8 @@ def gen_drawdown_table(returns, top=10):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     top : int, optional
         The amount of top drawdowns to find (default 10).
 
@@ -807,7 +829,8 @@ def rolling_sharpe(returns, rolling_sharpe_window):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     rolling_sharpe_window : int
         Length of rolling window, in days, over which to compute.
 
@@ -1013,7 +1036,8 @@ def extract_interesting_date_ranges(returns):
     Parameters
     ----------
     returns : pd.Series
-       Daily returns of the strategy, non-cumulative.
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
 
     Returns
     -------
@@ -1045,7 +1069,7 @@ def portfolio_returns(holdings_returns, exclude_non_overlapping=True):
     ----------
     holdings_returns : list
        List containing each individual holding's daily returns of the
-       strategy, non-cumulative.
+       strategy, noncumulative.
 
     exclude_non_overlapping : boolean, optional
        If True, timeseries returned will include values only for dates
