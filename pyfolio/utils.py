@@ -104,8 +104,9 @@ def default_returns_func(symbol):
 
     Returns
     -------
-    pd.DataFrame
+    pd.Series
         Daily returns for the symbol.
+         - See full explanation in tears.create_full_tear_sheet (returns).
     """
 
     rets = None
@@ -223,13 +224,17 @@ def extract_rets_pos_txn_from_zipline(backtest):
     Returns
     -------
     returns : pd.Series
-        Daily returns of backtest
+        Daily returns of strategy.
+         - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
-        Daily net position values
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
     transactions : pd.DataFrame
         Daily transaction volume and dollar ammount.
-    gross_lev : pd.Series
-        Daily gross leverage.
+         - See full explanation in tears.create_full_tear_sheet.
+    gross_lev : pd.Series, optional
+        The leverage of a strategy.
+         - See full explanation in tears.create_full_tear_sheet.
 
 
     Example (on the Quantopian research platform)
@@ -304,6 +309,6 @@ def get_symbol_rets(symbol):
     Returns
     -------
     pandas.Series
-        the series returned by the current 'returns_func'
+        Returned by the current 'returns_func'
     """
     return SETTINGS['returns_func'](symbol)
