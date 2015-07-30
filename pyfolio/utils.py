@@ -121,9 +121,9 @@ def default_returns_func(symbol):
 
     if rets is None:
         px = web.get_data_yahoo(symbol, start='1/1/1970')
-        px = pd.DataFrame.rename(px, columns={'Adj Close': 'AdjClose'})
+        px = pd.DataFrame.rename(px, columns={'Adj Close': 'adj_close'})
         px.columns.name = symbol
-        rets = px.AdjClose.pct_change().dropna()
+        rets = px.adj_close.pct_change().dropna()
 
         if symbol == 'SPY':
             try:

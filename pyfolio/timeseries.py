@@ -364,7 +364,7 @@ def sharpe_ratio(returns, returns_style='compound'):
         return np.nan
 
 
-def stability_of_timeseries(returns, logValue=True):
+def stability_of_timeseries(returns):
     """Determines R-squared of a linear fit to the returns.
 
     Computes an ordinary least squares linear fit, and returns
@@ -386,14 +386,13 @@ def stability_of_timeseries(returns, logValue=True):
         return np.nan
 
     df_cum_rets = cum_returns(returns, starting_value=100)
-    temp_values = np.log10(
-        df_cum_rets.values) if logValue else df_cum_rets.values
+    df_cum_rets_log = np.log10(df_cum_rets.values)
     len_returns = df_cum_rets.size
 
     X = list(range(0, len_returns))
     X = sm.add_constant(X)
 
-    model = sm.OLS(temp_values, X).fit()
+    model = sm.OLS(df_cum_rets_log, X).fit()
 
     return model.rsquared
 
