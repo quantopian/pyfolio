@@ -96,8 +96,11 @@ def default_returns_func(symbol, start=None, end=None):
         Daily returns for the symbol.
          - See full explanation in tears.create_full_tear_sheet (returns).
     """
-    start = '1/1/1970' if start is None else start
-    end = datetime.now() if end is None else end
+    if start is None:
+        start = '1/1/1970'
+    if end is None:
+        end = datetime.now()
+
     start = pd.Timestamp(start)
     end = pd.Timestamp(end)
 
