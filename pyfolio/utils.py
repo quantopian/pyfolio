@@ -20,12 +20,12 @@ from os.path import (
     getmtime,
     join,
 )
+import warnings
 
 from datetime import datetime
 
 import pandas as pd
 import numpy as np
-import zlib
 import pandas.io.data as web
 
 import zipfile
@@ -49,24 +49,6 @@ def pyfolio_root():
 
 def data_path(name):
     return join(pyfolio_root(), 'data', name)
-
-
-def json_to_obj(json):
-    """
-    Converts a JSON string to a DataFrame.
-
-    Parameters
-    ----------
-    json : str
-        Data to convert.
-
-    Returns
-    -------
-    pd.DataFrame
-        The converted data.
-    """
-
-    return pd.json.loads(str(zlib.decompress(json)))
 
 
 def one_dec_places(x, pos):
@@ -93,7 +75,7 @@ def round_two_dec_places(x):
     return np.round(x, 2)
 
 
-def default_returns_func(symbol):
+def default_returns_func(symbol, start=None, end=None):
     """
     Gets returns for a symbol.
     Queries Yahoo Finance. Attempts to cache SPY in HDF5.
@@ -101,6 +83,12 @@ def default_returns_func(symbol):
     ----------
     symbol : str
         Ticker symbol, e.g. APPL.
+    start : date, optional
+        Earliest date to fetch data for.
+        Defaults to earliest date available.
+    end : date, optional
+        Latest date to fetch data for.
+        Defaults to latest date available.
 
     Returns
     -------
@@ -108,29 +96,40 @@ def default_returns_func(symbol):
         Daily returns for the symbol.
          - See full explanation in tears.create_full_tear_sheet (returns).
     """
+    if start is None:
+        start = '1/1/1970'
+    if end is None:
+        end = datetime.now()
 
-    rets = None
-    if symbol == 'SPY':
-        filepath = data_path('spy.h5')
-        try:
-            # If it's been less than a day since we got benchmark
-            if datetime.now() - pd.to_datetime(
-                    getmtime(filepath), unit='s') < pd.Timedelta(days=1):
-                rets = pd.read_hdf(filepath, 'df')
-        except:
-            pass
+    start = pd.Timestamp(start)
+    end = pd.Timestamp(end)
 
-    if rets is None:
-        px = web.get_data_yahoo(symbol, start='1/1/1970')
+    def get_symbol_from_yahoo(symbol, start=None, end=None):
+        px = web.get_data_yahoo(symbol, start=start, end=end)
         px = pd.DataFrame.rename(px, columns={'Adj Close': 'adj_close'})
         px.columns.name = symbol
         rets = px.adj_close.pct_change().dropna()
+        return rets
 
-        if symbol == 'SPY':
+    if symbol == 'SPY':
+        filepath = data_path('spy.h5')
+        # Is cache recent enough?
+        if pd.to_datetime(getmtime(filepath), unit='s') >= end:
+            rets = pd.read_hdf(filepath, 'df')
+        else:
+            # Download most-recent SPY to update cache
+            rets = get_symbol_from_yahoo(symbol, start='1/1/1970',
+                                         end=datetime.now())
             try:
                 rets.to_hdf(filepath, 'df')
-            except:
-                pass
+            except IOError as e:
+                warnings.warn('Could not update cache {}.'
+                              'Exception: {}'.format(filepath, e),
+                              UserWarning)
+
+        rets = rets[start:end]
+    else:
+        rets = get_symbol_from_yahoo(symbol, start=start, end=end)
 
     return rets
 
@@ -295,7 +294,7 @@ def register_return_func(func):
     SETTINGS['returns_func'] = func
 
 
-def get_symbol_rets(symbol):
+def get_symbol_rets(symbol, start=None, end=None):
     """
     Calls the currently registered 'returns_func'
 
@@ -305,10 +304,18 @@ def get_symbol_rets(symbol):
         An identifier for the asset whose return
         series is desired.
         e.g. ticker symbol or database ID
+    start : date, optional
+        Earliest date to fetch data for.
+        Defaults to earliest date available.
+    end : date, optional
+        Latest date to fetch data for.
+        Defaults to latest date available.
 
     Returns
     -------
     pandas.Series
         Returned by the current 'returns_func'
     """
-    return SETTINGS['returns_func'](symbol)
+    return SETTINGS['returns_func'](symbol,
+                                    start=start,
+                                    end=end)
