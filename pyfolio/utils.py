@@ -20,6 +20,7 @@ from os.path import (
     getmtime,
     join,
 )
+import warnings
 
 from datetime import datetime
 
@@ -116,7 +117,13 @@ def default_returns_func(symbol, start=None, end=None):
             # Download most-recent SPY to update cache
             rets = get_symbol_from_yahoo(symbol, start='1/1/1970',
                                          end=datetime.now())
-            rets.to_hdf(filepath, 'df')
+            try:
+                rets.to_hdf(filepath, 'df')
+            except IOError as e:
+                warnings.warn('Could not update cache {}.'
+                              'Exception: {}'.format(filepath, e),
+                              UserWarning)
+
         rets = rets[start:end]
     else:
         rets = get_symbol_from_yahoo(symbol, start=start, end=end)
