@@ -25,7 +25,6 @@ from datetime import datetime
 
 import pandas as pd
 import numpy as np
-import zlib
 import pandas.io.data as web
 
 import zipfile
@@ -49,24 +48,6 @@ def pyfolio_root():
 
 def data_path(name):
     return join(pyfolio_root(), 'data', name)
-
-
-def json_to_obj(json):
-    """
-    Converts a JSON string to a DataFrame.
-
-    Parameters
-    ----------
-    json : str
-        Data to convert.
-
-    Returns
-    -------
-    pd.DataFrame
-        The converted data.
-    """
-
-    return pd.json.loads(str(zlib.decompress(json)))
 
 
 def one_dec_places(x, pos):
