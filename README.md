@@ -40,6 +40,10 @@ If you find a bug, feel free to open an issue on our github tracker.
 
 You can also join our [mailing list](https://groups.google.com/forum/#!forum/pyfolio).
 
+## Contribute
+
+If you want to contribute, a great place to start would be the [help-wanted issues](https://github.com/quantopian/pyfolio/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
+
 ## Credits
 
 * Gus Gordon (gus@quantopian.com)
@@ -48,5 +52,6 @@ You can also join our [mailing list](https://groups.google.com/forum/#!forum/pyf
 * Thomas Wiecki (thomas@quantopian.com)
 * Jessica Stauth (jstauth@quantopian.com)
 * Karen Rubin (karen@quantopian.com)
+* David Edwards (dedwards@quantopian.com)
 
 For a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.
