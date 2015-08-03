@@ -2,7 +2,7 @@
     "docs": [
         {
             "location": "/", 
-            "text": "pyfolio\n\n\n\n\n\n\npyfolio is a Python library for performance and risk analysis of\nfinancial portfolios developed by\n\nQuantopian Inc\n. It works well with the\n\nZipline\n open source backtesting library.\n\n\nAt the core of pyfolio is a so-called tear sheet that consists of\nvarious individual plots that provide a comprehensive image of the\nperformance of a trading algorithm. Here is an example of a tear sheet of a returns-based analysis of the \n$FB\n stock:\n\n\n\n\nInstallation\n\n\nTo install \npyfolio\n via \npip\n issue the following command:\n\n\npip install --pre pyfolio\n\n\n\n\nFor development, clone the git repo and run \npython setup.py develop\n\nand edit the library files directly. Make sure to reload or restart\nthe IPython kernel when you make changes.\n\n\npyfolio\n has the following dependencies:\n\n numpy\n\n scipy\n\n pandas\n\n matplotlib\n\n \nseaborn\n\n\n \npymc3\n (optional)\n\n\nQuestions?\n\n\nIf you find a bug, feel free to open an issue on our github tracker.\n\n\nYou can also join our \nmailing list\n.\n\n\nCredits\n\n\n\n\nGus Gordon (gus@quantopian.com)\n\n\nJustin Lent (justin@quantopian.com)\n\n\nSepideh Sadeghi (sp.sadeghi@gmail.com)\n\n\nThomas Wiecki (thomas@quantopian.com)\n\n\nJessica Stauth (jstauth@quantopian.com)\n\n\nKaren Rubin (karen@quantopian.com)\n\n\n\n\nFor a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.", 
+            "text": "pyfolio\n\n\n\n\n\n\npyfolio is a Python library for performance and risk analysis of\nfinancial portfolios developed by\n\nQuantopian Inc\n. It works well with the\n\nZipline\n open source backtesting library.\n\n\nAt the core of pyfolio is a so-called tear sheet that consists of\nvarious individual plots that provide a comprehensive image of the\nperformance of a trading algorithm. Here is an example of a tear sheet of a returns-based analysis of the \n$FB\n stock:\n\n\n\n\nInstallation\n\n\nTo install \npyfolio\n via \npip\n issue the following command:\n\n\npip install --pre pyfolio\n\n\n\n\nFor development, clone the git repo and run \npython setup.py develop\n\nand edit the library files directly. Make sure to reload or restart\nthe IPython kernel when you make changes.\n\n\npyfolio\n has the following dependencies:\n\n numpy\n\n scipy\n\n pandas\n\n matplotlib\n\n \nseaborn\n\n\n \npymc3\n (optional)\n\n\nQuestions?\n\n\nIf you find a bug, feel free to open an issue on our github tracker.\n\n\nYou can also join our \nmailing list\n.\n\n\nContribute\n\n\nIf you want to contribute, a great place to start would be the \nhelp-wanted issues\n.\n\n\nCredits\n\n\n\n\nGus Gordon (gus@quantopian.com)\n\n\nJustin Lent (justin@quantopian.com)\n\n\nSepideh Sadeghi (sp.sadeghi@gmail.com)\n\n\nThomas Wiecki (thomas@quantopian.com)\n\n\nJessica Stauth (jstauth@quantopian.com)\n\n\nKaren Rubin (karen@quantopian.com)\n\n\nDavid Edwards (dedwards@quantopian.com)\n\n\n\n\nFor a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.", 
             "title": "Overview"
         }, 
         {
@@ -21,8 +21,13 @@
             "title": "Questions?"
         }, 
         {
+            "location": "/#contribute", 
+            "text": "If you want to contribute, a great place to start would be the  help-wanted issues .", 
+            "title": "Contribute"
+        }, 
+        {
             "location": "/#credits", 
-            "text": "Gus Gordon (gus@quantopian.com)  Justin Lent (justin@quantopian.com)  Sepideh Sadeghi (sp.sadeghi@gmail.com)  Thomas Wiecki (thomas@quantopian.com)  Jessica Stauth (jstauth@quantopian.com)  Karen Rubin (karen@quantopian.com)   For a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.", 
+            "text": "Gus Gordon (gus@quantopian.com)  Justin Lent (justin@quantopian.com)  Sepideh Sadeghi (sp.sadeghi@gmail.com)  Thomas Wiecki (thomas@quantopian.com)  Jessica Stauth (jstauth@quantopian.com)  Karen Rubin (karen@quantopian.com)  David Edwards (dedwards@quantopian.com)   For a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.", 
             "title": "Credits"
         }, 
         {
