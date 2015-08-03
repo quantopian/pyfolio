@@ -109,6 +109,7 @@ def default_returns_func(symbol, start=None, end=None):
         px = pd.DataFrame.rename(px, columns={'Adj Close': 'adj_close'})
         px.columns.name = symbol
         rets = px.adj_close.pct_change().dropna()
+        rets.index = rets.index.tz_localize("UTC")
         return rets
 
     if symbol == 'SPY':
