@@ -14,9 +14,9 @@ before_install:
 install:
   - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
   - source activate testenv
-  - conda install --yes ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8 scikit-learn seaborn runipy pytables
-  - pip install https://codeload.github.com/quantopian/zipline/legacy.zip/b89fc0c02871837900d79933040a53869a456ec4
-  - pip install nose_parameterized
+  - conda install --yes ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8 scikit-learn seaborn runipy pytables networkx
+  - curl https://codeload.github.com/quantopian/zipline/legacy.zip/b89fc0c02871837900d79933040a53869a456ec4 > zipline.zip; unzip zipline; pushd quantopian-zipline-b89fc0c; python setup.py build_ext --inplace; python setup.py develop; popd
+  - pip install nose_parameterized contextlib2 logbook
   - pip install git+https://github.com/Theano/Theano.git
   - pip install git+https://github.com/pymc-devs/pymc3.git
   - python setup.py build_ext --inplace
