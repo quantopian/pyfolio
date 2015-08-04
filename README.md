@@ -27,12 +27,12 @@ and edit the library files directly. Make sure to reload or restart
 the IPython kernel when you make changes.
 
 `pyfolio` has the following dependencies:
-* numpy
-* scipy
-* pandas
-* matplotlib
-* [seaborn](https://github.com/mwaskom/seaborn)
-* [pymc3](https://github.com/pymc-devs/pymc3) (optional)
+ - numpy
+ - scipy
+ - pandas
+ - matplotlib
+ - [seaborn](https://github.com/mwaskom/seaborn)
+ - [pymc3](https://github.com/pymc-devs/pymc3) (optional)
 
 ## Questions?
 
