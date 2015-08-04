@@ -5,9 +5,7 @@ python:
   - "3.4"
 
 before_install:
-  - sudo apt-get install liblapack-dev gfortran python-scipy libblas-dev libsuitesparse-dev swig
-  - sudo ln -Tsf /{run,dev}/shm
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; fi
+  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh; else wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; fi
   - chmod +x miniconda.sh
   - ./miniconda.sh -b
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then export PATH=/home/travis/miniconda/bin:$PATH; else export PATH=/home/travis/miniconda3/bin:$PATH; fi
@@ -15,7 +13,8 @@ before_install:
 install:
   - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
   - source activate testenv
-  - conda install --yes ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8 scikit-learn seaborn
+  - conda install --yes ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8 scikit-learn seaborn runipy
+  - pip install https://codeload.github.com/quantopian/zipline/legacy.zip/b89fc0c02871837900d79933040a53869a456ec4
   - pip install nose_parameterized
   - pip install git+https://github.com/Theano/Theano.git
   - pip install git+https://github.com/pymc-devs/pymc3.git
