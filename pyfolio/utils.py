@@ -90,6 +90,7 @@ def get_utc_timestamp(dt):
     same type as input
         date(s) converted to UTC
     """
+    dt = pd.to_datetime(dt)
     try:
         dt = dt.tz_localize('UTC')
     except TypeError:
