@@ -135,16 +135,16 @@ def default_returns_func(symbol, start=None, end=None):
         return rets
 
     if symbol == 'SPY':
-        filepath = data_path('spy.h5')
+        filepath = data_path('spy.csv')
         # Is cache recent enough?
         if pd.to_datetime(getmtime(filepath), unit='s') >= end:
-            rets = pd.read_hdf(filepath, 'df')
+            rets = pd.read_csv(filepath)
         else:
             # Download most-recent SPY to update cache
             rets = get_symbol_from_yahoo(symbol, start='1/1/1970',
                                          end=datetime.now())
             try:
-                rets.to_hdf(filepath, 'df')
+                rets.to_csv(filepath)
             except IOError as e:
                 warnings.warn('Could not update cache {}.'
                               'Exception: {}'.format(filepath, e),
