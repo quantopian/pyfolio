@@ -224,7 +224,7 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
         filepath = filepath_prefix
 
     # Is cache recent enough?
-    if pd.to_datetime(getmtime(filepath), unit='s') >= end:
+    if pd.to_datetime(getmtime(filepath), unit='s', utc=True) >= end:
         five_factors = pd.read_hdf(filepath, 'df')
     else:
         five_factors = get_fama_french()
