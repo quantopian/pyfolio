@@ -55,7 +55,7 @@ extras_reqs = {
     'bayesian': ['pymc3']
 }
 
-test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0']
+test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
 
 if __name__ == "__main__":
     setup(name=DISTNAME,
