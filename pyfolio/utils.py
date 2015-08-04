@@ -172,7 +172,7 @@ def vectorize(func):
     return wrapper
 
 
-def load_portfolio_risk_factors(filepath_prefix=None):
+def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     """
     Loads risk factors Mkt-Rf, SMB, HML, Rf, and UMD.
 
@@ -184,51 +184,57 @@ def load_portfolio_risk_factors(filepath_prefix=None):
     five_factors : pd.DataFrame
         Risk factors timeseries.
     """
+    if start is None:
+        start = '1/1/1970'
+    if end is None:
+        end = datetime.now()
+
+    start = pd.Timestamp(start)
+    end = pd.Timestamp(end)
+
+    def get_fama_french():
+        umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
+                          's/faculty/ken.french/ftp/F-F_Momentum'
+                          '_Factor_daily_CSV.zip')
+        factors_req = urlopen('http://mba.tuck.dartmouth.edu/pag'
+                              'es/faculty/ken.french/ftp/F-F_Re'
+                              'search_Data_Factors_daily_CSV.zip')
+
+        umd_zip = zipfile.ZipFile(StringIO(umd_req.read()), 'r')
+        factors_zip = zipfile.ZipFile(StringIO(factors_req.read()),
+                                      'r')
+        umd_csv = umd_zip.read('F-F_Momentum_Factor_daily.CSV')
+        umd_csv = umd_csv.split('\r\n\r\n')[2]
+        factors_csv = factors_zip.read('F-F_Research_Data_'
+                                       'Factors_daily.CSV')
+        factors_csv = factors_csv.split('\r\n\r\n')[1]
+
+        factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
+        umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')
+
+        five_factors = factors.join(umd).dropna(axis=0)
+        five_factors = five_factors / 100
+
+        return five_factors
 
     if filepath_prefix is None:
         filepath = data_path('factors.h5')
     else:
         filepath = filepath_prefix
 
-    five_factors = None
-
-    # If it's been less than two days since we updated
-    if datetime.now() - pd.to_datetime(getmtime(filepath),
-                                       unit='s') < pd.Timedelta(days=2):
+    # Is cache recent enough?
+    if pd.to_datetime(getmtime(filepath), unit='s') >= end:
+        five_factors = pd.read_hdf(filepath, 'df')
+    else:
+        five_factors = get_fama_french()
         try:
-            five_factors = pd.read_hdf(filepath, 'df')
-        except:
-            pass
-
-    if not isinstance(five_factors, pd.DataFrame):
-        try:
-            umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
-                              's/faculty/ken.french/ftp/F-F_Momentum'
-                              '_Factor_daily_CSV.zip')
-            factors_req = urlopen('http://mba.tuck.dartmouth.edu/pag'
-                                  'es/faculty/ken.french/ftp/F-F_Re'
-                                  'search_Data_Factors_daily_CSV.zip')
-
-            umd_zip = zipfile.ZipFile(StringIO(umd_req.read()), 'r')
-            factors_zip = zipfile.ZipFile(StringIO(factors_req.read()),
-                                          'r')
-            umd_csv = umd_zip.read('F-F_Momentum_Factor_daily.CSV')
-            umd_csv = umd_csv.split('\r\n\r\n')[2]
-            factors_csv = factors_zip.read('F-F_Research_Data_'
-                                           'Factors_daily.CSV')
-            factors_csv = factors_csv.split('\r\n\r\n')[1]
-
-            factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
-            umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')
-
-            five_factors = factors.join(umd).dropna(axis=0)
-            five_factors = five_factors / 100
-
             five_factors.to_hdf(filepath, 'df')
-        except:
-            pass
+        except IOError as e:
+            warnings.warn('Could not update cache {}.'
+                          'Exception: {}'.format(filepath, e),
+                          UserWarning)
 
-    return five_factors
+    return five_factors.loc[start:end]
 
 
 def extract_rets_pos_txn_from_zipline(backtest):
