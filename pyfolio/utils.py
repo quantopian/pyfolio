@@ -30,14 +30,13 @@ import pandas.io.data as web
 
 import zipfile
 
+from io import BytesIO, StringIO
 
 try:
     # For Python 3.0 and later
     from urllib.request import urlopen
-    from io import StringIO
 except:
     from urllib2 import urlopen
-    from StringIO import StringIO
 
 from . import pos
 from . import txn
@@ -200,14 +199,16 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
                               'es/faculty/ken.french/ftp/F-F_Re'
                               'search_Data_Factors_daily_CSV.zip')
 
-        umd_zip = zipfile.ZipFile(StringIO(umd_req.read()), 'r')
-        factors_zip = zipfile.ZipFile(StringIO(factors_req.read()),
+        umd_zip = zipfile.ZipFile(BytesIO(umd_req.read()), 'r')
+        factors_zip = zipfile.ZipFile(BytesIO(factors_req.read()),
                                       'r')
         umd_csv = umd_zip.read('F-F_Momentum_Factor_daily.CSV')
-        umd_csv = umd_csv.split('\r\n\r\n')[2]
+        umd_csv = str(umd_csv).split('\\r\\n\\r\\n')[2]\
+                              .replace('\\r\\n', '\n')
         factors_csv = factors_zip.read('F-F_Research_Data_'
                                        'Factors_daily.CSV')
-        factors_csv = factors_csv.split('\r\n\r\n')[1]
+        factors_csv = str(factors_csv).split('\\r\\n\\r\\n')[1]\
+                                      .replace('\\r\\n', '\n')
 
         factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
         umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')

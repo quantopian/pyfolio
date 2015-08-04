@@ -132,8 +132,9 @@ def plot_rolling_risk_factors(
         ax = plt.gca()
 
     if risk_factors is None:
-        risk_factors = utils.load_portfolio_risk_factors(start=returns.index[0],
-                                                         end=returns.index[-1])
+        risk_factors = utils.load_portfolio_risk_factors(
+            start=returns.index[0],
+            end=returns.index[-1])
 
     num_months_str = '%.0f' % (rolling_beta_window / 21)
 
