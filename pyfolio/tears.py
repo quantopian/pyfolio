@@ -37,6 +37,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import seaborn as sns
 
+from . utils import get_utc_timestamp
+
 
 def create_full_tear_sheet(returns, positions=None, transactions=None,
                            benchmark_rets=None,
@@ -193,6 +195,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
     if live_start_date is not None:
         vertical_sections = 10
+        live_start_date = get_utc_timestamp(live_start_date)
     else:
         vertical_sections = 9
 
@@ -481,6 +484,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
     ax_sharpe = plt.subplot(gs[row, 0])
     ax_vol = plt.subplot(gs[row, 1])
 
+    live_start_date = get_utc_timestamp(live_start_date)
     df_train = returns.loc[returns.index < live_start_date]
     df_test = returns.loc[returns.index >= live_start_date]
     trace_t = bayesian.run_model('t', df_train, returns_test=df_test,

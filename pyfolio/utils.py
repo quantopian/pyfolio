@@ -75,6 +75,28 @@ def round_two_dec_places(x):
     return np.round(x, 2)
 
 
+def get_utc_timestamp(dt):
+    """
+    returns the Timestamp/DatetimeIndex
+    with either localized or converted to UTC.
+
+    Parameters
+    ----------
+    dt : Timestamp/DatetimeIndex
+        the date(s) to be converted
+
+    Returns
+    -------
+    same type as input
+        date(s) converted to UTC
+    """
+    try:
+        dt = dt.tz_localize('UTC')
+    except TypeError:
+        dt = dt.tz_convert('UTC')
+    return dt
+
+
 def default_returns_func(symbol, start=None, end=None):
     """
     Gets returns for a symbol.
