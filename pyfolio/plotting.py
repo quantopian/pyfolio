@@ -500,6 +500,7 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
     """
 
     if live_start_date is not None:
+        live_start_date = utils.get_utc_timestamp(live_start_date)
         returns_backtest = returns[returns.index < live_start_date]
         returns_live = returns[returns.index > live_start_date]
 
@@ -597,6 +598,8 @@ def plot_rolling_returns(
     if benchmark_rets is not None:
         timeseries.cum_returns(benchmark_rets[df_cum_rets.index], 1.0).plot(
             lw=2, color='gray', label='S&P500', alpha=0.60, ax=ax, **kwargs)
+    if live_start_date is not None:
+        live_start_date = utils.get_utc_timestamp(live_start_date)
 
     if (live_start_date is None) or (df_cum_rets.index[-1] <=
                                      live_start_date):
