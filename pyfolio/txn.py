@@ -99,17 +99,14 @@ def get_txn_vol(transactions):
          - See full explanation in tears.create_full_tear_sheet.
     """
 
-    txn_vol = transactions.reset_index().groupby('index').apply(
-        lambda ser: (
-            ser['amount'].abs() *
-            ser['price']).sum())
-    txn_amount = transactions.reset_index().groupby(
-        'index')['amount'].apply(lambda ser: ser.abs().sum())
-    transactions_out = pd.concat([txn_vol, txn_amount], axis=1)
-    transactions_out.columns = ['txn_volume', 'txn_shares']
-    transactions_out.index = transactions_out.index.normalize()
-
-    return transactions_out
+    amounts = transactions.amount.abs()
+    prices = transactions.price
+    values = amounts * prices
+    daily_amounts = amounts.groupby(amounts.index).sum()
+    daily_values = values.groupby(values.index).sum()
+    daily_amounts.name = "txn_shares"
+    daily_values.name = "txn_volume"
+    return pd.concat([daily_values, daily_amounts], axis=1)
 
 
 def create_txn_profits(transactions):
