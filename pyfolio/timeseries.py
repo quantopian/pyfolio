@@ -763,7 +763,7 @@ def get_top_drawdowns(returns, top=10):
             underwater = underwater.loc[:peak]
 
         drawdowns.append((peak, valley, recovery))
-        if len(returns) == 0:
+        if (len(returns) == 0) or (len(underwater) == 0):
             break
 
     return drawdowns
