@@ -126,9 +126,9 @@ def extract_pos(positions, cash):
     positions['values'] = positions.amount * positions.last_sale_price
     cash.name = 'cash'
 
-    values = positions.reset_index().pivot(index='index',
-                                           columns='sid',
-                                           values='values')
+    values = positions.reset_index().pivot_table(index='index',
+                                                 columns='sid',
+                                                 values='values')
 
     values = values.join(cash)
 
