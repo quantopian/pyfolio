@@ -203,12 +203,14 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
         factors_zip = zipfile.ZipFile(BytesIO(factors_req.read()),
                                       'r')
         umd_csv = umd_zip.read('F-F_Momentum_Factor_daily.CSV')
-        umd_csv = str(umd_csv).split('\\r\\n\\r\\n')[2]\
-                              .replace('\\r\\n', '\n')
+        umd_csv = umd_csv.decode('utf-8')
+        umd_csv = umd_csv.split('\r\n\r\n')[2]\
+                         .replace('\r\n', '\n')
         factors_csv = factors_zip.read('F-F_Research_Data_'
                                        'Factors_daily.CSV')
-        factors_csv = str(factors_csv).split('\\r\\n\\r\\n')[1]\
-                                      .replace('\\r\\n', '\n')
+        factors_csv = factors_csv.decode('utf-8')
+        factors_csv = factors_csv.split('\r\n\r\n')[1]\
+                                 .replace('\r\n', '\n')
 
         factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
         umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')
