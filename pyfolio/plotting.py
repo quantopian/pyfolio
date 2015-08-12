@@ -878,7 +878,7 @@ def show_and_plot_top_positions(returns, positions_alloc,
     df_top_long, df_top_short, df_top_abs = pos.get_top_long_short_abs(
         positions_alloc)
 
-    if show_and_plot == 0 or show_and_plot == 2:
+    if show_and_plot == 1 or show_and_plot == 2:
         print("\n")
         print('Top 10 long positions of all time (and max%)')
         print(pd.DataFrame(df_top_long).index.values)
@@ -902,7 +902,7 @@ def show_and_plot_top_positions(returns, positions_alloc,
         print(np.round(pd.DataFrame(df_top_abs_all)[0].values, 3))
         print("\n")
 
-    if show_and_plot == 1 or show_and_plot == 2:
+    if show_and_plot == 0 or show_and_plot == 2:
 
         if ax is None:
             ax = plt.gca()
