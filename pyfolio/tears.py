@@ -284,8 +284,8 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
 
 @plotting_context
-def create_position_tear_sheet(
-        returns, positions, gross_lev=None, return_fig=False):
+def create_position_tear_sheet(returns, positions, gross_lev=None,
+                               show_and_plot=2, return_fig=False):
     """
     Generate a number of plots for analyzing a
     strategy's positions and holdings.
@@ -304,6 +304,10 @@ def create_position_tear_sheet(
     gross_lev : pd.Series, optional
         The leverage of a strategy.
          - See full explanation in create_full_tear_sheet.
+    show_and_plot_top_pos : int, optional
+        By default, this is 2, and both prints and plots the
+        top 10 positions.
+        If this is 0, it will only plot; if 1, it will only print.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
@@ -327,6 +331,7 @@ def create_position_tear_sheet(
     plotting.show_and_plot_top_positions(
         returns,
         positions_alloc,
+        show_and_plot=show_and_plot_top_pos,
         ax=ax_top_positions)
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
