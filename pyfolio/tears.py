@@ -285,7 +285,8 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
 @plotting_context
 def create_position_tear_sheet(returns, positions, gross_lev=None,
-                               show_and_plot=2, return_fig=False):
+                               show_and_plot_top_pos=2,
+                               return_fig=False):
     """
     Generate a number of plots for analyzing a
     strategy's positions and holdings.
