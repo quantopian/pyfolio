@@ -135,29 +135,39 @@ def extract_pos(positions, cash):
     return values
 
 
-def turnover(transactions_df, backtest_data_df, period='M'):
+def get_turnover(transactions, positions, period=None):
     """
-    Calculates the percent absolute value portfolio turnover.
+    Portfolio Turnover Rate:
+
+    Average value of purchases and sales divided
+    by the average portfolio value for the period.
+
+    If no period is provided the period is one time step.
 
     Parameters
     ----------
     transactions_df : pd.DataFrame
-        Contains transactional data.
-    backtest_data_df : pd.DataFrame
-        Contains backtest data, like positions.
+        Contains transactions data.
+        - See full explanation in tears.create_full_tear_sheet
+    positions : pd.DataFrame
+        Contains daily position values including cash
+        - See full explanation in tears.create_full_tear_sheet
     period : str, optional
         Takes the same arguments as df.resample.
 
     Returns
     -------
-    turnoverpct : pd.DataFrame
-        The number of shares traded for a period as a fraction of total shares.
+    turnover_rate : pd.Series
+        timeseries of portfolio turnover rates.
     """
 
-    turnover = transactions_df.apply(
-        lambda z: z.apply(
-            lambda r: abs(r))).resample(period, 'sum').sum(axis=1)
-    portfolio_value = backtest_data_df.portfolio_value.resample(period, 'mean')
-    turnoverpct = turnover / portfolio_value
-    turnoverpct = turnoverpct.fillna(0)
-    return turnoverpct
+    traded_value = transactions.txn_volume
+    portfolio_value = positions.sum(axis=1)
+    if period is not None:
+        traded_value = traded_value.resample(period, how='sum')
+        portfolio_value = portfolio_value.resample(period, how='mean')
+    # traded_value contains the summed value from buys and sells;
+    # this is divided by 2.0 to get the average of the two.
+    turnover = traded_value / 2.0
+    turnover_rate = turnover / portfolio_value
+    return turnover_rate

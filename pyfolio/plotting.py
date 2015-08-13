@@ -1032,9 +1032,8 @@ def plot_turnover(returns, transactions, positions,
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_turnover = transactions.txn_volume / \
-        positions.abs().sum(axis='columns')
-    df_turnover_by_month = df_turnover.resample('1M', how='mean')
+    df_turnover = pos.get_turnover(transactions, positions)
+    df_turnover_by_month = df_turnover.resample("M")
     df_turnover.plot(color='steelblue', alpha=1.0, lw=0.5, ax=ax, **kwargs)
     df_turnover_by_month.plot(
         color='orangered',
