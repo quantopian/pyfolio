@@ -166,6 +166,8 @@ def get_turnover(transactions, positions, period=None):
     if period is not None:
         traded_value = traded_value.resample(period, how='sum')
         portfolio_value = portfolio_value.resample(period, how='mean')
+    # traded_value contains the summed value from buys and sells;
+    # this is divided by 2.0 to get the average of the two.
     turnover = traded_value / 2.0
     turnover_rate = turnover / portfolio_value
     return turnover_rate
