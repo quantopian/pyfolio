@@ -141,7 +141,7 @@ def default_returns_func(symbol, start=None, end=None):
         if isfile(filepath) and (pd.to_datetime(getmtime(filepath),
                                                 unit='s', utc=True) >= end):
             rets = pd.read_csv(filepath, index_col=0,
-                               parse_dates=True, header=None)
+                               parse_dates=True, header=None)[1]
         else:
             # Download most-recent SPY to update cache
             rets = get_symbol_from_yahoo(symbol, start='1/1/1970',
