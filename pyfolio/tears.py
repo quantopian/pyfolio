@@ -455,8 +455,8 @@ def create_interesting_times_tear_sheet(
 
 
 @plotting_context
-def create_bayesian_tear_sheet(returns, live_start_date,
-                               benchmark_rets=None, return_fig=False):
+def create_bayesian_tear_sheet_oos(returns, live_start_date=None,
+                                   benchmark_rets=None, return_fig=False):
     """
     Generate a number of Bayesian distributions and a Bayesian
     cone plot of returns.
@@ -470,7 +470,7 @@ def create_bayesian_tear_sheet(returns, live_start_date,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in create_full_tear_sheet.
-    benchmark_rets : pd.Series
+    benchmark_rets : pd.Series, optional
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
     live_start_date : datetime, optional
@@ -487,32 +487,88 @@ def create_bayesian_tear_sheet(returns, live_start_date,
                                                start=returns.index[0],
                                                end=returns.index[-1])
 
-    fig = plt.figure(figsize=(14, 10 * 2))
-    gs = gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.3)
+    if live_start_date is not None:
+        live_start_date = utils.get_utc_timestamp(live_start_date)
+        df_train = returns.loc[returns.index < live_start_date]
+        df_test = returns.loc[returns.index >= live_start_date]
 
-    row = 0
-    ax_sharpe = plt.subplot(gs[row, 0])
-    ax_vol = plt.subplot(gs[row, 1])
+        # Run T model with missing data
+        trace_t = bayesian.run_model('t', df_train, returns_test=df_test,
+                                     samples=2000)
 
-    live_start_date = utils.get_utc_timestamp(live_start_date)
-    df_train = returns.loc[returns.index < live_start_date]
-    df_test = returns.loc[returns.index >= live_start_date]
-    trace_t = bayesian.run_model('t', df_train, returns_test=df_test,
-                                 samples=2000)
+        # Compute BEST model
+        trace_best = bayesian.run_model('best', df_train,
+                                        returns_test=df_test,
+                                        samples=2000)
 
-    sns.distplot(trace_t['sharpe'][100:], ax=ax_sharpe)
-    # ax_sharpe.set_title('Bayesian T-Sharpe Ratio')
-    ax_sharpe.set_xlabel('Sharpe Ratio')
-    ax_sharpe.set_ylabel('Belief')
-    sns.distplot(trace_t['annual volatility'][100:], ax=ax_vol)
-    # ax_vol.set_title('Annual Volatility')
-    ax_vol.set_xlabel('Annual Volatility')
-    ax_vol.set_ylabel('Belief')
+        # Plot results
 
+        fig = plt.figure(figsize=(14, 10 * 2))
+        gs = gridspec.GridSpec(9, 2, wspace=0.3, hspace=0.3)
+
+        axs = []
+        row = 0
+
+        # Plot Bayesian cone
+        ax_cone = plt.subplot(gs[row, :])
+        bayesian.plot_bayes_cone(df_train, df_test,
+                                 trace=trace_t,
+                                 ax=ax_cone)
+
+        # Plot BEST results
+        row += 1
+        axs.append(plt.subplot(gs[row, 0]))
+        axs.append(plt.subplot(gs[row, 1]))
+        row += 1
+        axs.append(plt.subplot(gs[row, 0]))
+        axs.append(plt.subplot(gs[row, 1]))
+        row += 1
+        axs.append(plt.subplot(gs[row, 0]))
+        axs.append(plt.subplot(gs[row, 1]))
+        row += 1
+        # Effect size across two
+        axs.append(plt.subplot(gs[row, :]))
+
+        bayesian.plot_best(trace=trace_best, axs=axs)
+
+        # Compute Bayesian predictions
+        row += 1
+        ax_ret_pred_day = plt.subplot(gs[row, 0])
+        ax_ret_pred_week = plt.subplot(gs[row, 1])
+        day_pred = trace_t['returns_missing'][:, 0]
+        p5 = scipy.stats.scoreatpercentile(day_pred, 5)
+        sns.distplot(day_pred,
+                     ax=ax_ret_pred_day
+                     )
+        ax_ret_pred_day.axvline(p5, linestyle='--', linewidth=3.)
+        ax_ret_pred_day.set_xlabel('Predicted returns 1 day')
+        ax_ret_pred_day.set_ylabel('Frequency')
+        ax_ret_pred_day.text(0.4, 0.9, 'Bayesian VaR = %.2f' % p5,
+                             verticalalignment='bottom',
+                             horizontalalignment='right',
+                             transform=ax_ret_pred_day.transAxes)
+        # Plot Bayesian VaRs
+        week_pred = (
+            np.cumprod(trace_t['returns_missing'][:, :5] + 1, 1) - 1)[:, -1]
+        p5 = scipy.stats.scoreatpercentile(week_pred, 5)
+        sns.distplot(week_pred,
+                     ax=ax_ret_pred_week
+                     )
+        ax_ret_pred_week.axvline(p5, linestyle='--', linewidth=3.)
+        ax_ret_pred_week.set_xlabel('Predicted cum returns 5 days')
+        ax_ret_pred_week.set_ylabel('Frequency')
+        ax_ret_pred_week.text(0.4, 0.9, 'Bayesian VaR = %.2f' % p5,
+                              verticalalignment='bottom',
+                              horizontalalignment='right',
+                              transform=ax_ret_pred_week.transAxes)
+
+
+    # Run alpha beta model
     benchmark_rets = benchmark_rets.loc[df_train.index]
     trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
                                           bmark=benchmark_rets, samples=2000)
 
+    # Plot alpha and beta
     row += 1
     ax_alpha = plt.subplot(gs[row, 0])
     ax_beta = plt.subplot(gs[row, 1])
@@ -525,42 +581,7 @@ def create_bayesian_tear_sheet(returns, live_start_date,
     ax_beta.set_xlabel('Beta')
     ax_beta.set_ylabel('Belief')
 
-    row += 1
-    ax_ret_pred_day = plt.subplot(gs[row, 0])
-    ax_ret_pred_week = plt.subplot(gs[row, 1])
-    day_pred = trace_t['returns_missing'][:, 0]
-    p5 = scipy.stats.scoreatpercentile(day_pred, 5)
-    sns.distplot(day_pred,
-                 ax=ax_ret_pred_day
-                 )
-    ax_ret_pred_day.axvline(p5, linestyle='--', linewidth=3.)
-    ax_ret_pred_day.set_xlabel('Predicted returns 1 day')
-    ax_ret_pred_day.set_ylabel('Frequency')
-    ax_ret_pred_day.text(0.4, 0.9, 'Bayesian VaR = %.2f' % p5,
-                         verticalalignment='bottom',
-                         horizontalalignment='right',
-                         transform=ax_ret_pred_day.transAxes)
-
-    week_pred = (
-        np.cumprod(trace_t['returns_missing'][:, :5] + 1, 1) - 1)[:, -1]
-    p5 = scipy.stats.scoreatpercentile(week_pred, 5)
-    sns.distplot(week_pred,
-                 ax=ax_ret_pred_week
-                 )
-    ax_ret_pred_week.axvline(p5, linestyle='--', linewidth=3.)
-    ax_ret_pred_week.set_xlabel('Predicted cum returns 5 days')
-    ax_ret_pred_week.set_ylabel('Frequency')
-    ax_ret_pred_week.text(0.4, 0.9, 'Bayesian VaR = %.2f' % p5,
-                          verticalalignment='bottom',
-                          horizontalalignment='right',
-                          transform=ax_ret_pred_week.transAxes)
-
-    row += 1
-    ax_cone = plt.subplot(gs[row, :])
-
-    bayesian.plot_bayes_cone(df_train, df_test,
-                             trace=trace_t,
-                             ax=ax_cone)
+    gs.tight_layout(fig)
 
     if return_fig:
         return fig

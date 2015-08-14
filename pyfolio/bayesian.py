@@ -196,20 +196,32 @@ def model_best(y1, y2, samples=1000):
                                 upper=sigma_high, testval=y1.std())
         group2_std = pm.Uniform('group2_std', lower=sigma_low,
                                 upper=sigma_high, testval=y2.std())
-        nu = pm.Exponential('nu_minus_one', 1/29.) + 1
+        nu = pm.Exponential('nu_minus_one', 1/29., testval=4.) + 1
 
-        pm.T('group1', nu=nu, mu=group1_mean,
+        returns_group1 = pm.T('group1', nu=nu, mu=group1_mean,
              lam=group1_std**-2, observed=y1)
-        pm.T('group2', nu=nu, mu=group2_mean,
+        returns_group2 = pm.T('group2', nu=nu, mu=group2_mean,
              lam=group2_std**-2, observed=y2)
 
         diff_of_means = pm.Deterministic('difference of means',
-                                         group1_mean - group2_mean)
+                                         group2_mean - group1_mean)
         pm.Deterministic('difference of stds',
-                         group1_std - group2_std)
+                         group2_std - group1_std)
         pm.Deterministic('effect size', diff_of_means /
                          pm.sqrt((group1_std**2 +
                                   group2_std**2) / 2))
+
+        pm.Deterministic('group1_annual_volatility',
+                         returns_group1.distribution.variance**.5 * np.sqrt(252))
+        pm.Deterministic('group2_annual_volatility',
+                         returns_group2.distribution.variance**.5 * np.sqrt(252))
+
+        pm.Deterministic('group1_sharpe', returns_group1.distribution.mean /
+                         returns_group1.distribution.variance**.5 *
+                         np.sqrt(252))
+        pm.Deterministic('group2_sharpe', returns_group2.distribution.mean /
+                         returns_group2.distribution.variance**.5 *
+                         np.sqrt(252))
 
         step = pm.NUTS()
 
@@ -218,40 +230,63 @@ def model_best(y1, y2, samples=1000):
 
 
 def plot_best(trace=None, data_train=None, data_test=None,
-              samples=1000, burn=200):
+              samples=1000, burn=200, axs=None):
     if trace is None:
         if (data_train is not None) or (data_test is not None):
             raise ValueError('Either pass trace or data_train and data_test')
         trace = model_best(data_train, data_test, samples=samples)
 
     trace = trace[burn:]
+    if axs is None:
+        fig, axs = plt.subplots(ncols=2, nrows=3, figsize=(16, 4))
 
-    fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(16, 4))
-    sns.distplot(trace['group1_mean'], ax=ax1, label='backtest')
-    sns.distplot(trace['group2_mean'], ax=ax1, label='forward')
-    ax1.legend(loc=0)
-    sns.distplot(trace['difference of means'], ax=ax2)
-    ax2.axvline(0, linestyle='-', color='k')
-    ax2.axvline(
-        stats.scoreatpercentile(trace['difference of means'], 2.5),
-        linestyle='--', color='b', label='2.5 and 97.5 percentiles')
-    ax2.axvline(
-        stats.scoreatpercentile(trace['difference of means'], 97.5),
-        linestyle='--', color='b')
-    ax2.legend(loc=0)
+    def distplot_w_perc(trace, ax):
+        sns.distplot(trace, ax=ax)
+        ax.axvline(
+            stats.scoreatpercentile(trace, 2.5),
+            color='0.5', label='2.5 and 97.5 percentiles')
+        ax.axvline(
+            stats.scoreatpercentile(trace, 97.5),
+            color='0.5')
 
-    sns.distplot(trace['effect size'], ax=ax3)
-    ax3.axvline(0, linestyle='-', color='k')
-    ax3.axvline(
+    sns.distplot(trace['group1_mean'], ax=axs[0], label='backtest')
+    sns.distplot(trace['group2_mean'], ax=axs[0], label='forward')
+    axs[0].legend(loc=0)
+    axs[1].legend(loc=0)
+
+    distplot_w_perc(trace['difference of means'], axs[1])
+
+    axs[0].set(xlabel='mean', ylabel='belief', yticklabels=[])
+    axs[1].set(xlabel='difference of means', yticklabels=[])
+
+    sns.distplot(trace['group1_annual_volatility'], ax=axs[2],
+                 label='backtest')
+    sns.distplot(trace['group2_annual_volatility'], ax=axs[2],
+                 label='forward')
+    distplot_w_perc(trace['group2_annual_volatility'] -
+                 trace['group1_annual_volatility'], axs[3])
+    axs[2].set(xlabel='Annual volatility', ylabel='belief',
+               yticklabels=[])
+    axs[2].legend(loc=0)
+    axs[3].set(xlabel='difference of volatility', yticklabels=[])
+
+    sns.distplot(trace['group1_sharpe'], ax=axs[4], label='backtest')
+    sns.distplot(trace['group2_sharpe'], ax=axs[4], label='forward')
+    distplot_w_perc(trace['group2_sharpe'] - trace['group1_sharpe'],
+                    axs[5])
+    axs[4].set(xlabel='Sharpe', ylabel='belief', yticklabels=[])
+    axs[4].legend(loc=0)
+    axs[5].set(xlabel='difference of Sharpes', yticklabels=[])
+
+    sns.distplot(trace['effect size'], ax=axs[6])
+    axs[6].axvline(
         stats.scoreatpercentile(trace['effect size'], 2.5),
-        linestyle='--', color='b')
-    ax3.axvline(
+        color='0.5')
+    axs[6].axvline(
         stats.scoreatpercentile(trace['effect size'], 97.5),
-        linestyle='--', color='b')
-    ax1.set_xlabel('mean')
-    ax2.set_xlabel('difference of means')
-    ax3.set_xlabel('effect size')
-
+        color='0.5')
+    axs[6].set(xlabel='difference of means normalized by volatility',
+               ylabel='belief', yticklabels=[])
 
 def compute_bayes_cone(preds, starting_value=1.):
     """Compute 5, 25, 75 and 95 percentiles of cumulative returns, used
