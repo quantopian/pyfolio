@@ -132,10 +132,9 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
                                   set_context=set_context)
 
     if bayesian and live_start_date is not None:
-        create_bayesian_tear_sheet(returns,
-                                   live_start_date=live_start_date,
-                                   benchmark_rets=benchmark_rets,
-                                   set_context=set_context)
+        create_bayesian_tear_sheet_oos(returns, live_start_date,
+                                       benchmark_rets=benchmark_rets,
+                                       set_context=set_context)
 
 
 @plotting_context
@@ -455,7 +454,7 @@ def create_interesting_times_tear_sheet(
 
 
 @plotting_context
-def create_bayesian_tear_sheet_oos(returns, live_start_date=None,
+def create_bayesian_tear_sheet_oos(returns, live_start_date,
                                    benchmark_rets=None, return_fig=False):
     """
     Generate a number of Bayesian distributions and a Bayesian
