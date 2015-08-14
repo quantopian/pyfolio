@@ -199,9 +199,9 @@ def model_best(y1, y2, samples=1000):
         nu = pm.Exponential('nu_minus_one', 1/29., testval=4.) + 1
 
         returns_group1 = pm.T('group1', nu=nu, mu=group1_mean,
-             lam=group1_std**-2, observed=y1)
+                              lam=group1_std**-2, observed=y1)
         returns_group2 = pm.T('group2', nu=nu, mu=group2_mean,
-             lam=group2_std**-2, observed=y2)
+                              lam=group2_std**-2, observed=y2)
 
         diff_of_means = pm.Deterministic('difference of means',
                                          group2_mean - group1_mean)
@@ -212,9 +212,11 @@ def model_best(y1, y2, samples=1000):
                                   group2_std**2) / 2))
 
         pm.Deterministic('group1_annual_volatility',
-                         returns_group1.distribution.variance**.5 * np.sqrt(252))
+                         returns_group1.distribution.variance**.5 *
+                         np.sqrt(252))
         pm.Deterministic('group2_annual_volatility',
-                         returns_group2.distribution.variance**.5 * np.sqrt(252))
+                         returns_group2.distribution.variance**.5 *
+                         np.sqrt(252))
 
         pm.Deterministic('group1_sharpe', returns_group1.distribution.mean /
                          returns_group1.distribution.variance**.5 *
@@ -264,7 +266,7 @@ def plot_best(trace=None, data_train=None, data_test=None,
     sns.distplot(trace['group2_annual_volatility'], ax=axs[2],
                  label='forward')
     distplot_w_perc(trace['group2_annual_volatility'] -
-                 trace['group1_annual_volatility'], axs[3])
+                    trace['group1_annual_volatility'], axs[3])
     axs[2].set(xlabel='Annual volatility', ylabel='belief',
                yticklabels=[])
     axs[2].legend(loc=0)
@@ -292,37 +294,40 @@ def plot_best(trace=None, data_train=None, data_test=None,
 def model_stoch_vol(data, samples=2000):
     from pymc3.distributions.timeseries import GaussianRandomWalk
 
-    with Model():
+    with pm.Model():
         nu = pm.Exponential('nu', 1./10, testval=5.)
         sigma = pm.Exponential('sigma', 1./.02, testval=.1)
-        s = GaussianRandomWalk('s', sigma**-2, shape=len(returns))
+        s = GaussianRandomWalk('s', sigma**-2, shape=len(data))
         volatility_process = pm.Deterministic('volatility_process',
-                                              exp(-2*s))
+                                              pm.exp(-2*s))
         pm.T('r', nu, lam=volatility_process, observed=data)
-        start = find_MAP(vars=[s], fmin=scipy.optimize.fmin_l_bfgs_b)
+        start = pm.find_MAP(vars=[s], fmin=sp.optimize.fmin_l_bfgs_b)
 
-        step = NUTS(scaling=start)
-        trace = sample(100, step, progressbar=False)
+        step = pm.NUTS(scaling=start)
+        trace = pm.sample(100, step, progressbar=False)
 
         # Start next run at the last sampled position.
-        step = NUTS(scaling=trace[-1], gamma=.25)
-        trace = sample(samples, step, start=trace[-1], progressbar=False, njobs=2)
+        step = pm.NUTS(scaling=trace[-1], gamma=.25)
+        trace = pm.sample(samples, step, start=trace[-1],
+                          progressbar=False, njobs=2)
 
     return trace
 
-def plot_stoch_vol(trace=None, data=None, ax=None):
+
+def plot_stoch_vol(data, trace=None, ax=None):
     if trace is None:
         trace = model_stoch_vol(data)
 
     if ax is None:
         fig, ax = plt.subplots(figsize=(15, 8))
 
-    returns.abs().plot(ax=ax)
-    ax.plot(returns.index, np.exp(trace['s',::30].T), 'r', alpha=.03);
-    ax.set(title='volatility_process', xlabel='time', ylabel='volatility');
+    data.abs().plot(ax=ax)
+    ax.plot(data.index, np.exp(trace['s', ::30].T), 'r', alpha=.03)
+    ax.set(title='volatility_process', xlabel='time', ylabel='volatility')
     ax.legend(['abs returns', 'stochastic volatility process'])
 
     return ax
+
 
 def compute_bayes_cone(preds, starting_value=1.):
     """Compute 5, 25, 75 and 95 percentiles of cumulative returns, used
