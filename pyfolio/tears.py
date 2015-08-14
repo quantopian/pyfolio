@@ -132,8 +132,9 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
                                   set_context=set_context)
 
     if bayesian and live_start_date is not None:
-        create_bayesian_tear_sheet(returns, benchmark_rets,
+        create_bayesian_tear_sheet(returns,
                                    live_start_date=live_start_date,
+                                   benchmark_rets=benchmark_rets,
                                    set_context=set_context)
 
 
@@ -454,8 +455,8 @@ def create_interesting_times_tear_sheet(
 
 
 @plotting_context
-def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
-                               return_fig=False):
+def create_bayesian_tear_sheet(returns, live_start_date,
+                               benchmark_rets=None, return_fig=False):
     """
     Generate a number of Bayesian distributions and a Bayesian
     cone plot of returns.
@@ -480,6 +481,11 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
     set_context : boolean, optional
         If True, set default plotting style context.
     """
+
+    if benchmark_rets is None:
+        benchmark_rets = utils.get_symbol_rets('SPY',
+                                               start=returns.index[0],
+                                               end=returns.index[-1])
 
     fig = plt.figure(figsize=(14, 10 * 2))
     gs = gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.3)
