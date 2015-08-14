@@ -288,6 +288,42 @@ def plot_best(trace=None, data_train=None, data_test=None,
     axs[6].set(xlabel='difference of means normalized by volatility',
                ylabel='belief', yticklabels=[])
 
+
+def model_stoch_vol(data, samples=2000):
+    from pymc3.distributions.timeseries import GaussianRandomWalk
+
+    with Model():
+        nu = pm.Exponential('nu', 1./10, testval=5.)
+        sigma = pm.Exponential('sigma', 1./.02, testval=.1)
+        s = GaussianRandomWalk('s', sigma**-2, shape=len(returns))
+        volatility_process = pm.Deterministic('volatility_process',
+                                              exp(-2*s))
+        pm.T('r', nu, lam=volatility_process, observed=data)
+        start = find_MAP(vars=[s], fmin=scipy.optimize.fmin_l_bfgs_b)
+
+        step = NUTS(scaling=start)
+        trace = sample(100, step, progressbar=False)
+
+        # Start next run at the last sampled position.
+        step = NUTS(scaling=trace[-1], gamma=.25)
+        trace = sample(samples, step, start=trace[-1], progressbar=False, njobs=2)
+
+    return trace
+
+def plot_stoch_vol(trace=None, data=None, ax=None):
+    if trace is None:
+        trace = model_stoch_vol(data)
+
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(15, 8))
+
+    returns.abs().plot(ax=ax)
+    ax.plot(returns.index, np.exp(trace['s',::30].T), 'r', alpha=.03);
+    ax.set(title='volatility_process', xlabel='time', ylabel='volatility');
+    ax.legend(['abs returns', 'stochastic volatility process'])
+
+    return ax
+
 def compute_bayes_cone(preds, starting_value=1.):
     """Compute 5, 25, 75 and 95 percentiles of cumulative returns, used
     for the Bayesian cone.
