@@ -19,6 +19,7 @@ from os.path import (
     dirname,
     getmtime,
     join,
+    isfile
 )
 import warnings
 
@@ -123,8 +124,8 @@ def default_returns_func(symbol, start=None, end=None):
     if end is None:
         end = datetime.now()
 
-    start = pd.Timestamp(start)
-    end = pd.Timestamp(end)
+    start = get_utc_timestamp(start)
+    end = get_utc_timestamp(end)
 
     def get_symbol_from_yahoo(symbol, start=None, end=None):
         px = web.get_data_yahoo(symbol, start=start, end=end)
@@ -135,16 +136,18 @@ def default_returns_func(symbol, start=None, end=None):
         return rets
 
     if symbol == 'SPY':
-        filepath = data_path('spy.h5')
+        filepath = data_path('spy.csv')
         # Is cache recent enough?
-        if pd.to_datetime(getmtime(filepath), unit='s') >= end:
-            rets = pd.read_hdf(filepath, 'df')
+        if isfile(filepath) and (pd.to_datetime(getmtime(filepath),
+                                                unit='s', utc=True) >= end):
+            rets = pd.read_csv(filepath, index_col=0,
+                               parse_dates=True, header=None)[1]
         else:
             # Download most-recent SPY to update cache
             rets = get_symbol_from_yahoo(symbol, start='1/1/1970',
                                          end=datetime.now())
             try:
-                rets.to_hdf(filepath, 'df')
+                rets.to_csv(filepath)
             except IOError as e:
                 warnings.warn('Could not update cache {}.'
                               'Exception: {}'.format(filepath, e),
@@ -188,8 +191,8 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     if end is None:
         end = datetime.now()
 
-    start = pd.Timestamp(start)
-    end = pd.Timestamp(end)
+    start = get_utc_timestamp(start)
+    end = get_utc_timestamp(end)
 
     def get_fama_french():
         umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
@@ -221,17 +224,19 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
         return five_factors
 
     if filepath_prefix is None:
-        filepath = data_path('factors.h5')
+        filepath = data_path('factors.csv')
     else:
         filepath = filepath_prefix
 
     # Is cache recent enough?
-    if pd.to_datetime(getmtime(filepath), unit='s', utc=True) >= end:
-        five_factors = pd.read_hdf(filepath, 'df')
+    if isfile(filepath) and pd.to_datetime(getmtime(filepath),
+                                           unit='s', utc=True) >= end:
+        five_factors = pd.read_csv(filepath, index_col=0,
+                                   parse_dates=True)
     else:
         five_factors = get_fama_french()
         try:
-            five_factors.to_hdf(filepath, 'df')
+            five_factors.to_csv(filepath)
         except IOError as e:
             warnings.warn('Could not update cache {}.'
                           'Exception: {}'.format(filepath, e),
