@@ -136,7 +136,7 @@ def model_returns_t(data, samples=500):
     ----------
     returns : pandas.Series
         Series of simple returns of an algorithm or stock.
-    samples : int (optional)
+    samples : int, optional
         Number of posterior samples to draw.
 
     Returns
@@ -169,15 +169,34 @@ def model_returns_t(data, samples=500):
 def model_best(y1, y2, samples=1000):
     """Bayesian Estimation Supersedes the T-Test
 
-    This model replicates the example used in:
+    This model runs a Bayesian hypothesis comparing if y1 and y2 come
+    from the same distribution. Returns are assumed to be T-distributed.
 
+    In addition, computes annual volatility and Sharpe of in and
+    out-of-sample periods.
+
+    This model replicates the example used in:
     Kruschke, John. (2012) Bayesian estimation supersedes the t
     test. Journal of Experimental Psychology: General.
 
-    The original pymc2 implementation was written by Andrew Straw and
-    can be found here: https://github.com/strawlab/best
+    Parameters
+    ----------
+    y1 : array-like
+        Array of returns (e.g. in-sample)
+    y2 : array-like
+        Array of returns (e.g. out-of-sample)
+    samples : int, optional
+        Number of posterior samples to draw.
 
-    Ported to PyMC3 by Thomas Wiecki (c) 2015.
+    Returns
+    -------
+    pymc3.sampling.BaseTrace object
+        A PyMC3 trace object that contains samples for each parameter
+        of the posterior.
+
+    See Also
+    --------
+    plot_stoch_vol : plotting of tochastic volatility model
     """
 
     y = np.concatenate((y1, y2))
@@ -233,6 +252,35 @@ def model_best(y1, y2, samples=1000):
 
 def plot_best(trace=None, data_train=None, data_test=None,
               samples=1000, burn=200, axs=None):
+    """Plot BEST significance analysis.
+
+    Parameters
+    ----------
+    trace : pymc3.sampling.BaseTrace, optional
+        trace object as returned by model_best()
+        If not passed, will run model_best(), for which
+        data_train and data_test are required.
+    data_train : pandas.Series, optional
+        Returns of in-sample period.
+        Required if trace=None.
+    data_test : pandas.Series, optional
+        Returns of out-of-sample period.
+        Required if trace=None.
+    samples : int, optional
+        Posterior samples to draw.
+    burn : int
+        Posterior sampels to discard as burn-in.
+    axs : array of matplotlib.axes objects, optional
+        Plot into passed axes objects. Needs 6 axes.
+
+    Returns
+    -------
+    None
+
+    See Also
+    --------
+    model_best : Estimation of BEST model.
+    """
     if trace is None:
         if (data_train is not None) or (data_test is not None):
             raise ValueError('Either pass trace or data_train and data_test')
@@ -292,6 +340,29 @@ def plot_best(trace=None, data_train=None, data_test=None,
 
 
 def model_stoch_vol(data, samples=2000):
+    """Run stochastic volatility model.
+
+    This model estimates the volatility of a returns series over time.
+    Returns are assumed to be T-distributed. lambda (width of
+    T-distributed) is assumed to follow a random-walk.
+
+    Parameters
+    ----------
+    data : pandas.Series
+        Return series to model.
+    samples : int, optional
+        Posterior samples to draw.
+
+    Returns
+    -------
+    pymc3.sampling.BaseTrace object
+        A PyMC3 trace object that contains samples for each parameter
+        of the posterior.
+
+    See Also
+    --------
+    plot_stoch_vol : plotting of tochastic volatility model
+    """
     from pymc3.distributions.timeseries import GaussianRandomWalk
 
     with pm.Model():
@@ -315,6 +386,26 @@ def model_stoch_vol(data, samples=2000):
 
 
 def plot_stoch_vol(data, trace=None, ax=None):
+    """Generate plot for stochastic volatility model.
+
+    Parameters
+    ----------
+    data : pandas.Series
+        Returns to model.
+    trace : pymc3.sampling.BaseTrace object, optional
+        trace as returned by model_stoch_vol
+        If not passed, sample from model.
+    ax : matplotlib.axes object, optional
+        Plot into axes object
+
+    Returns
+    -------
+    ax object
+
+    See Also
+    --------
+    model_stoch_vol : run stochastic volatility model
+    """
     if trace is None:
         trace = model_stoch_vol(data)
 
@@ -323,7 +414,7 @@ def plot_stoch_vol(data, trace=None, ax=None):
 
     data.abs().plot(ax=ax)
     ax.plot(data.index, np.exp(trace['s', ::30].T), 'r', alpha=.03)
-    ax.set(title='volatility_process', xlabel='time', ylabel='volatility')
+    ax.set(title='Stochastic Volatility', xlabel='time', ylabel='volatility')
     ax.legend(['abs returns', 'stochastic volatility process'])
 
     return ax
