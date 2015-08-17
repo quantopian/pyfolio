@@ -565,7 +565,8 @@ def create_bayesian_tear_sheet_oos(returns, live_start_date, samples=2000,
     # Run alpha beta model
     benchmark_rets = benchmark_rets.loc[df_train.index]
     trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
-                                          bmark=benchmark_rets, samples=samples)
+                                          bmark=benchmark_rets,
+                                          samples=samples)
 
     # Plot alpha and beta
     row += 1
