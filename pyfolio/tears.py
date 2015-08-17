@@ -454,7 +454,7 @@ def create_interesting_times_tear_sheet(
 
 
 @plotting_context
-def create_bayesian_tear_sheet_oos(returns, live_start_date,
+def create_bayesian_tear_sheet_oos(returns, live_start_date, samples=2000,
                                    benchmark_rets=None, return_fig=False):
     """
     Generate a number of Bayesian distributions and a Bayesian
@@ -475,6 +475,8 @@ def create_bayesian_tear_sheet_oos(returns, live_start_date,
     live_start_date : datetime, optional
         The point in time when the strategy began live
         trading, after its backtest period.
+    samples : int, optional
+        Number of posterior samples to draw.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
@@ -492,12 +494,12 @@ def create_bayesian_tear_sheet_oos(returns, live_start_date,
 
     # Run T model with missing data
     trace_t = bayesian.run_model('t', df_train, returns_test=df_test,
-                                 samples=2000)
+                                 samples=samples)
 
     # Compute BEST model
     trace_best = bayesian.run_model('best', df_train,
                                     returns_test=df_test,
-                                    samples=2000)
+                                    samples=samples)
 
     # Plot results
 
@@ -563,7 +565,7 @@ def create_bayesian_tear_sheet_oos(returns, live_start_date,
     # Run alpha beta model
     benchmark_rets = benchmark_rets.loc[df_train.index]
     trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
-                                          bmark=benchmark_rets, samples=2000)
+                                          bmark=benchmark_rets, samples=samples)
 
     # Plot alpha and beta
     row += 1
