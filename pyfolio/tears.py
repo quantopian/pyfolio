@@ -132,9 +132,9 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
                                   set_context=set_context)
 
     if bayesian and live_start_date is not None:
-        create_bayesian_tear_sheet(returns, benchmark_rets,
-                                   live_start_date=live_start_date,
-                                   set_context=set_context)
+        create_bayesian_tear_sheet_oos(returns, live_start_date,
+                                       benchmark_rets=benchmark_rets,
+                                       set_context=set_context)
 
 
 @plotting_context
@@ -454,8 +454,8 @@ def create_interesting_times_tear_sheet(
 
 
 @plotting_context
-def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
-                               return_fig=False):
+def create_bayesian_tear_sheet_oos(returns, live_start_date, samples=2000,
+                                   benchmark_rets=None, return_fig=False):
     """
     Generate a number of Bayesian distributions and a Bayesian
     cone plot of returns.
@@ -469,56 +469,69 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in create_full_tear_sheet.
-    benchmark_rets : pd.Series
+    benchmark_rets : pd.Series, optional
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
     live_start_date : datetime, optional
         The point in time when the strategy began live
         trading, after its backtest period.
+    samples : int, optional
+        Number of posterior samples to draw.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
         If True, set default plotting style context.
     """
 
-    fig = plt.figure(figsize=(14, 10 * 2))
-    gs = gridspec.GridSpec(4, 2, wspace=0.3, hspace=0.3)
-
-    row = 0
-    ax_sharpe = plt.subplot(gs[row, 0])
-    ax_vol = plt.subplot(gs[row, 1])
+    if benchmark_rets is None:
+        benchmark_rets = utils.get_symbol_rets('SPY',
+                                               start=returns.index[0],
+                                               end=returns.index[-1])
 
     live_start_date = utils.get_utc_timestamp(live_start_date)
     df_train = returns.loc[returns.index < live_start_date]
     df_test = returns.loc[returns.index >= live_start_date]
+
+    # Run T model with missing data
     trace_t = bayesian.run_model('t', df_train, returns_test=df_test,
-                                 samples=2000)
+                                 samples=samples)
 
-    sns.distplot(trace_t['sharpe'][100:], ax=ax_sharpe)
-    # ax_sharpe.set_title('Bayesian T-Sharpe Ratio')
-    ax_sharpe.set_xlabel('Sharpe Ratio')
-    ax_sharpe.set_ylabel('Belief')
-    sns.distplot(trace_t['annual volatility'][100:], ax=ax_vol)
-    # ax_vol.set_title('Annual Volatility')
-    ax_vol.set_xlabel('Annual Volatility')
-    ax_vol.set_ylabel('Belief')
+    # Compute BEST model
+    trace_best = bayesian.run_model('best', df_train,
+                                    returns_test=df_test,
+                                    samples=samples)
 
-    benchmark_rets = benchmark_rets.loc[df_train.index]
-    trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
-                                          bmark=benchmark_rets, samples=2000)
+    # Plot results
 
+    fig = plt.figure(figsize=(14, 10 * 2))
+    gs = gridspec.GridSpec(9, 2, wspace=0.3, hspace=0.3)
+
+    axs = []
+    row = 0
+
+    # Plot Bayesian cone
+    ax_cone = plt.subplot(gs[row, :])
+    bayesian.plot_bayes_cone(df_train, df_test,
+                             trace=trace_t,
+                             ax=ax_cone)
+
+    # Plot BEST results
     row += 1
-    ax_alpha = plt.subplot(gs[row, 0])
-    ax_beta = plt.subplot(gs[row, 1])
-    sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1, ax=ax_alpha)
-    # ax_sharpe.set_title('Alpha')
-    ax_alpha.set_xlabel('Annual Alpha')
-    ax_alpha.set_ylabel('Belief')
-    sns.distplot(trace_alpha_beta['beta'][100:], ax=ax_beta)
-    # ax_beta.set_title('Beta')
-    ax_beta.set_xlabel('Beta')
-    ax_beta.set_ylabel('Belief')
+    axs.append(plt.subplot(gs[row, 0]))
+    axs.append(plt.subplot(gs[row, 1]))
+    row += 1
+    axs.append(plt.subplot(gs[row, 0]))
+    axs.append(plt.subplot(gs[row, 1]))
+    row += 1
+    axs.append(plt.subplot(gs[row, 0]))
+    axs.append(plt.subplot(gs[row, 1]))
+    row += 1
+    # Effect size across two
+    axs.append(plt.subplot(gs[row, :]))
 
+    bayesian.plot_best(trace=trace_best, axs=axs)
+
+    # Compute Bayesian predictions
     row += 1
     ax_ret_pred_day = plt.subplot(gs[row, 0])
     ax_ret_pred_week = plt.subplot(gs[row, 1])
@@ -534,7 +547,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
                          verticalalignment='bottom',
                          horizontalalignment='right',
                          transform=ax_ret_pred_day.transAxes)
-
+    # Plot Bayesian VaRs
     week_pred = (
         np.cumprod(trace_t['returns_missing'][:, :5] + 1, 1) - 1)[:, -1]
     p5 = scipy.stats.scoreatpercentile(week_pred, 5)
@@ -549,12 +562,24 @@ def create_bayesian_tear_sheet(returns, benchmark_rets, live_start_date,
                           horizontalalignment='right',
                           transform=ax_ret_pred_week.transAxes)
 
-    row += 1
-    ax_cone = plt.subplot(gs[row, :])
+    # Run alpha beta model
+    benchmark_rets = benchmark_rets.loc[df_train.index]
+    trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
+                                          bmark=benchmark_rets,
+                                          samples=samples)
 
-    bayesian.plot_bayes_cone(df_train, df_test,
-                             trace=trace_t,
-                             ax=ax_cone)
+    # Plot alpha and beta
+    row += 1
+    ax_alpha = plt.subplot(gs[row, 0])
+    ax_beta = plt.subplot(gs[row, 1])
+    sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1, ax=ax_alpha)
+    ax_alpha.set_xlabel('Annual Alpha')
+    ax_alpha.set_ylabel('Belief')
+    sns.distplot(trace_alpha_beta['beta'][100:], ax=ax_beta)
+    ax_beta.set_xlabel('Beta')
+    ax_beta.set_ylabel('Belief')
+
+    gs.tight_layout(fig)
 
     if return_fig:
         return fig

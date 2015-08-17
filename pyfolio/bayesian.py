@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 from scipy import stats
+import seaborn as sns
 
 import matplotlib.pyplot as plt
 
@@ -135,7 +136,7 @@ def model_returns_t(data, samples=500):
     ----------
     returns : pandas.Series
         Series of simple returns of an algorithm or stock.
-    samples : int (optional)
+    samples : int, optional
         Number of posterior samples to draw.
 
     Returns
@@ -163,6 +164,260 @@ def model_returns_t(data, samples=500):
         step = pm.NUTS(scaling=start)
         trace = pm.sample(samples, step, start=start)
     return trace
+
+
+def model_best(y1, y2, samples=1000):
+    """Bayesian Estimation Supersedes the T-Test
+
+    This model runs a Bayesian hypothesis comparing if y1 and y2 come
+    from the same distribution. Returns are assumed to be T-distributed.
+
+    In addition, computes annual volatility and Sharpe of in and
+    out-of-sample periods.
+
+    This model replicates the example used in:
+    Kruschke, John. (2012) Bayesian estimation supersedes the t
+    test. Journal of Experimental Psychology: General.
+
+    Parameters
+    ----------
+    y1 : array-like
+        Array of returns (e.g. in-sample)
+    y2 : array-like
+        Array of returns (e.g. out-of-sample)
+    samples : int, optional
+        Number of posterior samples to draw.
+
+    Returns
+    -------
+    pymc3.sampling.BaseTrace object
+        A PyMC3 trace object that contains samples for each parameter
+        of the posterior.
+
+    See Also
+    --------
+    plot_stoch_vol : plotting of tochastic volatility model
+    """
+
+    y = np.concatenate((y1, y2))
+
+    mu_m = np.mean(y)
+    mu_p = 0.000001 * 1 / np.std(y)**2
+
+    sigma_low = np.std(y)/1000
+    sigma_high = np.std(y)*1000
+    with pm.Model():
+        group1_mean = pm.Normal('group1_mean', mu=mu_m, tau=mu_p,
+                                testval=y1.mean())
+        group2_mean = pm.Normal('group2_mean', mu=mu_m, tau=mu_p,
+                                testval=y2.mean())
+        group1_std = pm.Uniform('group1_std', lower=sigma_low,
+                                upper=sigma_high, testval=y1.std())
+        group2_std = pm.Uniform('group2_std', lower=sigma_low,
+                                upper=sigma_high, testval=y2.std())
+        nu = pm.Exponential('nu_minus_one', 1/29., testval=4.) + 1
+
+        returns_group1 = pm.T('group1', nu=nu, mu=group1_mean,
+                              lam=group1_std**-2, observed=y1)
+        returns_group2 = pm.T('group2', nu=nu, mu=group2_mean,
+                              lam=group2_std**-2, observed=y2)
+
+        diff_of_means = pm.Deterministic('difference of means',
+                                         group2_mean - group1_mean)
+        pm.Deterministic('difference of stds',
+                         group2_std - group1_std)
+        pm.Deterministic('effect size', diff_of_means /
+                         pm.sqrt((group1_std**2 +
+                                  group2_std**2) / 2))
+
+        pm.Deterministic('group1_annual_volatility',
+                         returns_group1.distribution.variance**.5 *
+                         np.sqrt(252))
+        pm.Deterministic('group2_annual_volatility',
+                         returns_group2.distribution.variance**.5 *
+                         np.sqrt(252))
+
+        pm.Deterministic('group1_sharpe', returns_group1.distribution.mean /
+                         returns_group1.distribution.variance**.5 *
+                         np.sqrt(252))
+        pm.Deterministic('group2_sharpe', returns_group2.distribution.mean /
+                         returns_group2.distribution.variance**.5 *
+                         np.sqrt(252))
+
+        step = pm.NUTS()
+
+        trace = pm.sample(samples, step)
+    return trace
+
+
+def plot_best(trace=None, data_train=None, data_test=None,
+              samples=1000, burn=200, axs=None):
+    """Plot BEST significance analysis.
+
+    Parameters
+    ----------
+    trace : pymc3.sampling.BaseTrace, optional
+        trace object as returned by model_best()
+        If not passed, will run model_best(), for which
+        data_train and data_test are required.
+    data_train : pandas.Series, optional
+        Returns of in-sample period.
+        Required if trace=None.
+    data_test : pandas.Series, optional
+        Returns of out-of-sample period.
+        Required if trace=None.
+    samples : int, optional
+        Posterior samples to draw.
+    burn : int
+        Posterior sampels to discard as burn-in.
+    axs : array of matplotlib.axes objects, optional
+        Plot into passed axes objects. Needs 6 axes.
+
+    Returns
+    -------
+    None
+
+    See Also
+    --------
+    model_best : Estimation of BEST model.
+    """
+    if trace is None:
+        if (data_train is not None) or (data_test is not None):
+            raise ValueError('Either pass trace or data_train and data_test')
+        trace = model_best(data_train, data_test, samples=samples)
+
+    trace = trace[burn:]
+    if axs is None:
+        fig, axs = plt.subplots(ncols=2, nrows=3, figsize=(16, 4))
+
+    def distplot_w_perc(trace, ax):
+        sns.distplot(trace, ax=ax)
+        ax.axvline(
+            stats.scoreatpercentile(trace, 2.5),
+            color='0.5', label='2.5 and 97.5 percentiles')
+        ax.axvline(
+            stats.scoreatpercentile(trace, 97.5),
+            color='0.5')
+
+    sns.distplot(trace['group1_mean'], ax=axs[0], label='backtest')
+    sns.distplot(trace['group2_mean'], ax=axs[0], label='forward')
+    axs[0].legend(loc=0)
+    axs[1].legend(loc=0)
+
+    distplot_w_perc(trace['difference of means'], axs[1])
+
+    axs[0].set(xlabel='mean', ylabel='belief', yticklabels=[])
+    axs[1].set(xlabel='difference of means', yticklabels=[])
+
+    sns.distplot(trace['group1_annual_volatility'], ax=axs[2],
+                 label='backtest')
+    sns.distplot(trace['group2_annual_volatility'], ax=axs[2],
+                 label='forward')
+    distplot_w_perc(trace['group2_annual_volatility'] -
+                    trace['group1_annual_volatility'], axs[3])
+    axs[2].set(xlabel='Annual volatility', ylabel='belief',
+               yticklabels=[])
+    axs[2].legend(loc=0)
+    axs[3].set(xlabel='difference of volatility', yticklabels=[])
+
+    sns.distplot(trace['group1_sharpe'], ax=axs[4], label='backtest')
+    sns.distplot(trace['group2_sharpe'], ax=axs[4], label='forward')
+    distplot_w_perc(trace['group2_sharpe'] - trace['group1_sharpe'],
+                    axs[5])
+    axs[4].set(xlabel='Sharpe', ylabel='belief', yticklabels=[])
+    axs[4].legend(loc=0)
+    axs[5].set(xlabel='difference of Sharpes', yticklabels=[])
+
+    sns.distplot(trace['effect size'], ax=axs[6])
+    axs[6].axvline(
+        stats.scoreatpercentile(trace['effect size'], 2.5),
+        color='0.5')
+    axs[6].axvline(
+        stats.scoreatpercentile(trace['effect size'], 97.5),
+        color='0.5')
+    axs[6].set(xlabel='difference of means normalized by volatility',
+               ylabel='belief', yticklabels=[])
+
+
+def model_stoch_vol(data, samples=2000):
+    """Run stochastic volatility model.
+
+    This model estimates the volatility of a returns series over time.
+    Returns are assumed to be T-distributed. lambda (width of
+    T-distributed) is assumed to follow a random-walk.
+
+    Parameters
+    ----------
+    data : pandas.Series
+        Return series to model.
+    samples : int, optional
+        Posterior samples to draw.
+
+    Returns
+    -------
+    pymc3.sampling.BaseTrace object
+        A PyMC3 trace object that contains samples for each parameter
+        of the posterior.
+
+    See Also
+    --------
+    plot_stoch_vol : plotting of tochastic volatility model
+    """
+    from pymc3.distributions.timeseries import GaussianRandomWalk
+
+    with pm.Model():
+        nu = pm.Exponential('nu', 1./10, testval=5.)
+        sigma = pm.Exponential('sigma', 1./.02, testval=.1)
+        s = GaussianRandomWalk('s', sigma**-2, shape=len(data))
+        volatility_process = pm.Deterministic('volatility_process',
+                                              pm.exp(-2*s))
+        pm.T('r', nu, lam=volatility_process, observed=data)
+        start = pm.find_MAP(vars=[s], fmin=sp.optimize.fmin_l_bfgs_b)
+
+        step = pm.NUTS(scaling=start)
+        trace = pm.sample(100, step, progressbar=False)
+
+        # Start next run at the last sampled position.
+        step = pm.NUTS(scaling=trace[-1], gamma=.25)
+        trace = pm.sample(samples, step, start=trace[-1],
+                          progressbar=False, njobs=2)
+
+    return trace
+
+
+def plot_stoch_vol(data, trace=None, ax=None):
+    """Generate plot for stochastic volatility model.
+
+    Parameters
+    ----------
+    data : pandas.Series
+        Returns to model.
+    trace : pymc3.sampling.BaseTrace object, optional
+        trace as returned by model_stoch_vol
+        If not passed, sample from model.
+    ax : matplotlib.axes object, optional
+        Plot into axes object
+
+    Returns
+    -------
+    ax object
+
+    See Also
+    --------
+    model_stoch_vol : run stochastic volatility model
+    """
+    if trace is None:
+        trace = model_stoch_vol(data)
+
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(15, 8))
+
+    data.abs().plot(ax=ax)
+    ax.plot(data.index, np.exp(trace['s', ::30].T), 'r', alpha=.03)
+    ax.set(title='Stochastic Volatility', xlabel='time', ylabel='volatility')
+    ax.legend(['abs returns', 'stochastic volatility process'])
+
+    return ax
 
 
 def compute_bayes_cone(preds, starting_value=1.):
@@ -265,7 +520,7 @@ def run_model(model, returns_train, returns_test=None,
 
     Parameters
     ----------
-    model : {'alpha_beta', 't', 'normal'}
+    model : {'alpha_beta', 't', 'normal', 'best'}
         Which model to run
     returns_train : pd.Series
         Timeseries of simple returns
@@ -297,9 +552,12 @@ def run_model(model, returns_train, returns_test=None,
         trace = model_returns_t(rets, samples)
     elif model == 'normal':
         trace = model_returns_normal(rets, samples)
+    elif model == 'best':
+        trace = model_best(returns_train, returns_test, samples=samples)
     else:
         raise NotImplementedError(
-            'Model {} not found. Use alpha_beta, t, or normal.'.format(model))
+            'Model {} not found.'
+            'Use alpha_beta, t, normal, or best.'.format(model))
 
     return trace
 
