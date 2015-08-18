@@ -162,17 +162,17 @@ def get_symbol_from_yahoo(symbol, start=None, end=None):
         Returns of symbol in requested period.
     """
     px = web.get_data_yahoo(symbol, start=start, end=end)
-    px = pd.DataFrame.rename(px, columns={'Adj Close': 'adj_close'})
-    px.columns.name = symbol
-    rets = px.adj_close.pct_change().dropna()
+    rets = px[['Adj Close']].pct_change().dropna()
     rets.index = rets.index.tz_localize("UTC")
+    rets.columns = [symbol]
     return rets
 
 
 def default_returns_func(symbol, start=None, end=None):
     """
     Gets returns for a symbol.
-    Queries Yahoo Finance. Attempts to cache SPY in HDF5.
+    Queries Yahoo Finance. Attempts to cache SPY.
+
     Parameters
     ----------
     symbol : str
@@ -203,14 +203,14 @@ def default_returns_func(symbol, start=None, end=None):
         rets = get_returns_cached(filepath,
                                   get_symbol_from_yahoo,
                                   end,
+                                  symbol='SPY',
                                   start='1/1/1970',
                                   end=datetime.now())
-
         rets = rets[start:end]
     else:
         rets = get_symbol_from_yahoo(symbol, start=start, end=end)
 
-    return rets
+    return rets[symbol]
 
 
 def vectorize(func):
