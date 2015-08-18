@@ -28,6 +28,7 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 import pandas.io.data as web
+from pandas.tseries.offsets import BDay
 
 import zipfile
 
@@ -122,7 +123,7 @@ def default_returns_func(symbol, start=None, end=None):
     if start is None:
         start = '1/1/1970'
     if end is None:
-        end = datetime.now()
+        end = pd.Timestamp(datetime.today()).normalize() - BDay()
 
     start = get_utc_timestamp(start)
     end = get_utc_timestamp(end)
@@ -138,11 +139,17 @@ def default_returns_func(symbol, start=None, end=None):
     if symbol == 'SPY':
         filepath = data_path('spy.csv')
         # Is cache recent enough?
-        if isfile(filepath) and (pd.to_datetime(getmtime(filepath),
-                                                unit='s', utc=True) >= end):
+        update_cache = False
+        if not isfile(filepath):
+            update_cache = True
+        else:
             rets = pd.read_csv(filepath, index_col=0,
                                parse_dates=True, header=None)[1]
-        else:
+            rets.index = rets.index.tz_localize("UTC")
+            if rets.index[-1] < end:
+                update_cache = True
+
+        if update_cache:
             # Download most-recent SPY to update cache
             rets = get_symbol_from_yahoo(symbol, start='1/1/1970',
                                          end=datetime.now())
@@ -189,7 +196,7 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     if start is None:
         start = '1/1/1970'
     if end is None:
-        end = datetime.now()
+        end = pd.Timestamp(datetime.today()).normalize() - BDay()
 
     start = get_utc_timestamp(start)
     end = get_utc_timestamp(end)
@@ -229,11 +236,17 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
         filepath = filepath_prefix
 
     # Is cache recent enough?
-    if isfile(filepath) and pd.to_datetime(getmtime(filepath),
-                                           unit='s', utc=True) >= end:
+    update_cache = False
+    if not isfile(filepath):
+        update_cache = True
+    else:
         five_factors = pd.read_csv(filepath, index_col=0,
                                    parse_dates=True)
-    else:
+        five_factors.index = factors.index.tz_localize("UTC")
+        if five_factors.index[-1] < end:
+            update_cache = True
+
+    if update_cache:
         five_factors = get_fama_french()
         try:
             five_factors.to_csv(filepath)
