@@ -17,7 +17,6 @@ from __future__ import division
 from os.path import (
     abspath,
     dirname,
-    getmtime,
     join,
     isfile
 )
@@ -99,6 +98,77 @@ def get_utc_timestamp(dt):
     return dt
 
 
+def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
+    """Get returns from a cached file if the cache is recent enough,
+    otherwise, try to retrieve via a provided update function and
+    update the cache file.
+
+    Parameters
+    ----------
+    filepath : str
+        Path to cached csv file
+    update_func : function
+        Function to call in case cache is not up-to-date.
+    latest_dt : pd.Timestamp (tz=UTC)
+        Latest datetime required in csv file.
+    **kwargs : Keyword arguments
+        Optional keyword arguments will be passed to update_func()
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing returns
+    """
+    update_cache = False
+
+    if not isfile(filepath):
+        update_cache = True
+    else:
+        returns = pd.read_csv(filepath, index_col=0,
+                              parse_dates=True)
+        returns.index = returns.index.tz_localize("UTC")
+        if returns.index[-1] < latest_dt:
+            update_cache = True
+
+    if update_cache:
+        returns = update_func(**kwargs)
+        try:
+            returns.to_csv(filepath)
+        except IOError as e:
+            warnings.warn('Could not update cache {}.'
+                          'Exception: {}'.format(filepath, e),
+                          UserWarning)
+
+    return returns
+
+
+def get_symbol_from_yahoo(symbol, start=None, end=None):
+    """Wrapper for pandas.io.data.get_data_yahoo().
+    Retrieves prices for symbol from yahoo and computes returns
+    based on adjusted closing prices.
+
+    Parameters
+    ----------
+    symbol : str
+        Symbol name to load, e.g. 'SPY'
+    start : pandas.Timestamp compatible, optional
+        Start date of time period to retrieve
+    end : pandas.Timestamp compatible, optional
+        End date of time period to retrieve
+
+    Returns
+    -------
+    pandas.DataFrame
+        Returns of symbol in requested period.
+    """
+    px = web.get_data_yahoo(symbol, start=start, end=end)
+    px = pd.DataFrame.rename(px, columns={'Adj Close': 'adj_close'})
+    px.columns.name = symbol
+    rets = px.adj_close.pct_change().dropna()
+    rets.index = rets.index.tz_localize("UTC")
+    return rets
+
+
 def default_returns_func(symbol, start=None, end=None):
     """
     Gets returns for a symbol.
@@ -128,37 +198,13 @@ def default_returns_func(symbol, start=None, end=None):
     start = get_utc_timestamp(start)
     end = get_utc_timestamp(end)
 
-    def get_symbol_from_yahoo(symbol, start=None, end=None):
-        px = web.get_data_yahoo(symbol, start=start, end=end)
-        px = pd.DataFrame.rename(px, columns={'Adj Close': 'adj_close'})
-        px.columns.name = symbol
-        rets = px.adj_close.pct_change().dropna()
-        rets.index = rets.index.tz_localize("UTC")
-        return rets
-
     if symbol == 'SPY':
         filepath = data_path('spy.csv')
-        # Is cache recent enough?
-        update_cache = False
-        if not isfile(filepath):
-            update_cache = True
-        else:
-            rets = pd.read_csv(filepath, index_col=0,
-                               parse_dates=True, header=None)[1]
-            rets.index = rets.index.tz_localize("UTC")
-            if rets.index[-1] < end:
-                update_cache = True
-
-        if update_cache:
-            # Download most-recent SPY to update cache
-            rets = get_symbol_from_yahoo(symbol, start='1/1/1970',
-                                         end=datetime.now())
-            try:
-                rets.to_csv(filepath)
-            except IOError as e:
-                warnings.warn('Could not update cache {}.'
-                              'Exception: {}'.format(filepath, e),
-                              UserWarning)
+        rets = get_returns_cached(filepath,
+                                  get_symbol_from_yahoo,
+                                  end,
+                                  start='1/1/1970',
+                                  end=datetime.now())
 
         rets = rets[start:end]
     else:
@@ -181,6 +227,43 @@ def vectorize(func):
     return wrapper
 
 
+def get_fama_french():
+    """Retrieve Fama-French factors from dartmouth host.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Percent change of Fama-French factors
+    """
+    umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
+                      's/faculty/ken.french/ftp/F-F_Momentum'
+                      '_Factor_daily_CSV.zip')
+    factors_req = urlopen('http://mba.tuck.dartmouth.edu/pag'
+                          'es/faculty/ken.french/ftp/F-F_Re'
+                          'search_Data_Factors_daily_CSV.zip')
+
+    umd_zip = zipfile.ZipFile(BytesIO(umd_req.read()), 'r')
+    factors_zip = zipfile.ZipFile(BytesIO(factors_req.read()),
+                                  'r')
+    umd_csv = umd_zip.read('F-F_Momentum_Factor_daily.CSV')
+    umd_csv = umd_csv.decode('utf-8')
+    umd_csv = umd_csv.split('\r\n\r\n')[2]\
+                     .replace('\r\n', '\n')
+    factors_csv = factors_zip.read('F-F_Research_Data_'
+                                   'Factors_daily.CSV')
+    factors_csv = factors_csv.decode('utf-8')
+    factors_csv = factors_csv.split('\r\n\r\n')[1]\
+                             .replace('\r\n', '\n')
+
+    factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
+    umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')
+
+    five_factors = factors.join(umd).dropna(axis=0)
+    five_factors = five_factors / 100
+
+    return five_factors
+
+
 def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     """
     Loads risk factors Mkt-Rf, SMB, HML, Rf, and UMD.
@@ -201,59 +284,12 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     start = get_utc_timestamp(start)
     end = get_utc_timestamp(end)
 
-    def get_fama_french():
-        umd_req = urlopen('http://mba.tuck.dartmouth.edu/page'
-                          's/faculty/ken.french/ftp/F-F_Momentum'
-                          '_Factor_daily_CSV.zip')
-        factors_req = urlopen('http://mba.tuck.dartmouth.edu/pag'
-                              'es/faculty/ken.french/ftp/F-F_Re'
-                              'search_Data_Factors_daily_CSV.zip')
-
-        umd_zip = zipfile.ZipFile(BytesIO(umd_req.read()), 'r')
-        factors_zip = zipfile.ZipFile(BytesIO(factors_req.read()),
-                                      'r')
-        umd_csv = umd_zip.read('F-F_Momentum_Factor_daily.CSV')
-        umd_csv = umd_csv.decode('utf-8')
-        umd_csv = umd_csv.split('\r\n\r\n')[2]\
-                         .replace('\r\n', '\n')
-        factors_csv = factors_zip.read('F-F_Research_Data_'
-                                       'Factors_daily.CSV')
-        factors_csv = factors_csv.decode('utf-8')
-        factors_csv = factors_csv.split('\r\n\r\n')[1]\
-                                 .replace('\r\n', '\n')
-
-        factors = pd.DataFrame.from_csv(StringIO(factors_csv), sep=',')
-        umd = pd.DataFrame.from_csv(StringIO(umd_csv), sep=',')
-
-        five_factors = factors.join(umd).dropna(axis=0)
-        five_factors = five_factors / 100
-
-        return five_factors
-
     if filepath_prefix is None:
         filepath = data_path('factors.csv')
     else:
         filepath = filepath_prefix
 
-    # Is cache recent enough?
-    update_cache = False
-    if not isfile(filepath):
-        update_cache = True
-    else:
-        five_factors = pd.read_csv(filepath, index_col=0,
-                                   parse_dates=True)
-        five_factors.index = factors.index.tz_localize("UTC")
-        if five_factors.index[-1] < end:
-            update_cache = True
-
-    if update_cache:
-        five_factors = get_fama_french()
-        try:
-            five_factors.to_csv(filepath)
-        except IOError as e:
-            warnings.warn('Could not update cache {}.'
-                          'Exception: {}'.format(filepath, e),
-                          UserWarning)
+    five_factors = get_returns_cached(filepath, get_fama_french, end)
 
     return five_factors.loc[start:end]
 
