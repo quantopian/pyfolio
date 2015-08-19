@@ -131,10 +131,11 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
             create_txn_tear_sheet(returns, positions, transactions,
                                   set_context=set_context)
 
-    if bayesian and live_start_date is not None:
-        create_bayesian_tear_sheet_oos(returns, live_start_date,
-                                       benchmark_rets=benchmark_rets,
-                                       set_context=set_context)
+    if bayesian:
+        create_bayesian_tear_sheet(returns,
+                                   live_start_date=live_start_date,
+                                   benchmark_rets=benchmark_rets,
+                                   set_context=set_context)
 
 
 @plotting_context
@@ -454,8 +455,9 @@ def create_interesting_times_tear_sheet(
 
 
 @plotting_context
-def create_bayesian_tear_sheet_oos(returns, live_start_date, samples=2000,
-                                   benchmark_rets=None, return_fig=False):
+def create_bayesian_tear_sheet(returns, benchmark_rets=None,
+                               live_start_date=None, samples=2000,
+                               return_fig=False):
     """
     Generate a number of Bayesian distributions and a Bayesian
     cone plot of returns.
@@ -482,6 +484,11 @@ def create_bayesian_tear_sheet_oos(returns, live_start_date, samples=2000,
     set_context : boolean, optional
         If True, set default plotting style context.
     """
+
+    if live_start_date is None:
+        raise NotImplementedError(
+            'Bayesian tear sheet requires setting of live_start_date'
+        )
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY',
