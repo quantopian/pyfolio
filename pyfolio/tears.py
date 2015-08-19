@@ -415,6 +415,12 @@ def create_interesting_times_tear_sheet(
         If True, set default plotting style context.
     """
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
+
+    if len(rets_interesting) == 0:
+        warnings.warn('Passed returns do not overlap with any'
+                      'interesting times.', UserWarning)
+        return
+
     print('\nStress Events')
     print(np.round(pd.DataFrame(rets_interesting).describe().transpose().loc[
           :, ['mean', 'min', 'max']], 3))
