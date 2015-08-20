@@ -215,7 +215,7 @@ def model_best(y1, y2, samples=1000):
                                 upper=sigma_high, testval=y1.std())
         group2_std = pm.Uniform('group2_std', lower=sigma_low,
                                 upper=sigma_high, testval=y2.std())
-        nu = pm.Exponential('nu_minus_one', 1/29., testval=4.) + 1
+        nu = pm.Exponential('nu_minus_two', 1/29., testval=4.) + 2.
 
         returns_group1 = pm.T('group1', nu=nu, mu=group1_mean,
                               lam=group1_std**-2, observed=y1)
