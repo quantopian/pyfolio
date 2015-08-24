@@ -549,6 +549,7 @@ def plot_rolling_returns(
         live_start_date=None,
         cone_std=None,
         legend_loc='best',
+        volatility_match=False,
         ax=None, **kwargs):
     """Plots cumulative rolling returns versus some benchmarks'.
 
@@ -575,6 +576,10 @@ def plot_rolling_returns(
              centered around a linear regression.
     legend_loc : matplotlib.loc, optional
         The location of the legend on the plot.
+    volatility_match : bool, optional
+        Whether to normalize the volatility of the returns to those of the
+        benchmark returns. This helps compare strategies with different
+        volatilities. Requires passing of benchmark_rets.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -590,7 +595,15 @@ def plot_rolling_returns(
     if ax is None:
         ax = plt.gca()
 
-    df_cum_rets = timeseries.cum_returns(returns, 1.0)
+    if volatility_match and benchmark_rets is None:
+        raise ValueError('volatility_match requires passing of benchmark_rets.')
+    elif volatility_match and benchmark_rets is not None:
+        df_cum_rets = timeseries.cum_returns(
+            (returns / returns.std()) * benchmark_rets.loc[returns.index].std(),
+            1.0
+        )
+    else:
+        df_cum_rets = timeseries.cum_returns(returns, 1.0)
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
