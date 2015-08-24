@@ -141,11 +141,11 @@
 <p>Here's an example where we run an algorithm with zipline, then produce tear sheets for that algorithm.</p>
 <h2 id="imports">Imports</h2>
 <p>Import pyfolio, along with the necessary modules for running our zipline backtest.</p>
-<pre><code>%matplotlib inline
+<pre><code class="python">%matplotlib inline
 import pyfolio as pf
+</code></pre>
 
-
-import numpy as np
+<pre><code class="python">import numpy as np
 import pandas as pd
 
 import sys
@@ -155,7 +155,6 @@ from datetime import datetime
 import pytz
 
 # Import Zipline, the open source backtester
-import zipline
 from zipline import TradingAlgorithm
 from zipline.data.loader import load_bars_from_yahoo
 from zipline.api import order_target, symbol, history, add_history, schedule_function, date_rules, time_rules
@@ -163,9 +162,10 @@ from zipline.algorithm import TradingAlgorithm
 from zipline.utils.factory import load_from_yahoo
 from zipline.finance import commission
 </code></pre>
+
 <h2 id="run-our-zipline-algorithm">Run our zipline algorithm</h2>
 <p>This algorithm can also be adjusted to execute a modified, or completely different, trading strategy.</p>
-<pre><code># Zipline trading algorithm
+<pre><code class="python"># Zipline trading algorithm
 # Taken from zipline.examples.olmar
 zipline_logging = logbook.NestedSetup([
     logbook.NullHandler(level=logbook.DEBUG, bubble=True),
@@ -272,7 +272,7 @@ def rebalance_portfolio(algo, data, desired_port):
 
 
 def simplex_projection(v, b=1):
-    """Projection vectors to the simplex domain
+    &quot;&quot;&quot;Projection vectors to the simplex domain
 
     Implemented according to the paper: Efficient projections onto the
     l1-ball for learning in high dimensions, John Duchi, et al. ICML 2008.
@@ -292,7 +292,7 @@ def simplex_projection(v, b=1):
 
     Original matlab implementation: John Duchi (jduchi@cs.berkeley.edu)
     Python-port: Copyright 2013 by Thomas Wiecki (thomas.wiecki@gmail.com).
-    """
+    &quot;&quot;&quot;
 
     v = np.asarray(v)
     p = len(v)
@@ -316,68 +316,77 @@ olmar = TradingAlgorithm(handle_data=handle_data,
                          initialize=initialize,
                          identifiers=STOCKS)
 backtest = olmar.run(data)
+</code></pre>
 
-AMD
+<pre><code>AMD
 CERN
 COST
 DELL
 GPS
 INTC
 MMM
-[2015-07-14 20:56:01.136902] INFO: Performance: Simulated 1511 trading days out of 1511.
-[2015-07-14 20:56:01.137554] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
-[2015-07-14 20:56:01.138004] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
+[2015-08-05 20:16:25.197696] INFO: Performance: Simulated 1511 trading days out of 1511.
+[2015-08-05 20:16:25.198356] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
+[2015-08-05 20:16:25.198812] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
 </code></pre>
 <h2 id="extract-metrics">Extract metrics</h2>
 <p>Get the returns, positions, and transactions from the zipline backtest object.</p>
-<pre><code>returns, positions, transactions, gross_lev = pf.utils.extract_rets_pos_txn_from_zipline(backtest)
+<pre><code class="python">returns, positions, transactions, gross_lev = pf.utils.extract_rets_pos_txn_from_zipline(backtest)
 </code></pre>
+
 <h2 id="single-plot-example">Single plot example</h2>
 <p>Make one plot of the top 5 drawdown periods.</p>
-<pre><code>pf.plot_drawdown_periods(returns, top=5).set_xlabel('Date')
+<pre><code class="python">pf.plot_drawdown_periods(returns, top=5).set_xlabel('Date')
+</code></pre>
 
-/opt/miniconda/lib/python2.7/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
+<pre><code>/opt/miniconda/lib/python2.7/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
   warnings.warn(message, mplDeprecation, stacklevel=1)
 
 
 
 
 
-&lt;matplotlib.text.Text at 0x7fa783b6b110&gt;
+&lt;matplotlib.text.Text at 0x7f645912e110&gt;
 </code></pre>
 <p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_10_2.png" /></p>
 <h2 id="full-tear-sheet-example">Full tear sheet example</h2>
-<p>Create a full tear sheet for our algorithm. As an example, pretend the first 80% was a backtest and the last 20% was live trading.</p>
-<pre><code>pf.create_full_tear_sheet(returns, 
-                          positions=positions, 
-                          transactions=transactions,
-                          gross_lev=gross_lev, bayesian=True, backtest_days_pct=0.8)
+<p>Create a full tear sheet for our algorithm. As an example, set the live start date to something arbitrary.</p>
+<pre><code class="python">pf.create_full_tear_sheet(returns, positions=positions, transactions=transactions,
+                          gross_lev=gross_lev, live_start_date='2009-10-22')
+</code></pre>
 
-Entire data start date: 2004-01-02 00:00:00
-Entire data end date: 2009-12-31 00:00:00
+<pre><code>Entire data start date: 2004-01-02 00:00:00+00:00
+Entire data end date: 2009-12-31 00:00:00+00:00
 
 
-Out-of-Sample Months: 14
-Backtest Months: 57
+Out-of-Sample Months: 2
+Backtest Months: 69
                    Backtest  Out_of_Sample  All_History
-sortino_ratio          0.01           3.68         0.76
-omega_ratio            1.00           1.33         1.09
-max_drawdown          -0.53          -0.22        -0.60
-calmar_ratio           0.00           2.64         0.21
-annual_return          0.00           0.59         0.12
-stability              0.19           0.91         0.01
-sharpe_ratio           0.00           1.70         0.48
-annual_volatility      0.23           0.35         0.25
-alpha                  0.00           0.44         0.09
-beta                   0.84           0.80         0.81
+sortino_ratio          0.74           0.43         0.76
+omega_ratio            1.09           1.05         1.09
+max_drawdown          -0.60          -0.07        -0.60
+calmar_ratio           0.20           0.84         0.21
+annual_return          0.12           0.06         0.12
+stability              0.00           0.05         0.01
+sharpe_ratio           0.47           0.28         0.48
+annual_volatility      0.26           0.22         0.25
+alpha                  0.09          -0.11         0.09
+beta                   0.81           1.18         0.81
 
 Worst Drawdown Periods
-   net drawdown in %  peak date valley date recovery date duration
-0              59.50 2007-11-06  2008-11-20           NaT      NaN
-1              22.33 2006-02-16  2006-08-31    2007-05-21      328
-2              12.52 2005-07-28  2005-10-12    2006-01-11      120
-3              11.28 2004-11-15  2005-04-28    2005-07-22      180
-4               9.44 2007-07-16  2007-08-06    2007-09-04       37
+   net drawdown in %                  peak date                valley date  \
+0              59.50  2007-11-06 00:00:00+00:00  2008-11-20 00:00:00+00:00   
+1              22.33  2006-02-16 00:00:00+00:00  2006-08-31 00:00:00+00:00   
+2              12.52  2005-07-28 00:00:00+00:00  2005-10-12 00:00:00+00:00   
+3              11.28  2004-11-15 00:00:00+00:00  2005-04-28 00:00:00+00:00   
+4               9.44  2007-07-16 00:00:00+00:00  2007-08-06 00:00:00+00:00
+
+               recovery date duration  
+0                        NaN      NaN  
+1  2007-05-21 00:00:00+00:00      328  
+2  2006-01-11 00:00:00+00:00      120  
+3  2005-07-22 00:00:00+00:00      180  
+4  2007-09-04 00:00:00+00:00       37
 
 
 2-sigma returns daily    -0.032
@@ -411,18 +420,11 @@ Top 10 positions of all time (and max%)
 All positions ever held
 [2 6 1 3 0 5 4]
 [ 0.993  0.911  0.845  0.717  0.709  0.666  0.62 ]
-
-
- [-----------------100%-----------------] 2000 of 2000 complete in 5.2 sec
-
-/opt/miniconda/lib/python2.7/site-packages/theano/scan_module/scan_perform_ext.py:133: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility
-  from scan_perform.scan_perform import *
 </code></pre>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_1.png" /></p>
 <p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_2.png" /></p>
 <p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_3.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_4.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_5.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_6.png" /></p></div>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_4.png" /></p></div>
             
         </div>
 

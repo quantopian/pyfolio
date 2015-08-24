@@ -128,6 +128,8 @@
         
             <li><a href="#create-a-full-tear-sheet-for-the-single-stock">Create a full tear sheet for the single stock</a></li>
         
+            <li><a href="#create-a-full-tear-sheet-for-an-equal-weight-portfolio-of">Create a full tear sheet for an equal-weight portfolio of:</a></li>
+        
     
     </ul>
 </div></div>
@@ -136,65 +138,136 @@
 <h1 id="single-stock-analysis-example-in-pyfolio">Single stock analysis example in pyfolio</h1>
 <p>Here's a simple example where we produce a set of plots, called a tear sheet, for a stock.</p>
 <h2 id="import-pyfolio">Import pyfolio</h2>
-<pre><code>%matplotlib inline
+<pre><code class="python">%matplotlib inline
 import pyfolio as pf
 </code></pre>
+
 <h2 id="fetch-the-daily-returns-for-a-stock">Fetch the daily returns for a stock</h2>
-<pre><code>stock_rets = pf.utils.get_symbol_rets('FB')
+<pre><code class="python">stock_rets = pf.utils.get_symbol_rets('FB')
 </code></pre>
+
 <h2 id="create-a-full-tear-sheet-for-the-single-stock">Create a full tear sheet for the single stock</h2>
-<p>This will show charts about returns and shock events. As an example, we set the first 80% of the stock's history to be in-sample, which controls the cone plot. The Bayesian tear sheet is also enabled.</p>
-<pre><code>pf.create_full_tear_sheet(stock_rets, backtest_days_pct=0.8, bayesian=True)
+<p>This will show charts about returns and shock events.</p>
+<pre><code class="python">pf.create_returns_tear_sheet(stock_rets)
+</code></pre>
 
-Entire data start date: 2012-05-21 00:00:00
-Entire data end date: 2015-07-13 00:00:00
+<pre><code>Entire data start date: 2012-05-21 00:00:00+00:00
+Entire data end date: 2015-08-04 00:00:00+00:00
 
 
-Out-of-Sample Months: 7
-Backtest Months: 30
-                   Backtest  Out_of_Sample  All_History
-sortino_ratio          1.54           3.04         1.60
-omega_ratio            1.16           1.28         1.17
-max_drawdown          -0.48          -0.09        -0.48
-calmar_ratio           0.79           3.70         0.77
-annual_return          0.38           0.34         0.37
-stability              0.84           0.54         0.87
-sharpe_ratio           0.78           1.52         0.83
-annual_volatility      0.49           0.22         0.45
-alpha                  0.17           0.29         0.19
-beta                   0.97           1.04         0.98
+Backtest Months: 38
+                   Backtest
+sortino_ratio          1.65
+omega_ratio            1.18
+max_drawdown          -0.48
+calmar_ratio           0.79
+annual_return          0.38
+stability              0.87
+sharpe_ratio           0.85
+annual_volatility      0.44
+alpha                  0.20
+beta                   0.98
 
 Worst Drawdown Periods
-   net drawdown in %  peak date valley date recovery date duration
-0              47.90 2012-05-21  2012-09-04    2013-07-25      309
-1              22.06 2014-03-10  2014-04-28    2014-07-24       99
-2              17.34 2013-10-18  2013-11-25    2013-12-17       43
-4               9.21 2014-10-28  2014-11-19    2014-12-22       40
-3               9.20 2015-03-24  2015-05-12    2015-06-23       66
+   net drawdown in %                  peak date                valley date  \
+0              47.90  2012-05-21 00:00:00+00:00  2012-09-04 00:00:00+00:00   
+1              22.06  2014-03-10 00:00:00+00:00  2014-04-28 00:00:00+00:00   
+2              17.34  2013-10-18 00:00:00+00:00  2013-11-25 00:00:00+00:00   
+4               9.21  2014-10-28 00:00:00+00:00  2014-11-19 00:00:00+00:00   
+3               9.20  2015-03-24 00:00:00+00:00  2015-05-12 00:00:00+00:00
+
+               recovery date duration  
+0  2013-07-25 00:00:00+00:00      309  
+1  2014-07-24 00:00:00+00:00       99  
+2  2013-12-17 00:00:00+00:00       43  
+4  2014-12-22 00:00:00+00:00       40  
+3  2015-06-23 00:00:00+00:00       66
 
 
-2-sigma returns daily    -0.055
-2-sigma returns weekly   -0.111
+2-sigma returns daily    -0.054
+2-sigma returns weekly   -0.110
 dtype: float64
 
-Stress Events
 
 /opt/miniconda/lib/python2.7/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
   warnings.warn(message, mplDeprecation, stacklevel=1)
-/opt/miniconda/lib/python2.7/site-packages/theano/scan_module/scan_perform_ext.py:133: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility
-  from scan_perform.scan_perform import *
-
-
-
-               mean    min    max
-EZB IR Event  0.002 -0.091  0.077
-Apr14         0.001 -0.052  0.073
-Oct14        -0.002 -0.061  0.046
- [-----------------100%-----------------] 2000 of 2000 complete in 4.7 sec
 </code></pre>
-<p><img alt="png" src="../single_stock_example_files/single_stock_example_7_3.png" /></p>
-<p><img alt="png" src="../single_stock_example_files/single_stock_example_7_4.png" /></p>
-<p><img alt="png" src="../single_stock_example_files/single_stock_example_7_5.png" /></p></div>
+<p><img alt="png" src="../single_stock_example_files/single_stock_example_7_2.png" /></p>
+<h2 id="create-a-full-tear-sheet-for-an-equal-weight-portfolio-of">Create a full tear sheet for an equal-weight portfolio of:</h2>
+<ul>
+<li>Long SPY</li>
+<li>Short QQQ</li>
+<li>Long GLD</li>
+<li>Long TLT</li>
+</ul>
+<p>Additionally, we set the live start date as an example.</p>
+<pre><code class="python">stock_rets_SPY = pf.utils.get_symbol_rets('SPY')
+stock_rets_QQQ = pf.utils.get_symbol_rets('QQQ')
+stock_rets_GLD = pf.utils.get_symbol_rets('GLD')
+stock_rets_TLT = pf.utils.get_symbol_rets('TLT')
+</code></pre>
+
+<pre><code class="python">portfolio_4_assets_rets = pf.timeseries.portfolio_returns([stock_rets_SPY, -1 * stock_rets_QQQ, stock_rets_GLD, stock_rets_TLT], 
+                                exclude_non_overlapping=True)
+</code></pre>
+
+<pre><code class="python">pf.create_full_tear_sheet(portfolio_4_assets_rets, live_start_date='2013-10-22')
+</code></pre>
+
+<pre><code>Entire data start date: 2004-11-19 00:00:00+00:00
+Entire data end date: 2015-08-04 00:00:00+00:00
+
+
+Out-of-Sample Months: 21
+Backtest Months: 106
+                   Backtest  Out_of_Sample  All_History
+sortino_ratio          0.96          -0.43         0.78
+omega_ratio            1.12           0.95         1.09
+max_drawdown          -0.11          -0.08        -0.13
+calmar_ratio           0.41          -0.20         0.28
+annual_return          0.05          -0.02         0.04
+stability              0.94           0.04         0.83
+sharpe_ratio           0.65          -0.28         0.53
+annual_volatility      0.07           0.06         0.07
+alpha                  0.05           0.00         0.04
+beta                  -0.04          -0.17        -0.05
+
+Worst Drawdown Periods
+   net drawdown in %                  peak date                valley date  \
+0              13.06  2012-11-13 00:00:00+00:00  2013-12-19 00:00:00+00:00   
+2               8.96  2008-03-17 00:00:00+00:00  2008-08-15 00:00:00+00:00   
+1               8.85  2008-12-30 00:00:00+00:00  2009-07-29 00:00:00+00:00   
+4               4.66  2010-10-06 00:00:00+00:00  2011-01-27 00:00:00+00:00   
+3               4.38  2012-01-31 00:00:00+00:00  2012-04-03 00:00:00+00:00
+
+               recovery date duration  
+0                        NaN      NaN  
+2  2008-12-10 00:00:00+00:00      193  
+1  2010-06-07 00:00:00+00:00      375  
+4  2011-04-27 00:00:00+00:00      146  
+3  2012-06-01 00:00:00+00:00       89
+
+
+2-sigma returns daily    -0.008
+2-sigma returns weekly   -0.016
+dtype: float64
+
+Stress Events
+                                    mean    min    max
+Lehmann                            0.001 -0.016  0.031
+US downgrade/European Debt Crisis  0.002 -0.018  0.015
+Fukushima                          0.001 -0.006  0.007
+EZB IR Event                       0.000 -0.007  0.004
+Aug07                              0.000 -0.006  0.005
+Sept08                             0.002 -0.016  0.031
+2009Q1                            -0.001 -0.012  0.015
+2009Q2                            -0.000 -0.012  0.020
+Flash Crash                        0.002 -0.009  0.015
+Apr14                              0.000 -0.005  0.009
+Oct14                             -0.000 -0.007  0.007
+</code></pre>
+<p><img alt="png" src="../single_stock_example_files/single_stock_example_12_1.png" /></p>
+<p><img alt="png" src="../single_stock_example_files/single_stock_example_12_2.png" /></p></div>
             
         </div>
 
