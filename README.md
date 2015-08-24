@@ -19,7 +19,7 @@ performance of a trading algorithm. Here is an example of a tear sheet of a retu
 To install `pyfolio` via `pip` issue the following command:
 
 ```bash
-pip install --pre pyfolio
+pip install pyfolio
 ```
 
 For development, clone the git repo and run `python setup.py develop`
