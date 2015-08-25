@@ -635,7 +635,7 @@ def plot_rolling_returns(
             cone_df_live['line'].plot(
                 ax=ax,
                 ls='--',
-                label='Live trend',
+                label='Predicted trend',
                 lw=2,
                 color='red',
                 alpha=0.7,
