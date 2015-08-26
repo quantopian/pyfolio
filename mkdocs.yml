@@ -7,3 +7,4 @@ pages:
 - Tutorial:
   - 'Single stock': 'single_stock_example.md'
   - 'Zipline algorithm': 'zipline_algo_example.md'
+  - 'Bayesian analysis': 'bayesian.md'
