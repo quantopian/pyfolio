@@ -131,11 +131,6 @@ def plot_rolling_risk_factors(
     if ax is None:
         ax = plt.gca()
 
-    if risk_factors is None:
-        risk_factors = utils.load_portfolio_risk_factors(
-            start=returns.index[0],
-            end=returns.index[-1])
-
     num_months_str = '%.0f' % (rolling_beta_window / 21)
 
     ax.set_title(
@@ -144,22 +139,12 @@ def plot_rolling_risk_factors(
         '-month)')
     ax.set_ylabel('beta')
 
-    rolling_beta_SMB = timeseries.rolling_beta(
+    rolling_beta = timeseries.rolling_risk_factors(
         returns,
-        risk_factors['SMB'],
-        rolling_window=rolling_beta_window)
-    rolling_beta_HML = timeseries.rolling_beta(
-        returns,
-        risk_factors['HML'],
-        rolling_window=rolling_beta_window)
-    rolling_beta_UMD = timeseries.rolling_beta(
-        returns,
-        risk_factors['UMD'],
-        rolling_window=rolling_beta_window)
+        risk_factors=risk_factors,
+        rolling_beta_window=rolling_beta_window)
 
-    rolling_beta_SMB.plot(color='steelblue', alpha=0.7, ax=ax, **kwargs)
-    rolling_beta_HML.plot(color='orangered', alpha=0.7, ax=ax, **kwargs)
-    rolling_beta_UMD.plot(color='forestgreen', alpha=0.7, ax=ax, **kwargs)
+    rolling_beta.plot(alpha=0.7, ax=ax, **kwargs)
 
     ax.axhline(0.0, color='black')
     ax.legend(['Small-Caps (SMB)',
@@ -170,10 +155,7 @@ def plot_rolling_risk_factors(
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
-
     ax.axhline(0.0, color='black')
-
-    ax.set_ylim((-.40, .40))
     ax.set_xlabel('')
 
     return ax

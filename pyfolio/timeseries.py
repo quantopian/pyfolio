@@ -24,6 +24,8 @@ from sklearn import preprocessing
 
 import statsmodels.api as sm
 
+from . import utils
+
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
     """Variance-covariance calculation of daily Value-at-Risk in a
@@ -582,6 +584,55 @@ def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
                                         df_multi_factor.loc[beg:end])
 
     return out
+
+
+def rolling_risk_factors(returns, risk_factors=None,
+                         rolling_beta_window=63 * 2):
+    """Computes rolling Fama-French single factor betas.
+
+    Specifically, returns SMB, HML, and UMD.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    risk_factors : pd.DataFrame, optional
+        data set containing the risk factors. See
+        utils.load_portfolio_risk_factors.
+    rolling_beta_window : int, optional
+        The days window over which to compute the beta.
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing rolling beta coefficients for SMB, HML
+        and UMD
+    """
+    if risk_factors is None:
+        risk_factors = utils.load_portfolio_risk_factors(
+            start=returns.index[0],
+            end=returns.index[-1])
+
+    rolling_beta_SMB = rolling_beta(
+        returns,
+        risk_factors['SMB'],
+        rolling_window=rolling_beta_window)
+    rolling_beta_HML = rolling_beta(
+        returns,
+        risk_factors['HML'],
+        rolling_window=rolling_beta_window)
+    rolling_beta_UMD = rolling_beta(
+        returns,
+        risk_factors['UMD'],
+        rolling_window=rolling_beta_window)
+
+    rolling_factors = pd.concat([rolling_beta_SMB, rolling_beta_HML,
+                                 rolling_beta_UMD])
+
+    rolling_factors.columns = ['SMB', 'HML', 'UMD']
+
+    return rolling_factors
 
 
 def calc_alpha_beta(returns, benchmark_rets):
