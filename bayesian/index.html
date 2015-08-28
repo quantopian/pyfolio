@@ -155,9 +155,7 @@ import pyfolio as pf
 <pre><code>Using gpu device 0: NVS 5200M
 </code></pre>
 <h2 id="fetch-the-daily-returns-for-a-stock">Fetch the daily returns for a stock</h2>
-<pre><code class="python">#stock_rets = pf.utils.get_symbol_rets('FB')
-import pandas as pd
-stock_rets = pd.read_pickle('fb.pickle')
+<pre><code class="python">stock_rets = pf.utils.get_symbol_rets('FB')
 </code></pre>
 
 <h2 id="create-bayesian-tear-sheet">Create Bayesian tear sheet</h2>
