@@ -29,6 +29,8 @@ from . import utils
 from . import timeseries
 from . import pos
 
+from .utils import BDAYS_PER_MONTH
+
 from functools import wraps
 
 
@@ -97,7 +99,7 @@ def context(context='notebook', font_scale=1.5, rc=None):
 def plot_rolling_fama_french(
         returns,
         risk_factors=None,
-        rolling_window=63 * 2,
+        rolling_window=BDAYS_PER_MONTH * 6,
         legend_loc='best',
         ax=None, **kwargs):
     """Plots rolling Fama-French single factor betas.

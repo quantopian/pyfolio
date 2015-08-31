@@ -26,6 +26,7 @@ from sklearn import preprocessing
 import statsmodels.api as sm
 
 from . import utils
+from .utils import BDAYS_PER_MONTH
 
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
@@ -515,7 +516,8 @@ def calc_multifactor(returns, factors):
     return results.params
 
 
-def rolling_beta(returns, benchmark_rets, rolling_window=63):
+def rolling_beta(returns, benchmark_rets,
+                 rolling_window=BDAYS_PER_MONTH * 3):
     """Determines the rolling beta of a strategy.
 
     Parameters
@@ -529,7 +531,7 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
         If DataFrame is passed, computes rolling beta for each column.
     rolling_window : int, optional
         The size of the rolling window, in days, over which to compute
-        beta (default 63 days).
+        beta (default 3 months).
 
     Returns
     -------
@@ -556,7 +558,8 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
         return out
 
 
-def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
+def rolling_multifactor_beta(returns, df_multi_factor,
+                             rolling_window=BDAYS_PER_MONTH * 3):
     """Determines the rolling beta of multiple factors.
 
     Parameters
@@ -568,7 +571,7 @@ def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
         Other factors over which to compute beta.
     rolling_window : int, optional
         The size of the rolling window, in days, over which to compute
-        beta (default 63 days).
+        beta (default 3 months).
 
     Returns
     -------
@@ -594,7 +597,7 @@ def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
 
 
 def rolling_fama_french(returns, risk_factors=None,
-                        rolling_window=63 * 2):
+                        rolling_window=BDAYS_PER_MONTH * 6):
     """Computes rolling Fama-French single factor betas.
 
     Specifically, returns SMB, HML, and UMD.
@@ -609,6 +612,7 @@ def rolling_fama_french(returns, risk_factors=None,
         utils.load_portfolio_risk_factors.
     rolling_window : int, optional
         The days window over which to compute the beta.
+        Default is 6 months.
 
     Returns
     -------
