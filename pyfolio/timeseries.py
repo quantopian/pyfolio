@@ -15,6 +15,7 @@
 from __future__ import division
 
 from collections import OrderedDict
+from functools import partial
 
 import pandas as pd
 import numpy as np
@@ -522,9 +523,10 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_rets : pd.Series
+    benchmark_rets : pd.Series or pd.DataFrame
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
+        If DataFrame is passed, computes rolling beta for each column.
     rolling_window : int, optional
         The size of the rolling window, in days, over which to compute
         beta (default 63 days).
@@ -539,14 +541,19 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
 
     """
+    if benchmark_rets.ndim > 1:
+        # Apply column-wise
+        return benchmark_rets.apply(partial(rolling_beta, returns),
+                                    rolling_window=rolling_window)
+    else:
+        out = pd.Series(index=returns.index)
+        for beg, end in zip(returns.index[0:-rolling_window],
+                            returns.index[rolling_window:]):
+            out.loc[end] = calc_alpha_beta(
+                returns.loc[beg:end],
+                benchmark_rets.loc[beg:end])[1]
 
-    out = pd.Series(index=returns.index)
-    for beg, end in zip(returns.index[0:-rolling_window],
-                        returns.index[rolling_window:]):
-        out.loc[end] = calc_alpha_beta(returns.loc[beg:end],
-                                       benchmark_rets.loc[beg:end])[1]
-
-    return out
+        return out
 
 
 def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
@@ -586,8 +593,8 @@ def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
     return out
 
 
-def rolling_risk_factors(returns, risk_factors=None,
-                         rolling_beta_window=63 * 2):
+def rolling_fama_french(returns, risk_factors=None,
+                        rolling_window=63 * 2):
     """Computes rolling Fama-French single factor betas.
 
     Specifically, returns SMB, HML, and UMD.
@@ -598,9 +605,9 @@ def rolling_risk_factors(returns, risk_factors=None,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     risk_factors : pd.DataFrame, optional
-        data set containing the risk factors. See
+        data set containing the Fama-French risk factors. See
         utils.load_portfolio_risk_factors.
-    rolling_beta_window : int, optional
+    rolling_window : int, optional
         The days window over which to compute the beta.
 
     Returns
@@ -611,28 +618,12 @@ def rolling_risk_factors(returns, risk_factors=None,
     """
     if risk_factors is None:
         risk_factors = utils.load_portfolio_risk_factors(
-            start=returns.index[0],
-            end=returns.index[-1])
+            start=returns.index[0], end=returns.index[-1])
+        risk_factors = risk_factors.drop(['Mkt-RF', 'RF'],
+                                         axis='columns')
 
-    rolling_beta_SMB = rolling_beta(
-        returns,
-        risk_factors['SMB'],
-        rolling_window=rolling_beta_window)
-    rolling_beta_HML = rolling_beta(
-        returns,
-        risk_factors['HML'],
-        rolling_window=rolling_beta_window)
-    rolling_beta_UMD = rolling_beta(
-        returns,
-        risk_factors['UMD'],
-        rolling_window=rolling_beta_window)
-
-    rolling_factors = pd.concat([rolling_beta_SMB, rolling_beta_HML,
-                                 rolling_beta_UMD])
-
-    rolling_factors.columns = ['SMB', 'HML', 'UMD']
-
-    return rolling_factors
+    return rolling_beta(returns, risk_factors,
+                        rolling_window=rolling_window)
 
 
 def calc_alpha_beta(returns, benchmark_rets):

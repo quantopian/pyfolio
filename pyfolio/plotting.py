@@ -94,10 +94,10 @@ def context(context='notebook', font_scale=1.5, rc=None):
                                 rc=rc)
 
 
-def plot_rolling_risk_factors(
+def plot_rolling_fama_french(
         returns,
         risk_factors=None,
-        rolling_beta_window=63 * 2,
+        rolling_window=63 * 2,
         legend_loc='best',
         ax=None, **kwargs):
     """Plots rolling Fama-French single factor betas.
@@ -110,9 +110,9 @@ def plot_rolling_risk_factors(
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     risk_factors : pd.DataFrame, optional
-        data set containing the risk factors. See
+        data set containing the Fama-French risk factors. See
         utils.load_portfolio_risk_factors.
-    rolling_beta_window : int, optional
+    rolling_window : int, optional
         The days window over which to compute the beta.
     legend_loc : matplotlib.loc, optional
         The location of the legend on the plot.
@@ -131,7 +131,7 @@ def plot_rolling_risk_factors(
     if ax is None:
         ax = plt.gca()
 
-    num_months_str = '%.0f' % (rolling_beta_window / 21)
+    num_months_str = '%.0f' % (rolling_window / 21)
 
     ax.set_title(
         "Rolling Fama-French Single Factor Betas (" +
@@ -139,10 +139,10 @@ def plot_rolling_risk_factors(
         '-month)')
     ax.set_ylabel('beta')
 
-    rolling_beta = timeseries.rolling_risk_factors(
+    rolling_beta = timeseries.rolling_fama_french(
         returns,
         risk_factors=risk_factors,
-        rolling_beta_window=rolling_beta_window)
+        rolling_window=rolling_window)
 
     rolling_beta.plot(alpha=0.7, ax=ax, **kwargs)
 
