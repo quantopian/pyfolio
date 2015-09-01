@@ -460,7 +460,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     return ax
 
 
-def show_perf_stats(returns, benchmark_rets, live_start_date=None):
+def show_perf_stats(returns, factor_returns, live_start_date=None):
     """Prints some performance metrics of the strategy.
 
     - Shows amount of time the strategy has been run in backtest and
@@ -477,7 +477,7 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
-    benchmark_rets : pd.Series
+    factor_returns : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
 
@@ -491,7 +491,7 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
         perf_stats_live = np.round(timeseries.perf_stats(
             returns_live, returns_style='arithmetic'), 2)
         perf_stats_live_ab = np.round(
-            timeseries.calc_alpha_beta(returns_live, benchmark_rets), 2)
+            timeseries.calc_alpha_beta(returns_live, factor_returns), 2)
         perf_stats_live.loc['alpha'] = perf_stats_live_ab[0]
         perf_stats_live.loc['beta'] = perf_stats_live_ab[1]
         perf_stats_live.columns = ['Out_of_Sample']
@@ -499,7 +499,7 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
         perf_stats_all = np.round(timeseries.perf_stats(
             returns, returns_style='arithmetic'), 2)
         perf_stats_all_ab = np.round(
-            timeseries.calc_alpha_beta(returns, benchmark_rets), 2)
+            timeseries.calc_alpha_beta(returns, factor_returns), 2)
         perf_stats_all.loc['alpha'] = perf_stats_all_ab[0]
         perf_stats_all.loc['beta'] = perf_stats_all_ab[1]
         perf_stats_all.columns = ['All_History']
@@ -513,7 +513,7 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
     perf_stats = np.round(timeseries.perf_stats(
         returns_backtest, returns_style='arithmetic'), 2)
     perf_stats_ab = np.round(
-        timeseries.calc_alpha_beta(returns_backtest, benchmark_rets), 2)
+        timeseries.calc_alpha_beta(returns_backtest, factor_returns), 2)
     perf_stats.loc['alpha'] = perf_stats_ab[0]
     perf_stats.loc['beta'] = perf_stats_ab[1]
     perf_stats.columns = ['Backtest']
@@ -529,7 +529,7 @@ def show_perf_stats(returns, benchmark_rets, live_start_date=None):
 
 def plot_rolling_returns(
         returns,
-        benchmark_rets=None,
+        factor_returns=None,
         live_start_date=None,
         cone_std=None,
         legend_loc='best',
@@ -547,8 +547,8 @@ def plot_rolling_returns(
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_rets : pd.Series, optional
-        Daily noncumulative returns of the benchmark.
+    factor_returns : pd.Series, optional
+        Daily noncumulative returns of a risk factor.
          - This is in the same style as returns.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
@@ -579,8 +579,8 @@ def plot_rolling_returns(
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    if benchmark_rets is not None:
-        timeseries.cum_returns(benchmark_rets[df_cum_rets.index], 1.0).plot(
+    if factor_returns is not None:
+        timeseries.cum_returns(factor_returns[df_cum_rets.index], 1.0).plot(
             lw=2, color='gray', label='S&P500', alpha=0.60, ax=ax, **kwargs)
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
@@ -639,7 +639,7 @@ def plot_rolling_returns(
     return ax
 
 
-def plot_rolling_beta(returns, benchmark_rets, rolling_beta_window=63,
+def plot_rolling_beta(returns, factor_returns, rolling_beta_window=63,
                       legend_loc='best', ax=None, **kwargs):
     """
     Plots the rolling beta versus date.
@@ -649,7 +649,7 @@ def plot_rolling_beta(returns, benchmark_rets, rolling_beta_window=63,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_rets : pd.Series, optional
+    factor_returns : pd.Series, optional
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
     rolling_beta_window : int, optional
@@ -676,10 +676,10 @@ def plot_rolling_beta(returns, benchmark_rets, rolling_beta_window=63,
     ax.set_title("Rolling Portfolio Beta to S&P 500")
     ax.set_ylabel('Beta')
     rb_1 = timeseries.rolling_beta(
-        returns, benchmark_rets, rolling_window=rolling_beta_window * 2)
+        returns, factor_returns, rolling_window=rolling_beta_window * 2)
     rb_1.plot(color='steelblue', lw=3, alpha=0.6, ax=ax, **kwargs)
     rb_2 = timeseries.rolling_beta(
-        returns, benchmark_rets, rolling_window=rolling_beta_window * 3)
+        returns, factor_returns, rolling_window=rolling_beta_window * 3)
     rb_2.plot(color='grey', lw=3, alpha=0.4, ax=ax, **kwargs)
     ax.set_ylim((-2.5, 2.5))
     ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)

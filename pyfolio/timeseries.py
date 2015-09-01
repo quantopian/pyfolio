@@ -516,7 +516,7 @@ def calc_multifactor(returns, factors):
     return results.params
 
 
-def rolling_beta(returns, benchmark_rets,
+def rolling_beta(returns, factor_returns,
                  rolling_window=BDAYS_PER_MONTH * 3):
     """Determines the rolling beta of a strategy.
 
@@ -525,7 +525,7 @@ def rolling_beta(returns, benchmark_rets,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_rets : pd.Series or pd.DataFrame
+    factor_returns : pd.Series or pd.DataFrame
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
         If DataFrame is passed, computes rolling beta for each column.
@@ -543,9 +543,9 @@ def rolling_beta(returns, benchmark_rets,
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
 
     """
-    if benchmark_rets.ndim > 1:
+    if factor_returns.ndim > 1:
         # Apply column-wise
-        return benchmark_rets.apply(partial(rolling_beta, returns),
+        return factor_returns.apply(partial(rolling_beta, returns),
                                     rolling_window=rolling_window)
     else:
         out = pd.Series(index=returns.index)
@@ -553,7 +553,7 @@ def rolling_beta(returns, benchmark_rets,
                             returns.index[rolling_window:]):
             out.loc[end] = calc_alpha_beta(
                 returns.loc[beg:end],
-                benchmark_rets.loc[beg:end])[1]
+                factor_returns.loc[beg:end])[1]
 
         return out
 
@@ -596,7 +596,7 @@ def rolling_multifactor_beta(returns, df_multi_factor,
     return out
 
 
-def rolling_fama_french(returns, risk_factors=None,
+def rolling_fama_french(returns, factor_returns=None,
                         rolling_window=BDAYS_PER_MONTH * 6):
     """Computes rolling Fama-French single factor betas.
 
@@ -607,7 +607,7 @@ def rolling_fama_french(returns, risk_factors=None,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    risk_factors : pd.DataFrame, optional
+    factor_returns : pd.DataFrame, optional
         data set containing the Fama-French risk factors. See
         utils.load_portfolio_risk_factors.
     rolling_window : int, optional
@@ -620,27 +620,27 @@ def rolling_fama_french(returns, risk_factors=None,
         DataFrame containing rolling beta coefficients for SMB, HML
         and UMD
     """
-    if risk_factors is None:
-        risk_factors = utils.load_portfolio_risk_factors(
+    if factor_returns is None:
+        factor_returns = utils.load_portfolio_risk_factors(
             start=returns.index[0], end=returns.index[-1])
-        risk_factors = risk_factors.drop(['Mkt-RF', 'RF'],
-                                         axis='columns')
+        factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
+                                             axis='columns')
 
-    return rolling_beta(returns, risk_factors,
+    return rolling_beta(returns, factor_returns,
                         rolling_window=rolling_window)
 
 
-def calc_alpha_beta(returns, benchmark_rets):
-    """
-    Calculates both alpha and beta.
+def calc_alpha_beta(returns, factor_returns):
+    """Calculates both alpha and beta.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_rets : pd.Series
-        Daily noncumulative returns of the benchmark.
+    factor_returns : pd.Series
+         Daily noncumulative returns of the factor to which beta is
+         computed. Usually a benchmark such as the market.
          - This is in the same style as returns.
 
     Returns
@@ -649,10 +649,11 @@ def calc_alpha_beta(returns, benchmark_rets):
         Alpha.
     float
         Beta.
-    """
+
+"""
 
     ret_index = returns.index
-    beta, alpha = sp.stats.linregress(benchmark_rets.loc[ret_index].values,
+    beta, alpha = sp.stats.linregress(factor_returns.loc[ret_index].values,
                                       returns.values)[:2]
 
     return alpha * 252, beta
