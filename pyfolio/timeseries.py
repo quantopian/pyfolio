@@ -26,7 +26,7 @@ from sklearn import preprocessing
 import statsmodels.api as sm
 
 from . import utils
-from .utils import BDAYS_PER_MONTH
+from .utils import APPROX_BDAYS_PER_MONTH
 
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
@@ -517,7 +517,7 @@ def calc_multifactor(returns, factors):
 
 
 def rolling_beta(returns, factor_returns,
-                 rolling_window=BDAYS_PER_MONTH * 6):
+                 rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """Determines the rolling beta of a strategy.
 
     Parameters
@@ -559,7 +559,7 @@ def rolling_beta(returns, factor_returns,
 
 
 def rolling_fama_french(returns, factor_returns=None,
-                        rolling_window=BDAYS_PER_MONTH * 6):
+                        rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """Computes rolling Fama-French single factor betas.
 
     Specifically, returns SMB, HML, and UMD.

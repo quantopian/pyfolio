@@ -29,7 +29,7 @@ from . import utils
 from . import timeseries
 from . import pos
 
-from .utils import BDAYS_PER_MONTH
+from .utils import APPROX_BDAYS_PER_MONTH
 
 from functools import wraps
 
@@ -99,7 +99,7 @@ def context(context='notebook', font_scale=1.5, rc=None):
 def plot_rolling_fama_french(
         returns,
         risk_factors=None,
-        rolling_window=BDAYS_PER_MONTH * 6,
+        rolling_window=APPROX_BDAYS_PER_MONTH * 6,
         legend_loc='best',
         ax=None, **kwargs):
     """Plots rolling Fama-French single factor betas.
@@ -133,7 +133,7 @@ def plot_rolling_fama_french(
     if ax is None:
         ax = plt.gca()
 
-    num_months_str = '%.0f' % (rolling_window / BDAYS_PER_MONTH)
+    num_months_str = '%.0f' % (rolling_window / APPROX_BDAYS_PER_MONTH)
 
     ax.set_title(
         "Rolling Fama-French Single Factor Betas (" +
@@ -674,10 +674,10 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     ax.set_title("Rolling Portfolio Beta to S&P 500")
     ax.set_ylabel('Beta')
     rb_1 = timeseries.rolling_beta(
-        returns, factor_returns, rolling_window=BDAYS_PER_MONTH * 6)
+        returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6)
     rb_1.plot(color='steelblue', lw=3, alpha=0.6, ax=ax, **kwargs)
     rb_2 = timeseries.rolling_beta(
-        returns, factor_returns, rolling_window=BDAYS_PER_MONTH * 12)
+        returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 12)
     rb_2.plot(color='grey', lw=3, alpha=0.4, ax=ax, **kwargs)
     ax.set_ylim((-2.5, 2.5))
     ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)
@@ -690,7 +690,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     return ax
 
 
-def plot_rolling_sharpe(returns, rolling_window=BDAYS_PER_MONTH * 6,
+def plot_rolling_sharpe(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
                         legend_loc='best', ax=None, **kwargs):
     """
     Plots the rolling Sharpe ratio versus date.

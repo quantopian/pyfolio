@@ -42,7 +42,7 @@ except:
 from . import pos
 from . import txn
 
-BDAYS_PER_MONTH = 21
+APPROX_BDAYS_PER_MONTH = 21
 
 
 def pyfolio_root():
