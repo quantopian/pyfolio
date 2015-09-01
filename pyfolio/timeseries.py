@@ -558,44 +558,6 @@ def rolling_beta(returns, factor_returns,
         return out
 
 
-def rolling_multifactor_beta(returns, df_multi_factor,
-                             rolling_window=BDAYS_PER_MONTH * 6):
-    """Determines the rolling beta of multiple factors.
-
-    Parameters
-    ----------
-    returns : pd.Series
-        Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
-    df_multi_factor : pd.DataFrame
-        Other factors over which to compute beta.
-    rolling_window : int, optional
-        The size of the rolling window, in days, over which to compute
-        beta (default 6 months).
-
-    Returns
-    -------
-    pd.DataFrame
-        Rolling betas.
-
-    Note
-    -----
-
-    See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
-
-    """
-
-    out = pd.DataFrame(columns=['const'] + list(df_multi_factor.columns),
-                       index=returns.index)
-
-    for beg, end in zip(returns.index[0:-rolling_window],
-                        returns.index[rolling_window:]):
-        out.loc[end] = calc_multifactor(returns.loc[beg:end],
-                                        df_multi_factor.loc[beg:end])
-
-    return out
-
-
 def rolling_fama_french(returns, factor_returns=None,
                         rolling_window=BDAYS_PER_MONTH * 6):
     """Computes rolling Fama-French single factor betas.
