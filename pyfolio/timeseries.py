@@ -517,7 +517,7 @@ def calc_multifactor(returns, factors):
 
 
 def rolling_beta(returns, factor_returns,
-                 rolling_window=BDAYS_PER_MONTH * 3):
+                 rolling_window=BDAYS_PER_MONTH * 6):
     """Determines the rolling beta of a strategy.
 
     Parameters
@@ -531,7 +531,7 @@ def rolling_beta(returns, factor_returns,
         If DataFrame is passed, computes rolling beta for each column.
     rolling_window : int, optional
         The size of the rolling window, in days, over which to compute
-        beta (default 3 months).
+        beta (default 6 months).
 
     Returns
     -------
@@ -559,7 +559,7 @@ def rolling_beta(returns, factor_returns,
 
 
 def rolling_multifactor_beta(returns, df_multi_factor,
-                             rolling_window=BDAYS_PER_MONTH * 3):
+                             rolling_window=BDAYS_PER_MONTH * 6):
     """Determines the rolling beta of multiple factors.
 
     Parameters
@@ -571,7 +571,7 @@ def rolling_multifactor_beta(returns, df_multi_factor,
         Other factors over which to compute beta.
     rolling_window : int, optional
         The size of the rolling window, in days, over which to compute
-        beta (default 3 months).
+        beta (default 6 months).
 
     Returns
     -------

@@ -133,7 +133,7 @@ def plot_rolling_fama_french(
     if ax is None:
         ax = plt.gca()
 
-    num_months_str = '%.0f' % (rolling_window / 21)
+    num_months_str = '%.0f' % (rolling_window / BDAYS_PER_MONTH)
 
     ax.set_title(
         "Rolling Fama-French Single Factor Betas (" +
@@ -639,8 +639,8 @@ def plot_rolling_returns(
     return ax
 
 
-def plot_rolling_beta(returns, factor_returns, rolling_beta_window=63,
-                      legend_loc='best', ax=None, **kwargs):
+def plot_rolling_beta(returns, factor_returns, legend_loc='best',
+                      ax=None, **kwargs):
     """
     Plots the rolling beta versus date.
 
@@ -652,8 +652,6 @@ def plot_rolling_beta(returns, factor_returns, rolling_beta_window=63,
     factor_returns : pd.Series, optional
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
-    rolling_beta_window : int, optional
-        The days window over which to compute the beta.
     legend_loc : matplotlib.loc, optional
         The location of the legend on the plot.
     ax : matplotlib.Axes, optional
@@ -676,10 +674,10 @@ def plot_rolling_beta(returns, factor_returns, rolling_beta_window=63,
     ax.set_title("Rolling Portfolio Beta to S&P 500")
     ax.set_ylabel('Beta')
     rb_1 = timeseries.rolling_beta(
-        returns, factor_returns, rolling_window=rolling_beta_window * 2)
+        returns, factor_returns, rolling_window=BDAYS_PER_MONTH * 6)
     rb_1.plot(color='steelblue', lw=3, alpha=0.6, ax=ax, **kwargs)
     rb_2 = timeseries.rolling_beta(
-        returns, factor_returns, rolling_window=rolling_beta_window * 3)
+        returns, factor_returns, rolling_window=BDAYS_PER_MONTH * 12)
     rb_2.plot(color='grey', lw=3, alpha=0.4, ax=ax, **kwargs)
     ax.set_ylim((-2.5, 2.5))
     ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)
@@ -692,7 +690,7 @@ def plot_rolling_beta(returns, factor_returns, rolling_beta_window=63,
     return ax
 
 
-def plot_rolling_sharpe(returns, rolling_sharpe_window=63 * 2,
+def plot_rolling_sharpe(returns, rolling_window=BDAYS_PER_MONTH * 6,
                         legend_loc='best', ax=None, **kwargs):
     """
     Plots the rolling Sharpe ratio versus date.
@@ -702,7 +700,7 @@ def plot_rolling_sharpe(returns, rolling_sharpe_window=63 * 2,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    rolling_sharpe_window : int, optional
+    rolling_window : int, optional
         The days window over which to compute the sharpe ratio.
     legend_loc : matplotlib.loc, optional
         The location of the legend on the plot.
@@ -724,7 +722,7 @@ def plot_rolling_sharpe(returns, rolling_sharpe_window=63 * 2,
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     rolling_sharpe_ts = timeseries.rolling_sharpe(
-        returns, rolling_sharpe_window)
+        returns, rolling_window)
     rolling_sharpe_ts.plot(alpha=.7, lw=3, color='orangered', ax=ax,
                            **kwargs)
 
