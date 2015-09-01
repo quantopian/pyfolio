@@ -98,7 +98,7 @@ def context(context='notebook', font_scale=1.5, rc=None):
 
 def plot_rolling_fama_french(
         returns,
-        risk_factors=None,
+        factor_returns=None,
         rolling_window=APPROX_BDAYS_PER_MONTH * 6,
         legend_loc='best',
         ax=None, **kwargs):
@@ -111,7 +111,7 @@ def plot_rolling_fama_french(
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    risk_factors : pd.DataFrame, optional
+    factor_returns : pd.DataFrame, optional
         data set containing the Fama-French risk factors. See
         utils.load_portfolio_risk_factors.
     rolling_window : int, optional
@@ -143,7 +143,7 @@ def plot_rolling_fama_french(
 
     rolling_beta = timeseries.rolling_fama_french(
         returns,
-        risk_factors=risk_factors,
+        factor_returns=factor_returns,
         rolling_window=rolling_window)
 
     rolling_beta.plot(alpha=0.7, ax=ax, **kwargs)
