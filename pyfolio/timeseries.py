@@ -26,7 +26,7 @@ from sklearn import preprocessing
 import statsmodels.api as sm
 
 from . import utils
-from .utils import APPROX_BDAYS_PER_MONTH
+from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
 
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
@@ -213,15 +213,15 @@ def annual_return(returns, style='compound'):
         return np.nan
 
     if style == 'calendar':
-        num_years = len(returns) / 252.0
+        num_years = len(returns) / APPROX_BDAYS_PER_YEAR
         df_cum_rets = cum_returns(returns, starting_value=100)
         start_value = df_cum_rets[0]
         end_value = df_cum_rets[-1]
         return ((end_value - start_value) / start_value) / num_years
     if style == 'compound':
-        return pow((1 + returns.mean()), 252) - 1
+        return pow((1 + returns.mean()), APPROX_BDAYS_PER_YEAR) - 1
     else:
-        return returns.mean() * 252
+        return returns.mean() * APPROX_BDAYS_PER_YEAR
 
 
 def annual_volatility(returns):
@@ -243,7 +243,7 @@ def annual_volatility(returns):
     if returns.size < 2:
         return np.nan
 
-    return returns.std() * np.sqrt(252)
+    return returns.std() * np.sqrt(APPROX_BDAYS_PER_YEAR)
 
 
 def calmar_ratio(returns, returns_style='calendar'):
@@ -306,7 +306,7 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
 
 """
 
-    daily_return_thresh = pow(1 + annual_return_threshhold, 1 / 252) - 1
+    daily_return_thresh = pow(1 + annual_return_threshhold, 1 / APPROX_BDAYS_PER_YEAR) - 1
 
     returns_less_thresh = returns - daily_return_thresh
 
@@ -618,7 +618,7 @@ def calc_alpha_beta(returns, factor_returns):
     beta, alpha = sp.stats.linregress(factor_returns.loc[ret_index].values,
                                       returns.values)[:2]
 
-    return alpha * 252, beta
+    return alpha * APPROX_BDAYS_PER_YEAR, beta
 
 
 def perf_stats(
@@ -856,14 +856,15 @@ def rolling_sharpe(returns, rolling_sharpe_window):
     """
 
     return pd.rolling_mean(returns, rolling_sharpe_window) \
-        / pd.rolling_std(returns, rolling_sharpe_window) * np.sqrt(252)
+        / pd.rolling_std(returns, rolling_sharpe_window) \
+        * np.sqrt(APPROX_BDAYS_PER_YEAR)
 
 
 def cone_rolling(
         input_rets,
         num_stdev=1.0,
         warm_up_days_pct=0.5,
-        std_scale_factor=252,
+        std_scale_factor=APPROX_BDAYS_PER_YEAR,
         update_std_oos_rolling=False,
         cone_fit_end_date=None,
         extend_fit_trend=True,
@@ -953,7 +954,7 @@ def cone_rolling(
         new_cone_day_scale_factor += 1
 
     if create_future_cone:
-        extend_ahead_days = 252
+        extend_ahead_days = APPROX_BDAYS_PER_YEAR
         future_cone_dates = pd.date_range(
             cone_end_rets.index[-1], periods=extend_ahead_days, freq='B')
 
