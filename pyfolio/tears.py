@@ -383,7 +383,7 @@ def create_txn_tear_sheet(
     gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
     ax_turnover = plt.subplot(gs[0, :])
     ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
-    ax_daily_volume_hist = plt.subplot(gs[2, :])
+    ax_turnover_hist = plt.subplot(gs[2, :])
 
     plotting.plot_turnover(
         returns,
@@ -393,7 +393,8 @@ def create_txn_tear_sheet(
 
     plotting.plot_daily_volume(returns, transactions, ax=ax_daily_volume)
 
-    plotting.plot_volume_per_day_hist(transactions, ax=ax_daily_volume_hist)
+    plotting.plot_daily_turnover_hist(transactions, positions,
+                                      ax=ax_turnover_hist)
 
     if return_fig:
         return fig
