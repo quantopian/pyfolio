@@ -15,6 +15,7 @@
 from __future__ import division
 
 from collections import OrderedDict
+from functools import partial
 
 import pandas as pd
 import numpy as np
@@ -23,6 +24,9 @@ import scipy.stats as stats
 from sklearn import preprocessing
 
 import statsmodels.api as sm
+
+from . import utils
+from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
 
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
@@ -209,15 +213,15 @@ def annual_return(returns, style='compound'):
         return np.nan
 
     if style == 'calendar':
-        num_years = len(returns) / 252.0
+        num_years = len(returns) / APPROX_BDAYS_PER_YEAR
         df_cum_rets = cum_returns(returns, starting_value=100)
         start_value = df_cum_rets[0]
         end_value = df_cum_rets[-1]
         return ((end_value - start_value) / start_value) / num_years
     if style == 'compound':
-        return pow((1 + returns.mean()), 252) - 1
+        return pow((1 + returns.mean()), APPROX_BDAYS_PER_YEAR) - 1
     else:
-        return returns.mean() * 252
+        return returns.mean() * APPROX_BDAYS_PER_YEAR
 
 
 def annual_volatility(returns):
@@ -239,7 +243,7 @@ def annual_volatility(returns):
     if returns.size < 2:
         return np.nan
 
-    return returns.std() * np.sqrt(252)
+    return returns.std() * np.sqrt(APPROX_BDAYS_PER_YEAR)
 
 
 def calmar_ratio(returns, returns_style='calendar'):
@@ -302,7 +306,8 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
 
 """
 
-    daily_return_thresh = pow(1 + annual_return_threshhold, 1 / 252) - 1
+    daily_return_thresh = pow(1 + annual_return_threshhold, 1 /
+                              APPROX_BDAYS_PER_YEAR) - 1
 
     returns_less_thresh = returns - daily_return_thresh
 
@@ -512,7 +517,8 @@ def calc_multifactor(returns, factors):
     return results.params
 
 
-def rolling_beta(returns, benchmark_rets, rolling_window=63):
+def rolling_beta(returns, factor_returns,
+                 rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """Determines the rolling beta of a strategy.
 
     Parameters
@@ -520,12 +526,13 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_rets : pd.Series
+    factor_returns : pd.Series or pd.DataFrame
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
+        If DataFrame is passed, computes rolling beta for each column.
     rolling_window : int, optional
         The size of the rolling window, in days, over which to compute
-        beta (default 63 days).
+        beta (default 6 months).
 
     Returns
     -------
@@ -537,64 +544,66 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
 
     """
+    if factor_returns.ndim > 1:
+        # Apply column-wise
+        return factor_returns.apply(partial(rolling_beta, returns),
+                                    rolling_window=rolling_window)
+    else:
+        out = pd.Series(index=returns.index)
+        for beg, end in zip(returns.index[0:-rolling_window],
+                            returns.index[rolling_window:]):
+            out.loc[end] = calc_alpha_beta(
+                returns.loc[beg:end],
+                factor_returns.loc[beg:end])[1]
 
-    out = pd.Series(index=returns.index)
-    for beg, end in zip(returns.index[0:-rolling_window],
-                        returns.index[rolling_window:]):
-        out.loc[end] = calc_alpha_beta(returns.loc[beg:end],
-                                       benchmark_rets.loc[beg:end])[1]
-
-    return out
+        return out
 
 
-def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
-    """Determines the rolling beta of multiple factors.
+def rolling_fama_french(returns, factor_returns=None,
+                        rolling_window=APPROX_BDAYS_PER_MONTH * 6):
+    """Computes rolling Fama-French single factor betas.
+
+    Specifically, returns SMB, HML, and UMD.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    df_multi_factor : pd.DataFrame
-        Other factors over which to compute beta.
+    factor_returns : pd.DataFrame, optional
+        data set containing the Fama-French risk factors. See
+        utils.load_portfolio_risk_factors.
     rolling_window : int, optional
-        The size of the rolling window, in days, over which to compute
-        beta (default 63 days).
+        The days window over which to compute the beta.
+        Default is 6 months.
 
     Returns
     -------
-    pd.DataFrame
-        Rolling betas.
-
-    Note
-    -----
-
-    See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
-
+    pandas.DataFrame
+        DataFrame containing rolling beta coefficients for SMB, HML
+        and UMD
     """
+    if factor_returns is None:
+        factor_returns = utils.load_portfolio_risk_factors(
+            start=returns.index[0], end=returns.index[-1])
+        factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
+                                             axis='columns')
 
-    out = pd.DataFrame(columns=['const'] + list(df_multi_factor.columns),
-                       index=returns.index)
-
-    for beg, end in zip(returns.index[0:-rolling_window],
-                        returns.index[rolling_window:]):
-        out.loc[end] = calc_multifactor(returns.loc[beg:end],
-                                        df_multi_factor.loc[beg:end])
-
-    return out
+    return rolling_beta(returns, factor_returns,
+                        rolling_window=rolling_window)
 
 
-def calc_alpha_beta(returns, benchmark_rets):
-    """
-    Calculates both alpha and beta.
+def calc_alpha_beta(returns, factor_returns):
+    """Calculates both alpha and beta.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_rets : pd.Series
-        Daily noncumulative returns of the benchmark.
+    factor_returns : pd.Series
+         Daily noncumulative returns of the factor to which beta is
+         computed. Usually a benchmark such as the market.
          - This is in the same style as returns.
 
     Returns
@@ -603,13 +612,14 @@ def calc_alpha_beta(returns, benchmark_rets):
         Alpha.
     float
         Beta.
-    """
+
+"""
 
     ret_index = returns.index
-    beta, alpha = sp.stats.linregress(benchmark_rets.loc[ret_index].values,
+    beta, alpha = sp.stats.linregress(factor_returns.loc[ret_index].values,
                                       returns.values)[:2]
 
-    return alpha * 252, beta
+    return alpha * APPROX_BDAYS_PER_YEAR, beta
 
 
 def perf_stats(
@@ -847,14 +857,15 @@ def rolling_sharpe(returns, rolling_sharpe_window):
     """
 
     return pd.rolling_mean(returns, rolling_sharpe_window) \
-        / pd.rolling_std(returns, rolling_sharpe_window) * np.sqrt(252)
+        / pd.rolling_std(returns, rolling_sharpe_window) \
+        * np.sqrt(APPROX_BDAYS_PER_YEAR)
 
 
 def cone_rolling(
         input_rets,
         num_stdev=1.0,
         warm_up_days_pct=0.5,
-        std_scale_factor=252,
+        std_scale_factor=APPROX_BDAYS_PER_YEAR,
         update_std_oos_rolling=False,
         cone_fit_end_date=None,
         extend_fit_trend=True,
@@ -944,7 +955,7 @@ def cone_rolling(
         new_cone_day_scale_factor += 1
 
     if create_future_cone:
-        extend_ahead_days = 252
+        extend_ahead_days = APPROX_BDAYS_PER_YEAR
         future_cone_dates = pd.date_range(
             cone_end_rets.index[-1], periods=extend_ahead_days, freq='B')
 

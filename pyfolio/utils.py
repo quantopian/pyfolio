@@ -42,6 +42,9 @@ except:
 from . import pos
 from . import txn
 
+APPROX_BDAYS_PER_MONTH = 21
+APPROX_BDAYS_PER_YEAR = 252
+
 
 def pyfolio_root():
     return dirname(abspath(__file__))

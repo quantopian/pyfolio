@@ -322,19 +322,3 @@ class TestMultifactor(TestCase):
                 returns,
                 factors).values.tolist(),
             expected)
-
-    @parameterized.expand([
-        (simple_rets[:5],
-         simple_benchmark_rets[:5],
-         2,
-         [0.09991008092716558,
-            0.002997302427814967])
-    ])
-    def test_multifactor_beta(
-            self, returns, simple_benchmark_rets, rolling_window, expected):
-        self.assertEqual(
-            timeseries.rolling_multifactor_beta(
-                returns,
-                simple_benchmark_rets,
-                rolling_window=rolling_window).values.tolist()[2],
-            expected)

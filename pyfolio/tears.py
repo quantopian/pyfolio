@@ -218,7 +218,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
     plotting.plot_rolling_returns(
         returns,
-        benchmark_rets=benchmark_rets,
+        factor_returns=benchmark_rets,
         live_start_date=live_start_date,
         cone_std=cone_std,
         ax=ax_rolling_returns)
@@ -229,7 +229,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     plotting.plot_rolling_sharpe(
         returns, ax=ax_rolling_sharpe)
 
-    plotting.plot_rolling_risk_factors(
+    plotting.plot_rolling_fama_french(
         returns, ax=ax_rolling_risk)
 
     # Drawdowns
