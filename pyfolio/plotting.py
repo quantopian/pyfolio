@@ -642,7 +642,7 @@ def plot_rolling_returns(
 def plot_rolling_beta(returns, factor_returns, legend_loc='best',
                       ax=None, **kwargs):
     """
-    Plots the rolling beta versus date.
+    Plots the rolling 6-month and 12-month beta versus date.
 
     Parameters
     ----------

@@ -306,7 +306,8 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
 
 """
 
-    daily_return_thresh = pow(1 + annual_return_threshhold, 1 / APPROX_BDAYS_PER_YEAR) - 1
+    daily_return_thresh = pow(1 + annual_return_threshhold, 1 /
+                              APPROX_BDAYS_PER_YEAR) - 1
 
     returns_less_thresh = returns - daily_return_thresh
 
