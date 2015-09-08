@@ -579,11 +579,11 @@ def plot_rolling_returns(
     if ax is None:
         ax = plt.gca()
 
-    if volatility_match and benchmark_rets is None:
+    if volatility_match and factor_returns is None:
         raise ValueError('volatility_match requires passing of'
                          'benchmark_rets.')
-    elif volatility_match and benchmark_rets is not None:
-        bmark_vol = benchmark_rets.loc[returns.index].std()
+    elif volatility_match and factor_returns is not None:
+        bmark_vol = factor_returns.loc[returns.index].std()
         df_cum_rets = timeseries.cum_returns(
             (returns / returns.std()) * bmark_vol,
             1.0
