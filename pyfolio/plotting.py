@@ -581,7 +581,7 @@ def plot_rolling_returns(
 
     if volatility_match and factor_returns is None:
         raise ValueError('volatility_match requires passing of'
-                         'benchmark_rets.')
+                         'factor_returns.')
     elif volatility_match and factor_returns is not None:
         bmark_vol = factor_returns.loc[returns.index].std()
         df_cum_rets = timeseries.cum_returns(
