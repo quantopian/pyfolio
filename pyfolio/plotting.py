@@ -1125,35 +1125,6 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     return ax
 
 
-def plot_volume_per_day_hist(transactions, ax=None, **kwargs):
-    """Plots a histogram of trading volume per day.
-
-    Parameters
-    ----------
-    transactions : pd.DataFrame
-        Daily transaction volume and dollar ammount.
-         - See full explanation in tears.create_full_tear_sheet.
-    ax : matplotlib.Axes, optional
-        Axes upon which to plot.
-    **kwargs, optional
-        Passed to seaborn plotting function.
-
-    Returns
-    -------
-    ax : matplotlib.Axes
-        The axes that were plotted on.
-
-    """
-
-    if ax is None:
-        ax = plt.gca()
-
-    sns.distplot(transactions.txn_volume, ax=ax, **kwargs)
-    ax.set_title('Distribution of Daily Trading Volume')
-    ax.set_xlabel('Volume')
-    return ax
-
-
 def plot_daily_returns_similarity(returns_backtest, returns_live,
                                   title='', scale_kws=None, ax=None,
                                   **kwargs):
