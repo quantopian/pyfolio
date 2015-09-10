@@ -1053,6 +1053,39 @@ def plot_turnover(returns, transactions, positions,
     return ax
 
 
+def plot_daily_turnover_hist(transactions, positions,
+                             ax=None, **kwargs):
+    """Plots a histogram of daily turnover rates.
+
+    Parameters
+    ----------
+    transactions : pd.DataFrame
+        Daily transaction volume and dollar ammount.
+         - See full explanation in tears.create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+
+    """
+
+    if ax is None:
+        ax = plt.gca()
+    turnover = pos.get_turnover(transactions, positions, period=None)
+    sns.distplot(turnover, ax=ax, **kwargs)
+    ax.set_title('Distribution of Daily Turnover Rates')
+    ax.set_xlabel('Turnover Rate')
+    return ax
+
+
 def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     """Plots trading volume per day vs. date.
 
@@ -1089,35 +1122,6 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
     ax.set_ylabel('Amount of shares traded')
     ax.set_xlabel('')
-    return ax
-
-
-def plot_volume_per_day_hist(transactions, ax=None, **kwargs):
-    """Plots a histogram of trading volume per day.
-
-    Parameters
-    ----------
-    transactions : pd.DataFrame
-        Daily transaction volume and dollar ammount.
-         - See full explanation in tears.create_full_tear_sheet.
-    ax : matplotlib.Axes, optional
-        Axes upon which to plot.
-    **kwargs, optional
-        Passed to seaborn plotting function.
-
-    Returns
-    -------
-    ax : matplotlib.Axes
-        The axes that were plotted on.
-
-    """
-
-    if ax is None:
-        ax = plt.gca()
-
-    sns.distplot(transactions.txn_volume, ax=ax, **kwargs)
-    ax.set_title('Distribution of Daily Trading Volume')
-    ax.set_xlabel('Volume')
     return ax
 
 
