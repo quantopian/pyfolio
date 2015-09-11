@@ -183,9 +183,10 @@ def create_returns_tear_sheet(returns, live_start_date=None,
             returns = returns[returns.index > benchmark_rets.index[0]]
 
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
-
-    print("Entire data start date: " + str(df_cum_rets.index[0]))
-    print("Entire data end date: " + str(df_cum_rets.index[-1]))
+    print("Entire data start date: " + str(df_cum_rets
+                                           .index[0].strftime('%Y-%m-%d')))
+    print("Entire data end date: " + str(df_cum_rets
+                                         .index[-1].strftime('%Y-%m-%d')))
 
     print('\n')
 
@@ -292,6 +293,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
             title='Similarity without variance\nand mean normalization',
             ax=ax_daily_similarity_no_var_no_mean)
 
+    plt.show()
     if return_fig:
         return fig
 
@@ -350,6 +352,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
+    plt.show()
     if return_fig:
         return fig
 
@@ -396,6 +399,7 @@ def create_txn_tear_sheet(
     plotting.plot_daily_turnover_hist(transactions, positions,
                                       ax=ax_turnover_hist)
 
+    plt.show()
     if return_fig:
         return fig
 
@@ -469,6 +473,7 @@ def create_interesting_times_tear_sheet(
         ax.set_ylabel('Returns')
         ax.set_xlabel('')
 
+    plt.show()
     if return_fig:
         return fig
 
@@ -607,5 +612,6 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
 
     gs.tight_layout(fig)
 
+    plt.show()
     if return_fig:
         return fig
