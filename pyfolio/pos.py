@@ -37,7 +37,7 @@ def get_portfolio_alloc(positions):
     )
 
 
-def get_long_short_pos(positions, gross_lev=1.):
+def get_long_short_pos(positions):
     """
     Determines the long amount, short amount, and cash of a portfolio.
 
@@ -45,8 +45,6 @@ def get_long_short_pos(positions, gross_lev=1.):
     ----------
     positions : pd.DataFrame
         The positions that the strategy takes over time.
-    gross_lev : float, optional
-        The porfolio's gross leverage (default 1).
 
     Returns
     -------
@@ -54,19 +52,18 @@ def get_long_short_pos(positions, gross_lev=1.):
         Net long, short, and cash positions.
     """
 
-    positions_wo_cash = positions.drop('cash', axis='columns')
-    df_long = positions_wo_cash.apply(lambda x: x[x > 0].sum(), axis='columns')
-    df_short = - \
-        positions_wo_cash.apply(lambda x: x[x < 0].sum(), axis='columns')
-    # Shorting positions adds to cash
-    df_cash = positions.cash.abs() - df_short
-    df_long_short = pd.DataFrame({'long': df_long,
-                                  'short': df_short,
-                                  'cash': df_cash})
-    # Renormalize
-    df_long_short /= df_long_short.sum(axis='columns')
+    pos_wo_cash = positions.drop('cash', axis=1)
+    longs = pos_wo_cash[pos_wo_cash > 0].sum(axis=1)
+    shorts = pos_wo_cash[pos_wo_cash < 0].abs().sum(axis=1)
+    cash = positions.cash
+    df_long_short = pd.DataFrame({'long': longs,
+                                  'short': shorts,
+                                  'cash': cash})
+    # Normalize data
+    df_long_short /= df_long_short.abs().sum(axis=1)
 
-    # Renormalize to leverage
+    # Apply gross leverage
+    gross_lev = (longs + shorts) / (longs - shorts + cash)
     df_long_short *= gross_lev
 
     return df_long_short
