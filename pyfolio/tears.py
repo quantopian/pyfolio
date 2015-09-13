@@ -66,15 +66,15 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         Daily net position values.
          - Time series of dollar amount invested in each position and cash.
          - Days where stocks are not held can be represented by 0 or NaN.
+         - Non-working capital is labelled 'cash'
          - Example:
             index         'AAPL'         'MSFT'          cash
             2004-01-09    13939.3800     -14012.9930     711.5585
             2004-01-12    14492.6300     -14624.8700     27.1821
             2004-01-13    -13853.2800    13653.6400      -43.6375
     transactions : pd.DataFrame, optional
-        Daily transaction volume and dollar ammount.
-        -  Time series of dollar amount of transactions per day,
-            and number of shares traded per day.
+        Daily transaction quantity (txn_shares) and dollar amount
+        (txn_volume).
         - Example:
             index         txn_volume      txn_shares
             2004-01-09    99288.441805    6361
