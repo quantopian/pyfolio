@@ -73,7 +73,8 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
             2004-01-12    14492.6300     -14624.8700     27.1821
             2004-01-13    -13853.2800    13653.6400      -43.6375
     transactions : pd.DataFrame, optional
-        Daily transaction quantity (txn_shares) and dollar ammount (txn_volume).
+        Daily transaction quantity (txn_shares) and dollar amount
+        (txn_volume).
         - Example:
             index         txn_volume      txn_shares
             2004-01-09    99288.441805    6361
