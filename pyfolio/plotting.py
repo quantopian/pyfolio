@@ -1187,15 +1187,6 @@ def show_worst_drawdown_periods(returns, top=5):
 
     print('\nWorst Drawdown Periods')
     drawdown_df = timeseries.gen_drawdown_table(returns, top=top)
-    drawdown_df['peak date'] = pd.to_datetime(
-        drawdown_df['peak date'],
-        unit='D')
-    drawdown_df['valley date'] = pd.to_datetime(
-        drawdown_df['valley date'],
-        unit='D')
-    drawdown_df['recovery date'] = pd.to_datetime(
-        drawdown_df['recovery date'],
-        unit='D')
     drawdown_df['net drawdown in %'] = list(
         map(utils.round_two_dec_places, drawdown_df['net drawdown in %']))
     print(drawdown_df.sort('net drawdown in %', ascending=False))
