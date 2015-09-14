@@ -39,7 +39,7 @@ def get_portfolio_alloc(positions):
 
 def get_long_short_pos(positions):
     """
-    Determines the long amount, short amount, and cash of a portfolio.
+    Determines the long and short allocations in a portfolio.
 
     Parameters
     ----------
@@ -49,24 +49,19 @@ def get_long_short_pos(positions):
     Returns
     -------
     df_long_short : pd.DataFrame
-        Net long, short, and cash positions.
+        Long and short allocations as a decimal
+        percentage of the total net liquidation
     """
 
     pos_wo_cash = positions.drop('cash', axis=1)
     longs = pos_wo_cash[pos_wo_cash > 0].sum(axis=1)
     shorts = pos_wo_cash[pos_wo_cash < 0].abs().sum(axis=1)
     cash = positions.cash
+    net_liquidation = longs - shorts + cash
     df_long_short = pd.DataFrame({'long': longs,
-                                  'short': shorts,
-                                  'cash': cash})
-    # Normalize data
-    df_long_short /= df_long_short.abs().sum(axis=1)
+                                  'short': shorts})
 
-    # Apply gross leverage
-    gross_lev = (longs + shorts) / (longs - shorts + cash)
-    df_long_short *= gross_lev
-
-    return df_long_short
+    return df_long_short / net_liquidation
 
 
 def get_top_long_short_abs(positions, top=10):
