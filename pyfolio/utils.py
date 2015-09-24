@@ -346,6 +346,8 @@ def extract_rets_pos_txn_from_zipline(backtest):
         df = pd.DataFrame(pos_row)
         df.index = [dt] * len(df)
         raw_positions.append(df)
+    if not raw_positions:
+        raise ValueError("The backtest does not have any positions.")
     positions = pd.concat(raw_positions)
     positions = pos.extract_pos(positions, backtest.ending_cash)
     transactions_frame = txn.make_transaction_frame(backtest.transactions)
