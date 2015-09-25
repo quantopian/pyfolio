@@ -105,8 +105,8 @@ class TestDrawdown(TestCase):
                                         end="2015-04-01")
         fb_drawdowns = timeseries.gen_drawdown_table(fb_rets, top=5).sort(
             'peak date')
-        pairs = zip(fb_drawdowns['recovery date'],
-                    fb_drawdowns['peak date'].shift(-1))[:-1]
+        pairs = list(zip(fb_drawdowns['recovery date'],
+                    fb_drawdowns['peak date'].shift(-1)))[:-1]
         self.assertTrue(all(recovery <= peak for recovery, peak in pairs))
 
     @parameterized.expand([
