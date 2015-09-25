@@ -103,11 +103,11 @@ class TestDrawdown(TestCase):
         fb_rets = utils.get_symbol_rets('FB',
                                         start="2014-10-15",
                                         end="2015-04-01")
-        fb_drawdowns = timeseries.gen_drawdown_table(fb_rets, top=5).sort('peak date')
+        fb_drawdowns = timeseries.gen_drawdown_table(fb_rets, top=5).sort(
+            'peak date')
         pairs = zip(fb_drawdowns['recovery date'],
                     fb_drawdowns['peak date'].shift(-1))[:-1]
         self.assertTrue(all(recovery <= peak for recovery, peak in pairs))
-
 
     @parameterized.expand([
         (pd.Series(px_list_1 - 1, index=dt), -0.44000000000000011)
