@@ -54,8 +54,8 @@ def get_long_short_pos(positions):
     """
 
     pos_wo_cash = positions.drop('cash', axis=1)
-    longs = pos_wo_cash[pos_wo_cash > 0].sum(axis=1)
-    shorts = pos_wo_cash[pos_wo_cash < 0].abs().sum(axis=1)
+    longs = pos_wo_cash[pos_wo_cash > 0].sum(axis=1).fillna(0)
+    shorts = pos_wo_cash[pos_wo_cash < 0].abs().sum(axis=1).fillna(0)
     cash = positions.cash
     net_liquidation = longs - shorts + cash
     df_long_short = pd.DataFrame({'long': longs,
