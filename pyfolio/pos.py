@@ -122,7 +122,7 @@ def extract_pos(positions, cash):
                                                  columns='sid',
                                                  values='values')
 
-    values = values.join(cash)
+    values = values.join(cash).fillna(0)
 
     return values
 
