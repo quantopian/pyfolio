@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import division
-import warnings
 
 import pandas as pd
 import numpy as np
@@ -799,7 +798,7 @@ def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
 
 
 def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
-    """Plots a cake chart of long, short, and cash exposure.
+    """Plots a cake chart of the long and short exposure.
 
     Parameters
     ----------
@@ -818,23 +817,19 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     -------
     ax : matplotlib.Axes
         The axes that were plotted on.
-
-"""
+    """
 
     if ax is None:
         ax = plt.gca()
 
     df_long_short = pos.get_long_short_pos(positions_alloc)
 
-    if np.any(df_long_short.cash < 0):
-        warnings.warn('Negative cash, taking absolute for area plot.')
-        df_long_short = df_long_short.abs()
     df_long_short.plot(
-        kind='area', color=['lightblue', 'green', 'coral'], alpha=1.0,
+        kind='area', color=['lightblue', 'green'], alpha=1.0,
         ax=ax, **kwargs)
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
-    ax.set_title("Long/Short/Cash Exposure")
+    ax.set_title("Long/Short Exposure")
     ax.set_ylabel('Exposure')
     ax.set_xlabel('')
     return ax
