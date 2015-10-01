@@ -100,14 +100,18 @@ class TestDrawdown(TestCase):
     def test_drawdown_overlaps(self):
         # Add test to show that drawdowns don't overlap
         # Bug #145 observed for FB stock on the period 2014-10-24 - 2015-03-19
-        fb_rets = utils.get_symbol_rets('FB',
-                                        start="2014-10-15",
-                                        end="2015-04-01")
-        fb_drawdowns = timeseries.gen_drawdown_table(fb_rets, top=5).sort(
+        # Reproduced on SPY data (cached) but need a large number of drawdowns
+        spy_rets = utils.get_symbol_rets('SPY',
+                                         start='1997-01-01',
+                                         end='2004-12-31')
+        spy_drawdowns = timeseries.gen_drawdown_table(spy_rets, top=20).sort(
             'peak date')
-        pairs = list(zip(fb_drawdowns['recovery date'],
-                         fb_drawdowns['peak date'].shift(-1)))[:-1]
-        self.assertTrue(all(recovery <= peak for recovery, peak in pairs))
+        # Compare the recovery date of each drawdown with the peak of the next
+        # Last pair might contain a NaT if drawdown didn't finish, so ignore it
+        pairs = list(zip(spy_drawdowns['recovery date'],
+                         spy_drawdowns['peak date'].shift(-1)))[:-1]
+        for recovery, peak in pairs:
+            self.assertLessEqual(recovery, peak)
 
     @parameterized.expand([
         (pd.Series(px_list_1 - 1, index=dt), -0.44000000000000011)
