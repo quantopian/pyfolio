@@ -304,7 +304,7 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
     -----
     See https://en.wikipedia.org/wiki/Omega_ratio for more details.
 
-"""
+    """
 
     daily_return_thresh = pow(1 + annual_return_threshhold, 1 /
                               APPROX_BDAYS_PER_YEAR) - 1
@@ -320,32 +320,67 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
         return np.nan
 
 
-def sortino_ratio(returns, returns_style='compound'):
+def sortino_ratio(returns, required_return=0):
+
     """
     Determines the Sortino ratio of a strategy.
 
     Parameters
     ----------
-    returns : pd.Series
+    returns : pd.Series or pd.DataFrame
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
 
+    required_return: float / series
+        minimum acceptable return
+
     Returns
     -------
-    float
-        Sortino ratio.
+    depends on input type
+    series ==> float
+    DataFrame ==> np.array
 
-    Note
-    -----
-    See https://en.wikipedia.org/wiki/Sortino_ratio for more details.
+        Annualized Sortino ratio.
+
     """
-    numer = annual_return(returns, style=returns_style)
-    denom = annual_volatility(returns[returns < 0.0])
+    mu = np.nanmean(returns - required_return, axis=0)
+    sortino = mu / downside_risk(returns, required_return)
+    if len(returns.shape) == 2:
+        sortino = pd.Series(sortino, index=returns.columns)
+    return sortino * APPROX_BDAYS_PER_YEAR
 
-    if denom > 0.0:
-        return numer / denom
-    else:
-        return np.nan
+
+def downside_risk(returns, required_return=0):
+    """
+    Determines the downside deviation below a threshold
+
+    Parameters
+    ----------
+    returns : pd.Series or pd.DataFrame
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+
+    required_return: float / series
+        minimum acceptable return
+
+    Returns
+    -------
+    depends on input type
+    series ==> float
+    DataFrame ==> np.array
+
+        Annualized downside deviation
+
+    """
+    downside_diff = returns - required_return
+    mask = downside_diff > 0
+    downside_diff[mask] = 0.0
+    squares = np.square(downside_diff)
+    mean_squares = np.nanmean(squares, axis=0)
+    dside_risk = np.sqrt(mean_squares) * np.sqrt(APPROX_BDAYS_PER_YEAR)
+    if len(returns.shape) == 2:
+        dside_risk = pd.Series(dside_risk, index=returns.columns)
+    return dside_risk
 
 
 def sharpe_ratio(returns, returns_style='compound'):
