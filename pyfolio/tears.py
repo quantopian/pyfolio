@@ -337,7 +337,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
     ax_top_positions = plt.subplot(gs[2, :], sharex=ax_gross_leverage)
     ax_holdings = plt.subplot(gs[3, :], sharex=ax_gross_leverage)
 
-    positions_alloc = pos.get_portfolio_alloc(positions)
+    positions_alloc = pos.get_percent_alloc(positions)
 
     if gross_lev is not None:
         plotting.plot_gross_leverage(returns, gross_lev, ax=ax_gross_leverage)
