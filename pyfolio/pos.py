@@ -17,22 +17,22 @@ from __future__ import division
 import pandas as pd
 
 
-def get_portfolio_alloc(positions):
+def get_percent_alloc(values):
     """
     Determines a portfolio's allocations.
 
     Parameters
     ----------
-    positions : pd.DataFrame
+    values : pd.DataFrame
         Contains position values or amounts.
 
     Returns
     -------
-    positions_alloc : pd.DataFrame
+    allocations : pd.DataFrame
         Positions and their allocations.
     """
-    return positions.divide(
-        positions.abs().sum(axis='columns'),
+    return values.divide(
+        values.abs().sum(axis='columns'),
         axis='rows'
     )
 

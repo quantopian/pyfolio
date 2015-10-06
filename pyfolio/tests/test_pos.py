@@ -15,14 +15,14 @@ from numpy import (
     zeros_like,
 )
 
-from pyfolio.pos import (get_portfolio_alloc,
+from pyfolio.pos import (get_percent_alloc,
                          extract_pos,
                          get_turnover)
 
 
 class PositionsTestCase(TestCase):
 
-    def test_get_portfolio_alloc(self):
+    def test_get_percent_alloc(self):
         raw_data = arange(15, dtype=float).reshape(5, 3)
         # Make the first column negative to test absolute magnitudes.
         raw_data[:, 0] *= -1
@@ -33,7 +33,7 @@ class PositionsTestCase(TestCase):
             columns=['A', 'B', 'C']
         )
 
-        result = get_portfolio_alloc(frame)
+        result = get_percent_alloc(frame)
         expected_raw = zeros_like(raw_data)
         for idx, row in enumerate(raw_data):
             expected_raw[idx] = row / absolute(row).sum()
