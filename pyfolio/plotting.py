@@ -808,7 +808,7 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
          - See full explanation in tears.create_full_tear_sheet.
     positions_alloc : pd.DataFrame
         Portfolio allocation of positions. See
-        pos.get_portfolio_alloc.
+        pos.get_percent_alloc.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -853,7 +853,7 @@ def show_and_plot_top_positions(returns, positions_alloc,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     positions_alloc : pd.DataFrame
-        Portfolio allocation of positions. See pos.get_portfolio_alloc.
+        Portfolio allocation of positions. See pos.get_percent_alloc.
     show_and_plot : int, optional
         By default, this is 2, and both prints and plots.
         If this is 0, it will only plot; if 1, it will only print.
