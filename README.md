@@ -10,7 +10,7 @@ financial portfolios developed by
 
 At the core of pyfolio is a so-called tear sheet that consists of
 various individual plots that provide a comprehensive image of the
-performance of a trading algorithm. Here is an example of a tear sheet of a returns-based analysis of the `$FB` stock:
+performance of a trading algorithm. Here is an example of a tear sheet of a the Zipline algo included as one of our example notebooks:
 
 ![example tear 1](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_1.png "Example tear sheet created from a Zipline algo")
 ![example tear 2](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_2.png)
