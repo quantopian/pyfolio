@@ -27,6 +27,7 @@ import statsmodels.api as sm
 
 from . import utils
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
+from .interesting_periods import PERIODS
 
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
@@ -1007,7 +1008,6 @@ def extract_interesting_date_ranges(returns):
         Date ranges, with returns, of all valid events.
 
     """
-    from interesting_periods import PERIODS
     returns_dupe = returns.copy()
     returns_dupe.index = returns_dupe.index.map(pd.Timestamp)
     ranges = OrderedDict()
