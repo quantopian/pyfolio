@@ -33,6 +33,7 @@ the IPython kernel when you make changes.
  - matplotlib
  - [seaborn](https://github.com/mwaskom/seaborn)
  - [pymc3](https://github.com/pymc-devs/pymc3) (optional)
+ - [zipline](https://github.com/quantopian/zipline) (optional; requires master, *not* 0.7.0)
 
 ## Questions?
 
