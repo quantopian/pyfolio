@@ -58,3 +58,6 @@ PERIODS['Flash Crash'] = (
 # April and October 2014).
 PERIODS['Apr14'] = (pd.Timestamp('20140401'), pd.Timestamp('20140501'))
 PERIODS['Oct14'] = (pd.Timestamp('20141001'), pd.Timestamp('20141101'))
+
+# Market
+PERIODS['Aug15'] = (pd.Timestamp('20150820'), pd.Timestamp('20150904'))
