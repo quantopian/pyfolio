@@ -1109,3 +1109,167 @@ def portfolio_returns(holdings_returns, exclude_non_overlapping=True):
         port = port.fillna(0)
 
     return port / len(holdings_returns)
+
+
+def portfolio_returns_metric_weighted(holdings_returns,
+                                      exclude_non_overlapping=True,
+                                      weight_function=None,
+                                      weight_function_window=None,
+                                      inverse_weight=False,
+                                      portfolio_rebalance_rule='q',
+                                      weight_func_transform=None):
+    """
+    Generates an equal-weight portfolio, or portfolio weighted by
+    weight_function
+
+    Parameters
+    ----------
+    holdings_returns : list
+       List containing each individual holding's daily returns of the
+       strategy, noncumulative.
+
+    exclude_non_overlapping : boolean, optional
+       (Only applicable if equal-weight portfolio, e.g. weight_function=None)
+       If True, timeseries returned will include values only for dates
+       available across all holdings_returns timeseries If False, 0%
+       returns will be assumed for a holding until it has valid data
+
+    weight_function : function, optional
+       Function to be applied to holdings_returns timeseries
+
+    weight_function_window : int, optional
+       Rolling window over which weight_function will use as its input values
+
+    inverse_weight : boolean, optional
+       If True, high values returned from weight_function will result in lower
+       weight for that holding
+
+    portfolio_rebalance_rule : string, optional
+       A pandas.resample valid rule. Specifies how frequently to compute
+       the weighting criteria
+
+    weight_func_transform : function, optional
+       Function applied to value returned from weight_function
+
+    Returns
+    -------
+    (pd.Series, pd.DataFrame)
+        pd.Series : Portfolio returns timeseries.
+        pd.DataFrame : All the raw data used in the portfolio returns
+           calculations
+    """
+
+    if weight_function is None:
+        if exclude_non_overlapping:
+            holdings_df = pd.DataFrame(holdings_returns).T.dropna()
+        else:
+            holdings_df = pd.DataFrame(holdings_returns).T.fillna(0)
+
+        holdings_df['port_ret'] = holdings_df.sum(axis=1)/len(holdings_returns)
+    else:
+        holdings_df_na = pd.DataFrame(holdings_returns).T
+        holdings_cols = holdings_df_na.columns
+        holdings_df = holdings_df_na.dropna()
+        holdings_func = pd.rolling_apply(holdings_df,
+                                         window=weight_function_window,
+                                         func=weight_function).dropna()
+        holdings_func_rebal = holdings_func.resample(
+            rule=portfolio_rebalance_rule,
+            how='last')
+        holdings_df = holdings_df.join(
+            holdings_func_rebal, rsuffix='_f').fillna(method='ffill').dropna()
+        if weight_func_transform is None:
+            holdings_func_rebal_t = holdings_func_rebal
+            holdings_df = holdings_df.join(
+                holdings_func_rebal_t,
+                rsuffix='_t').fillna(method='ffill').dropna()
+        else:
+            holdings_func_rebal_t = holdings_func_rebal.applymap(
+                weight_func_transform)
+            holdings_df = holdings_df.join(
+                holdings_func_rebal_t,
+                rsuffix='_t').fillna(method='ffill').dropna()
+        transform_columns = list(map(lambda x: x+"_t", holdings_cols))
+        if inverse_weight:
+            inv_func = 1.0 / holdings_df[transform_columns]
+            holdings_df_weights = inv_func / inv_func.sum(axis=1)
+        else:
+            holdings_df_weights = holdings_df[transform_columns] / \
+                holdings_df[transform_columns].sum(axis=1)
+        holdings_df_weights.columns = holdings_cols
+        holdings_df = holdings_df.join(holdings_df_weights, rsuffix='_w')
+        holdings_df_weighted_rets = np.multiply(
+            holdings_df[holdings_cols], holdings_df_weights)
+        holdings_df_weighted_rets['port_ret'] = holdings_df_weighted_rets.sum(
+            axis=1)
+        holdings_df = holdings_df.join(holdings_df_weighted_rets,
+                                       rsuffix='_wret')
+
+    return holdings_df['port_ret'], holdings_df
+
+
+def bucket_std(value, bins=[0.12, 0.15, 0.18, 0.21], max_default=0.24):
+    """
+    Simple quantizing function. For use in binning stdevs into a "buckets"
+
+    Parameters
+    ----------
+    value : float
+       Value corresponding to the the stdev to be bucketed
+
+    bins : list, optional
+       Floats used to describe the buckets which the value can be placed
+
+    max_default : float, optional
+       If value is greater than all the bins, max_default will be returned
+
+    Returns
+    -------
+    float
+        bin which the value falls into
+    """
+
+    annual_vol = value * np.sqrt(252)
+
+    for i in bins:
+        if annual_vol <= i:
+            return i
+
+    return max_default
+
+
+def min_max_vol_bounds(value, lower_bound=0.12, upper_bound=0.24):
+    """
+    Restrict volatility weighting of the lowest volatility asset versus the
+    highest volatility asset to a certain limit.
+    E.g. Never allocate more than 2x to the lowest volatility asset.
+    round up all the asset volatilities that fall below a certain bound
+    to a specified "lower bound" and round down all of the asset
+    volatilites that fall above a certain bound to a specified "upper bound"
+
+    Parameters
+    ----------
+    value : float
+       Value corresponding to a daily volatility
+
+    lower_bound : float, optional
+       Lower bound for the volatility
+
+    upper_bound : float, optional
+       Upper bound for the volatility
+
+    Returns
+    -------
+    float
+        The value input, annualized, or the lower_bound or upper_bound
+    """
+
+    annual_vol = value * np.sqrt(252)
+
+    if annual_vol < lower_bound:
+        return lower_bound
+
+    if annual_vol > upper_bound:
+        return upper_bound
+
+    return annual_vol
