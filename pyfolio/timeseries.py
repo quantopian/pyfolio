@@ -27,7 +27,7 @@ import statsmodels.api as sm
 
 from . import utils
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
-from .utils import WEEKLY, MONTHLY, YEARLY, ANNUALIZATION_FACTORS
+from .utils import DAILY, WEEKLY, MONTHLY, YEARLY, ANNUALIZATION_FACTORS
 from .interesting_periods import PERIODS
 
 
@@ -191,7 +191,7 @@ def max_drawdown(returns):
     return -1 * MDD
 
 
-def annual_return(returns, style='compound', periodicty=DAILY):
+def annual_return(returns, style='compound', period=DAILY):
     """Determines the annual returns of a strategy.
 
     Parameters
@@ -221,11 +221,11 @@ def annual_return(returns, style='compound', periodicty=DAILY):
         return np.nan
 
     try:
-        ann_factor = ANNUALIZATION_FACTORS[periodicty]
+        ann_factor = ANNUALIZATION_FACTORS[period]
     except KeyError:
         raise ValueError(
-            "periodicty must cannot be: {}. Must be {}, {}, or {}".format(
-                DAILY, WEEKLY, MONTHLY
+            "periodicty must cannot be '{}'. Must be '{}', '{}', or '{}'".format(
+                period, DAILY, WEEKLY, MONTHLY
             )
         )
 
@@ -241,7 +241,7 @@ def annual_return(returns, style='compound', periodicty=DAILY):
         return returns.mean() * ann_factor
 
 
-def annual_volatility(returns, periodicty=DAILY):
+def annual_volatility(returns, period=DAILY):
     """
     Determines the annual volatility of a strategy.
 
@@ -265,11 +265,11 @@ def annual_volatility(returns, periodicty=DAILY):
         return np.nan
 
     try:
-        ann_factor = ANNUALIZATION_FACTORS[periodicty]
+        ann_factor = ANNUALIZATION_FACTORS[period]
     except KeyError:
         raise ValueError(
-            "periodicty must cannot be: {}. Must be {}, {}, or {}".format(
-                DAILY, WEEKLY, MONTHLY
+            "periodicty must cannot be: '{}'. Must be '{}', '{}', or '{}'".format(
+                period, DAILY, WEEKLY, MONTHLY
             )
         )
 
