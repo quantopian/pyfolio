@@ -285,22 +285,21 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
     ax.tick_params(axis='x', which='major', labelsize=10)
 
     monthly_ret_table = timeseries.aggregate_returns(returns, 'monthly')
-    monthly_ret_table = monthly_ret_table.unstack()
-    monthly_ret_table = np.round(monthly_ret_table, 3)
+
     ax.hist(
-        100 * monthly_ret_table.dropna().values.flatten(),
+        100 * monthly_ret_table,
         color='orangered',
         alpha=0.80,
         bins=20,
         **kwargs)
 
     ax.axvline(
-        100 *
-        monthly_ret_table.dropna().values.flatten().mean(),
+        100 * monthly_ret_table.mean(),
         color='gold',
         linestyle='--',
         lw=4,
         alpha=1.0)
+
     ax.axvline(0.0, color='black', linestyle='-', lw=3, alpha=0.75)
     ax.legend(['mean'])
     ax.set_ylabel('Number of months')
