@@ -59,6 +59,7 @@ ANNUALIZATION_FACTORS = {
     MONTHLY: MONTHS_PER_YEAR
 }
 
+
 def pyfolio_root():
     return dirname(abspath(__file__))
 

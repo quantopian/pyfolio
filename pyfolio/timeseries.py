@@ -149,7 +149,7 @@ def aggregate_returns(df_daily_rets, convert_to):
             [lambda x: x.year]).apply(cumulate_returns)
     else:
         ValueError(
-            'convert_to must be {}, {} or {}'.format(WEEKLY,MONTHLY,YEARLY)
+            'convert_to must be {}, {} or {}'.format(WEEKLY, MONTHLY, YEARLY)
         )
 
 
@@ -224,7 +224,8 @@ def annual_return(returns, style='compound', period=DAILY):
         ann_factor = ANNUALIZATION_FACTORS[period]
     except KeyError:
         raise ValueError(
-            "periodicty must cannot be '{}'. Must be '{}', '{}', or '{}'".format(
+            "periodicty must cannot be '{}'. "
+            "Must be '{}', '{}', or '{}'".format(
                 period, DAILY, WEEKLY, MONTHLY
             )
         )
@@ -268,7 +269,8 @@ def annual_volatility(returns, period=DAILY):
         ann_factor = ANNUALIZATION_FACTORS[period]
     except KeyError:
         raise ValueError(
-            "periodicty must cannot be: '{}'. Must be '{}', '{}', or '{}'".format(
+            "periodicty must cannot be: '{}'."
+            " Must be '{}', '{}', or '{}'".format(
                 period, DAILY, WEEKLY, MONTHLY
             )
         )
