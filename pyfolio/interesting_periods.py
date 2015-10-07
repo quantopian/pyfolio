@@ -16,6 +16,8 @@
 """Generates a list of historical event dates that may have had
 significant impact on markets.  See extract_interesting_date_ranges."""
 
+import pandas as pd
+
 from collections import OrderedDict
 
 PERIODS = OrderedDict()
@@ -60,4 +62,4 @@ PERIODS['Apr14'] = (pd.Timestamp('20140401'), pd.Timestamp('20140501'))
 PERIODS['Oct14'] = (pd.Timestamp('20141001'), pd.Timestamp('20141101'))
 
 # Market down-turn in August/Sept 2015
-PERIODS['Aug15'] = (pd.Timestamp('20150820'), pd.Timestamp('20150904'))
+PERIODS['Fall2015'] = (pd.Timestamp('20150815'), pd.Timestamp('20150930'))
