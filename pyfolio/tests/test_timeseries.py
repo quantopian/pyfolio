@@ -210,6 +210,21 @@ class TestStats(TestCase):
             '2000-1-3',
             periods=500,
             freq='D'))
+
+    simple_week_rets = pd.Series(
+        [0.1] * 3 + [0] * 497,
+        pd.date_range(
+            '2000-1-31',
+            periods=500,
+            freq='W'))
+
+    simple_month_rets = pd.Series(
+        [0.1] * 3 + [0] * 497,
+        pd.date_range(
+            '2000-1-31',
+            periods=500,
+            freq='M'))
+
     simple_benchmark = pd.Series(
         [0.03] * 4 + [0] * 496,
         pd.date_range(
@@ -221,25 +236,39 @@ class TestStats(TestCase):
     dt = pd.date_range('2000-1-3', periods=3, freq='D')
 
     @parameterized.expand([
-        (simple_rets, 'calendar', 0.10584000000000014),
-        (simple_rets, 'compound', 0.16317653888658334),
-        (simple_rets, 'calendar', 0.10584000000000014),
-        (simple_rets, 'compound', 0.16317653888658334)
+        (simple_rets, 'calendar', utils.DAILY, 0.10584000000000014),
+        (simple_rets, 'compound', utils.DAILY, 0.16317653888658334),
+        (simple_rets, 'calendar', utils.DAILY, 0.10584000000000014),
+        (simple_rets, 'compound', utils.DAILY, 0.16317653888658334),
+        (simple_week_rets, 'compound', utils.WEEKLY, 0.031682168889005213),
+        (simple_week_rets, 'calendar', utils.WEEKLY, 0.021840000000000033),
+        (simple_month_rets, 'compound', utils.MONTHLY, 0.0072238075842128158),
+        (simple_month_rets, 'calendar', utils.MONTHLY, 0.0050400000000000071)
     ])
-    def test_annual_ret(self, returns, style, expected):
+    def test_annual_ret(self, returns, style, period, expected):
         self.assertEqual(
             timeseries.annual_return(
                 returns,
-                style=style),
+                style=style, period=period),
             expected)
 
     @parameterized.expand([
-        (simple_rets, 0.12271674212427248),
-        (simple_rets, 0.12271674212427248)
+        (simple_rets, utils.DAILY, 0.12271674212427248),
+        (simple_rets, utils.DAILY, 0.12271674212427248),
+        (simple_week_rets, utils.WEEKLY, 0.055744909991675112),
+        (simple_week_rets, utils.WEEKLY, 0.055744909991675112),
+        (simple_month_rets, utils.MONTHLY, 0.026778988562993072),
+        (simple_month_rets, utils.MONTHLY, 0.026778988562993072)
     ])
-    def test_annual_volatility(self, returns, expected):
-        self.assertAlmostEqual(timeseries.annual_volatility(returns),
-                               expected, DECIMAL_PLACES)
+    def test_annual_volatility(self, returns, period, expected):
+        self.assertAlmostEqual(
+            timeseries.annual_volatility(
+                returns,
+                period=period
+            ),
+            expected,
+            DECIMAL_PLACES
+        )
 
     @parameterized.expand([
         (simple_rets, 'calendar', 0.8624740045072119),
