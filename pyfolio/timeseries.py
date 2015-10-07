@@ -248,7 +248,7 @@ def annual_volatility(returns, period=DAILY):
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, noncumulative.
+        Periodic returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     periodicty : str, optional
         - defines the periodicty of the 'returns' data for purposes of
