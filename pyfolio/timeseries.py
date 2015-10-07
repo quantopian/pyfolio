@@ -27,6 +27,7 @@ import statsmodels.api as sm
 
 from . import utils
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
+from .utils import WEEKLY, MONTHLY, YEARLY, ANNUALIZATION_FACTORS
 from .interesting_periods import PERIODS
 
 
@@ -135,19 +136,21 @@ def aggregate_returns(df_daily_rets, convert_to):
     def cumulate_returns(x):
         return cum_returns(x)[-1]
 
-    if convert_to == 'weekly':
+    if convert_to == WEEKLY:
         return df_daily_rets.groupby(
             [lambda x: x.year,
              lambda x: x.month,
              lambda x: x.isocalendar()[1]]).apply(cumulate_returns)
-    elif convert_to == 'monthly':
+    elif convert_to == MONTHLY:
         return df_daily_rets.groupby(
             [lambda x: x.year, lambda x: x.month]).apply(cumulate_returns)
-    elif convert_to == 'yearly':
+    elif convert_to == YEARLY:
         return df_daily_rets.groupby(
             [lambda x: x.year]).apply(cumulate_returns)
     else:
-        ValueError('convert_to must be weekly, monthly or yearly')
+        ValueError(
+            'convert_to must be {}, {} or {}'.format(WEEKLY,MONTHLY,YEARLY)
+        )
 
 
 def max_drawdown(returns):
@@ -188,13 +191,13 @@ def max_drawdown(returns):
     return -1 * MDD
 
 
-def annual_return(returns, style='compound'):
+def annual_return(returns, style='compound', periodicty=DAILY):
     """Determines the annual returns of a strategy.
 
     Parameters
     ----------
     returns : pd.Series
-        Daily returns of the strategy, noncumulative.
+        Periodic returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     style : str, optional
         - If 'compound', then return will be calculated in geometric
@@ -202,6 +205,10 @@ def annual_return(returns, style='compound'):
         - If 'calendar', then return will be calculated as
           ((last_value - start_value)/start_value)/num_of_years.
         - Otherwise, return is simply mean(all_daily_returns)*252.
+    periodicty : str, optional
+        - defines the periodicty of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'
+        - defaults to 'daily'.
 
     Returns
     -------
@@ -213,19 +220,28 @@ def annual_return(returns, style='compound'):
     if returns.size < 1:
         return np.nan
 
+    try:
+        ann_factor = ANNUALIZATION_FACTORS[periodicty]
+    except KeyError:
+        raise ValueError(
+            "periodicty must cannot be: {}. Must be {}, {}, or {}".format(
+                DAILY, WEEKLY, MONTHLY
+            )
+        )
+
     if style == 'calendar':
-        num_years = len(returns) / APPROX_BDAYS_PER_YEAR
+        num_years = len(returns) / ann_factor
         df_cum_rets = cum_returns(returns, starting_value=100)
         start_value = df_cum_rets[0]
         end_value = df_cum_rets[-1]
         return ((end_value - start_value) / start_value) / num_years
     if style == 'compound':
-        return pow((1 + returns.mean()), APPROX_BDAYS_PER_YEAR) - 1
+        return pow((1 + returns.mean()), ann_factor) - 1
     else:
-        return returns.mean() * APPROX_BDAYS_PER_YEAR
+        return returns.mean() * ann_factor
 
 
-def annual_volatility(returns):
+def annual_volatility(returns, periodicty=DAILY):
     """
     Determines the annual volatility of a strategy.
 
@@ -234,6 +250,10 @@ def annual_volatility(returns):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
+    periodicty : str, optional
+        - defines the periodicty of the 'returns' data for purposes of
+        annualizing volatility. Can be 'monthly' or 'weekly' or 'daily'.
+        - defaults to 'daily'
 
     Returns
     -------
@@ -244,7 +264,16 @@ def annual_volatility(returns):
     if returns.size < 2:
         return np.nan
 
-    return returns.std() * np.sqrt(APPROX_BDAYS_PER_YEAR)
+    try:
+        ann_factor = ANNUALIZATION_FACTORS[periodicty]
+    except KeyError:
+        raise ValueError(
+            "periodicty must cannot be: {}. Must be {}, {}, or {}".format(
+                DAILY, WEEKLY, MONTHLY
+            )
+        )
+
+    return returns.std() * np.sqrt(ann_factor)
 
 
 def calmar_ratio(returns, returns_style='calendar'):
