@@ -10,9 +10,15 @@ financial portfolios developed by
 
 At the core of pyfolio is a so-called tear sheet that consists of
 various individual plots that provide a comprehensive image of the
-performance of a trading algorithm. Here is an example of a tear sheet of a returns-based analysis of the `$FB` stock:
+performance of a trading algorithm. Here is an example of a tear sheet of a the Zipline algo included as one of our example notebooks:
 
-![example returns](https://github.com/quantopian/pyfolio/raw/master/docs/example_returns.png "Example tear sheet about $FB stock")
+![example tear 1](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_1.png "Example tear sheet created from a Zipline algo")
+![example tear 2](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_2.png)
+![example tear 3](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_3.png)
+![example tear 4](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_4.png)
+
+
+See also [slides of a recent talk about pyfolio.](http://nbviewer.ipython.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/overview_slides.ipynb#/)
 
 ## Installation
 
@@ -33,6 +39,7 @@ the IPython kernel when you make changes.
  - matplotlib
  - [seaborn](https://github.com/mwaskom/seaborn)
  - [pymc3](https://github.com/pymc-devs/pymc3) (optional)
+ - [zipline](https://github.com/quantopian/zipline) (optional; requires master, *not* 0.7.0)
 
 ## Questions?
 

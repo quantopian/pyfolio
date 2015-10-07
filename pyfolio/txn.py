@@ -76,7 +76,7 @@ def make_transaction_frame(transactions):
             txn = map_transaction(txn)
             transaction_list.append(txn)
     df = pd.DataFrame(sorted(transaction_list, key=lambda x: x['dt']))
-    df['txn_dollars'] = df['amount'] * df['price']
+    df['txn_dollars'] = -df['amount'] * df['price']
 
     df.index = list(map(pd.Timestamp, df.dt.values))
     return df

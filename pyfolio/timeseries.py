@@ -15,6 +15,7 @@
 from __future__ import division
 
 from collections import OrderedDict
+from functools import partial
 
 import pandas as pd
 import numpy as np
@@ -23,6 +24,10 @@ import scipy.stats as stats
 from sklearn import preprocessing
 
 import statsmodels.api as sm
+
+from . import utils
+from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
+from .interesting_periods import PERIODS
 
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
@@ -209,15 +214,15 @@ def annual_return(returns, style='compound'):
         return np.nan
 
     if style == 'calendar':
-        num_years = len(returns) / 252.0
+        num_years = len(returns) / APPROX_BDAYS_PER_YEAR
         df_cum_rets = cum_returns(returns, starting_value=100)
         start_value = df_cum_rets[0]
         end_value = df_cum_rets[-1]
         return ((end_value - start_value) / start_value) / num_years
     if style == 'compound':
-        return pow((1 + returns.mean()), 252) - 1
+        return pow((1 + returns.mean()), APPROX_BDAYS_PER_YEAR) - 1
     else:
-        return returns.mean() * 252
+        return returns.mean() * APPROX_BDAYS_PER_YEAR
 
 
 def annual_volatility(returns):
@@ -239,7 +244,7 @@ def annual_volatility(returns):
     if returns.size < 2:
         return np.nan
 
-    return returns.std() * np.sqrt(252)
+    return returns.std() * np.sqrt(APPROX_BDAYS_PER_YEAR)
 
 
 def calmar_ratio(returns, returns_style='calendar'):
@@ -302,7 +307,8 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
 
 """
 
-    daily_return_thresh = pow(1 + annual_return_threshhold, 1 / 252) - 1
+    daily_return_thresh = pow(1 + annual_return_threshhold, 1 /
+                              APPROX_BDAYS_PER_YEAR) - 1
 
     returns_less_thresh = returns - daily_return_thresh
 
@@ -512,7 +518,8 @@ def calc_multifactor(returns, factors):
     return results.params
 
 
-def rolling_beta(returns, benchmark_rets, rolling_window=63):
+def rolling_beta(returns, factor_returns,
+                 rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """Determines the rolling beta of a strategy.
 
     Parameters
@@ -520,12 +527,13 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_rets : pd.Series
+    factor_returns : pd.Series or pd.DataFrame
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
+        If DataFrame is passed, computes rolling beta for each column.
     rolling_window : int, optional
         The size of the rolling window, in days, over which to compute
-        beta (default 63 days).
+        beta (default 6 months).
 
     Returns
     -------
@@ -537,64 +545,66 @@ def rolling_beta(returns, benchmark_rets, rolling_window=63):
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
 
     """
+    if factor_returns.ndim > 1:
+        # Apply column-wise
+        return factor_returns.apply(partial(rolling_beta, returns),
+                                    rolling_window=rolling_window)
+    else:
+        out = pd.Series(index=returns.index)
+        for beg, end in zip(returns.index[0:-rolling_window],
+                            returns.index[rolling_window:]):
+            out.loc[end] = calc_alpha_beta(
+                returns.loc[beg:end],
+                factor_returns.loc[beg:end])[1]
 
-    out = pd.Series(index=returns.index)
-    for beg, end in zip(returns.index[0:-rolling_window],
-                        returns.index[rolling_window:]):
-        out.loc[end] = calc_alpha_beta(returns.loc[beg:end],
-                                       benchmark_rets.loc[beg:end])[1]
-
-    return out
+        return out
 
 
-def rolling_multifactor_beta(returns, df_multi_factor, rolling_window=63):
-    """Determines the rolling beta of multiple factors.
+def rolling_fama_french(returns, factor_returns=None,
+                        rolling_window=APPROX_BDAYS_PER_MONTH * 6):
+    """Computes rolling Fama-French single factor betas.
+
+    Specifically, returns SMB, HML, and UMD.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    df_multi_factor : pd.DataFrame
-        Other factors over which to compute beta.
+    factor_returns : pd.DataFrame, optional
+        data set containing the Fama-French risk factors. See
+        utils.load_portfolio_risk_factors.
     rolling_window : int, optional
-        The size of the rolling window, in days, over which to compute
-        beta (default 63 days).
+        The days window over which to compute the beta.
+        Default is 6 months.
 
     Returns
     -------
-    pd.DataFrame
-        Rolling betas.
-
-    Note
-    -----
-
-    See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
-
+    pandas.DataFrame
+        DataFrame containing rolling beta coefficients for SMB, HML
+        and UMD
     """
+    if factor_returns is None:
+        factor_returns = utils.load_portfolio_risk_factors(
+            start=returns.index[0], end=returns.index[-1])
+        factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
+                                             axis='columns')
 
-    out = pd.DataFrame(columns=['const'] + list(df_multi_factor.columns),
-                       index=returns.index)
-
-    for beg, end in zip(returns.index[0:-rolling_window],
-                        returns.index[rolling_window:]):
-        out.loc[end] = calc_multifactor(returns.loc[beg:end],
-                                        df_multi_factor.loc[beg:end])
-
-    return out
+    return rolling_beta(returns, factor_returns,
+                        rolling_window=rolling_window)
 
 
-def calc_alpha_beta(returns, benchmark_rets):
-    """
-    Calculates both alpha and beta.
+def calc_alpha_beta(returns, factor_returns):
+    """Calculates both alpha and beta.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_rets : pd.Series
-        Daily noncumulative returns of the benchmark.
+    factor_returns : pd.Series
+         Daily noncumulative returns of the factor to which beta is
+         computed. Usually a benchmark such as the market.
          - This is in the same style as returns.
 
     Returns
@@ -603,13 +613,14 @@ def calc_alpha_beta(returns, benchmark_rets):
         Alpha.
     float
         Beta.
-    """
+
+"""
 
     ret_index = returns.index
-    beta, alpha = sp.stats.linregress(benchmark_rets.loc[ret_index].values,
+    beta, alpha = sp.stats.linregress(factor_returns.loc[ret_index].values,
                                       returns.values)[:2]
 
-    return alpha * 252, beta
+    return alpha * APPROX_BDAYS_PER_YEAR, beta
 
 
 def perf_stats(
@@ -757,9 +768,8 @@ def get_top_drawdowns(returns, top=10):
         peak, valley, recovery = get_max_drawdown_underwater(underwater)
         # Slice out draw-down period
         if not pd.isnull(recovery):
-            underwater = pd.concat(
-                [underwater.loc[:peak].iloc[:-1],
-                 underwater.loc[recovery:].iloc[1:]])
+            underwater.drop(underwater[peak: recovery].index[1:-1],
+                            inplace=True)
         else:
             # drawdown has not ended yet
             underwater = underwater.loc[:peak]
@@ -805,9 +815,15 @@ def gen_drawdown_table(returns, top=10):
             df_drawdowns.loc[i, 'duration'] = len(pd.date_range(peak,
                                                                 recovery,
                                                                 freq='B'))
-        df_drawdowns.loc[i, 'peak date'] = peak
-        df_drawdowns.loc[i, 'valley date'] = valley
-        df_drawdowns.loc[i, 'recovery date'] = recovery
+        df_drawdowns.loc[i, 'peak date'] = (peak.to_pydatetime()
+                                            .strftime('%Y-%m-%d'))
+        df_drawdowns.loc[i, 'valley date'] = (valley.to_pydatetime()
+                                              .strftime('%Y-%m-%d'))
+        if isinstance(recovery, float):
+            df_drawdowns.loc[i, 'recovery date'] = recovery
+        else:
+            df_drawdowns.loc[i, 'recovery date'] = (recovery.to_pydatetime()
+                                                    .strftime('%Y-%m-%d'))
         df_drawdowns.loc[i, 'net drawdown in %'] = (
             (df_cum.loc[peak] - df_cum.loc[valley]) / df_cum.loc[peak]) * 100
 
@@ -847,14 +863,15 @@ def rolling_sharpe(returns, rolling_sharpe_window):
     """
 
     return pd.rolling_mean(returns, rolling_sharpe_window) \
-        / pd.rolling_std(returns, rolling_sharpe_window) * np.sqrt(252)
+        / pd.rolling_std(returns, rolling_sharpe_window) \
+        * np.sqrt(APPROX_BDAYS_PER_YEAR)
 
 
 def cone_rolling(
         input_rets,
         num_stdev=1.0,
         warm_up_days_pct=0.5,
-        std_scale_factor=252,
+        std_scale_factor=APPROX_BDAYS_PER_YEAR,
         update_std_oos_rolling=False,
         cone_fit_end_date=None,
         extend_fit_trend=True,
@@ -944,7 +961,7 @@ def cone_rolling(
         new_cone_day_scale_factor += 1
 
     if create_future_cone:
-        extend_ahead_days = 252
+        extend_ahead_days = APPROX_BDAYS_PER_YEAR
         future_cone_dates = pd.date_range(
             cone_end_rets.index[-1], periods=extend_ahead_days, freq='B')
 
@@ -975,62 +992,6 @@ def cone_rolling(
     return perf_ts_r
 
 
-def gen_date_ranges_interesting():
-    """Generates a list of historical event dates that may have had
-    significant impact on markets.  See
-    extract_interesting_date_ranges.
-
-    Returns
-    -------
-    periods : OrderedDict
-        Significant events.
-
-    """
-
-    periods = OrderedDict()
-    # Dotcom bubble
-    periods['Dotcom'] = (pd.Timestamp('20000310'), pd.Timestamp('20000910'))
-
-    # Lehmann Brothers
-    periods['Lehmann'] = (pd.Timestamp('20080801'), pd.Timestamp('20081001'))
-
-    # 9/11
-    periods['9/11'] = (pd.Timestamp('20010911'), pd.Timestamp('20011011'))
-
-    # 05/08/11  US down grade and European Debt Crisis 2011
-    periods[
-        'US downgrade/European Debt Crisis'] = (pd.Timestamp('20110805'),
-                                                pd.Timestamp('20110905'))
-
-    # 16/03/11  Fukushima melt down 2011
-    periods['Fukushima'] = (pd.Timestamp('20110316'), pd.Timestamp('20110416'))
-
-    # 01/08/03  US Housing Bubble 2003
-    periods['US Housing'] = (
-        pd.Timestamp('20030108'), pd.Timestamp('20030208'))
-
-    # 06/09/12  EZB IR Event 2012
-    periods['EZB IR Event'] = (
-        pd.Timestamp('20120910'), pd.Timestamp('20121010'))
-
-    # August 2007, March and September of 2008, Q1 & Q2 2009,
-    periods['Aug07'] = (pd.Timestamp('20070801'), pd.Timestamp('20070901'))
-    periods['Mar08'] = (pd.Timestamp('20080301'), pd.Timestamp('20070401'))
-    periods['Sept08'] = (pd.Timestamp('20080901'), pd.Timestamp('20081001'))
-    periods['2009Q1'] = (pd.Timestamp('20090101'), pd.Timestamp('20090301'))
-    periods['2009Q2'] = (pd.Timestamp('20090301'), pd.Timestamp('20090601'))
-
-    # Flash Crash (May 6, 2010 + 1 week post),
-    periods['Flash Crash'] = (
-        pd.Timestamp('20100505'), pd.Timestamp('20100510'))
-
-    # April and October 2014).
-    periods['Apr14'] = (pd.Timestamp('20140401'), pd.Timestamp('20140501'))
-    periods['Oct14'] = (pd.Timestamp('20141001'), pd.Timestamp('20141101'))
-
-    return periods
-
-
 def extract_interesting_date_ranges(returns):
     """Extracts returns based on interesting events. See
     gen_date_range_interesting.
@@ -1047,12 +1008,10 @@ def extract_interesting_date_ranges(returns):
         Date ranges, with returns, of all valid events.
 
     """
-
-    periods = gen_date_ranges_interesting()
     returns_dupe = returns.copy()
     returns_dupe.index = returns_dupe.index.map(pd.Timestamp)
     ranges = OrderedDict()
-    for name, (start, end) in periods.items():
+    for name, (start, end) in PERIODS.items():
         try:
             period = returns_dupe.loc[start:end]
             if len(period) == 0:
@@ -1093,3 +1052,167 @@ def portfolio_returns(holdings_returns, exclude_non_overlapping=True):
         port = port.fillna(0)
 
     return port / len(holdings_returns)
+
+
+def portfolio_returns_metric_weighted(holdings_returns,
+                                      exclude_non_overlapping=True,
+                                      weight_function=None,
+                                      weight_function_window=None,
+                                      inverse_weight=False,
+                                      portfolio_rebalance_rule='q',
+                                      weight_func_transform=None):
+    """
+    Generates an equal-weight portfolio, or portfolio weighted by
+    weight_function
+
+    Parameters
+    ----------
+    holdings_returns : list
+       List containing each individual holding's daily returns of the
+       strategy, noncumulative.
+
+    exclude_non_overlapping : boolean, optional
+       (Only applicable if equal-weight portfolio, e.g. weight_function=None)
+       If True, timeseries returned will include values only for dates
+       available across all holdings_returns timeseries If False, 0%
+       returns will be assumed for a holding until it has valid data
+
+    weight_function : function, optional
+       Function to be applied to holdings_returns timeseries
+
+    weight_function_window : int, optional
+       Rolling window over which weight_function will use as its input values
+
+    inverse_weight : boolean, optional
+       If True, high values returned from weight_function will result in lower
+       weight for that holding
+
+    portfolio_rebalance_rule : string, optional
+       A pandas.resample valid rule. Specifies how frequently to compute
+       the weighting criteria
+
+    weight_func_transform : function, optional
+       Function applied to value returned from weight_function
+
+    Returns
+    -------
+    (pd.Series, pd.DataFrame)
+        pd.Series : Portfolio returns timeseries.
+        pd.DataFrame : All the raw data used in the portfolio returns
+           calculations
+    """
+
+    if weight_function is None:
+        if exclude_non_overlapping:
+            holdings_df = pd.DataFrame(holdings_returns).T.dropna()
+        else:
+            holdings_df = pd.DataFrame(holdings_returns).T.fillna(0)
+
+        holdings_df['port_ret'] = holdings_df.sum(axis=1)/len(holdings_returns)
+    else:
+        holdings_df_na = pd.DataFrame(holdings_returns).T
+        holdings_cols = holdings_df_na.columns
+        holdings_df = holdings_df_na.dropna()
+        holdings_func = pd.rolling_apply(holdings_df,
+                                         window=weight_function_window,
+                                         func=weight_function).dropna()
+        holdings_func_rebal = holdings_func.resample(
+            rule=portfolio_rebalance_rule,
+            how='last')
+        holdings_df = holdings_df.join(
+            holdings_func_rebal, rsuffix='_f').fillna(method='ffill').dropna()
+        if weight_func_transform is None:
+            holdings_func_rebal_t = holdings_func_rebal
+            holdings_df = holdings_df.join(
+                holdings_func_rebal_t,
+                rsuffix='_t').fillna(method='ffill').dropna()
+        else:
+            holdings_func_rebal_t = holdings_func_rebal.applymap(
+                weight_func_transform)
+            holdings_df = holdings_df.join(
+                holdings_func_rebal_t,
+                rsuffix='_t').fillna(method='ffill').dropna()
+        transform_columns = list(map(lambda x: x+"_t", holdings_cols))
+        if inverse_weight:
+            inv_func = 1.0 / holdings_df[transform_columns]
+            holdings_df_weights = inv_func / inv_func.sum(axis=1)
+        else:
+            holdings_df_weights = holdings_df[transform_columns] / \
+                holdings_df[transform_columns].sum(axis=1)
+        holdings_df_weights.columns = holdings_cols
+        holdings_df = holdings_df.join(holdings_df_weights, rsuffix='_w')
+        holdings_df_weighted_rets = np.multiply(
+            holdings_df[holdings_cols], holdings_df_weights)
+        holdings_df_weighted_rets['port_ret'] = holdings_df_weighted_rets.sum(
+            axis=1)
+        holdings_df = holdings_df.join(holdings_df_weighted_rets,
+                                       rsuffix='_wret')
+
+    return holdings_df['port_ret'], holdings_df
+
+
+def bucket_std(value, bins=[0.12, 0.15, 0.18, 0.21], max_default=0.24):
+    """
+    Simple quantizing function. For use in binning stdevs into a "buckets"
+
+    Parameters
+    ----------
+    value : float
+       Value corresponding to the the stdev to be bucketed
+
+    bins : list, optional
+       Floats used to describe the buckets which the value can be placed
+
+    max_default : float, optional
+       If value is greater than all the bins, max_default will be returned
+
+    Returns
+    -------
+    float
+        bin which the value falls into
+    """
+
+    annual_vol = value * np.sqrt(252)
+
+    for i in bins:
+        if annual_vol <= i:
+            return i
+
+    return max_default
+
+
+def min_max_vol_bounds(value, lower_bound=0.12, upper_bound=0.24):
+    """
+    Restrict volatility weighting of the lowest volatility asset versus the
+    highest volatility asset to a certain limit.
+    E.g. Never allocate more than 2x to the lowest volatility asset.
+    round up all the asset volatilities that fall below a certain bound
+    to a specified "lower bound" and round down all of the asset
+    volatilites that fall above a certain bound to a specified "upper bound"
+
+    Parameters
+    ----------
+    value : float
+       Value corresponding to a daily volatility
+
+    lower_bound : float, optional
+       Lower bound for the volatility
+
+    upper_bound : float, optional
+       Upper bound for the volatility
+
+    Returns
+    -------
+    float
+        The value input, annualized, or the lower_bound or upper_bound
+    """
+
+    annual_vol = value * np.sqrt(252)
+
+    if annual_vol < lower_bound:
+        return lower_bound
+
+    if annual_vol > upper_bound:
+        return upper_bound
+
+    return annual_vol

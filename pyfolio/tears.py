@@ -66,15 +66,15 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         Daily net position values.
          - Time series of dollar amount invested in each position and cash.
          - Days where stocks are not held can be represented by 0 or NaN.
+         - Non-working capital is labelled 'cash'
          - Example:
             index         'AAPL'         'MSFT'          cash
             2004-01-09    13939.3800     -14012.9930     711.5585
             2004-01-12    14492.6300     -14624.8700     27.1821
             2004-01-13    -13853.2800    13653.6400      -43.6375
     transactions : pd.DataFrame, optional
-        Daily transaction volume and dollar ammount.
-        -  Time series of dollar amount of transactions per day,
-            and number of shares traded per day.
+        Daily transaction quantity (txn_shares) and dollar amount
+        (txn_volume).
         - Example:
             index         txn_volume      txn_shares
             2004-01-09    99288.441805    6361
@@ -183,9 +183,10 @@ def create_returns_tear_sheet(returns, live_start_date=None,
             returns = returns[returns.index > benchmark_rets.index[0]]
 
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
-
-    print("Entire data start date: " + str(df_cum_rets.index[0]))
-    print("Entire data end date: " + str(df_cum_rets.index[-1]))
+    print("Entire data start date: " + str(df_cum_rets
+                                           .index[0].strftime('%Y-%m-%d')))
+    print("Entire data end date: " + str(df_cum_rets
+                                         .index[-1].strftime('%Y-%m-%d')))
 
     print('\n')
 
@@ -193,35 +194,47 @@ def create_returns_tear_sheet(returns, live_start_date=None,
                              live_start_date=live_start_date)
 
     if live_start_date is not None:
-        vertical_sections = 10
+        vertical_sections = 11
         live_start_date = utils.get_utc_timestamp(live_start_date)
     else:
-        vertical_sections = 9
+        vertical_sections = 10
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
     ax_rolling_returns = plt.subplot(gs[:2, :])
-    ax_rolling_beta = plt.subplot(gs[2, :], sharex=ax_rolling_returns)
-    ax_rolling_sharpe = plt.subplot(gs[3, :], sharex=ax_rolling_returns)
-    ax_rolling_risk = plt.subplot(gs[4, :], sharex=ax_rolling_returns)
-    ax_drawdown = plt.subplot(gs[5, :], sharex=ax_rolling_returns)
-    ax_underwater = plt.subplot(gs[6, :], sharex=ax_rolling_returns)
-    ax_monthly_heatmap = plt.subplot(gs[7, 0])
-    ax_annual_returns = plt.subplot(gs[7, 1])
-    ax_monthly_dist = plt.subplot(gs[7, 2])
-    ax_return_quantiles = plt.subplot(gs[8, :])
+    ax_rolling_returns_vol_match = plt.subplot(gs[2, :],
+                                               sharex=ax_rolling_returns)
+    ax_rolling_beta = plt.subplot(gs[3, :], sharex=ax_rolling_returns)
+    ax_rolling_sharpe = plt.subplot(gs[4, :], sharex=ax_rolling_returns)
+    ax_rolling_risk = plt.subplot(gs[5, :], sharex=ax_rolling_returns)
+    ax_drawdown = plt.subplot(gs[6, :], sharex=ax_rolling_returns)
+    ax_underwater = plt.subplot(gs[7, :], sharex=ax_rolling_returns)
+    ax_monthly_heatmap = plt.subplot(gs[8, 0])
+    ax_annual_returns = plt.subplot(gs[8, 1])
+    ax_monthly_dist = plt.subplot(gs[8, 2])
+    ax_return_quantiles = plt.subplot(gs[9, :])
 
     if live_start_date is not None:
-        ax_daily_similarity_scale = plt.subplot(gs[9, 0])
-        ax_daily_similarity_no_var = plt.subplot(gs[9, 1])
-        ax_daily_similarity_no_var_no_mean = plt.subplot(gs[9, 2])
+        ax_daily_similarity_scale = plt.subplot(gs[10, 0])
+        ax_daily_similarity_no_var = plt.subplot(gs[10, 1])
+        ax_daily_similarity_no_var_no_mean = plt.subplot(gs[10, 2])
 
     plotting.plot_rolling_returns(
         returns,
-        benchmark_rets=benchmark_rets,
+        factor_returns=benchmark_rets,
         live_start_date=live_start_date,
         cone_std=cone_std,
         ax=ax_rolling_returns)
+
+    plotting.plot_rolling_returns(
+        returns,
+        factor_returns=benchmark_rets,
+        live_start_date=live_start_date,
+        cone_std=cone_std,
+        volatility_match=True,
+        ax=ax_rolling_returns_vol_match)
+    ax_rolling_returns_vol_match.set_title(
+        'Cumulative returns volatility matched to benchmark.')
 
     plotting.plot_rolling_beta(
         returns, benchmark_rets, ax=ax_rolling_beta)
@@ -229,7 +242,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     plotting.plot_rolling_sharpe(
         returns, ax=ax_rolling_sharpe)
 
-    plotting.plot_rolling_risk_factors(
+    plotting.plot_rolling_fama_french(
         returns, ax=ax_rolling_risk)
 
     # Drawdowns
@@ -280,6 +293,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
             title='Similarity without variance\nand mean normalization',
             ax=ax_daily_similarity_no_var_no_mean)
 
+    plt.show()
     if return_fig:
         return fig
 
@@ -338,6 +352,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
+    plt.show()
     if return_fig:
         return fig
 
@@ -371,7 +386,7 @@ def create_txn_tear_sheet(
     gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
     ax_turnover = plt.subplot(gs[0, :])
     ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
-    ax_daily_volume_hist = plt.subplot(gs[2, :])
+    ax_turnover_hist = plt.subplot(gs[2, :])
 
     plotting.plot_turnover(
         returns,
@@ -381,8 +396,13 @@ def create_txn_tear_sheet(
 
     plotting.plot_daily_volume(returns, transactions, ax=ax_daily_volume)
 
-    plotting.plot_volume_per_day_hist(transactions, ax=ax_daily_volume_hist)
+    try:
+        plotting.plot_daily_turnover_hist(transactions, positions,
+                                          ax=ax_turnover_hist)
+    except AttributeError:
+        warnings.warn('Unable to generate turnover plot.', UserWarning)
 
+    plt.show()
     if return_fig:
         return fig
 
@@ -456,6 +476,7 @@ def create_interesting_times_tear_sheet(
         ax.set_ylabel('Returns')
         ax.set_xlabel('')
 
+    plt.show()
     if return_fig:
         return fig
 
@@ -594,5 +615,6 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
 
     gs.tight_layout(fig)
 
+    plt.show()
     if return_fig:
         return fig
