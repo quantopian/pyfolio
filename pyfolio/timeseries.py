@@ -1189,7 +1189,7 @@ def portfolio_returns_metric_weighted(holdings_returns,
             holdings_df = holdings_df.join(
                 holdings_func_rebal_t,
                 rsuffix='_t').fillna(method='ffill').dropna()
-        transform_columns = map(lambda x: x+"_t", holdings_cols)
+        transform_columns = list(map(lambda x: x+"_t", holdings_cols))
         if inverse_weight:
             inv_func = 1.0 / holdings_df[transform_columns]
             holdings_df_weights = inv_func / inv_func.sum(axis=1)
