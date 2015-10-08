@@ -921,6 +921,46 @@ def show_and_plot_top_positions(returns, positions_alloc,
         return ax
 
 
+def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
+    """Plots the sector exposures of the portfolio over time.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    sector_alloc : pd.DataFrame
+        Portfolio allocation of positions. See pos.get_sector_alloc.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes, conditional
+        The axes that were plotted on.
+    """
+    if ax is None:
+        ax = plt.gcf()
+
+    sector_alloc.plot(title='Sector Allocation Over Time',
+                      alpha=0.4, ax=ax, **kwargs)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0 + box.height * 0.1,
+                     box.width, box.height * 0.9])
+
+    # Put a legend below current axis
+    ax.legend(
+        loc='upper center', frameon=True, bbox_to_anchor=(
+            0.5, -0.14), ncol=5)
+
+    df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
+    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+    ax.set_ylabel('Exposure by sector')
+
+
 def plot_return_quantiles(returns, df_weekly, df_monthly, ax=None, **kwargs):
     """Creates a box plot of daily, weekly, and monthly return
     distributions.
