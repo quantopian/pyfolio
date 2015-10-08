@@ -15,6 +15,8 @@
 from __future__ import division
 
 import pandas as pd
+import numpy as np
+import warnings
 
 
 def get_percent_alloc(values):
@@ -163,3 +165,38 @@ def get_turnover(transactions, positions, period=None):
     turnover = traded_value / 2.0
     turnover_rate = turnover / portfolio_value
     return turnover_rate
+
+
+def get_sector_exposures(positions, symbol_sector_map):
+    """
+    Sum position exposures by sector.
+
+    Parameters
+    ----------
+    positions : pd.DataFrame
+        Contains position values or amounts.
+    symbol_sector_map : dict or pd.Series
+        Security identifier to sector mapping.
+        Security ids as keys/index, sectors as values.
+
+    Returns
+    -------
+    positions_alloc : pd.DataFrame
+        Sectors and their allocations.
+    """
+    cash = positions.pop('cash')
+
+    unmapped_pos = np.setdiff1d(positions.columns.values,
+                                symbol_sector_map.keys())
+    if len(unmapped_pos) > 0:
+        warn_message = """Warning: Symbols {} have no sector mapping.
+        They will not be included in sector allocations""".format(
+            " ".join(map(str, unmapped_pos)))
+        warnings.warn(warn_message, UserWarning)
+
+    sector_exp = positions.groupby(
+        by=symbol_sector_map, axis=1).sum()
+
+    sector_exp['cash'] = cash
+
+    return sector_exp

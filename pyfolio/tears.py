@@ -42,6 +42,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
                            benchmark_rets=None,
                            gross_lev=None,
                            live_start_date=None, bayesian=False,
+                           sector_mappings=None,
                            cone_std=1.0, set_context=True):
     """
     Generate a number of tear sheets that are useful
@@ -125,6 +126,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     if positions is not None:
         create_position_tear_sheet(returns, positions,
                                    gross_lev=gross_lev,
+                                   sector_mappings=sector_mappings,
                                    set_context=set_context)
 
         if transactions is not None:
@@ -301,7 +303,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 @plotting_context
 def create_position_tear_sheet(returns, positions, gross_lev=None,
                                show_and_plot_top_pos=2,
-                               return_fig=False):
+                               return_fig=False, sector_mappings=None):
     """
     Generate a number of plots for analyzing a
     strategy's positions and holdings.
@@ -328,10 +330,15 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
         If True, set default plotting style context.
+    sector_mapping: dict or pd.Series.
+        Security identifier to sector mapping.
+        Security ids as keys, sectors as values.
     """
 
-    fig = plt.figure(figsize=(14, 4 * 6))
-    gs = gridspec.GridSpec(4, 3, wspace=0.5, hspace=0.5)
+    vertical_sections = 5 if sector_mappings else 4
+
+    fig = plt.figure(figsize=(14, vertical_sections * 6))
+    gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
     ax_gross_leverage = plt.subplot(gs[0, :])
     ax_exposures = plt.subplot(gs[1, :], sharex=ax_gross_leverage)
     ax_top_positions = plt.subplot(gs[2, :], sharex=ax_gross_leverage)
@@ -351,6 +358,15 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         ax=ax_top_positions)
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
+
+    if sector_mappings is not None:
+        sector_exposures = pos.get_sector_exposures(positions, sector_mappings)
+
+        sector_alloc = pos.get_percent_alloc(sector_exposures)
+        sector_alloc = sector_alloc.drop('cash', axis='columns')
+        ax_sector_alloc = plt.subplot(gs[4, :], sharex=ax_gross_leverage)
+        plotting.plot_sector_allocations(returns, sector_alloc,
+                                         ax=ax_sector_alloc)
 
     plt.show()
     if return_fig:
