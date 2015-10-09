@@ -109,6 +109,31 @@ def get_txn_vol(transactions):
     return pd.concat([daily_values, daily_amounts], axis=1)
 
 
+def adjust_returns_for_slippage(returns, turnover, slippage_bps):
+    """Apply a slippage penalty for every dollar traded.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Time series of daily returns.
+    turnover: pd.Series
+        Time series of daily total of buys and sells
+        divided by portfolio value.
+            - See pos.get_turnover.
+    slippage_bps: int/float
+        Basis points of slippage to apply.
+
+    Returns
+    -------
+    pd.Series
+        Time series of daily returns, adjusted for slippage.
+    """
+    slippage = 0.0001 * slippage_bps
+    # Only include returns in the period where the algo traded.
+    trim_returns = returns.loc[turnover.index]
+    return trim_returns - turnover * slippage
+
+
 def create_txn_profits(transactions):
     """
     Compute per-trade profits.
