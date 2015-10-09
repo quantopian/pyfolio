@@ -192,15 +192,15 @@ def get_sector_exposures(positions, symbol_sector_map):
     positions_alloc : pd.DataFrame
         Sectors and their allocations.
     """
-    unmapped_pos = np.setdiff1d(positions.drop('cash', axis=1).columns.values, 
+    unmapped_pos = np.setdiff1d(positions.drop('cash', axis=1).columns.values,
                                 symbol_sector_map.keys())
     if len(unmapped_pos) > 0:
         warn_message = "Warning: Symbols {} have no sector mapping.".format(
-                                            " ".join(map(str, unmapped_pos)))
+            " ".join(map(str, unmapped_pos)))
         warnings.warn(warn_message, UserWarning)
 
     sector_exp = positions.drop('cash', axis=1).groupby(
-                        by=symbol_sector_map, axis=1).sum()
+        by=symbol_sector_map, axis=1).sum()
 
     sector_exp['cash'] = positions['cash']
 

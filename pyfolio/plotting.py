@@ -953,8 +953,8 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
     if ax is None:
         ax = plt.gcf()
 
-    sector_alloc.plot(title='Sector Allocation Over Time', 
-        alpha=0.4, ax=ax, **kwargs)
+    sector_alloc.plot(title='Sector Allocation Over Time',
+                      alpha=0.4, ax=ax, **kwargs)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.1,

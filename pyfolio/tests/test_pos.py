@@ -133,19 +133,18 @@ class PositionsTestCase(TestCase):
         """
         dates = date_range(start='2015-01-01', freq='D', periods=20)
         positions = DataFrame([[1.0, 2.0, 3.0, 10.0]]*len(dates),
-                      columns=[0, 1, 2, 'cash'], index=dates)
+                              columns=[0, 1, 2, 'cash'], index=dates)
         mapping_d = {
             0: 'A',
             1: 'B',
             2: 'A',
         }
-        mapping_s = Series(index=[0,1,2], data=['A', 'B', 'A'])
+        mapping_s = Series(index=[0, 1, 2], data=['A', 'B', 'A'])
 
         for mapping in [mapping_d, mapping_s]:
             result = get_sector_exposures(positions, mapping)
             expected = DataFrame([[4.0, 2.0, 10.0]]*len(dates), 
                                  columns=['A', 'B', 'cash'], index=dates)
-
 
             assert_frame_equal(result, expected)
 
@@ -164,4 +163,3 @@ class PositionsTestCase(TestCase):
                                  columns=['A', 'B', 'cash'], index=dates)
 
             assert_frame_equal(result, expected)
-
