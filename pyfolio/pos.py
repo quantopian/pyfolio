@@ -190,66 +190,10 @@ def get_sector_exposures(positions, symbol_sector_map):
     positions_alloc : pd.DataFrame
         Sectors and their allocations.
     """
-
-    symbols_traded = positions.drop('cash', axis=1).columns.values
-
-    sector_symbol_map_traded = _generate_sector_symbol_map_traded(
-                                    symbols_traded, symbol_sector_map)
-    if sector_symbol_map_traded is None:
-        return
-
-    sector_exp = pd.DataFrame(index=positions.index)
-    for sector, securities in sector_symbol_map_traded.iteritems():
-        sector_exp[sector] = positions[securities].sum(axis=1)
+    sector_exp = positions.drop('cash', axis=1).groupby(
+                        by=symbol_sector_map, axis=1).sum()
 
     sector_exp['cash'] = positions['cash']
 
     return sector_exp
 
-
-def _generate_sector_symbol_map_traded(symbols_traded, symbol_sector_map):
-    """
-    Creates a dictionary of sector mappings with sectors as
-    key and position security ids as values
-
-    Parameters
-    ----------
-    security_ids : list
-    symbol_sector_map : Series or dict
-        Series/dict with symbols as the index/keys
-        and sectors as the values
-
-    Returns
-    -------
-    sector_symbol_map: dict
-    """
-    if isinstance(symbol_sector_map, pd.Series):
-        # If a symbol is not included in the passed mappings
-        # we continue on. 
-        try:
-            traded_map = symbol_sector_map.loc[symbols_traded]
-        except KeyError as e:
-            # Case where no mappings exist for any traded stocks
-            print "No sector mapping found for traded symbols"
-            return
-
-        dupes = traded_map[traded_map.groupby(level=0).count() > 1]
-        if len(dupes) > 1:
-            print "Warning: Duplicate symbols exist"
-
-        no_mapping = traded_map[traded_map.isnull()].index.values
-        traded_map = traded_map.dropna()
-
-        if len(no_mapping) > 1:
-            print "No sector mappings provided for {}".format(no_mapping)
-
-        sector_symbol_map = traded_map.groupby(traded_map.values).apply(
-                                               lambda x: x.index.tolist())
-        sector_symbol_map = sector_symbol_map.to_dict()
-
-    elif isinstance(symbol_sector_map, dict):
-        sector_symbol_map = _generate_sector_symbol_map_traded(symbols_traded, 
-                                                    pd.Series(symbol_sector_map))
-        
-
-    return sector_symbol_map
