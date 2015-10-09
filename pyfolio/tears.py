@@ -19,6 +19,7 @@ import warnings
 from . import timeseries
 from . import utils
 from . import pos
+from . import txn
 from . import plotting
 from .plotting import plotting_context
 
@@ -41,6 +42,7 @@ import seaborn as sns
 def create_full_tear_sheet(returns, positions=None, transactions=None,
                            benchmark_rets=None,
                            gross_lev=None,
+                           slippage=None,
                            live_start_date=None, bayesian=False,
                            sector_mappings=None,
                            cone_std=(1.0, 1.5, 2.0), set_context=True):
@@ -90,6 +92,13 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
             2009-12-07    0.999783
             2009-12-08    0.999880
             2009-12-09    1.000283
+    slippage : int/float, optional
+        Basis points of slippage to apply to returns before generating
+        tearsheet stats and plots.
+        If a value is provided, slippage parameter sweep
+        plots will be generated from the unadjusted returns.
+        Transactions and positions must also be passed.
+        - See txn.adjust_returns_for_slippage for more details.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period.
@@ -112,6 +121,16 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     if returns.index[0] < benchmark_rets.index[0]:
         returns = returns[returns.index > benchmark_rets.index[0]]
 
+    if slippage is not None and transactions is not None:
+        turnover = pos.get_turnover(transactions, positions, period=None)
+        # Multiply average long/short turnover by two to get the total
+        # value of buys and sells each day.
+        turnover *= 2
+        unadjusted_returns = returns.copy()
+        returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
+    else:
+        unadjusted_returns = None
+
     create_returns_tear_sheet(
         returns,
         live_start_date=live_start_date,
@@ -131,6 +150,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
 
         if transactions is not None:
             create_txn_tear_sheet(returns, positions, transactions,
+                                  unadjusted_returns=unadjusted_returns,
                                   set_context=set_context)
 
     if bayesian:
@@ -375,8 +395,8 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
 
 
 @plotting_context
-def create_txn_tear_sheet(
-        returns, positions, transactions, return_fig=False):
+def create_txn_tear_sheet(returns, positions, transactions,
+                          unadjusted_returns=None, return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's transactions.
 
@@ -398,9 +418,10 @@ def create_txn_tear_sheet(
     set_context : boolean, optional
         If True, set default plotting style context.
     """
+    vertical_sections = 5 if unadjusted_returns is not None else 3
 
-    fig = plt.figure(figsize=(14, 3 * 6))
-    gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
+    fig = plt.figure(figsize=(14, vertical_sections * 6))
+    gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
     ax_turnover = plt.subplot(gs[0, :])
     ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
     ax_turnover_hist = plt.subplot(gs[2, :])
@@ -418,6 +439,20 @@ def create_txn_tear_sheet(
                                           ax=ax_turnover_hist)
     except AttributeError:
         warnings.warn('Unable to generate turnover plot.', UserWarning)
+
+    if unadjusted_returns is not None:
+        ax_slippage_sweep = plt.subplot(gs[3, :], sharex=ax_turnover)
+        plotting.plot_slippage_sweep(unadjusted_returns,
+                                     transactions,
+                                     positions,
+                                     ax=ax_slippage_sweep
+                                     )
+        ax_slippage_sensitivity = plt.subplot(gs[4, :])
+        plotting.plot_slippage_sensitivity(unadjusted_returns,
+                                           transactions,
+                                           positions,
+                                           ax=ax_slippage_sensitivity
+                                           )
 
     plt.show()
     if return_fig:
