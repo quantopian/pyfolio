@@ -183,7 +183,7 @@ def get_sector_exposures(positions, symbol_sector_map):
     ----------
     positions : pd.DataFrame
         Contains position values or amounts.
-    sector_map : dict
+    symbol_sector_map : dict
         Sector to security identifier mapping.
         Sectors as keys, security ids as values.
 
