@@ -17,10 +17,14 @@ from numpy import (
 
 from pyfolio.pos import (get_percent_alloc,
                          extract_pos,
-                         get_turnover)
+                         get_turnover,
+                         get_sector_exposures)
+import warnings
 
 
 class PositionsTestCase(TestCase):
+    def __init__(self):
+        self.test_sector_exposure()
 
     def test_get_percent_alloc(self):
         raw_data = arange(15, dtype=float).reshape(5, 3)
@@ -121,3 +125,43 @@ class PositionsTestCase(TestCase):
         result = get_turnover(transactions, positions, period='M')
         expected = Series([10.0], index=index)
         assert_series_equal(result, expected)
+
+    def test_sector_exposure(self):
+        """
+        Tests sector exposure mapping and rollup.
+
+        """
+        dates = date_range(start='2015-01-01', freq='D', periods=20)
+        positions = DataFrame([[1.0, 2.0, 3.0, 10.0]]*len(dates),
+                      columns=[0, 1, 2, 'cash'], index=dates)
+        mapping_d = {
+            0: 'A',
+            1: 'B',
+            2: 'A',
+        }
+        mapping_s = Series(index=[0,1,2], data=['A', 'B', 'A'])
+
+        for mapping in [mapping_d, mapping_s]:
+            result = get_sector_exposures(positions, mapping)
+            expected = DataFrame([[4.0, 2.0, 10.0]]*len(dates), 
+                                 columns=['A', 'B', 'cash'], index=dates)
+
+
+            assert_frame_equal(result, expected)
+
+        mapping = {
+            0: 'A',
+            1: 'B'
+        }
+
+        with warnings.catch_warnings(record=True) as w:
+            result = get_sector_exposures(positions, mapping)
+            expected_warn = 'Warning: Symbols 2 have no sector mapping.'
+
+            assert w[-1].message.message == expected_warn
+
+            expected = DataFrame([[1.0, 2.0, 10.0]]*len(dates), 
+                                 columns=['A', 'B', 'cash'], index=dates)
+
+            assert_frame_equal(result, expected)
+
