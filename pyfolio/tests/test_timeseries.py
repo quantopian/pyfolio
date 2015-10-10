@@ -241,7 +241,7 @@ class TestStats(TestCase):
         (simple_rets, 'calendar', utils.DAILY, 0.10584000000000014),
         (simple_rets, 'compound', utils.DAILY, 0.16317653888658334),
         (simple_week_rets, 'compound', utils.WEEKLY, 0.031682168889005213),
-        (simple_week_rets, 'calendar', utils.WEEKLY, 0.021840000000000033)
+        (simple_week_rets, 'calendar', utils.WEEKLY, 0.021840000000000033),
         (simple_month_rets, 'compound', utils.MONTHLY, 0.0072238075842128158),
         (simple_month_rets, 'calendar', utils.MONTHLY, 0.0050400000000000071)
     ])
@@ -255,9 +255,9 @@ class TestStats(TestCase):
 
     @parameterized.expand([
         (simple_rets, utils.DAILY, 0.12271674212427248),
-        (simple_rets, utils.DAILY, 0.12271674212427248)
+        (simple_rets, utils.DAILY, 0.12271674212427248),
         (simple_week_rets, utils.WEEKLY, 0.055744909991675112),
-        (simple_week_rets, utils.WEEKLY, 0.055744909991675112)
+        (simple_week_rets, utils.WEEKLY, 0.055744909991675112),
         (simple_month_rets, utils.MONTHLY, 0.026778988562993072),
         (simple_month_rets, utils.MONTHLY, 0.026778988562993072)
     ])
