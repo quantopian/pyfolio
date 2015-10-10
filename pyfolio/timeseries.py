@@ -206,7 +206,7 @@ def annual_return(returns, style='compound', period=DAILY):
           ((last_value - start_value)/start_value)/num_of_years.
         - Otherwise, return is simply mean(all_daily_returns)*252.
     period : str, optional
-        - defines the periodicty of the 'returns' data for purposes of
+        - defines the periodicity of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
         - defaults to 'daily'.
 
@@ -224,7 +224,7 @@ def annual_return(returns, style='compound', period=DAILY):
         ann_factor = ANNUALIZATION_FACTORS[period]
     except KeyError:
         raise ValueError(
-            "periodicty must cannot be '{}'. "
+            "period cannot be '{}'. "
             "Must be '{}', '{}', or '{}'".format(
                 period, DAILY, WEEKLY, MONTHLY
             )
@@ -252,7 +252,7 @@ def annual_volatility(returns, period=DAILY):
         Periodic returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     period : str, optional
-        - defines the periodicty of the 'returns' data for purposes of
+        - defines the periodicity of the 'returns' data for purposes of
         annualizing volatility. Can be 'monthly' or 'weekly' or 'daily'.
         - defaults to 'daily'
 
@@ -269,7 +269,7 @@ def annual_volatility(returns, period=DAILY):
         ann_factor = ANNUALIZATION_FACTORS[period]
     except KeyError:
         raise ValueError(
-            "periodicty must cannot be: '{}'."
+            "period cannot be: '{}'."
             " Must be '{}', '{}', or '{}'".format(
                 period, DAILY, WEEKLY, MONTHLY
             )
@@ -290,7 +290,7 @@ def calmar_ratio(returns,returns_style='calendar', period=DAILY):
     returns_style : str, optional
         See annual_returns' style
     period : str, optional
-        - defines the periodicty of the 'returns' data for purposes of
+        - defines the periodicity of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
         - defaults to 'daily'.
 
@@ -371,7 +371,7 @@ def sortino_ratio(returns, returns_style='compound', period=DAILY):
     returns_style : str, optional
         See annual_returns' style
     period : str, optional
-        - defines the periodicty of the 'returns' data for purposes of
+        - defines the periodicity of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
         - defaults to 'daily'.
 
@@ -405,7 +405,7 @@ def sharpe_ratio(returns, returns_style='compound', period=DAILY):
     returns_style : str, optional
         See annual_returns' style
     period : str, optional
-        - defines the periodicty of the 'returns' data for purposes of
+        - defines the periodicity of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
         - defaults to 'daily'.
 
@@ -689,7 +689,7 @@ def perf_stats(
     return_as_dict : boolean, optional
        If True, returns the computed metrics in a dictionary.
     period : str, optional
-        - defines the periodicty of the 'returns' data for purposes of
+        - defines the periodicity of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
         - defaults to 'daily'.
 
