@@ -205,7 +205,7 @@ def annual_return(returns, style='compound', period=DAILY):
         - If 'calendar', then return will be calculated as
           ((last_value - start_value)/start_value)/num_of_years.
         - Otherwise, return is simply mean(all_daily_returns)*252.
-    periodicty : str, optional
+    period : str, optional
         - defines the periodicty of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
         - defaults to 'daily'.
@@ -251,7 +251,7 @@ def annual_volatility(returns, period=DAILY):
     returns : pd.Series
         Periodic returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    periodicty : str, optional
+    period : str, optional
         - defines the periodicty of the 'returns' data for purposes of
         annualizing volatility. Can be 'monthly' or 'weekly' or 'daily'.
         - defaults to 'daily'
@@ -278,7 +278,7 @@ def annual_volatility(returns, period=DAILY):
     return returns.std() * np.sqrt(ann_factor)
 
 
-def calmar_ratio(returns, returns_style='calendar'):
+def calmar_ratio(returns,returns_style='calendar', period=DAILY):
     """
     Determines the Calmar ratio, or drawdown ratio, of a strategy.
 
@@ -289,6 +289,11 @@ def calmar_ratio(returns, returns_style='calendar'):
          - See full explanation in tears.create_full_tear_sheet.
     returns_style : str, optional
         See annual_returns' style
+    period : str, optional
+        - defines the periodicty of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'
+        - defaults to 'daily'.
+
 
     Returns
     -------
@@ -304,7 +309,9 @@ def calmar_ratio(returns, returns_style='calendar'):
     if temp_max_dd < 0:
         temp = annual_return(
             returns=returns,
-            style=returns_style) / abs(max_drawdown(returns=returns))
+            style=returns_style,
+            period=period
+        ) / abs(max_drawdown(returns=returns))
     else:
         return np.nan
 
@@ -352,7 +359,7 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
         return np.nan
 
 
-def sortino_ratio(returns, returns_style='compound'):
+def sortino_ratio(returns, returns_style='compound', period=DAILY):
     """
     Determines the Sortino ratio of a strategy.
 
@@ -361,6 +368,12 @@ def sortino_ratio(returns, returns_style='compound'):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
+    returns_style : str, optional
+        See annual_returns' style
+    period : str, optional
+        - defines the periodicty of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'
+        - defaults to 'daily'.
 
     Returns
     -------
@@ -371,8 +384,8 @@ def sortino_ratio(returns, returns_style='compound'):
     -----
     See https://en.wikipedia.org/wiki/Sortino_ratio for more details.
     """
-    numer = annual_return(returns, style=returns_style)
-    denom = annual_volatility(returns[returns < 0.0])
+    numer = annual_return(returns, style=returns_style, period=period)
+    denom = annual_volatility(returns[returns < 0.0], period=period)
 
     if denom > 0.0:
         return numer / denom
@@ -380,7 +393,7 @@ def sortino_ratio(returns, returns_style='compound'):
         return np.nan
 
 
-def sharpe_ratio(returns, returns_style='compound'):
+def sharpe_ratio(returns, returns_style='compound', period=DAILY):
     """
     Determines the Sharpe ratio of a strategy.
 
@@ -391,6 +404,10 @@ def sharpe_ratio(returns, returns_style='compound'):
          - See full explanation in tears.create_full_tear_sheet.
     returns_style : str, optional
         See annual_returns' style
+    period : str, optional
+        - defines the periodicty of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'
+        - defaults to 'daily'.
 
     Returns
     -------
@@ -402,8 +419,8 @@ def sharpe_ratio(returns, returns_style='compound'):
     See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
-    numer = annual_return(returns, style=returns_style)
-    denom = annual_volatility(returns)
+    numer = annual_return(returns, style=returns_style, period=period)
+    denom = annual_volatility(returns, period=period)
 
     if denom > 0.0:
         return numer / denom
@@ -657,7 +674,8 @@ def calc_alpha_beta(returns, factor_returns):
 def perf_stats(
         returns,
         returns_style='compound',
-        return_as_dict=False):
+        return_as_dict=False,
+        period=DAILY):
     """Calculates various performance metrics of a strategy, for use in
     plotting.show_perf_stats.
 
@@ -670,6 +688,10 @@ def perf_stats(
        See annual_returns' style
     return_as_dict : boolean, optional
        If True, returns the computed metrics in a dictionary.
+    period : str, optional
+        - defines the periodicty of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'
+        - defaults to 'daily'.
 
     Returns
     -------
@@ -681,14 +703,14 @@ def perf_stats(
     all_stats = OrderedDict()
     all_stats['annual_return'] = annual_return(
         returns,
-        style=returns_style)
-    all_stats['annual_volatility'] = annual_volatility(returns)
+        style=returns_style, period=period)
+    all_stats['annual_volatility'] = annual_volatility(returns, period=period)
     all_stats['sharpe_ratio'] = sharpe_ratio(
         returns,
-        returns_style=returns_style)
+        returns_style=returns_style, period=period)
     all_stats['calmar_ratio'] = calmar_ratio(
         returns,
-        returns_style=returns_style)
+        returns_style=returns_style, period=period)
     all_stats['stability'] = stability_of_timeseries(returns)
     all_stats['max_drawdown'] = max_drawdown(returns)
     all_stats['omega_ratio'] = omega_ratio(returns)
