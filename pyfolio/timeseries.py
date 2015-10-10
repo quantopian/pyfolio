@@ -278,7 +278,7 @@ def annual_volatility(returns, period=DAILY):
     return returns.std() * np.sqrt(ann_factor)
 
 
-def calmar_ratio(returns,returns_style='calendar', period=DAILY):
+def calmar_ratio(returns, returns_style='calendar', period=DAILY):
     """
     Determines the Calmar ratio, or drawdown ratio, of a strategy.
 
@@ -404,7 +404,7 @@ def sortino_ratio(returns, required_return=0, period=DAILY):
     return sortino * ann_factor
 
 
-def downside_risk(returns, required_return=0, period = DAILY):
+def downside_risk(returns, required_return=0, period=DAILY):
     """
     Determines the downside deviation below a threshold
 

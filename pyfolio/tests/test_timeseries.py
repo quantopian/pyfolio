@@ -245,7 +245,6 @@ class TestStats(TestCase):
         (simple_month_rets, 'compound', utils.MONTHLY, 0.0072238075842128158),
         (simple_month_rets, 'calendar', utils.MONTHLY, 0.0050400000000000071)
     ])
-
     def test_annual_ret(self, returns, style, period, expected):
         self.assertEqual(
             timeseries.annual_return(
