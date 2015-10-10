@@ -333,15 +333,14 @@ class TestStats(TestCase):
             expected)
 
     @parameterized.expand([
-        (-simple_rets[:5], 'calendar', -458003439.10738045),
-        (-simple_rets[:5], 'arithmetic', -723163324.90639055)
+        (-simple_rets[:5], -12.29634091915152),
+        (-simple_rets, -1.2296340919151518),
+        (simple_rets, np.inf)
     ])
-    def test_sortino(self, returns, returns_style, expected):
-        self.assertEqual(
-            timeseries.sortino_ratio(
-                returns,
-                returns_style=returns_style),
-            expected)
+    def test_sortino(self, returns, expected):
+        self.assertAlmostEqual(
+            timeseries.sortino_ratio(returns),
+            expected, DECIMAL_PLACES)
 
 
 class TestMultifactor(TestCase):

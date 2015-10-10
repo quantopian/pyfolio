@@ -343,7 +343,7 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
     -----
     See https://en.wikipedia.org/wiki/Omega_ratio for more details.
 
-"""
+    """
 
     daily_return_thresh = pow(1 + annual_return_threshhold, 1 /
                               APPROX_BDAYS_PER_YEAR) - 1
@@ -359,17 +359,20 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
         return np.nan
 
 
-def sortino_ratio(returns, returns_style='compound', period=DAILY):
+def sortino_ratio(returns, required_return=0, period=DAILY):
+
     """
     Determines the Sortino ratio of a strategy.
 
     Parameters
     ----------
-    returns : pd.Series
+    returns : pd.Series or pd.DataFrame
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     returns_style : str, optional
         See annual_returns' style
+    required_return: float / series
+        minimum acceptable return
     period : str, optional
         - defines the periodicity of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
@@ -377,20 +380,75 @@ def sortino_ratio(returns, returns_style='compound', period=DAILY):
 
     Returns
     -------
-    float
-        Sortino ratio.
+    depends on input type
+    series ==> float
+    DataFrame ==> np.array
 
-    Note
-    -----
-    See https://en.wikipedia.org/wiki/Sortino_ratio for more details.
+        Annualized Sortino ratio.
+
     """
-    numer = annual_return(returns, style=returns_style, period=period)
-    denom = annual_volatility(returns[returns < 0.0], period=period)
+    try:
+        ann_factor = ANNUALIZATION_FACTORS[period]
+    except KeyError:
+        raise ValueError(
+            "period cannot be: '{}'."
+            " Must be '{}', '{}', or '{}'".format(
+                period, DAILY, WEEKLY, MONTHLY
+            )
+        )
 
-    if denom > 0.0:
-        return numer / denom
-    else:
-        return np.nan
+    mu = np.nanmean(returns - required_return, axis=0)
+    sortino = mu / downside_risk(returns, required_return)
+    if len(returns.shape) == 2:
+        sortino = pd.Series(sortino, index=returns.columns)
+    return sortino * ann_factor
+
+
+def downside_risk(returns, required_return=0, period = DAILY):
+    """
+    Determines the downside deviation below a threshold
+
+    Parameters
+    ----------
+    returns : pd.Series or pd.DataFrame
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+
+    required_return: float / series
+        minimum acceptable return
+    period : str, optional
+        - defines the periodicity of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'
+        - defaults to 'daily'.
+
+    Returns
+    -------
+    depends on input type
+    series ==> float
+    DataFrame ==> np.array
+
+        Annualized downside deviation
+
+    """
+    try:
+        ann_factor = ANNUALIZATION_FACTORS[period]
+    except KeyError:
+        raise ValueError(
+            "period cannot be: '{}'."
+            " Must be '{}', '{}', or '{}'".format(
+                period, DAILY, WEEKLY, MONTHLY
+            )
+        )
+
+    downside_diff = returns - required_return
+    mask = downside_diff > 0
+    downside_diff[mask] = 0.0
+    squares = np.square(downside_diff)
+    mean_squares = np.nanmean(squares, axis=0)
+    dside_risk = np.sqrt(mean_squares) * np.sqrt(ann_factor)
+    if len(returns.shape) == 2:
+        dside_risk = pd.Series(dside_risk, index=returns.columns)
+    return dside_risk
 
 
 def sharpe_ratio(returns, returns_style='compound', period=DAILY):
