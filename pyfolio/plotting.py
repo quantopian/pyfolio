@@ -611,10 +611,18 @@ def plot_rolling_returns(
             label='Live', ax=ax, **kwargs)
 
         if cone_std is not None:
-            cone_df = timeseries.cone_rolling(
-                returns,
-                num_stdev=cone_std,
-                cone_fit_end_date=live_start_date)
+            # check to see if we're just rendering a single cone, or multiple
+            # cones at various stddevs, defined as elements of cone_std
+            if type(cone_std) is list:
+                cone_df = timeseries.cone_rolling(
+                    returns,
+                    num_stdev=cone_std[0],
+                    cone_fit_end_date=live_start_date)
+            else:
+                cone_df = timeseries.cone_rolling(
+                    returns,
+                    num_stdev=cone_std,
+                    cone_fit_end_date=live_start_date)
 
             cone_df_fit = cone_df[cone_df.index < live_start_date]
 
@@ -641,7 +649,25 @@ def plot_rolling_returns(
             ax.fill_between(cone_df_live.index,
                             cone_df_live.sd_down,
                             cone_df_live.sd_up,
-                            color='red', alpha=0.30)
+                            color='steelblue', alpha=0.25)
+
+            if type(cone_std) is list:
+                for cone_i in range(1, len(cone_std)):
+                    cone_df = timeseries.cone_rolling(
+                        returns,
+                        num_stdev=cone_std[cone_i],
+                        cone_fit_end_date=live_start_date)
+
+                    cone_df_fit = cone_df[cone_df.index < live_start_date]
+
+                    cone_df_live = cone_df[cone_df.index > live_start_date]
+                    cone_df_live = cone_df_live[cone_df_live.index
+                                                < returns.index[-1]]
+
+                    ax.fill_between(cone_df_live.index,
+                                    cone_df_live.sd_down,
+                                    cone_df_live.sd_up,
+                                    color='steelblue', alpha=0.25)
 
     ax.axhline(1.0, linestyle='--', color='black', lw=2)
     ax.set_ylabel('Cumulative returns')
