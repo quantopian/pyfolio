@@ -661,8 +661,8 @@ def plot_rolling_returns(
                     cone_df_fit = cone_df[cone_df.index < live_start_date]
 
                     cone_df_live = cone_df[cone_df.index > live_start_date]
-                    cone_df_live = cone_df_live[cone_df_live.index
-                                                < returns.index[-1]]
+                    temp_keep_days = cone_df_live.index < returns.index[-1]
+                    cone_df_live = cone_df_live[temp_keep_days]
 
                     ax.fill_between(cone_df_live.index,
                                     cone_df_live.sd_down,
