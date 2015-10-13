@@ -652,7 +652,7 @@ def plot_rolling_returns(
                             color='steelblue', alpha=0.25)
 
             if type(cone_std) is list:
-                for cone_i in range(1, len(cone_std)):
+                for cone_i in list(range(1, len(cone_std))):
                     cone_df = timeseries.cone_rolling(
                         returns,
                         num_stdev=cone_std[cone_i],
