@@ -330,8 +330,9 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
         If True, set default plotting style context.
-    sector_mapping:
-        Dictionary or Series.
+    sector_mapping: dict or pd.Series.
+        Security identifier to sector mapping.
+        Security ids as keys, sectors as values.
     """
 
     vertical_sections = 5 if sector_mappings else 4
@@ -361,14 +362,11 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
     if sector_mappings is not None:
         sector_exposures = pos.get_sector_exposures(positions, sector_mappings)
 
-        if sector_exposures is None:
-            return
-
         sector_alloc = pos.get_percent_alloc(sector_exposures)
-        sector_alloc = sector_alloc.drop('cash', axis=1)
-
+        sector_alloc = sector_alloc.drop('cash', axis='columns')
         ax_sector_alloc = plt.subplot(gs[4, :], sharex=ax_gross_leverage)
-        plotting.plot_sector_allocations(returns, sector_alloc, ax=ax_sector_alloc)
+        plotting.plot_sector_allocations(returns, sector_alloc,
+                                         ax=ax_sector_alloc)
 
     plt.show()
     if return_fig:
