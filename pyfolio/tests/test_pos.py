@@ -1,4 +1,5 @@
 from unittest import TestCase
+from nose_parameterized import parameterized
 from collections import OrderedDict
 
 from pandas import (
@@ -23,8 +24,7 @@ import warnings
 
 
 class PositionsTestCase(TestCase):
-    def __init__(self):
-        self.test_sector_exposure()
+    dates = date_range(start='2015-01-01', freq='D', periods=20)
 
     def test_get_percent_alloc(self):
         raw_data = arange(15, dtype=float).reshape(5, 3)
@@ -126,40 +126,40 @@ class PositionsTestCase(TestCase):
         expected = Series([10.0], index=index)
         assert_series_equal(result, expected)
 
-    def test_sector_exposure(self):
+    @parameterized.expand([
+        (DataFrame([[1.0, 2.0, 3.0, 10.0]]*len(dates),
+                   columns=[0, 1, 2, 'cash'], index=dates),
+         {0: 'A', 1: 'B', 2: 'A'},
+         DataFrame([[4.0, 2.0, 10.0]]*len(dates),
+                   columns=['A', 'B', 'cash'], index=dates),
+         False),
+        (DataFrame([[1.0, 2.0, 3.0, 10.0]]*len(dates),
+                   columns=[0, 1, 2, 'cash'], index=dates),
+         Series(index=[0, 1, 2], data=['A', 'B', 'A']),
+         DataFrame([[4.0, 2.0, 10.0]]*len(dates),
+                   columns=['A', 'B', 'cash'], index=dates),
+         False),
+        (DataFrame([[1.0, 2.0, 3.0, 10.0]]*len(dates),
+                   columns=[0, 1, 2, 'cash'], index=dates),
+         {0: 'A', 1: 'B'},
+         DataFrame([[1.0, 2.0, 10.0]]*len(dates),
+                   columns=['A', 'B', 'cash'], index=dates),
+         True)
+    ])
+    def test_sector_exposure(self, positions, mapping,
+                             expected_sector_exposure,
+                             warning_expected):
         """
         Tests sector exposure mapping and rollup.
 
         """
-        dates = date_range(start='2015-01-01', freq='D', periods=20)
-        positions = DataFrame([[1.0, 2.0, 3.0, 10.0]]*len(dates),
-                              columns=[0, 1, 2, 'cash'], index=dates)
-        mapping_d = {
-            0: 'A',
-            1: 'B',
-            2: 'A',
-        }
-        mapping_s = Series(index=[0, 1, 2], data=['A', 'B', 'A'])
-
-        for mapping in [mapping_d, mapping_s]:
-            result = get_sector_exposures(positions, mapping)
-            expected = DataFrame([[4.0, 2.0, 10.0]]*len(dates), 
-                                 columns=['A', 'B', 'cash'], index=dates)
-
-            assert_frame_equal(result, expected)
-
-        mapping = {
-            0: 'A',
-            1: 'B'
-        }
-
         with warnings.catch_warnings(record=True) as w:
-            result = get_sector_exposures(positions, mapping)
-            expected_warn = 'Warning: Symbols 2 have no sector mapping.'
+            result_sector_exposure = get_sector_exposures(positions,
+                                                          mapping)
 
-            assert w[-1].message.message == expected_warn
-
-            expected = DataFrame([[1.0, 2.0, 10.0]]*len(dates), 
-                                 columns=['A', 'B', 'cash'], index=dates)
-
-            assert_frame_equal(result, expected)
+            assert_frame_equal(result_sector_exposure,
+                               expected_sector_exposure)
+            if warning_expected:
+                assert len(w) == 1
+            else:
+                assert len(w) == 0

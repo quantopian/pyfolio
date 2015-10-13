@@ -937,9 +937,6 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
          - See full explanation in tears.create_full_tear_sheet.
     sector_alloc : pd.DataFrame
         Portfolio allocation of positions. See pos.get_sector_alloc.
-    show_and_plot : int, optional
-        By default, this is 2, and both prints and plots.
-        If this is 0, it will only plot; if 1, it will only print.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
