@@ -129,40 +129,6 @@ def extract_pos(positions, cash):
     return values
 
 
-def get_turnover(transactions, positions, period=None):
-    """
-    Portfolio Turnover Rate:
-    Average value of purchases and sales divided
-    by the average portfolio value for the period.
-    If no period is provided the period is one time step.
-    Parameters
-    ----------
-    transactions_df : pd.DataFrame
-        Contains transactions data.
-        - See full explanation in tears.create_full_tear_sheet
-    positions : pd.DataFrame
-        Contains daily position values including cash
-        - See full explanation in tears.create_full_tear_sheet
-    period : str, optional
-        Takes the same arguments as df.resample.
-    Returns
-    -------
-    turnover_rate : pd.Series
-        timeseries of portfolio turnover rates.
-    """
-
-    traded_value = transactions.txn_volume
-    portfolio_value = positions.sum(axis=1)
-    if period is not None:
-        traded_value = traded_value.resample(period, how='sum')
-        portfolio_value = portfolio_value.resample(period, how='mean')
-    # traded_value contains the summed value from buys and sells;
-    # this is divided by 2.0 to get the average of the two.
-    turnover = traded_value / 2.0
-    turnover_rate = turnover / portfolio_value
-    return turnover_rate
-
-
 def get_sector_exposures(positions, symbol_sector_map):
     """
     Sum position exposures by sector.

@@ -121,10 +121,8 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         returns = returns[returns.index > benchmark_rets.index[0]]
 
     if slippage is not None and transactions is not None:
-        turnover = pos.get_turnover(transactions, positions, period=None)
-        # Multiply average long/short turnover by two to get the total
-        # value of buys and sells each day.
-        turnover *= 2
+        turnover = txn.get_turnover(transactions, positions,
+                                    period=None, average=False)
         unadjusted_returns = returns.copy()
         returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
     else:
@@ -440,7 +438,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
         warnings.warn('Unable to generate turnover plot.', UserWarning)
 
     if unadjusted_returns is not None:
-        ax_slippage_sweep = plt.subplot(gs[3, :], sharex=ax_turnover)
+        ax_slippage_sweep = plt.subplot(gs[3, :])
         plotting.plot_slippage_sweep(unadjusted_returns,
                                      transactions,
                                      positions,
