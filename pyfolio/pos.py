@@ -61,7 +61,7 @@ def get_long_short_pos(positions):
     df_long_short = pd.DataFrame({'long': longs,
                                   'short': shorts})
 
-    return df_long_short / net_liquidation
+    return df_long_short.divide(net_liquidation, axis='index')
 
 
 def get_top_long_short_abs(positions, top=10):
