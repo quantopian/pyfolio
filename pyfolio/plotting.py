@@ -637,12 +637,8 @@ def plot_rolling_returns(
             # check to see if cone_std was passed as a single value and,
             # if so, just convert to list automatically
             if isinstance(cone_std, float):
-                #cone_std_list = [cone_std]
                 cone_std = [cone_std]
-            #else:
-            #    cone_std_list = cone_std
 
-            #for cone_i in cone_std_list:
             for cone_i in cone_std:
                 cone_in_sample, cone_out_of_sample = draw_cone(
                     returns,
