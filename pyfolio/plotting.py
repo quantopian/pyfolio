@@ -600,6 +600,11 @@ def plot_rolling_returns(
                          'factor_returns.')
     elif volatility_match and factor_returns is not None:
         bmark_vol = factor_returns.loc[returns.index].std()
+        # TO-DO: @tweicki 'returns' probably needs to get updated to:
+        # (returns / returns.std()) * bmark_vol if we want to plot
+        # the cone on this later on.
+        # Will we need a temp variable to do this? Or can we just re-assign as
+        # returns = (returns / returns.std()) * bmark_vol
         df_cum_rets = timeseries.cum_returns(
             (returns / returns.std()) * bmark_vol,
             1.0
