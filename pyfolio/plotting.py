@@ -580,18 +580,17 @@ def plot_rolling_returns(
             num_stdev=num_stdev,
             cone_fit_end_date=live_start_date)
 
-        cone_df_fit = cone_df[cone_df.index < live_start_date]
+        cone_in_sample = cone_df[cone_df.index < live_start_date]
+        cone_out_of_sample = cone_df[cone_df.index > live_start_date]
+        cone_out_of_sample = cone_out_of_sample[
+            cone_out_of_sample.index < returns.index[-1]]
 
-        cone_df_live = cone_df[cone_df.index > live_start_date]
-        temp_keep_days = cone_df_live.index < returns.index[-1]
-        cone_df_live = cone_df_live[temp_keep_days]
-
-        ax.fill_between(cone_df_live.index,
-                        cone_df_live.sd_down,
-                        cone_df_live.sd_up,
+        ax.fill_between(cone_out_of_sample.index,
+                        cone_out_of_sample.sd_down,
+                        cone_out_of_sample.sd_up,
                         color='steelblue', alpha=0.25)
 
-        return cone_df_fit, cone_df_live
+        return cone_in_sample, cone_out_of_sample
 
     if ax is None:
         ax = plt.gca()
@@ -633,17 +632,20 @@ def plot_rolling_returns(
             # check to see if cone_std was passed as a single value and,
             # if so, just convert to list automatically
             if isinstance(cone_std, float):
-                cone_std_list = [cone_std]
-            else:
-                cone_std_list = cone_std
+                #cone_std_list = [cone_std]
+                cone_std = [cone_std]
+            #else:
+            #    cone_std_list = cone_std
 
-            for cone_i in cone_std_list:
-                cone_df_fit, cone_df_live = draw_cone(returns,
-                                                      cone_i,
-                                                      live_start_date,
-                                                      ax)
+            #for cone_i in cone_std_list:
+            for cone_i in cone_std:
+                cone_in_sample, cone_out_of_sample = draw_cone(
+                    returns,
+                    cone_i,
+                    live_start_date,
+                    ax)
 
-            cone_df_fit['line'].plot(
+            cone_in_sample['line'].plot(
                 ax=ax,
                 ls='--',
                 label='Backtest trend',
@@ -651,7 +653,7 @@ def plot_rolling_returns(
                 color='forestgreen',
                 alpha=0.7,
                 **kwargs)
-            cone_df_live['line'].plot(
+            cone_out_of_sample['line'].plot(
                 ax=ax,
                 ls='--',
                 label='Predicted trend',
