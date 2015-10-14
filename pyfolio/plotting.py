@@ -938,7 +938,7 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
 
     Returns
     -------
-    ax : matplotlib.Axes, conditional
+    ax : matplotlib.Axes
         The axes that were plotted on.
     """
     if ax is None:
@@ -956,9 +956,10 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
         loc='upper center', frameon=True, bbox_to_anchor=(
             0.5, -0.14), ncol=5)
 
-    df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
-    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+    ax.set_xlim((sector_alloc.index[0], sector_alloc.index[-1]))
     ax.set_ylabel('Exposure by sector')
+
+    return ax
 
 
 def plot_return_quantiles(returns, df_weekly, df_monthly, ax=None, **kwargs):

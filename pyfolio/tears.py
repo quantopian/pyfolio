@@ -330,7 +330,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
         If True, set default plotting style context.
-    sector_mapping: dict or pd.Series.
+    sector_mapping: dict or pd.Series, optional
         Security identifier to sector mapping.
         Security ids as keys, sectors as values.
     """
