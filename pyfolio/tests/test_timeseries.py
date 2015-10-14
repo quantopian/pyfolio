@@ -8,6 +8,7 @@ import pandas as pd
 import pandas.util.testing as pdt
 
 from .. import timeseries
+from .. import utils
 
 DECIMAL_PLACES = 8
 
@@ -95,6 +96,22 @@ class TestDrawdown(TestCase):
             pd.isnull(drawdowns.loc[0, 'duration'])) \
             if expected_duration is None else self.assertEqual(
                 drawdowns.loc[0, 'duration'], expected_duration)
+
+    def test_drawdown_overlaps(self):
+        # Add test to show that drawdowns don't overlap
+        # Bug #145 observed for FB stock on the period 2014-10-24 - 2015-03-19
+        # Reproduced on SPY data (cached) but need a large number of drawdowns
+        spy_rets = utils.get_symbol_rets('SPY',
+                                         start='1997-01-01',
+                                         end='2004-12-31')
+        spy_drawdowns = timeseries.gen_drawdown_table(spy_rets, top=20).sort(
+            'peak date')
+        # Compare the recovery date of each drawdown with the peak of the next
+        # Last pair might contain a NaT if drawdown didn't finish, so ignore it
+        pairs = list(zip(spy_drawdowns['recovery date'],
+                         spy_drawdowns['peak date'].shift(-1)))[:-1]
+        for recovery, peak in pairs:
+            self.assertLessEqual(recovery, peak)
 
     @parameterized.expand([
         (pd.Series(px_list_1 - 1, index=dt), -0.44000000000000011)
@@ -193,6 +210,21 @@ class TestStats(TestCase):
             '2000-1-3',
             periods=500,
             freq='D'))
+
+    simple_week_rets = pd.Series(
+        [0.1] * 3 + [0] * 497,
+        pd.date_range(
+            '2000-1-31',
+            periods=500,
+            freq='W'))
+
+    simple_month_rets = pd.Series(
+        [0.1] * 3 + [0] * 497,
+        pd.date_range(
+            '2000-1-31',
+            periods=500,
+            freq='M'))
+
     simple_benchmark = pd.Series(
         [0.03] * 4 + [0] * 496,
         pd.date_range(
@@ -204,25 +236,39 @@ class TestStats(TestCase):
     dt = pd.date_range('2000-1-3', periods=3, freq='D')
 
     @parameterized.expand([
-        (simple_rets, 'calendar', 0.10584000000000014),
-        (simple_rets, 'compound', 0.16317653888658334),
-        (simple_rets, 'calendar', 0.10584000000000014),
-        (simple_rets, 'compound', 0.16317653888658334)
+        (simple_rets, 'calendar', utils.DAILY, 0.10584000000000014),
+        (simple_rets, 'compound', utils.DAILY, 0.16317653888658334),
+        (simple_rets, 'calendar', utils.DAILY, 0.10584000000000014),
+        (simple_rets, 'compound', utils.DAILY, 0.16317653888658334),
+        (simple_week_rets, 'compound', utils.WEEKLY, 0.031682168889005213),
+        (simple_week_rets, 'calendar', utils.WEEKLY, 0.021840000000000033),
+        (simple_month_rets, 'compound', utils.MONTHLY, 0.0072238075842128158),
+        (simple_month_rets, 'calendar', utils.MONTHLY, 0.0050400000000000071)
     ])
-    def test_annual_ret(self, returns, style, expected):
+    def test_annual_ret(self, returns, style, period, expected):
         self.assertEqual(
             timeseries.annual_return(
                 returns,
-                style=style),
+                style=style, period=period),
             expected)
 
     @parameterized.expand([
-        (simple_rets, 0.12271674212427248),
-        (simple_rets, 0.12271674212427248)
+        (simple_rets, utils.DAILY, 0.12271674212427248),
+        (simple_rets, utils.DAILY, 0.12271674212427248),
+        (simple_week_rets, utils.WEEKLY, 0.055744909991675112),
+        (simple_week_rets, utils.WEEKLY, 0.055744909991675112),
+        (simple_month_rets, utils.MONTHLY, 0.026778988562993072),
+        (simple_month_rets, utils.MONTHLY, 0.026778988562993072)
     ])
-    def test_annual_volatility(self, returns, expected):
-        self.assertAlmostEqual(timeseries.annual_volatility(returns),
-                               expected, DECIMAL_PLACES)
+    def test_annual_volatility(self, returns, period, expected):
+        self.assertAlmostEqual(
+            timeseries.annual_volatility(
+                returns,
+                period=period
+            ),
+            expected,
+            DECIMAL_PLACES
+        )
 
     @parameterized.expand([
         (simple_rets, 'calendar', 0.8624740045072119),
@@ -286,15 +332,14 @@ class TestStats(TestCase):
             expected)
 
     @parameterized.expand([
-        (-simple_rets[:5], 'calendar', -458003439.10738045),
-        (-simple_rets[:5], 'arithmetic', -723163324.90639055)
+        (-simple_rets[:5], -12.29634091915152),
+        (-simple_rets, -1.2296340919151518),
+        (simple_rets, np.inf)
     ])
-    def test_sortino(self, returns, returns_style, expected):
-        self.assertEqual(
-            timeseries.sortino_ratio(
-                returns,
-                returns_style=returns_style),
-            expected)
+    def test_sortino(self, returns, expected):
+        self.assertAlmostEqual(
+            timeseries.sortino_ratio(returns),
+            expected, DECIMAL_PLACES)
 
 
 class TestMultifactor(TestCase):

@@ -412,8 +412,11 @@ def create_txn_tear_sheet(
 
     plotting.plot_daily_volume(returns, transactions, ax=ax_daily_volume)
 
-    plotting.plot_daily_turnover_hist(transactions, positions,
-                                      ax=ax_turnover_hist)
+    try:
+        plotting.plot_daily_turnover_hist(transactions, positions,
+                                          ax=ax_turnover_hist)
+    except AttributeError:
+        warnings.warn('Unable to generate turnover plot.', UserWarning)
 
     plt.show()
     if return_fig:
