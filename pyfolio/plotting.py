@@ -573,6 +573,24 @@ def plot_rolling_returns(
         The axes that were plotted on.
 
 """
+    def draw_cone(returns, num_stdev, live_start_date, ax):
+        cone_df = timeseries.cone_rolling(
+            returns,
+            num_stdev=num_stdev,
+            cone_fit_end_date=live_start_date)
+
+        cone_df_fit = cone_df[cone_df.index < live_start_date]
+
+        cone_df_live = cone_df[cone_df.index > live_start_date]
+        temp_keep_days = cone_df_live.index < returns.index[-1]
+        cone_df_live = cone_df_live[temp_keep_days]
+
+        ax.fill_between(cone_df_live.index,
+                        cone_df_live.sd_down,
+                        cone_df_live.sd_up,
+                        color='steelblue', alpha=0.25)
+
+        return cone_df_fit, cone_df_live
 
     if ax is None:
         ax = plt.gca()
@@ -610,24 +628,19 @@ def plot_rolling_returns(
             lw=4, color='red', alpha=0.6,
             label='Live', ax=ax, **kwargs)
 
-        if cone_std is not None:
-            # check to see if we're just rendering a single cone, or multiple
-            # cones at various stddevs, defined as elements of cone_std
-            if type(cone_std) is list:
-                cone_df = timeseries.cone_rolling(
-                    returns,
-                    num_stdev=cone_std[0],
-                    cone_fit_end_date=live_start_date)
+        if cone_std is not None and not volatility_match:
+            # check to see if cone_std was passed as a single value and,
+            # if so, just convert to list automatically
+            if isinstance(cone_std, float):
+                cone_std_list = [cone_std]
             else:
-                cone_df = timeseries.cone_rolling(
-                    returns,
-                    num_stdev=cone_std,
-                    cone_fit_end_date=live_start_date)
+                cone_std_list = cone_std
 
-            cone_df_fit = cone_df[cone_df.index < live_start_date]
-
-            cone_df_live = cone_df[cone_df.index > live_start_date]
-            cone_df_live = cone_df_live[cone_df_live.index < returns.index[-1]]
+            for cone_i in cone_std_list:
+                cone_df_fit, cone_df_live = draw_cone(returns,
+                                                      cone_i,
+                                                      live_start_date,
+                                                      ax)
 
             cone_df_fit['line'].plot(
                 ax=ax,
@@ -645,29 +658,6 @@ def plot_rolling_returns(
                 color='red',
                 alpha=0.7,
                 **kwargs)
-
-            ax.fill_between(cone_df_live.index,
-                            cone_df_live.sd_down,
-                            cone_df_live.sd_up,
-                            color='steelblue', alpha=0.25)
-
-            if type(cone_std) is list:
-                for cone_i in list(range(1, len(cone_std))):
-                    cone_df = timeseries.cone_rolling(
-                        returns,
-                        num_stdev=cone_std[cone_i],
-                        cone_fit_end_date=live_start_date)
-
-                    cone_df_fit = cone_df[cone_df.index < live_start_date]
-
-                    cone_df_live = cone_df[cone_df.index > live_start_date]
-                    temp_keep_days = cone_df_live.index < returns.index[-1]
-                    cone_df_live = cone_df_live[temp_keep_days]
-
-                    ax.fill_between(cone_df_live.index,
-                                    cone_df_live.sd_down,
-                                    cone_df_live.sd_up,
-                                    color='steelblue', alpha=0.25)
 
     ax.axhline(1.0, linestyle='--', color='black', lw=2)
     ax.set_ylabel('Cumulative returns')
