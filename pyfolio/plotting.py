@@ -628,7 +628,7 @@ def plot_rolling_returns(
             lw=4, color='red', alpha=0.6,
             label='Live', ax=ax, **kwargs)
 
-        if cone_std is not None and not volatility_match:
+        if cone_std is not None:
             # check to see if cone_std was passed as a single value and,
             # if so, just convert to list automatically
             if isinstance(cone_std, float):

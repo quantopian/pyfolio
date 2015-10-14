@@ -230,7 +230,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         returns,
         factor_returns=benchmark_rets,
         live_start_date=live_start_date,
-        cone_std=cone_std,
+        cone_std=None,
         volatility_match=True,
         ax=ax_rolling_returns_vol_match)
     ax_rolling_returns_vol_match.set_title(
