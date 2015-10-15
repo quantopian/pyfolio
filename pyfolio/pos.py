@@ -197,7 +197,8 @@ def get_sector_exposures(positions, symbol_sector_map):
             2004-01-12    -4132.240       142.630             3989.6100
             2004-01-13    -199.640        -100.980            100.0000
     """
-    cash = positions.pop('cash')
+    cash = positions['cash']
+    positions = positions.drop('cash', axis=1)
 
     unmapped_pos = np.setdiff1d(positions.columns.values,
                                 symbol_sector_map.keys())
