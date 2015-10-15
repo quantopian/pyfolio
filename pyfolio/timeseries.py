@@ -1246,10 +1246,12 @@ def portfolio_returns_metric_weighted(holdings_returns,
         transform_columns = list(map(lambda x: x+"_t", holdings_cols))
         if inverse_weight:
             inv_func = 1.0 / holdings_df[transform_columns]
-            holdings_df_weights = inv_func / inv_func.sum(axis=1)
+            holdings_df_weights = inv_func.div(inv_func.sum(axis=1),
+                                               axis='index')
         else:
-            holdings_df_weights = holdings_df[transform_columns] / \
-                holdings_df[transform_columns].sum(axis=1)
+            holdings_df_weights = holdings_df[transform_columns] \
+                .div(holdings_df[transform_columns].sum(axis=1), axis='index')
+
         holdings_df_weights.columns = holdings_cols
         holdings_df = holdings_df.join(holdings_df_weights, rsuffix='_w')
         holdings_df_weighted_rets = np.multiply(
