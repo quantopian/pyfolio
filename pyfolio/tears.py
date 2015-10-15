@@ -335,7 +335,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         Security ids as keys, sectors as values.
     """
 
-    vertical_sections = 5 if sector_mappings else 4
+    vertical_sections = 5 if sector_mappings is not None else 4
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
