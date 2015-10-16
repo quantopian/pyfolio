@@ -44,6 +44,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
                            gross_lev=None,
                            slippage=None,
                            live_start_date=None, bayesian=False,
+                           hide_positions=False,
                            sector_mappings=None,
                            cone_std=(1.0, 1.5, 2.0), set_context=True):
     """
@@ -102,6 +103,8 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period.
+    hide_positions : bool, optional
+        If True, will not output any symbol names.
     bayesian: boolean, optional
         If True, causes the generation of a Bayesian tear sheet.
     cone_std : float, or tuple, optional
@@ -144,6 +147,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     if positions is not None:
         create_position_tear_sheet(returns, positions,
                                    gross_lev=gross_lev,
+                                   hide_positions=hide_positions,
                                    set_context=set_context)
 
         if transactions is not None:
@@ -321,7 +325,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
 @plotting_context
 def create_position_tear_sheet(returns, positions, gross_lev=None,
-                               show_and_plot_top_pos=2,
+                               show_and_plot_top_pos=2, hide_positions=False,
                                return_fig=False, sector_mappings=None):
     """
     Generate a number of plots for analyzing a
@@ -345,6 +349,9 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         By default, this is 2, and both prints and plots the
         top 10 positions.
         If this is 0, it will only plot; if 1, it will only print.
+    hide_positions : bool, optional
+        If True, will not output any symbol names.
+        Overrides show_and_plot_top_pos to 0 to suppress text output.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
@@ -354,6 +361,8 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         Security ids as keys, sectors as values.
     """
 
+    if hide_positions:
+        show_and_plot_top_pos = 0
     vertical_sections = 5 if sector_mappings is not None else 4
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
@@ -374,6 +383,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         returns,
         positions_alloc,
         show_and_plot=show_and_plot_top_pos,
+        hide_positions=hide_positions,
         ax=ax_top_positions)
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)

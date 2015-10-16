@@ -848,7 +848,7 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
 
 
 def show_and_plot_top_positions(returns, positions_alloc,
-                                show_and_plot=2,
+                                show_and_plot=2, hide_positions=False,
                                 legend_loc='real_best', ax=None,
                                 **kwargs):
     """Prints and/or plots the exposures of the top 10 held positions of
@@ -864,6 +864,8 @@ def show_and_plot_top_positions(returns, positions_alloc,
     show_and_plot : int, optional
         By default, this is 2, and both prints and plots.
         If this is 0, it will only plot; if 1, it will only print.
+    hide_positions : bool, optional
+        If True, will not output any symbol names.
     legend_loc : matplotlib.loc, optional
         The location of the legend on the plot.
         By default, the legend will display below the plot.
@@ -931,6 +933,10 @@ def show_and_plot_top_positions(returns, positions_alloc,
         df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
         ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
         ax.set_ylabel('Exposure by stock')
+
+        if hide_positions:
+            ax.legend_.remove()
+
         return ax
 
 
