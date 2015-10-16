@@ -1135,7 +1135,7 @@ def plot_slippage_sweep(returns, transactions, positions,
         ax = plt.gca()
 
     turnover = txn.get_turnover(transactions, positions,
-                                period='D', average=False)
+                                period=None, average=False)
 
     slippage_sweep = pd.DataFrame()
     for bps in slippage_params:
@@ -1145,7 +1145,8 @@ def plot_slippage_sweep(returns, transactions, positions,
 
     slippage_sweep.plot(alpha=1.0, lw=0.5, ax=ax)
 
-    ax.set_title('Cumulative Returns Given Per-Dollar Slippage Assumption')
+    ax.set_title('Cumulative Returns Given Additional Per-Dollar Slippage')
+    ax.set_ylabel('')
 
     ax.legend(loc='center left')
 
@@ -1192,7 +1193,7 @@ def plot_slippage_sensitivity(returns, transactions, positions,
 
     avg_returns_given_slippage.plot(alpha=1.0, lw=2, ax=ax)
 
-    ax.set(title='Average Annual Returns Given Per-Dollar Slippage Assumption',
+    ax.set(title='Average Annual Returns Given Additional Per-Dollar Slippage',
            xticks=np.arange(0, 100, 10),
            ylabel='Average Annual Return',
            xlabel='Per-Dollar Slippage (bps)')
