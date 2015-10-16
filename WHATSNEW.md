@@ -2,6 +2,12 @@
 
 These are new features and improvements of note in each release.
 
+## v0.3 (TBA)
+
+### New features
+
+* Sector exposures: sum positions by sector given a dictionary or series of symbol to sector mappings [PR166](https://github.com/quantopian/pyfolio/pull/166)
+
 ## v0.2 (Oct 16, 2015)
 
 This is a major release from 0.1 that includes mainly bugfixes and refactorings but also some new features. We recommend that all users upgrade to this new version.
