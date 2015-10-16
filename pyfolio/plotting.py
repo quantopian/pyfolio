@@ -552,9 +552,9 @@ def plot_rolling_returns(
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
-    cone_std : float, or list, optional
+    cone_std : float, or tuple, optional
         If float, The standard deviation to use for the cone plots.
-        If list, A list of standard deviation values to use for the cone plots
+        If tuple, Tuple of standard deviation values to use for the cone plots
          - The cone is a normal distribution with this standard deviation
              centered around a linear regression.
     legend_loc : matplotlib.loc, optional
