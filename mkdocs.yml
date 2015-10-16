@@ -4,6 +4,7 @@ site_author: Quantopian Inc.
 
 pages:
 - Overview: 'index.md'
+- Releases: 'whatsnew.md'
 - Tutorial:
   - 'Single stock': 'single_stock_example.md'
   - 'Zipline algorithm': 'zipline_algo_example.md'
