@@ -552,8 +552,9 @@ def plot_rolling_returns(
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
-    cone_std : float, optional
-        The standard deviation to use for the cone plots.
+    cone_std : float, or list, optional
+        If float, The standard deviation to use for the cone plots.
+        If list, A list of standard deviation values to use for the cone plots
          - The cone is a normal distribution with this standard deviation
              centered around a linear regression.
     legend_loc : matplotlib.loc, optional
@@ -573,6 +574,23 @@ def plot_rolling_returns(
         The axes that were plotted on.
 
 """
+    def draw_cone(returns, num_stdev, live_start_date, ax):
+        cone_df = timeseries.cone_rolling(
+            returns,
+            num_stdev=num_stdev,
+            cone_fit_end_date=live_start_date)
+
+        cone_in_sample = cone_df[cone_df.index < live_start_date]
+        cone_out_of_sample = cone_df[cone_df.index > live_start_date]
+        cone_out_of_sample = cone_out_of_sample[
+            cone_out_of_sample.index < returns.index[-1]]
+
+        ax.fill_between(cone_out_of_sample.index,
+                        cone_out_of_sample.sd_down,
+                        cone_out_of_sample.sd_up,
+                        color='steelblue', alpha=0.25)
+
+        return cone_in_sample, cone_out_of_sample
 
     if ax is None:
         ax = plt.gca()
@@ -582,6 +600,11 @@ def plot_rolling_returns(
                          'factor_returns.')
     elif volatility_match and factor_returns is not None:
         bmark_vol = factor_returns.loc[returns.index].std()
+        # TO-DO: @tweicki 'returns' probably needs to get updated to:
+        # (returns / returns.std()) * bmark_vol if we want to plot
+        # the cone on this later on.
+        # Will we need a temp variable to do this? Or can we just re-assign as
+        # returns = (returns / returns.std()) * bmark_vol
         df_cum_rets = timeseries.cum_returns(
             (returns / returns.std()) * bmark_vol,
             1.0
@@ -611,17 +634,19 @@ def plot_rolling_returns(
             label='Live', ax=ax, **kwargs)
 
         if cone_std is not None:
-            cone_df = timeseries.cone_rolling(
-                returns,
-                num_stdev=cone_std,
-                cone_fit_end_date=live_start_date)
+            # check to see if cone_std was passed as a single value and,
+            # if so, just convert to list automatically
+            if isinstance(cone_std, float):
+                cone_std = [cone_std]
 
-            cone_df_fit = cone_df[cone_df.index < live_start_date]
+            for cone_i in cone_std:
+                cone_in_sample, cone_out_of_sample = draw_cone(
+                    returns,
+                    cone_i,
+                    live_start_date,
+                    ax)
 
-            cone_df_live = cone_df[cone_df.index > live_start_date]
-            cone_df_live = cone_df_live[cone_df_live.index < returns.index[-1]]
-
-            cone_df_fit['line'].plot(
+            cone_in_sample['line'].plot(
                 ax=ax,
                 ls='--',
                 label='Backtest trend',
@@ -629,7 +654,7 @@ def plot_rolling_returns(
                 color='forestgreen',
                 alpha=0.7,
                 **kwargs)
-            cone_df_live['line'].plot(
+            cone_out_of_sample['line'].plot(
                 ax=ax,
                 ls='--',
                 label='Predicted trend',
@@ -637,11 +662,6 @@ def plot_rolling_returns(
                 color='red',
                 alpha=0.7,
                 **kwargs)
-
-            ax.fill_between(cone_df_live.index,
-                            cone_df_live.sd_down,
-                            cone_df_live.sd_up,
-                            color='red', alpha=0.30)
 
     ax.axhline(1.0, linestyle='--', color='black', lw=2)
     ax.set_ylabel('Cumulative returns')
