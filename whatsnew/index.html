@@ -7,14 +7,14 @@
         
         <meta name="author" content="Quantopian Inc.">
         
-        <link rel="shortcut icon" href="./img/favicon.ico">
+        <link rel="shortcut icon" href="../img/favicon.ico">
 
-	<title>pyfolio</title>
+	<title>Releases - pyfolio</title>
 
-        <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="./css/font-awesome-4.0.3.css" rel="stylesheet">
-        <link href="./css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="./css/highlight.css">
+        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/highlight.css">
 
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -43,7 +43,7 @@
             
 
             <!-- Main title -->
-            <a class="navbar-brand" href=".">pyfolio</a>
+            <a class="navbar-brand" href="..">pyfolio</a>
         </div>
 
         <!-- Expanded navigation -->
@@ -54,13 +54,13 @@
                 
                 
                     <li >
-                        <a href=".">Overview</a>
+                        <a href="..">Overview</a>
                     </li>
                 
                 
                 
-                    <li >
-                        <a href="whatsnew/">Releases</a>
+                    <li class="active">
+                        <a href="./">Releases</a>
                     </li>
                 
                 
@@ -71,19 +71,19 @@
                         
                             
 <li >
-    <a href="single_stock_example/">Single stock</a>
+    <a href="../single_stock_example/">Single stock</a>
 </li>
 
                         
                             
 <li >
-    <a href="zipline_algo_example/">Zipline algorithm</a>
+    <a href="../zipline_algo_example/">Zipline algorithm</a>
 </li>
 
                         
                             
 <li >
-    <a href="bayesian/">Bayesian analysis</a>
+    <a href="../bayesian/">Bayesian analysis</a>
 </li>
 
                         
@@ -101,13 +101,13 @@
                     </a>
                 </li>
                 
-                    <li class="disabled">
-                        <a rel="next" >
+                    <li >
+                        <a rel="next" href="..">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li class="disabled">
-                        <a rel="prev" >
+                    <li >
+                        <a rel="prev" href="../single_stock_example/">
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -129,15 +129,36 @@
 
         <div class="container">
             
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#whats-new">What's New</a></li>
+        
+            <li><a href="#v02-oct-16-2015">v0.2 (Oct 16, 2015)</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
 
-    <div class="row-fluid">
-      <div id="main-content" class="span12">
-        <h1 id="404-page-not-found" style="text-align: center">404</h1>
-        <p style="text-align: center"><strong>Page not found</strong></p>
-      </div>
-    </div>
-
-
+<h1 id="whats-new">What's New</h1>
+<p>These are new features and improvements of note in each release.</p>
+<h2 id="v02-oct-16-2015">v0.2 (Oct 16, 2015)</h2>
+<p>This is a major release from 0.1 that includes mainly bugfixes and refactorings but also some new features. We recommend that all users upgrade to this new version.</p>
+<h3 id="new-features">New features</h3>
+<ul>
+<li>Volatility matched cumulative returns plot <a href="https://github.com/quantopian/pyfolio/pull/126">PR126</a>.</li>
+<li>Allow for different periodicity (annualization factors) in the annual_() methods <a href="https://github.com/quantopian/pyfolio/pull/164">PR164</a>.</li>
+<li>Users can supply their own interesting periods <a href="https://github.com/quantopian/pyfolio/pull/163">PR163</a>.</li>
+<li>Ability to weight a portfolio of holdings by a metric valued <a href="https://github.com/quantopian/pyfolio/pull/161">PR161</a>.</li>
+</ul>
+<h3 id="bug-fixes">Bug fixes</h3>
+<ul>
+<li>Fix drawdown overlaps <a href="https://github.com/quantopian/pyfolio/pull/150">PR150</a>.</li>
+<li>Monthly returns distribution should not stack by year <a href="https://github.com/quantopian/pyfolio/pull/162">PR162</a>.</li>
+<li>Fix gross leverage <a href="https://github.com/quantopian/pyfolio/pull/147">PR147</a></li>
+</ul></div>
+            
         </div>
 
         <footer class="col-md-12">
@@ -146,12 +167,12 @@
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
 
-        <script src="./js/jquery-1.10.2.min.js"></script>
-        <script src="./js/bootstrap-3.0.3.min.js"></script>
-        <script src="./js/highlight.pack.js"></script>
-        <script>var base_url = '.';</script>
-        <script data-main="./mkdocs/js/search.js" src="./mkdocs/js/require.js"></script>
-        <script src="./js/base.js"></script>
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script>
+        <script>var base_url = '..';</script>
+        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
+        <script src="../js/base.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
             <div class="modal-dialog">

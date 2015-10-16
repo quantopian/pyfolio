@@ -2,12 +2,12 @@
     "docs": [
         {
             "location": "/",
-            "text": "pyfolio\n\n\n\n\n\n\npyfolio is a Python library for performance and risk analysis of\nfinancial portfolios developed by\n\nQuantopian Inc\n. It works well with the\n\nZipline\n open source backtesting library.\n\n\nAt the core of pyfolio is a so-called tear sheet that consists of\nvarious individual plots that provide a comprehensive image of the\nperformance of a trading algorithm. Here is an example of a tear sheet of a returns-based analysis of the \n$FB\n stock:\n\n\n\n\nSee also \nslides of a recent talk about pyfolio.\n\n\nInstallation\n\n\nTo install \npyfolio\n via \npip\n issue the following command:\n\n\npip install pyfolio\n\n\n\n\nFor development, clone the git repo and run \npython setup.py develop\n\nand edit the library files directly. Make sure to reload or restart\nthe IPython kernel when you make changes.\n\n\npyfolio\n has the following dependencies:\n - numpy\n - scipy\n - pandas\n - matplotlib\n - \nseaborn\n\n - \npymc3\n (optional)\n - \nzipline\n (optional; requires master, \nnot\n 0.7.0)\n\n\nQuestions?\n\n\nIf you find a bug, feel free to open an issue on our github tracker.\n\n\nYou can also join our \nmailing list\n.\n\n\nContribute\n\n\nIf you want to contribute, a great place to start would be the \nhelp-wanted issues\n.\n\n\nCredits\n\n\n\n\nGus Gordon (gus@quantopian.com)\n\n\nJustin Lent (justin@quantopian.com)\n\n\nSepideh Sadeghi (sp.sadeghi@gmail.com)\n\n\nThomas Wiecki (thomas@quantopian.com)\n\n\nJessica Stauth (jstauth@quantopian.com)\n\n\nKaren Rubin (karen@quantopian.com)\n\n\nDavid Edwards (dedwards@quantopian.com)\n\n\n\n\nFor a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.",
+            "text": "pyfolio\n\n\n\n\n\n\npyfolio is a Python library for performance and risk analysis of\nfinancial portfolios developed by\n\nQuantopian Inc\n. It works well with the\n\nZipline\n open source backtesting library.\n\n\nAt the core of pyfolio is a so-called tear sheet that consists of\nvarious individual plots that provide a comprehensive image of the\nperformance of a trading algorithm. Here is an example of a tear sheet of a the Zipline algo included as one of our example notebooks:\n\n\n\n\n\n\n\n\n\n\nSee also \nslides of a recent talk about pyfolio.\n\n\nInstallation\n\n\nTo install \npyfolio\n via \npip\n issue the following command:\n\n\npip install pyfolio\n\n\n\n\nFor development, clone the git repo and run \npython setup.py develop\n\nand edit the library files directly. Make sure to reload or restart\nthe IPython kernel when you make changes.\n\n\npyfolio\n has the following dependencies:\n - numpy\n - scipy\n - pandas\n - matplotlib\n - \nseaborn\n\n - \npymc3\n (optional)\n - \nzipline\n (optional; requires master, \nnot\n 0.7.0)\n\n\nQuestions?\n\n\nIf you find a bug, feel free to open an issue on our github tracker.\n\n\nYou can also join our \nmailing list\n.\n\n\nContribute\n\n\nIf you want to contribute, a great place to start would be the \nhelp-wanted issues\n.\n\n\nCredits\n\n\n\n\nGus Gordon (gus@quantopian.com)\n\n\nJustin Lent (justin@quantopian.com)\n\n\nSepideh Sadeghi (sp.sadeghi@gmail.com)\n\n\nThomas Wiecki (thomas@quantopian.com)\n\n\nJessica Stauth (jstauth@quantopian.com)\n\n\nKaren Rubin (karen@quantopian.com)\n\n\nDavid Edwards (dedwards@quantopian.com)\n\n\n\n\nFor a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.",
             "title": "Overview"
         },
         {
             "location": "/#pyfolio",
-            "text": "pyfolio is a Python library for performance and risk analysis of\nfinancial portfolios developed by Quantopian Inc . It works well with the Zipline  open source backtesting library.  At the core of pyfolio is a so-called tear sheet that consists of\nvarious individual plots that provide a comprehensive image of the\nperformance of a trading algorithm. Here is an example of a tear sheet of a returns-based analysis of the  $FB  stock:   See also  slides of a recent talk about pyfolio.",
+            "text": "pyfolio is a Python library for performance and risk analysis of\nfinancial portfolios developed by Quantopian Inc . It works well with the Zipline  open source backtesting library.  At the core of pyfolio is a so-called tear sheet that consists of\nvarious individual plots that provide a comprehensive image of the\nperformance of a trading algorithm. Here is an example of a tear sheet of a the Zipline algo included as one of our example notebooks:      See also  slides of a recent talk about pyfolio.",
             "title": "pyfolio"
         },
         {
@@ -29,6 +29,21 @@
             "location": "/#credits",
             "text": "Gus Gordon (gus@quantopian.com)  Justin Lent (justin@quantopian.com)  Sepideh Sadeghi (sp.sadeghi@gmail.com)  Thomas Wiecki (thomas@quantopian.com)  Jessica Stauth (jstauth@quantopian.com)  Karen Rubin (karen@quantopian.com)  David Edwards (dedwards@quantopian.com)   For a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.",
             "title": "Credits"
+        },
+        {
+            "location": "/whatsnew/",
+            "text": "What's New\n\n\nThese are new features and improvements of note in each release.\n\n\nv0.2 (Oct 16, 2015)\n\n\nThis is a major release from 0.1 that includes mainly bugfixes and refactorings but also some new features. We recommend that all users upgrade to this new version.\n\n\nNew features\n\n\n\n\nVolatility matched cumulative returns plot \nPR126\n.\n\n\nAllow for different periodicity (annualization factors) in the annual_() methods \nPR164\n.\n\n\nUsers can supply their own interesting periods \nPR163\n.\n\n\nAbility to weight a portfolio of holdings by a metric valued \nPR161\n.\n\n\n\n\nBug fixes\n\n\n\n\nFix drawdown overlaps \nPR150\n.\n\n\nMonthly returns distribution should not stack by year \nPR162\n.\n\n\nFix gross leverage \nPR147",
+            "title": "Releases"
+        },
+        {
+            "location": "/whatsnew/#whats-new",
+            "text": "These are new features and improvements of note in each release.",
+            "title": "What's New"
+        },
+        {
+            "location": "/whatsnew/#v02-oct-16-2015",
+            "text": "This is a major release from 0.1 that includes mainly bugfixes and refactorings but also some new features. We recommend that all users upgrade to this new version.  New features   Volatility matched cumulative returns plot  PR126 .  Allow for different periodicity (annualization factors) in the annual_() methods  PR164 .  Users can supply their own interesting periods  PR163 .  Ability to weight a portfolio of holdings by a metric valued  PR161 .   Bug fixes   Fix drawdown overlaps  PR150 .  Monthly returns distribution should not stack by year  PR162 .  Fix gross leverage  PR147",
+            "title": "v0.2 (Oct 16, 2015)"
         },
         {
             "location": "/single_stock_example/",

@@ -4,7 +4,15 @@
     
     <url>
      <loc>None/</loc>
-     <lastmod>2015-10-07</lastmod>
+     <lastmod>2015-10-16</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>None/whatsnew/</loc>
+     <lastmod>2015-10-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -13,19 +21,19 @@
         
     <url>
      <loc>None/single_stock_example/</loc>
-     <lastmod>2015-10-07</lastmod>
+     <lastmod>2015-10-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/zipline_algo_example/</loc>
-     <lastmod>2015-10-07</lastmod>
+     <lastmod>2015-10-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/bayesian/</loc>
-     <lastmod>2015-10-07</lastmod>
+     <lastmod>2015-10-16</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
