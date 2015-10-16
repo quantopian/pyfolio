@@ -1,4 +1,5 @@
 from unittest import TestCase
+from nose_parameterized import parameterized
 from collections import OrderedDict
 
 from pandas import (
@@ -15,14 +16,17 @@ from numpy import (
     zeros_like,
 )
 
-from pyfolio.pos import (get_portfolio_alloc,
+from pyfolio.pos import (get_percent_alloc,
                          extract_pos,
-                         get_turnover)
+                         get_turnover,
+                         get_sector_exposures)
+import warnings
 
 
 class PositionsTestCase(TestCase):
+    dates = date_range(start='2015-01-01', freq='D', periods=20)
 
-    def test_get_portfolio_alloc(self):
+    def test_get_percent_alloc(self):
         raw_data = arange(15, dtype=float).reshape(5, 3)
         # Make the first column negative to test absolute magnitudes.
         raw_data[:, 0] *= -1
@@ -33,7 +37,7 @@ class PositionsTestCase(TestCase):
             columns=['A', 'B', 'C']
         )
 
-        result = get_portfolio_alloc(frame)
+        result = get_percent_alloc(frame)
         expected_raw = zeros_like(raw_data)
         for idx, row in enumerate(raw_data):
             expected_raw[idx] = row / absolute(row).sum()
@@ -121,3 +125,41 @@ class PositionsTestCase(TestCase):
         result = get_turnover(transactions, positions, period='M')
         expected = Series([10.0], index=index)
         assert_series_equal(result, expected)
+
+    @parameterized.expand([
+        (DataFrame([[1.0, 2.0, 3.0, 10.0]]*len(dates),
+                   columns=[0, 1, 2, 'cash'], index=dates),
+         {0: 'A', 1: 'B', 2: 'A'},
+         DataFrame([[4.0, 2.0, 10.0]]*len(dates),
+                   columns=['A', 'B', 'cash'], index=dates),
+         False),
+        (DataFrame([[1.0, 2.0, 3.0, 10.0]]*len(dates),
+                   columns=[0, 1, 2, 'cash'], index=dates),
+         Series(index=[0, 1, 2], data=['A', 'B', 'A']),
+         DataFrame([[4.0, 2.0, 10.0]]*len(dates),
+                   columns=['A', 'B', 'cash'], index=dates),
+         False),
+        (DataFrame([[1.0, 2.0, 3.0, 10.0]]*len(dates),
+                   columns=[0, 1, 2, 'cash'], index=dates),
+         {0: 'A', 1: 'B'},
+         DataFrame([[1.0, 2.0, 10.0]]*len(dates),
+                   columns=['A', 'B', 'cash'], index=dates),
+         True)
+    ])
+    def test_sector_exposure(self, positions, mapping,
+                             expected_sector_exposure,
+                             warning_expected):
+        """
+        Tests sector exposure mapping and rollup.
+
+        """
+        with warnings.catch_warnings(record=True) as w:
+            result_sector_exposure = get_sector_exposures(positions,
+                                                          mapping)
+
+            assert_frame_equal(result_sector_exposure,
+                               expected_sector_exposure)
+            if warning_expected:
+                assert len(w) == 1
+            else:
+                assert len(w) == 0
