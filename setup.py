@@ -22,7 +22,7 @@ AUTHOR = 'Quantopian Inc'
 AUTHOR_EMAIL = 'opensource@quantopian.com'
 URL = "https://github.com/quantopian/pyfolio"
 LICENSE = "Apache License, Version 2.0"
-VERSION = "0.1"
+VERSION = "0.2"
 
 classifiers = ['Development Status :: 4 - Beta',
                'Programming Language :: Python',

@@ -15,5 +15,5 @@ except ImportError:
         "Could not import bayesian submodule due to missing pymc3 dependency.",
         ImportWarning)
 
-__version__ = '0.1'
+__version__ = '0.2'
 __all__ = ['utils', 'timeseries', 'pos', 'txn', 'bayesian']
