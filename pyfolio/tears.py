@@ -42,7 +42,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
                            benchmark_rets=None,
                            gross_lev=None,
                            live_start_date=None, bayesian=False,
-                           cone_std=[1.0, 1.5, 2.0], set_context=True):
+                           cone_std=(1.0, 1.5, 2.0), set_context=True):
     """
     Generate a number of tear sheets that are useful
     for analyzing a strategy's performance.
@@ -94,8 +94,9 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         after its backtest period.
     bayesian: boolean, optional
         If True, causes the generation of a Bayesian tear sheet.
-    cone_std : float, optional
-        The standard deviation to use for the cone plots.
+    cone_std : float, or tuple, optional
+        If float, The standard deviation to use for the cone plots.
+        If tuple, Tuple of standard deviation values to use for the cone plots
          - The cone is a normal distribution with this standard deviation
              centered around a linear regression.
     set_context : boolean, optional
@@ -140,7 +141,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
 
 @plotting_context
 def create_returns_tear_sheet(returns, live_start_date=None,
-                              cone_std=[1.0, 1.5, 2.0],
+                              cone_std=(1.0, 1.5, 2.0),
                               benchmark_rets=None,
                               return_fig=False):
     """
@@ -162,8 +163,9 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period.
-    cone_std : float, optional
-        The standard deviation to use for the cone plots.
+    cone_std : float, or tuple, optional
+        If float, The standard deviation to use for the cone plots.
+        If tuple, Tuple of standard deviation values to use for the cone plots
          - The cone is a normal distribution with this standard deviation
              centered around a linear regression.
     benchmark_rets : pd.Series, optional
