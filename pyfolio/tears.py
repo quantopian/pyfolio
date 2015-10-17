@@ -629,6 +629,27 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     ax_beta.set_xlabel('Beta')
     ax_beta.set_ylabel('Belief')
 
+    # run stochastic volatility model
+    trace_stoch_vol = bayesian.model_stoch_vol(df_train)
+
+    # plot log(sigma) and log(nu)
+    row += 1
+    ax_sigma_log = plt.subplot(gs[row, 0])
+    ax_nu_log = plt.subplot(gs[row, 1])
+    sigma_log = trace_stoch_vol['sigma_log']
+    sns.distplot(sigma_log, ax=ax_sigma_log)
+    ax_sigma_log.set_xlabel('log(Sigma)')
+    ax_sigma_log.set_ylabel('Belief')
+    nu_log = trace_stoch_vol['nu_log']
+    sns.distplot(nu_log, ax=ax_nu_log)
+    ax_nu_log.set_xlabel('log(nu)')
+    ax_nu_log.set_ylabel('Belief')
+
+    # plot latent volatility
+    row += 1
+    ax_volatility = plt.subplot(gs[row, :])
+    bayesian.plot_stoch_vol(df_train, trace=trace_stoch_vol, ax=ax_volatility)
+
     gs.tight_layout(fig)
 
     plt.show()
