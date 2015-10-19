@@ -58,3 +58,6 @@ target/
 
 # VIM
 *.sw?
+
+# IPython notebook checkpoints
+.ipynb_checkpoints/
