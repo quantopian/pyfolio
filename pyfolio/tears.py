@@ -510,7 +510,7 @@ def create_interesting_times_tear_sheet(
 @plotting_context
 def create_bayesian_tear_sheet(returns, benchmark_rets=None,
                                live_start_date=None, samples=2000,
-                               return_fig=False):
+                               return_fig=False, stoch_vol=False):
     """
     Generate a number of Bayesian distributions and a Bayesian
     cone plot of returns.
@@ -536,6 +536,8 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
         If True, set default plotting style context.
+    stoch_vol : boolean, optional
+        If True, run and plot the stochastic volatility model
     """
 
     if live_start_date is None:
@@ -655,30 +657,31 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     ax_beta.set_ylabel('Belief')
     previous_time = timer("plotting alpha beta model", previous_time)
 
-    # run stochastic volatility model
-    print("\nRunning stochastic volatility model")
-    trace_stoch_vol = bayesian.model_stoch_vol(df_train)
-    previous_time = timer("running stochastic volatility model", previous_time)
+    if stoch_vol:
+        # run stochastic volatility model
+        print("\nRunning stochastic volatility model")
+        trace_stoch_vol = bayesian.model_stoch_vol(df_train)
+        previous_time = timer("running stochastic volatility model", previous_time)
 
-    # plot log(sigma) and log(nu)
-    print("\nPlotting stochastic volatility model")
-    row += 1
-    ax_sigma_log = plt.subplot(gs[row, 0])
-    ax_nu_log = plt.subplot(gs[row, 1])
-    sigma_log = trace_stoch_vol['sigma_log']
-    sns.distplot(sigma_log, ax=ax_sigma_log)
-    ax_sigma_log.set_xlabel('log(Sigma)')
-    ax_sigma_log.set_ylabel('Belief')
-    nu_log = trace_stoch_vol['nu_log']
-    sns.distplot(nu_log, ax=ax_nu_log)
-    ax_nu_log.set_xlabel('log(nu)')
-    ax_nu_log.set_ylabel('Belief')
+        # plot log(sigma) and log(nu)
+        print("\nPlotting stochastic volatility model")
+        row += 1
+        ax_sigma_log = plt.subplot(gs[row, 0])
+        ax_nu_log = plt.subplot(gs[row, 1])
+        sigma_log = trace_stoch_vol['sigma_log']
+        sns.distplot(sigma_log, ax=ax_sigma_log)
+        ax_sigma_log.set_xlabel('log(Sigma)')
+        ax_sigma_log.set_ylabel('Belief')
+        nu_log = trace_stoch_vol['nu_log']
+        sns.distplot(nu_log, ax=ax_nu_log)
+        ax_nu_log.set_xlabel('log(nu)')
+        ax_nu_log.set_ylabel('Belief')
 
-    # plot latent volatility
-    row += 1
-    ax_volatility = plt.subplot(gs[row, :])
-    bayesian.plot_stoch_vol(df_train, trace=trace_stoch_vol, ax=ax_volatility)
-    previous_time = timer("plotting stochastic volatility model", previous_time)
+        # plot latent volatility
+        row += 1
+        ax_volatility = plt.subplot(gs[row, :])
+        bayesian.plot_stoch_vol(df_train, trace=trace_stoch_vol, ax=ax_volatility)
+        previous_time = timer("plotting stochastic volatility model", previous_time)
 
     total_time = time() - start_time
     print("\nTotal runtime was {:.2f} seconds.").format(total_time)
