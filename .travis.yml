@@ -6,20 +6,29 @@ python:
   - "3.4"
 
 before_install:
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh; else wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; fi
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then export PATH=/home/travis/miniconda/bin:$PATH; else export PATH=/home/travis/miniconda3/bin:$PATH; fi
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
 
 install:
-  - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8 scikit-learn seaborn runipy pytables networkx
   - source activate testenv
-  - conda install --yes ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8 scikit-learn seaborn runipy pytables networkx
-  - curl https://codeload.github.com/quantopian/zipline/legacy.zip/b89fc0c02871837900d79933040a53869a456ec4 > zipline.zip; unzip zipline; pushd quantopian-zipline-b89fc0c; python setup.py build_ext --inplace; python setup.py develop; popd
   - pip install nose_parameterized contextlib2 logbook==0.10.1
+  - pip install --no-deps git+https://github.com/quantopian/zipline
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock enum34; fi
-  - pip install git+https://github.com/Theano/Theano.git@557fe6fab49262706241f0e774f3269a2ec0275b
-  - pip install git+https://github.com/pymc-devs/pymc3.git
+  - pip install --no-deps git+https://github.com/Theano/Theano.git@557fe6fab49262706241f0e774f3269a2ec0275b
+  - pip install --no-deps git+https://github.com/pymc-devs/pymc3.git
   - python setup.py build_ext --inplace
 
 before_script:
