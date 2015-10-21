@@ -213,5 +213,5 @@ def get_turnover(transactions, positions, period=None, average=True):
     # traded_value contains the summed value from buys and sells;
     # this is divided by 2.0 to get the average of the two.
     turnover = traded_value / 2.0 if average else traded_value
-    turnover_rate = turnover / portfolio_value
+    turnover_rate = turnover.div(portfolio_value, axis='items')
     return turnover_rate
