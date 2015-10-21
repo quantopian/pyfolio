@@ -4,9 +4,17 @@ These are new features and improvements of note in each release.
 
 ## v0.3 (TBA)
 
+This is a major release from 0.2 that includes many exciting new features. We recommend that all users upgrade to this new version.
+
 ### New features
 
 * Sector exposures: sum positions by sector given a dictionary or series of symbol to sector mappings [PR166](https://github.com/quantopian/pyfolio/pull/166)
+* Ability to make cones with multiple shades stdev regions [PR168](https://github.com/quantopian/pyfolio/pull/168)
+* Slippage sweep: See how an algorithm performs with various levels of slippage [PR170](https://github.com/quantopian/pyfolio/pull/170)
+
+### Bug fixes
+
+* Various fixes to make pyfolio pandas 0.17 compatible
 
 ## v0.2 (Oct 16, 2015)
 
