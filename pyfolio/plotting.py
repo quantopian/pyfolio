@@ -27,6 +27,7 @@ from sklearn import preprocessing
 from . import utils
 from . import timeseries
 from . import pos
+from . import txn
 
 from .utils import APPROX_BDAYS_PER_MONTH
 
@@ -1076,7 +1077,7 @@ def plot_turnover(returns, transactions, positions,
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_turnover = pos.get_turnover(transactions, positions)
+    df_turnover = txn.get_turnover(transactions, positions)
     df_turnover_by_month = df_turnover.resample("M")
     df_turnover.plot(color='steelblue', alpha=1.0, lw=0.5, ax=ax, **kwargs)
     df_turnover_by_month.plot(
@@ -1097,6 +1098,106 @@ def plot_turnover(returns, transactions, positions,
     ax.set_ylim((0, 1))
     ax.set_ylabel('Turnover')
     ax.set_xlabel('')
+    return ax
+
+
+def plot_slippage_sweep(returns, transactions, positions,
+                        slippage_params=(3, 8, 10, 12, 15, 20, 50),
+                        ax=None, **kwargs):
+    """Plots a equity curves at different per-dollar slippage assumptions.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Timeseries of portfolio returns to be adjusted for various
+        degrees of slippage.
+    transactions : pd.DataFrame
+        Daily transaction volume and dollar ammount.
+         - See full explanation in tears.create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    slippage_params: tuple
+        Slippage pameters to apply to the return time series (in
+        basis points).
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    turnover = txn.get_turnover(transactions, positions,
+                                period=None, average=False)
+
+    slippage_sweep = pd.DataFrame()
+    for bps in slippage_params:
+        adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
+        label = str(bps) + " bps"
+        slippage_sweep[label] = timeseries.cum_returns(adj_returns, 1)
+
+    slippage_sweep.plot(alpha=1.0, lw=0.5, ax=ax)
+
+    ax.set_title('Cumulative Returns Given Additional Per-Dollar Slippage')
+    ax.set_ylabel('')
+
+    ax.legend(loc='center left')
+
+    return ax
+
+
+def plot_slippage_sensitivity(returns, transactions, positions,
+                              ax=None, **kwargs):
+    """Plots curve relating per-dollar slippage to average annual returns.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Timeseries of portfolio returns to be adjusted for various
+        degrees of slippage.
+    transactions : pd.DataFrame
+        Daily transaction volume and dollar ammount.
+         - See full explanation in tears.create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    turnover = txn.get_turnover(transactions, positions,
+                                period=None, average=False)
+    avg_returns_given_slippage = pd.Series()
+    for bps in range(1, 100):
+        adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
+        avg_returns = timeseries.annual_return(
+            adj_returns, style='calendar')
+        avg_returns_given_slippage.loc[bps] = avg_returns
+
+    avg_returns_given_slippage.plot(alpha=1.0, lw=2, ax=ax)
+
+    ax.set(title='Average Annual Returns Given Additional Per-Dollar Slippage',
+           xticks=np.arange(0, 100, 10),
+           ylabel='Average Annual Return',
+           xlabel='Per-Dollar Slippage (bps)')
+
     return ax
 
 
@@ -1126,7 +1227,7 @@ def plot_daily_turnover_hist(transactions, positions,
 
     if ax is None:
         ax = plt.gca()
-    turnover = pos.get_turnover(transactions, positions, period=None)
+    turnover = txn.get_turnover(transactions, positions, period=None)
     sns.distplot(turnover, ax=ax, **kwargs)
     ax.set_title('Distribution of Daily Turnover Rates')
     ax.set_xlabel('Turnover Rate')
