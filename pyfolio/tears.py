@@ -660,10 +660,10 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     if stoch_vol:
         # run stochastic volatility model
         print("\nRunning stochastic volatility model on most recent 400 days of returns")
-        cutoff = 400
-        if df_train.size > cutoff:
-            df_train = df_train[-cutoff:]
-        trace_stoch_vol = bayesian.model_stoch_vol(df_train)
+        returns_cutoff = 400
+        if df_train.size > returns_cutoff:
+            df_train_truncated = df_train[-returns_cutoff:]
+        trace_stoch_vol = bayesian.model_stoch_vol(df_train_truncated)
         previous_time = timer("running stochastic volatility model", previous_time)
 
         # plot log(sigma) and log(nu)
@@ -683,7 +683,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         # plot latent volatility
         row += 1
         ax_volatility = plt.subplot(gs[row, :])
-        bayesian.plot_stoch_vol(df_train, trace=trace_stoch_vol, ax=ax_volatility)
+        bayesian.plot_stoch_vol(df_train_truncated, trace=trace_stoch_vol, ax=ax_volatility)
         previous_time = timer("plotting stochastic volatility model", previous_time)
 
     total_time = time() - start_time
