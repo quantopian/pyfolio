@@ -366,7 +366,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
     positions = pos.extract_pos(positions, backtest.ending_cash)
     transactions_frame = txn.make_transaction_frame(backtest.transactions)
     transactions = txn.get_txn_vol(transactions_frame)
-    transactions.index = transactions.index.normalize()
+    transactions.index = transactions.index.normalize().tz_localize('utc')
 
     return returns, positions, transactions, gross_lev
 
