@@ -568,7 +568,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in create_full_tear_sheet.
-    benchmark_rets : pd.Series, optional
+    benchmark_rets : pd.Series or pd.DataFrame, optional
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
     live_start_date : datetime, optional
