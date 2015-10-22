@@ -19,6 +19,7 @@ import pandas as pd
 import scipy as sp
 from scipy import stats
 import seaborn as sns
+import theano.tensor as tt
 
 import matplotlib.pyplot as plt
 
@@ -34,14 +35,16 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
     return sets. Usually, these will be algorithm returns and
     benchmark returns (e.g. S&P500). The data is assumed to be T
     distributed and thus is robust to outliers and takes tail events
-    into account.
+    into account.  If a pandas.DataFrame is passed as a benchmark, then
+    multiple linear regression is used to estimate alpha and beta.
 
     Parameters
     ----------
     returns : pandas.Series
         Series of simple returns of an algorithm or stock.
-    bmark : pandas.Series
-        Series of simple returns of a benchmark like the S&P500.
+    bmark : pandas.DataFrame
+        DataFrame of benchmark returns (e.g., S&P500) or risk factors (e.g.,
+        Fama-French SMB, HML, and UMD).
         If bmark has more recent returns than returns_train, these dates
         will be treated as missing values and predictions will be
         generated for them taking market correlations into account.
@@ -55,10 +58,15 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         of the posterior.
     """
 
-    if len(data) != len(bmark):
-        # pad missing data
+    bmark = bmark.dropna()
+
+    if data.shape[0] != bmark.shape[0]:
         data = pd.Series(data, index=bmark.index)
 
+    if bmark.ndim > 1:
+        Nbmark = bmark.shape[1]
+    else:
+        Nbmark = 1
     data_no_missing = data.dropna()
 
     with pm.Model():
@@ -69,16 +77,19 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         nu = pm.Exponential('nu_minus_two', 1. / 10., testval=.3)
 
         # alpha and beta
-        beta_init, alpha_init = sp.stats.linregress(
-            bmark.loc[data_no_missing.index],
-            data_no_missing)[:2]
+        X = bmark.loc[data_no_missing.index]
+        X['ones'] = np.ones(len(X))
+        y = data_no_missing
+        alphabeta_init = np.linalg.lstsq(X, y)[0]#[:2]
 
-        alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alpha_init)
-        beta_reg = pm.Normal('beta', mu=0, sd=1, testval=beta_init)
-
+        alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alphabeta_init[-1])
+        beta_reg = pm.Normal('beta', mu=0, sd=1, 
+                testval=alphabeta_init[:-1], shape=Nbmark)
+        bmark_theano = tt.as_tensor_variable(bmark.ix[data_no_missing.index].T)
+        mu_reg = alpha_reg + tt.dot(beta_reg, bmark_theano)
         pm.T('returns',
              nu=nu + 2,
-             mu=alpha_reg + beta_reg * bmark,
+             mu=mu_reg,
              sd=sigma,
              observed=data)
         start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
@@ -528,7 +539,7 @@ def run_model(model, returns_train, returns_test=None,
         Out-of-sample returns. Datetimes in returns_test will be added to
         returns_train as missing values and predictions will be generated
         for them.
-    bmark : pd.Series (optional)
+    bmark : pd.Series or pd.DataFrame (optional)
         Only used for alpha_beta to estimate regression coefficients.
         If bmark has more recent returns than returns_train, these dates
         will be treated as missing values and predictions will be
