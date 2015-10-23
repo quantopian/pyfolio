@@ -360,7 +360,6 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
 
 
 def sortino_ratio(returns, required_return=0, period=DAILY):
-
     """
     Determines the Sortino ratio of a strategy.
 
@@ -1219,7 +1218,8 @@ def portfolio_returns_metric_weighted(holdings_returns,
         else:
             holdings_df = pd.DataFrame(holdings_returns).T.fillna(0)
 
-        holdings_df['port_ret'] = holdings_df.sum(axis=1)/len(holdings_returns)
+        holdings_df['port_ret'] = holdings_df.sum(
+            axis=1) / len(holdings_returns)
     else:
         holdings_df_na = pd.DataFrame(holdings_returns).T
         holdings_cols = holdings_df_na.columns
@@ -1243,7 +1243,7 @@ def portfolio_returns_metric_weighted(holdings_returns,
             holdings_df = holdings_df.join(
                 holdings_func_rebal_t,
                 rsuffix='_t').fillna(method='ffill').dropna()
-        transform_columns = list(map(lambda x: x+"_t", holdings_cols))
+        transform_columns = list(map(lambda x: x + "_t", holdings_cols))
         if inverse_weight:
             inv_func = 1.0 / holdings_df[transform_columns]
             holdings_df_weights = inv_func.div(inv_func.sum(axis=1),
