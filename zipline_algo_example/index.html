@@ -144,6 +144,8 @@
         
             <li><a href="#full-tear-sheet-example">Full tear sheet example</a></li>
         
+            <li><a href="#suppressing-symbol-output">Suppressing symbol output</a></li>
+        
     
     </ul>
 </div></div>
@@ -157,6 +159,11 @@
 import pyfolio as pf
 </code></pre>
 
+<pre><code>/home/wiecki/miniconda3/lib/python3.4/site-packages/pandas/io/data.py:33: FutureWarning: 
+The pandas.io.data module is moved to a separate package (pandas-datareader) and will be removed from pandas in a future version.
+After installing the pandas-datareader package (https://github.com/pydata/pandas-datareader), you can change the import ``from pandas.io import data, wb`` to ``from pandas_datareader import data, wb``.
+  FutureWarning)
+</code></pre>
 <pre><code class="python">import numpy as np
 import pandas as pd
 
@@ -180,7 +187,7 @@ from zipline.finance import commission
 <pre><code class="python"># Zipline trading algorithm
 # Taken from zipline.examples.olmar
 zipline_logging = logbook.NestedSetup([
-    logbook.NullHandler(level=logbook.DEBUG, bubble=True),
+    logbook.NullHandler(level=logbook.DEBUG),
     logbook.StreamHandler(sys.stdout, level=logbook.INFO),
     logbook.StreamHandler(sys.stderr, level=logbook.ERROR),
 ])
@@ -337,9 +344,9 @@ DELL
 GPS
 INTC
 MMM
-[2015-09-11 20:08:05.713549] INFO: Performance: Simulated 1511 trading days out of 1511.
-[2015-09-11 20:08:05.714176] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
-[2015-09-11 20:08:05.714632] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
+[2015-10-21 14:10:42.252494] INFO: Performance: Simulated 1511 trading days out of 1511.
+[2015-10-21 14:10:42.253271] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
+[2015-10-21 14:10:42.253904] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
 </code></pre>
 <h2 id="extract-metrics">Extract metrics</h2>
 <p>Get the returns, positions, and transactions from the zipline backtest object.</p>
@@ -351,14 +358,14 @@ MMM
 <pre><code class="python">pf.plot_drawdown_periods(returns, top=5).set_xlabel('Date')
 </code></pre>
 
-<pre><code>/opt/miniconda/lib/python2.7/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
+<pre><code>/home/wiecki/miniconda3/lib/python3.4/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
   warnings.warn(message, mplDeprecation, stacklevel=1)
 
 
 
 
 
-&lt;matplotlib.text.Text at 0x7f987fd25110&gt;
+&lt;matplotlib.text.Text at 0x7f7287bb0860&gt;
 </code></pre>
 <p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_10_2.png" /></p>
 <h2 id="full-tear-sheet-example">Full tear sheet example</h2>
@@ -381,26 +388,30 @@ calmar_ratio           0.20           0.84         0.21
 stability              0.00           0.05         0.01
 max_drawdown          -0.60          -0.07        -0.60
 omega_ratio            1.09           1.05         1.09
-sortino_ratio          0.74           0.43         0.76
+sortino_ratio          0.70           0.39         0.71
 skewness               0.28          -0.28         0.27
 kurtosis               4.10           0.46         4.05
 alpha                  0.09          -0.11         0.09
 beta                   0.81           1.18         0.81
 
 Worst Drawdown Periods
-   net drawdown in %   peak date valley date recovery date duration
-0              59.50  2007-11-06  2008-11-20           NaT      NaN
-1              22.33  2006-02-16  2006-08-31    2007-05-21      328
-2              12.52  2005-07-28  2005-10-12    2006-01-11      120
-3              11.28  2004-11-15  2005-04-28    2005-07-22      180
-4               9.44  2007-07-16  2007-08-06    2007-09-04       37
+   net drawdown in %  peak date valley date recovery date duration
+0              59.50 2007-11-06  2008-11-20           NaT      NaN
+1              22.33 2006-02-16  2006-08-31    2007-05-21      328
+2              12.52 2005-07-28  2005-10-12    2006-01-11      120
+3              11.28 2004-11-15  2005-04-28    2005-07-22      180
+4               9.44 2007-07-16  2007-08-06    2007-09-04       37
 
 
 2-sigma returns daily    -0.032
 2-sigma returns weekly   -0.065
 dtype: float64
+
+
+/home/wiecki/miniconda3/lib/python3.4/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
+  warnings.warn(message, mplDeprecation, stacklevel=1)
 </code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_1.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_2.png" /></p>
 <pre><code>Stress Events
           mean    min    max
 Lehmann -0.003 -0.044  0.044
@@ -409,7 +420,7 @@ Sept08  -0.006 -0.043  0.040
 2009Q1  -0.004 -0.050  0.034
 2009Q2   0.007 -0.038  0.062
 </code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_3.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_4.png" /></p>
 <pre><code>Top 10 long positions of all time (and max%)
 [2 6 1 3 0 5 4]
 [ 0.993  0.911  0.845  0.717  0.709  0.666  0.62 ]
@@ -429,8 +440,64 @@ All positions ever held
 [2 6 1 3 0 5 4]
 [ 0.993  0.911  0.845  0.717  0.709  0.666  0.62 ]
 </code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_5.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_6.png" /></p></div>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_6.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_7.png" /></p>
+<h2 id="suppressing-symbol-output">Suppressing symbol output</h2>
+<p>When sharing tear sheets it might be undesirable to display which symbols where used by a strategy. To suppress these in the tear sheet you can pass <code>hide_positions=True</code>.</p>
+<pre><code class="python">pf.create_full_tear_sheet(returns, positions=positions, transactions=transactions,
+                          gross_lev=gross_lev, live_start_date='2009-10-22',
+                          hide_positions=True)
+</code></pre>
+
+<pre><code>Entire data start date: 2004-01-02
+Entire data end date: 2009-12-31
+
+
+Out-of-Sample Months: 2
+Backtest Months: 69
+                   Backtest  Out_of_Sample  All_History
+annual_return          0.12           0.06         0.12
+annual_volatility      0.26           0.22         0.25
+sharpe_ratio           0.47           0.28         0.48
+calmar_ratio           0.20           0.84         0.21
+stability              0.00           0.05         0.01
+max_drawdown          -0.60          -0.07        -0.60
+omega_ratio            1.09           1.05         1.09
+sortino_ratio          0.70           0.39         0.71
+skewness               0.28          -0.28         0.27
+kurtosis               4.10           0.46         4.05
+alpha                  0.09          -0.11         0.09
+beta                   0.81           1.18         0.81
+
+Worst Drawdown Periods
+   net drawdown in %  peak date valley date recovery date duration
+0              59.50 2007-11-06  2008-11-20           NaT      NaN
+1              22.33 2006-02-16  2006-08-31    2007-05-21      328
+2              12.52 2005-07-28  2005-10-12    2006-01-11      120
+3              11.28 2004-11-15  2005-04-28    2005-07-22      180
+4               9.44 2007-07-16  2007-08-06    2007-09-04       37
+
+
+2-sigma returns daily    -0.032
+2-sigma returns weekly   -0.065
+dtype: float64
+
+
+/home/wiecki/miniconda3/lib/python3.4/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
+  warnings.warn(message, mplDeprecation, stacklevel=1)
+</code></pre>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_2.png" /></p>
+<pre><code>Stress Events
+          mean    min    max
+Lehmann -0.003 -0.044  0.044
+Aug07    0.003 -0.030  0.030
+Sept08  -0.006 -0.043  0.040
+2009Q1  -0.004 -0.050  0.034
+2009Q2   0.007 -0.038  0.062
+</code></pre>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_4.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_5.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_6.png" /></p></div>
             
         </div>
 
