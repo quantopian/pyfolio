@@ -2,7 +2,7 @@
 
 These are new features and improvements of note in each release.
 
-## v0.3 (TBA)
+## v0.3 (Oct 23, 2015)
 
 This is a major release from 0.2 that includes many exciting new features. We recommend that all users upgrade to this new version.
 
@@ -11,6 +11,8 @@ This is a major release from 0.2 that includes many exciting new features. We re
 * Sector exposures: sum positions by sector given a dictionary or series of symbol to sector mappings [PR166](https://github.com/quantopian/pyfolio/pull/166)
 * Ability to make cones with multiple shades stdev regions [PR168](https://github.com/quantopian/pyfolio/pull/168)
 * Slippage sweep: See how an algorithm performs with various levels of slippage [PR170](https://github.com/quantopian/pyfolio/pull/170)
+* Stochastic volatility model in Bayesian tear sheet [PR174](https://github.com/quantopian/pyfolio/pull/174)
+* Ability to suppress display of position information [PR177](https://github.com/quantopian/pyfolio/pull/177)
 
 ### Bug fixes
 
