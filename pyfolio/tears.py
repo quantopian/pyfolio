@@ -703,7 +703,10 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
 
     if stoch_vol:
         # run stochastic volatility model
-        print("\nRunning stochastic volatility model on most recent 400 days of returns")
+        print(
+            "\nRunning stochastic volatility model on "
+            "most recent 400 days of returns."
+        )
         returns_cutoff = 400
         if df_train.size > returns_cutoff:
             df_train_truncated = df_train[-returns_cutoff:]
