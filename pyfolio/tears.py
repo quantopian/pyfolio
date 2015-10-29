@@ -147,7 +147,8 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         live_start_date=live_start_date,
         cone_std=cone_std,
         benchmark_rets=benchmark_rets,
-        set_context=set_context
+        set_context=set_context,
+        sector_mappings=sector_mappings
     )
 
     create_interesting_times_tear_sheet(returns,
@@ -366,7 +367,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
         If True, set default plotting style context.
-    sector_mapping: dict or pd.Series, optional
+    sector_mappings : dict or pd.Series, optional
         Security identifier to sector mapping.
         Security ids as keys, sectors as values.
     """
