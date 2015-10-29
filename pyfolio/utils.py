@@ -278,6 +278,8 @@ def get_fama_french():
     five_factors = factors.join(umd).dropna(axis=0)
     five_factors = five_factors / 100
 
+    five_factors.index = five_factors.index.tz_localize('utc')
+
     return five_factors
 
 
