@@ -19,6 +19,7 @@ import pandas as pd
 import scipy as sp
 from scipy import stats
 import seaborn as sns
+import theano.tensor as tt
 
 import matplotlib.pyplot as plt
 
@@ -41,10 +42,9 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
     ----------
     returns : pandas.Series
         Series of simple returns of an algorithm or stock.
-    bmark : pandas.Series or pandas.DataFrame
-        Series of simple returns of a benchmark like the S&P500
-        OR
-        DataFrame of risk factors like Fama-French SMB, HML, and UMD.
+    bmark : pandas.DataFrame
+        DataFrame of benchmark returns (e.g., S&P500) or risk factors (e.g.,
+        Fama-French SMB, HML, and UMD).
         If bmark has more recent returns than returns_train, these dates
         will be treated as missing values and predictions will be
         generated for them taking market correlations into account.
@@ -63,7 +63,10 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
     if data.shape[0] != bmark.shape[0]:
         data = pd.Series(data, index=bmark.index)
 
-    Nbmark = bmark.shape[1]
+    if bmark.ndim > 1:
+        Nbmark = bmark.shape[1]
+    else:
+        Nbmark = 1
     data_no_missing = data.dropna()
 
     with pm.Model():
@@ -84,20 +87,27 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         #    bmark.loc[data_no_missing.index],
         #    data_no_missing)[:2]
 
-        ab_reg = []
-        abi_string = ['beta'] * Nbmark + ['alpha']
-        abi_sd = [1.0] * Nbmark + [0.1]
-        for i, abi in enumerate(alphabeta_init):
-            ab_reg.append(pm.Normal(abi_string[i], mu=0, sd=abi_sd[i], 
-                testval=abi))
+        #ab_reg = []
+        #abi_string = ['beta'] * Nbmark + ['alpha']
+        #abi_sd = [1.0] * Nbmark + [0.1]
+        #for i, abi in enumerate(alphabeta_init):
+        #    ab_reg.append(pm.Normal(abi_string[i], mu=0, sd=abi_sd[i], 
+        #        testval=abi, shape=Nbmark))
 
-        #alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alpha_init)
-        #beta_reg = pm.Normal('beta', mu=0, sd=1, testval=beta_init)
-        mu_reg = ab_reg[0]
-        for i in range(Nbmark):
-            mu_reg += ab_reg[i] * bmark.ix[data_no_missing.index, i]
+        alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alphabeta_init[-1])
+        beta_reg = pm.Normal('beta', mu=0, sd=1, 
+                testval=alphabeta_init[:-1], shape=Nbmark)
+        # theano elementwise multiplication
+        # alpha + beta_vector * data
+        # dot product between beta_vector and data
+        #import pdb; pdb.set_trace()
+        #mu_reg = alpha_reg + beta_reg * bmark.ix[data_no_missing.index]
+        bmark_theano = tt.as_tensor_variable(bmark.ix[data_no_missing.index].T)
+        mu_reg = alpha_reg + tt.dot(beta_reg, bmark_theano)
+        #for i in range(Nbmark):
+        #    mu_reg += ab_reg[i] * bmark.ix[data_no_missing.index, i]
 
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         pm.T('returns',
              nu=nu + 2,
              mu=mu_reg,

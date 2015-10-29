@@ -545,10 +545,18 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
             'Bayesian tear sheet requires setting of live_start_date'
         )
 
+    # start by benchmark is S&P500
+    fama_french = False
     if benchmark_rets is None:
-        benchmark_rets = utils.get_symbol_rets('SPY',
+        benchmark_rets = pd.DataFrame(utils.get_symbol_rets('SPY',
                                                start=returns.index[0],
-                                               end=returns.index[-1])
+                                               end=returns.index[-1]))
+    # unless user indicates otherwise
+    elif benchmark_rets == 'Fama-French':
+        fama_french = True
+        rolling_window = utils.APPROX_BDAYS_PER_MONTH * 6
+        benchmark_rets = timeseries.rolling_fama_french(
+            returns, rolling_window=rolling_window)
 
     live_start_date = utils.get_utc_timestamp(live_start_date)
     df_train = returns.loc[returns.index < live_start_date]
@@ -649,10 +657,19 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     row += 1
     ax_alpha = plt.subplot(gs[row, 0])
     ax_beta = plt.subplot(gs[row, 1])
-    sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1, ax=ax_alpha)
+    if fama_french:
+        sns.distplot((trace_alpha_beta['alpha'][100:]), ax=ax_alpha)
+        betas = ['SMB', 'HML', 'UMD']
+        nbeta = trace_alpha_beta['beta'].shape[1]
+        for i in range(nbeta):
+            sns.distplot(trace_alpha_beta['beta'][100:, i], ax=ax_beta, 
+                    label=betas[i])
+        plt.legend()
+    else:
+        sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1, ax=ax_alpha)
+        sns.distplot(trace_alpha_beta['beta'][100:], ax=ax_beta)
     ax_alpha.set_xlabel('Annual Alpha')
     ax_alpha.set_ylabel('Belief')
-    sns.distplot(trace_alpha_beta['beta'][100:], ax=ax_beta)
     ax_beta.set_xlabel('Beta')
     ax_beta.set_ylabel('Belief')
     previous_time = timer("plotting alpha beta model", previous_time)
