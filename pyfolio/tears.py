@@ -737,7 +737,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
             "plotting stochastic volatility model", previous_time)
 
     total_time = time() - start_time
-    print("\nTotal runtime was {:.2f} seconds.").format(total_time)
+    print("\nTotal runtime was {:.2f} seconds.".format(total_time))
 
     gs.tight_layout(fig)
 
