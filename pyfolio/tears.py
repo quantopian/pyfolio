@@ -147,9 +147,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         live_start_date=live_start_date,
         cone_std=cone_std,
         benchmark_rets=benchmark_rets,
-        set_context=set_context,
-        sector_mappings=sector_mappings
-    )
+        set_context=set_context)
 
     create_interesting_times_tear_sheet(returns,
                                         benchmark_rets=benchmark_rets,
@@ -159,7 +157,8 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         create_position_tear_sheet(returns, positions,
                                    gross_lev=gross_lev,
                                    hide_positions=hide_positions,
-                                   set_context=set_context)
+                                   set_context=set_context,
+                                   sector_mappings=sector_mappings)
 
         if transactions is not None:
             create_txn_tear_sheet(returns, positions, transactions,
