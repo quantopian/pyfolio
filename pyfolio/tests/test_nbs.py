@@ -20,7 +20,7 @@ def test_nbs():
         # See if bayesian is useable before we run a test
         if ipynb.endswith('bayesian.ipynb'):
             try:
-                import pyfolio.bayesian  # NOQA
+                import pymc3  # NOQA
             except:
                 continue
 
