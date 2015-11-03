@@ -772,6 +772,7 @@ def perf_stats(
     all_stats['max_drawdown'] = max_drawdown(returns)
     all_stats['omega_ratio'] = omega_ratio(returns)
     all_stats['sortino_ratio'] = sortino_ratio(returns)
+    all_stats['information_ratio'] = information_ratio(returns)
     all_stats['skewness'] = stats.skew(returns)
     all_stats['kurtosis'] = stats.kurtosis(returns)
 
@@ -1329,3 +1330,31 @@ def min_max_vol_bounds(value, lower_bound=0.12, upper_bound=0.24):
         return upper_bound
 
     return annual_vol
+
+
+def information_ratio(returns, benchmark_returns):
+    """
+    Determines the Information ratio of a strategy.
+
+    Parameters
+    ----------
+    returns : pd.Series or pd.DataFrame
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    benchmark_returns: float / series
+
+    Returns
+    -------
+    float
+        The information ratio.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/information_ratio for more details.
+
+    """
+    active_return = returns - benchmark_returns
+    tracking_error = np.std(active_return, ddof=1)
+    if np.isnan(tracking_error):
+        return 0.0
+    return np.mean(active_return) / tracking_error
