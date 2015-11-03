@@ -1388,4 +1388,19 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     ax.set_ylabel('Return')
     ax.set_xlabel('Month')
     ax.set_title("Monthly Returns")
+
+    # only show x-labels on year boundary
+    xticks_coord = []
+    xticks_label = []
+    count = 0
+    for i in monthly_ret_table.month:
+        if int(i) == 1:
+            xticks_label.append(date_labels[count])
+            xticks_coord.append(count)
+
+        count += 1
+
+    ax.set_xticks(xticks_coord)
+    ax.set_xticklabels(xticks_label)
+
     return ax
