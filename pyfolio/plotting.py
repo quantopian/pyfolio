@@ -1344,3 +1344,48 @@ def show_worst_drawdown_periods(returns, top=5):
     drawdown_df['net drawdown in %'] = list(
         map(utils.round_two_dec_places, drawdown_df['net drawdown in %']))
     print(drawdown_df.sort('net drawdown in %', ascending=False))
+
+
+def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
+    """
+    Plots monthly returns as a timeseries.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
+    if ax is None:
+        ax = plt.gca()
+
+    monthly_ret_table = timeseries.aggregate_returns(returns, 'monthly')
+    monthly_ret_table = monthly_ret_table.reset_index()
+    monthly_ret_table.columns = ['year', 'month', 'returns']
+
+    # Generate month-year labels for the x-axis corresponding to
+    # the returns plotted
+    date_labels = [str(i[1]) + ' - ' + str(i[0]) for i in
+                   zip(monthly_ret_table.year.values,
+                   monthly_ret_table.month.values)]
+
+    sns.barplot(x=date_labels,
+                y=monthly_ret_table.returns,
+                color='steelblue')
+    locs, labels = plt.xticks()
+    plt.setp(labels, rotation=90)
+
+    ax.set_ylabel('Return')
+    ax.set_xlabel('Month')
+    ax.set_title("Monthly Returns")
+    return ax
