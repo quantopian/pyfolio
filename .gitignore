@@ -61,3 +61,7 @@ target/
 
 # IPython notebook checkpoints
 .ipynb_checkpoints/
+
+# local copies of spy and risk factors
+factors.csv
+spy.csv

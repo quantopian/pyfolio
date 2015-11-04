@@ -589,18 +589,19 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
             'Bayesian tear sheet requires setting of live_start_date'
         )
 
-    # start by benchmark is S&P500
+    # default benchmark is S&P500
     fama_french = False
     if benchmark_rets is None:
         benchmark_rets = pd.DataFrame(utils.get_symbol_rets('SPY',
                                                start=returns.index[0],
                                                end=returns.index[-1]))
-    # unless user indicates otherwise
+    # unless user selects Fama-French risk factors SMB, HML, and UMD
     elif benchmark_rets == 'Fama-French':
         fama_french = True
-        rolling_window = utils.APPROX_BDAYS_PER_MONTH * 6
-        benchmark_rets = timeseries.rolling_fama_french(
-            returns, rolling_window=rolling_window)
+        benchmark_rets = utils.load_portfolio_risk_factors(
+            start=returns.index[0], end=returns.index[-1])
+        benchmark_rets = benchmark_rets.drop(['Mkt-RF', 'RF'],
+                                             axis='columns'))
 
     live_start_date = utils.get_utc_timestamp(live_start_date)
     df_train = returns.loc[returns.index < live_start_date]
