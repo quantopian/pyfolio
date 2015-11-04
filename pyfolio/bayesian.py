@@ -204,8 +204,8 @@ def model_best(y1, y2, samples=1000):
     mu_m = np.mean(y)
     mu_p = 0.000001 * 1 / np.std(y)**2
 
-    sigma_low = np.std(y)/1000
-    sigma_high = np.std(y)*1000
+    sigma_low = np.std(y) / 1000
+    sigma_high = np.std(y) * 1000
     with pm.Model():
         group1_mean = pm.Normal('group1_mean', mu=mu_m, tau=mu_p,
                                 testval=y1.mean())
@@ -215,7 +215,7 @@ def model_best(y1, y2, samples=1000):
                                 upper=sigma_high, testval=y1.std())
         group2_std = pm.Uniform('group2_std', lower=sigma_low,
                                 upper=sigma_high, testval=y2.std())
-        nu = pm.Exponential('nu_minus_two', 1/29., testval=4.) + 2.
+        nu = pm.Exponential('nu_minus_two', 1 / 29., testval=4.) + 2.
 
         returns_group1 = pm.T('group1', nu=nu, mu=group1_mean,
                               lam=group1_std**-2, observed=y1)
@@ -366,11 +366,11 @@ def model_stoch_vol(data, samples=2000):
     from pymc3.distributions.timeseries import GaussianRandomWalk
 
     with pm.Model():
-        nu = pm.Exponential('nu', 1./10, testval=5.)
-        sigma = pm.Exponential('sigma', 1./.02, testval=.1)
+        nu = pm.Exponential('nu', 1. / 10, testval=5.)
+        sigma = pm.Exponential('sigma', 1. / .02, testval=.1)
         s = GaussianRandomWalk('s', sigma**-2, shape=len(data))
         volatility_process = pm.Deterministic('volatility_process',
-                                              pm.exp(-2*s))
+                                              pm.exp(-2 * s))
         pm.T('r', nu, lam=volatility_process, observed=data)
         start = pm.find_MAP(vars=[s], fmin=sp.optimize.fmin_l_bfgs_b)
 

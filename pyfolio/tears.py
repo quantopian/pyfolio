@@ -19,6 +19,7 @@ import warnings
 from . import timeseries
 from . import utils
 from . import pos
+from . import txn
 from . import plotting
 from .plotting import plotting_context
 
@@ -38,8 +39,8 @@ import matplotlib.gridspec as gridspec
 import seaborn as sns
 from time import time
 
-def timer(msg_body, previous_time):
 
+def timer(msg_body, previous_time):
     current_time = time()
     run_time = current_time - previous_time
     message = "\nFinished " + msg_body + " (required {:.2f} seconds)."
@@ -51,9 +52,11 @@ def timer(msg_body, previous_time):
 def create_full_tear_sheet(returns, positions=None, transactions=None,
                            benchmark_rets=None,
                            gross_lev=None,
+                           slippage=None,
                            live_start_date=None, bayesian=False,
+                           hide_positions=False,
                            sector_mappings=None,
-                           cone_std=1.0, set_context=True):
+                           cone_std=(1.0, 1.5, 2.0), set_context=True):
     """
     Generate a number of tear sheets that are useful
     for analyzing a strategy's performance.
@@ -100,13 +103,23 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
             2009-12-07    0.999783
             2009-12-08    0.999880
             2009-12-09    1.000283
+    slippage : int/float, optional
+        Basis points of slippage to apply to returns before generating
+        tearsheet stats and plots.
+        If a value is provided, slippage parameter sweep
+        plots will be generated from the unadjusted returns.
+        Transactions and positions must also be passed.
+        - See txn.adjust_returns_for_slippage for more details.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period.
+    hide_positions : bool, optional
+        If True, will not output any symbol names.
     bayesian: boolean, optional
         If True, causes the generation of a Bayesian tear sheet.
-    cone_std : float, optional
-        The standard deviation to use for the cone plots.
+    cone_std : float, or tuple, optional
+        If float, The standard deviation to use for the cone plots.
+        If tuple, Tuple of standard deviation values to use for the cone plots
          - The cone is a normal distribution with this standard deviation
              centered around a linear regression.
     set_context : boolean, optional
@@ -121,13 +134,20 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     if returns.index[0] < benchmark_rets.index[0]:
         returns = returns[returns.index > benchmark_rets.index[0]]
 
+    if slippage is not None and transactions is not None:
+        turnover = txn.get_turnover(transactions, positions,
+                                    period=None, average=False)
+        unadjusted_returns = returns.copy()
+        returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
+    else:
+        unadjusted_returns = None
+
     create_returns_tear_sheet(
         returns,
         live_start_date=live_start_date,
         cone_std=cone_std,
         benchmark_rets=benchmark_rets,
-        set_context=set_context
-    )
+        set_context=set_context)
 
     create_interesting_times_tear_sheet(returns,
                                         benchmark_rets=benchmark_rets,
@@ -136,11 +156,13 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     if positions is not None:
         create_position_tear_sheet(returns, positions,
                                    gross_lev=gross_lev,
-                                   sector_mappings=sector_mappings,
-                                   set_context=set_context)
+                                   hide_positions=hide_positions,
+                                   set_context=set_context,
+                                   sector_mappings=sector_mappings)
 
         if transactions is not None:
             create_txn_tear_sheet(returns, positions, transactions,
+                                  unadjusted_returns=unadjusted_returns,
                                   set_context=set_context)
 
     if bayesian:
@@ -152,7 +174,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
 
 @plotting_context
 def create_returns_tear_sheet(returns, live_start_date=None,
-                              cone_std=1.0,
+                              cone_std=(1.0, 1.5, 2.0),
                               benchmark_rets=None,
                               return_fig=False):
     """
@@ -174,8 +196,9 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period.
-    cone_std : float, optional
-        The standard deviation to use for the cone plots.
+    cone_std : float, or tuple, optional
+        If float, The standard deviation to use for the cone plots.
+        If tuple, Tuple of standard deviation values to use for the cone plots
          - The cone is a normal distribution with this standard deviation
              centered around a linear regression.
     benchmark_rets : pd.Series, optional
@@ -242,7 +265,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         returns,
         factor_returns=benchmark_rets,
         live_start_date=live_start_date,
-        cone_std=cone_std,
+        cone_std=None,
         volatility_match=True,
         ax=ax_rolling_returns_vol_match)
     ax_rolling_returns_vol_match.set_title(
@@ -312,7 +335,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
 @plotting_context
 def create_position_tear_sheet(returns, positions, gross_lev=None,
-                               show_and_plot_top_pos=2,
+                               show_and_plot_top_pos=2, hide_positions=False,
                                return_fig=False, sector_mappings=None):
     """
     Generate a number of plots for analyzing a
@@ -336,15 +359,20 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         By default, this is 2, and both prints and plots the
         top 10 positions.
         If this is 0, it will only plot; if 1, it will only print.
+    hide_positions : bool, optional
+        If True, will not output any symbol names.
+        Overrides show_and_plot_top_pos to 0 to suppress text output.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
         If True, set default plotting style context.
-    sector_mapping: dict or pd.Series, optional
+    sector_mappings : dict or pd.Series, optional
         Security identifier to sector mapping.
         Security ids as keys, sectors as values.
     """
 
+    if hide_positions:
+        show_and_plot_top_pos = 0
     vertical_sections = 5 if sector_mappings is not None else 4
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
@@ -365,6 +393,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         returns,
         positions_alloc,
         show_and_plot=show_and_plot_top_pos,
+        hide_positions=hide_positions,
         ax=ax_top_positions)
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
@@ -384,8 +413,8 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
 
 
 @plotting_context
-def create_txn_tear_sheet(
-        returns, positions, transactions, return_fig=False):
+def create_txn_tear_sheet(returns, positions, transactions,
+                          unadjusted_returns=None, return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's transactions.
 
@@ -407,9 +436,10 @@ def create_txn_tear_sheet(
     set_context : boolean, optional
         If True, set default plotting style context.
     """
+    vertical_sections = 5 if unadjusted_returns is not None else 3
 
-    fig = plt.figure(figsize=(14, 3 * 6))
-    gs = gridspec.GridSpec(3, 3, wspace=0.5, hspace=0.5)
+    fig = plt.figure(figsize=(14, vertical_sections * 6))
+    gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
     ax_turnover = plt.subplot(gs[0, :])
     ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
     ax_turnover_hist = plt.subplot(gs[2, :])
@@ -427,6 +457,20 @@ def create_txn_tear_sheet(
                                           ax=ax_turnover_hist)
     except AttributeError:
         warnings.warn('Unable to generate turnover plot.', UserWarning)
+
+    if unadjusted_returns is not None:
+        ax_slippage_sweep = plt.subplot(gs[3, :])
+        plotting.plot_slippage_sweep(unadjusted_returns,
+                                     transactions,
+                                     positions,
+                                     ax=ax_slippage_sweep
+                                     )
+        ax_slippage_sensitivity = plt.subplot(gs[4, :])
+        plotting.plot_slippage_sensitivity(unadjusted_returns,
+                                           transactions,
+                                           positions,
+                                           ax=ax_slippage_sensitivity
+                                           )
 
     plt.show()
     if return_fig:
@@ -659,12 +703,16 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
 
     if stoch_vol:
         # run stochastic volatility model
-        print("\nRunning stochastic volatility model on most recent 400 days of returns")
+        print(
+            "\nRunning stochastic volatility model on "
+            "most recent 400 days of returns."
+        )
         returns_cutoff = 400
         if df_train.size > returns_cutoff:
             df_train_truncated = df_train[-returns_cutoff:]
         trace_stoch_vol = bayesian.model_stoch_vol(df_train_truncated)
-        previous_time = timer("running stochastic volatility model", previous_time)
+        previous_time = timer(
+            "running stochastic volatility model", previous_time)
 
         # plot log(sigma) and log(nu)
         print("\nPlotting stochastic volatility model")
@@ -683,11 +731,13 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         # plot latent volatility
         row += 1
         ax_volatility = plt.subplot(gs[row, :])
-        bayesian.plot_stoch_vol(df_train_truncated, trace=trace_stoch_vol, ax=ax_volatility)
-        previous_time = timer("plotting stochastic volatility model", previous_time)
+        bayesian.plot_stoch_vol(
+            df_train_truncated, trace=trace_stoch_vol, ax=ax_volatility)
+        previous_time = timer(
+            "plotting stochastic volatility model", previous_time)
 
     total_time = time() - start_time
-    print("\nTotal runtime was {:.2f} seconds.").format(total_time)
+    print("\nTotal runtime was {:.2f} seconds.".format(total_time))
 
     gs.tight_layout(fig)
 

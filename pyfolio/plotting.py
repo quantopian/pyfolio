@@ -27,6 +27,7 @@ from sklearn import preprocessing
 from . import utils
 from . import timeseries
 from . import pos
+from . import txn
 
 from .utils import APPROX_BDAYS_PER_MONTH
 
@@ -552,8 +553,9 @@ def plot_rolling_returns(
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
-    cone_std : float, optional
-        The standard deviation to use for the cone plots.
+    cone_std : float, or tuple, optional
+        If float, The standard deviation to use for the cone plots.
+        If tuple, Tuple of standard deviation values to use for the cone plots
          - The cone is a normal distribution with this standard deviation
              centered around a linear regression.
     legend_loc : matplotlib.loc, optional
@@ -573,6 +575,23 @@ def plot_rolling_returns(
         The axes that were plotted on.
 
 """
+    def draw_cone(returns, num_stdev, live_start_date, ax):
+        cone_df = timeseries.cone_rolling(
+            returns,
+            num_stdev=num_stdev,
+            cone_fit_end_date=live_start_date)
+
+        cone_in_sample = cone_df[cone_df.index < live_start_date]
+        cone_out_of_sample = cone_df[cone_df.index > live_start_date]
+        cone_out_of_sample = cone_out_of_sample[
+            cone_out_of_sample.index < returns.index[-1]]
+
+        ax.fill_between(cone_out_of_sample.index,
+                        cone_out_of_sample.sd_down,
+                        cone_out_of_sample.sd_up,
+                        color='steelblue', alpha=0.25)
+
+        return cone_in_sample, cone_out_of_sample
 
     if ax is None:
         ax = plt.gca()
@@ -582,12 +601,9 @@ def plot_rolling_returns(
                          'factor_returns.')
     elif volatility_match and factor_returns is not None:
         bmark_vol = factor_returns.loc[returns.index].std()
-        df_cum_rets = timeseries.cum_returns(
-            (returns / returns.std()) * bmark_vol,
-            1.0
-        )
-    else:
-        df_cum_rets = timeseries.cum_returns(returns, 1.0)
+        returns = (returns / returns.std()) * bmark_vol
+
+    df_cum_rets = timeseries.cum_returns(returns, 1.0)
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
@@ -611,17 +627,19 @@ def plot_rolling_returns(
             label='Live', ax=ax, **kwargs)
 
         if cone_std is not None:
-            cone_df = timeseries.cone_rolling(
-                returns,
-                num_stdev=cone_std,
-                cone_fit_end_date=live_start_date)
+            # check to see if cone_std was passed as a single value and,
+            # if so, just convert to list automatically
+            if isinstance(cone_std, float):
+                cone_std = [cone_std]
 
-            cone_df_fit = cone_df[cone_df.index < live_start_date]
+            for cone_i in cone_std:
+                cone_in_sample, cone_out_of_sample = draw_cone(
+                    returns,
+                    cone_i,
+                    live_start_date,
+                    ax)
 
-            cone_df_live = cone_df[cone_df.index > live_start_date]
-            cone_df_live = cone_df_live[cone_df_live.index < returns.index[-1]]
-
-            cone_df_fit['line'].plot(
+            cone_in_sample['line'].plot(
                 ax=ax,
                 ls='--',
                 label='Backtest trend',
@@ -629,7 +647,7 @@ def plot_rolling_returns(
                 color='forestgreen',
                 alpha=0.7,
                 **kwargs)
-            cone_df_live['line'].plot(
+            cone_out_of_sample['line'].plot(
                 ax=ax,
                 ls='--',
                 label='Predicted trend',
@@ -637,11 +655,6 @@ def plot_rolling_returns(
                 color='red',
                 alpha=0.7,
                 **kwargs)
-
-            ax.fill_between(cone_df_live.index,
-                            cone_df_live.sd_down,
-                            cone_df_live.sd_up,
-                            color='red', alpha=0.30)
 
     ax.axhline(1.0, linestyle='--', color='black', lw=2)
     ax.set_ylabel('Cumulative returns')
@@ -835,7 +848,7 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
 
 
 def show_and_plot_top_positions(returns, positions_alloc,
-                                show_and_plot=2,
+                                show_and_plot=2, hide_positions=False,
                                 legend_loc='real_best', ax=None,
                                 **kwargs):
     """Prints and/or plots the exposures of the top 10 held positions of
@@ -851,6 +864,8 @@ def show_and_plot_top_positions(returns, positions_alloc,
     show_and_plot : int, optional
         By default, this is 2, and both prints and plots.
         If this is 0, it will only plot; if 1, it will only print.
+    hide_positions : bool, optional
+        If True, will not output any symbol names.
     legend_loc : matplotlib.loc, optional
         The location of the legend on the plot.
         By default, the legend will display below the plot.
@@ -918,6 +933,10 @@ def show_and_plot_top_positions(returns, positions_alloc,
         df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
         ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
         ax.set_ylabel('Exposure by stock')
+
+        if hide_positions:
+            ax.legend_.remove()
+
         return ax
 
 
@@ -1064,7 +1083,7 @@ def plot_turnover(returns, transactions, positions,
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_turnover = pos.get_turnover(transactions, positions)
+    df_turnover = txn.get_turnover(transactions, positions)
     df_turnover_by_month = df_turnover.resample("M")
     df_turnover.plot(color='steelblue', alpha=1.0, lw=0.5, ax=ax, **kwargs)
     df_turnover_by_month.plot(
@@ -1085,6 +1104,106 @@ def plot_turnover(returns, transactions, positions,
     ax.set_ylim((0, 1))
     ax.set_ylabel('Turnover')
     ax.set_xlabel('')
+    return ax
+
+
+def plot_slippage_sweep(returns, transactions, positions,
+                        slippage_params=(3, 8, 10, 12, 15, 20, 50),
+                        ax=None, **kwargs):
+    """Plots a equity curves at different per-dollar slippage assumptions.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Timeseries of portfolio returns to be adjusted for various
+        degrees of slippage.
+    transactions : pd.DataFrame
+        Daily transaction volume and dollar ammount.
+         - See full explanation in tears.create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    slippage_params: tuple
+        Slippage pameters to apply to the return time series (in
+        basis points).
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    turnover = txn.get_turnover(transactions, positions,
+                                period=None, average=False)
+
+    slippage_sweep = pd.DataFrame()
+    for bps in slippage_params:
+        adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
+        label = str(bps) + " bps"
+        slippage_sweep[label] = timeseries.cum_returns(adj_returns, 1)
+
+    slippage_sweep.plot(alpha=1.0, lw=0.5, ax=ax)
+
+    ax.set_title('Cumulative Returns Given Additional Per-Dollar Slippage')
+    ax.set_ylabel('')
+
+    ax.legend(loc='center left')
+
+    return ax
+
+
+def plot_slippage_sensitivity(returns, transactions, positions,
+                              ax=None, **kwargs):
+    """Plots curve relating per-dollar slippage to average annual returns.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Timeseries of portfolio returns to be adjusted for various
+        degrees of slippage.
+    transactions : pd.DataFrame
+        Daily transaction volume and dollar ammount.
+         - See full explanation in tears.create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    turnover = txn.get_turnover(transactions, positions,
+                                period=None, average=False)
+    avg_returns_given_slippage = pd.Series()
+    for bps in range(1, 100):
+        adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
+        avg_returns = timeseries.annual_return(
+            adj_returns, style='calendar')
+        avg_returns_given_slippage.loc[bps] = avg_returns
+
+    avg_returns_given_slippage.plot(alpha=1.0, lw=2, ax=ax)
+
+    ax.set(title='Average Annual Returns Given Additional Per-Dollar Slippage',
+           xticks=np.arange(0, 100, 10),
+           ylabel='Average Annual Return',
+           xlabel='Per-Dollar Slippage (bps)')
+
     return ax
 
 
@@ -1114,7 +1233,7 @@ def plot_daily_turnover_hist(transactions, positions,
 
     if ax is None:
         ax = plt.gca()
-    turnover = pos.get_turnover(transactions, positions, period=None)
+    turnover = txn.get_turnover(transactions, positions, period=None)
     sns.distplot(turnover, ax=ax, **kwargs)
     ax.set_title('Distribution of Daily Turnover Rates')
     ax.set_xlabel('Turnover Rate')

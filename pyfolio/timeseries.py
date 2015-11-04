@@ -360,7 +360,6 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
 
 
 def sortino_ratio(returns, required_return=0, period=DAILY):
-
     """
     Determines the Sortino ratio of a strategy.
 
@@ -773,6 +772,7 @@ def perf_stats(
     all_stats['max_drawdown'] = max_drawdown(returns)
     all_stats['omega_ratio'] = omega_ratio(returns)
     all_stats['sortino_ratio'] = sortino_ratio(returns)
+    all_stats['information_ratio'] = information_ratio(returns)
     all_stats['skewness'] = stats.skew(returns)
     all_stats['kurtosis'] = stats.kurtosis(returns)
 
@@ -1219,7 +1219,8 @@ def portfolio_returns_metric_weighted(holdings_returns,
         else:
             holdings_df = pd.DataFrame(holdings_returns).T.fillna(0)
 
-        holdings_df['port_ret'] = holdings_df.sum(axis=1)/len(holdings_returns)
+        holdings_df['port_ret'] = holdings_df.sum(
+            axis=1) / len(holdings_returns)
     else:
         holdings_df_na = pd.DataFrame(holdings_returns).T
         holdings_cols = holdings_df_na.columns
@@ -1243,7 +1244,7 @@ def portfolio_returns_metric_weighted(holdings_returns,
             holdings_df = holdings_df.join(
                 holdings_func_rebal_t,
                 rsuffix='_t').fillna(method='ffill').dropna()
-        transform_columns = list(map(lambda x: x+"_t", holdings_cols))
+        transform_columns = list(map(lambda x: x + "_t", holdings_cols))
         if inverse_weight:
             inv_func = 1.0 / holdings_df[transform_columns]
             holdings_df_weights = inv_func.div(inv_func.sum(axis=1),
@@ -1329,3 +1330,31 @@ def min_max_vol_bounds(value, lower_bound=0.12, upper_bound=0.24):
         return upper_bound
 
     return annual_vol
+
+
+def information_ratio(returns, benchmark_returns):
+    """
+    Determines the Information ratio of a strategy.
+
+    Parameters
+    ----------
+    returns : pd.Series or pd.DataFrame
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    benchmark_returns: float / series
+
+    Returns
+    -------
+    float
+        The information ratio.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/information_ratio for more details.
+
+    """
+    active_return = returns - benchmark_returns
+    tracking_error = np.std(active_return, ddof=1)
+    if np.isnan(tracking_error):
+        return 0.0
+    return np.mean(active_return) / tracking_error
