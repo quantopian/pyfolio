@@ -77,37 +77,16 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         nu = pm.Exponential('nu_minus_two', 1. / 10., testval=.3)
 
         # alpha and beta
-        #beta_init, alpha_init = np.linalg.lstsq(
         X = bmark.loc[data_no_missing.index]
         X['ones'] = np.ones(len(X))
         y = data_no_missing
         alphabeta_init = np.linalg.lstsq(X, y)[0]#[:2]
 
-        #beta_init, alpha_init = sp.stats.linregress(
-        #    bmark.loc[data_no_missing.index],
-        #    data_no_missing)[:2]
-
-        #ab_reg = []
-        #abi_string = ['beta'] * Nbmark + ['alpha']
-        #abi_sd = [1.0] * Nbmark + [0.1]
-        #for i, abi in enumerate(alphabeta_init):
-        #    ab_reg.append(pm.Normal(abi_string[i], mu=0, sd=abi_sd[i], 
-        #        testval=abi, shape=Nbmark))
-
         alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alphabeta_init[-1])
         beta_reg = pm.Normal('beta', mu=0, sd=1, 
                 testval=alphabeta_init[:-1], shape=Nbmark)
-        # theano elementwise multiplication
-        # alpha + beta_vector * data
-        # dot product between beta_vector and data
-        #import pdb; pdb.set_trace()
-        #mu_reg = alpha_reg + beta_reg * bmark.ix[data_no_missing.index]
         bmark_theano = tt.as_tensor_variable(bmark.ix[data_no_missing.index].T)
         mu_reg = alpha_reg + tt.dot(beta_reg, bmark_theano)
-        #for i in range(Nbmark):
-        #    mu_reg += ab_reg[i] * bmark.ix[data_no_missing.index, i]
-
-        #import pdb; pdb.set_trace()
         pm.T('returns',
              nu=nu + 2,
              mu=mu_reg,
