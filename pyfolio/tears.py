@@ -702,7 +702,8 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     ax_alpha = plt.subplot(gs[row, 0])
     ax_beta = plt.subplot(gs[row, 1])
     if fama_french:
-        sns.distplot((trace_alpha_beta['alpha'][100:]), ax=ax_alpha)
+        sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1,
+                     ax=ax_alpha)
         betas = ['SMB', 'HML', 'UMD']
         nbeta = trace_alpha_beta['beta'].shape[1]
         for i in range(nbeta):
@@ -710,7 +711,8 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
                     label=betas[i])
         plt.legend()
     else:
-        sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1, ax=ax_alpha)
+        sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1,
+                     ax=ax_alpha)
         sns.distplot(trace_alpha_beta['beta'][100:], ax=ax_beta)
     ax_alpha.set_xlabel('Annual Alpha')
     ax_alpha.set_ylabel('Belief')
