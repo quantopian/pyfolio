@@ -142,34 +142,48 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
     else:
         unadjusted_returns = None
 
-    create_returns_tear_sheet(
-        returns,
-        live_start_date=live_start_date,
-        cone_std=cone_std,
-        benchmark_rets=benchmark_rets,
-        set_context=set_context)
+    try:
+        create_returns_tear_sheet(
+            returns,
+            live_start_date=live_start_date,
+            cone_std=cone_std,
+            benchmark_rets=benchmark_rets,
+            set_context=set_context)
+    except:
+        pass
 
-    create_interesting_times_tear_sheet(returns,
-                                        benchmark_rets=benchmark_rets,
-                                        set_context=set_context)
+    try:
+        create_interesting_times_tear_sheet(returns,
+                                            benchmark_rets=benchmark_rets,
+                                            set_context=set_context)
+    except:
+        pass
 
     if positions is not None:
-        create_position_tear_sheet(returns, positions,
-                                   gross_lev=gross_lev,
-                                   hide_positions=hide_positions,
-                                   set_context=set_context,
-                                   sector_mappings=sector_mappings)
-
+        try:
+            create_position_tear_sheet(returns, positions,
+                                       gross_lev=gross_lev,
+                                       hide_positions=hide_positions,
+                                       set_context=set_context,
+                                       sector_mappings=sector_mappings)
+        except:
+            pass
         if transactions is not None:
-            create_txn_tear_sheet(returns, positions, transactions,
-                                  unadjusted_returns=unadjusted_returns,
-                                  set_context=set_context)
+            try:
+                create_txn_tear_sheet(returns, positions, transactions,
+                                      unadjusted_returns=unadjusted_returns,
+                                      set_context=set_context)
+            except:
+                pass
 
     if bayesian:
-        create_bayesian_tear_sheet(returns,
-                                   live_start_date=live_start_date,
-                                   benchmark_rets=benchmark_rets,
-                                   set_context=set_context)
+        try:
+            create_bayesian_tear_sheet(returns,
+                                       live_start_date=live_start_date,
+                                       benchmark_rets=benchmark_rets,
+                                       set_context=set_context)
+        except:
+            pass
 
 
 @plotting_context
