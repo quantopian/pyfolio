@@ -610,7 +610,7 @@ def plot_rolling_returns(
 
     if factor_returns is not None:
         timeseries.cum_returns(factor_returns[df_cum_rets.index], 1.0).plot(
-            lw=2, color='gray', label='S&P500', alpha=0.60, ax=ax, **kwargs)
+            lw=2, color='gray', label=factor_returns.name, alpha=0.60, ax=ax, **kwargs)
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
 
@@ -697,7 +697,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    ax.set_title("Rolling Portfolio Beta to S&P 500")
+    ax.set_title("Rolling Portfolio Beta to " + factor_returns.name)
     ax.set_ylabel('Beta')
     rb_1 = timeseries.rolling_beta(
         returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6)
