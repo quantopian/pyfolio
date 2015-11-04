@@ -1366,40 +1366,35 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
         The axes that were plotted on.
     """
 
+    def cumulate_returns(x):
+        return timeseries.cum_returns(x)[-1]
+
     if ax is None:
         ax = plt.gca()
 
-    monthly_ret_table = timeseries.aggregate_returns(returns, 'monthly')
-    monthly_ret_table = monthly_ret_table.reset_index()
-    monthly_ret_table.columns = ['year', 'month', 'returns']
+    monthly_rets = returns.resample('M', how=cumulate_returns).to_period()
 
-    # Generate month-year labels for the x-axis corresponding to
-    # the returns plotted
-    date_labels = [str(i[1]) + ' - ' + str(i[0]) for i in
-                   zip(monthly_ret_table.year.values,
-                   monthly_ret_table.month.values)]
-
-    sns.barplot(x=date_labels,
-                y=monthly_ret_table.returns,
+    sns.barplot(x=monthly_rets.index,
+                y=monthly_rets.values,
                 color='steelblue')
+
     locs, labels = plt.xticks()
     plt.setp(labels, rotation=90)
-
-    ax.set_ylabel('Return')
-    ax.set_xlabel('Month')
-    ax.set_title("Monthly Returns")
 
     # only show x-labels on year boundary
     xticks_coord = []
     xticks_label = []
     count = 0
-    for i in monthly_ret_table.month:
-        if int(i) == 1:
-            xticks_label.append(date_labels[count])
+    for i in monthly_rets.index:
+        if i.month == 1:
+            xticks_label.append(i)
             xticks_coord.append(count)
+            # plot yearly boundary line
+            ax.axvline(count, color='gray', ls='--', alpha=0.3)
 
         count += 1
 
+    ax.axhline(0.0, color='darkgray', ls='-')
     ax.set_xticks(xticks_coord)
     ax.set_xticklabels(xticks_label)
 
