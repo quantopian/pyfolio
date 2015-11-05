@@ -1099,7 +1099,6 @@ def cone_rolling(
                                          'sd_down': temp_sd_down})
 
         perf_ts_r = perf_ts_r.append(future_cone)
-
     return perf_ts_r
 
 
@@ -1332,7 +1331,7 @@ def min_max_vol_bounds(value, lower_bound=0.12, upper_bound=0.24):
     return annual_vol
 
 
-def information_ratio(returns, benchmark_returns):
+def information_ratio(returns, benchmark_returns=None):
     """
     Determines the Information ratio of a strategy.
 
@@ -1340,8 +1339,9 @@ def information_ratio(returns, benchmark_returns):
     ----------
     returns : pd.Series or pd.DataFrame
         Daily returns of the strategy, noncumulative.
+        Returns series may already be benchmark adjusted.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_returns: float / series
+    benchmark_returns: float / series, optional
 
     Returns
     -------
@@ -1353,7 +1353,10 @@ def information_ratio(returns, benchmark_returns):
     See https://en.wikipedia.org/wiki/information_ratio for more details.
 
     """
-    active_return = returns - benchmark_returns
+    active_return = returns
+    if benchmark_returns is not None:
+        active_return = returns - benchmark_returns
+
     tracking_error = np.std(active_return, ddof=1)
     if np.isnan(tracking_error):
         return 0.0
