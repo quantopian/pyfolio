@@ -503,12 +503,12 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
         perf_stats_all.loc['beta'] = perf_stats_all_ab[1]
         perf_stats_all.columns = ['All_History']
 
-        print('Out-of-Sample Months: ' + \
+        print('Out-of-Sample Months: ' +
               str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
     else:
         returns_backtest = returns
 
-    print('Backtest Months: ' + \
+    print('Backtest Months: ' +
           str(int(len(returns_backtest) / APPROX_BDAYS_PER_MONTH)))
 
     perf_stats = np.round(timeseries.perf_stats(
@@ -612,7 +612,8 @@ def plot_rolling_returns(
 
     if factor_returns is not None:
         timeseries.cum_returns(factor_returns[df_cum_rets.index], 1.0).plot(
-            lw=2, color='gray', label=factor_returns.name, alpha=0.60, ax=ax, **kwargs)
+            lw=2, color='gray', label=factor_returns.name, alpha=0.60,
+            ax=ax, **kwargs)
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
 
