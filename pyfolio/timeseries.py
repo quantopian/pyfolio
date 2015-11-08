@@ -772,14 +772,11 @@ def perf_stats(
     all_stats['max_drawdown'] = max_drawdown(returns)
     all_stats['omega_ratio'] = omega_ratio(returns)
     all_stats['sortino_ratio'] = sortino_ratio(returns)
-    
     # information_ratio needs a second argument for benchmark_returns
     #all_stats['information_ratio'] = information_ratio(returns)
     all_stats['information_ratio'] = np.nan
-    
     all_stats['skewness'] = stats.skew(returns)
     all_stats['kurtosis'] = stats.kurtosis(returns)
-
     if return_as_dict:
         return all_stats
     else:
