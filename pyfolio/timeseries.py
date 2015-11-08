@@ -772,6 +772,11 @@ def perf_stats(
     all_stats['max_drawdown'] = max_drawdown(returns)
     all_stats['omega_ratio'] = omega_ratio(returns)
     all_stats['sortino_ratio'] = sortino_ratio(returns)
+    # TODO: The information_ratio method requires
+    # a second argument for benchmark returns.
+    # Setting information_ratio to NaN until
+    # benchmark returns are added as an argument
+    # to this method.
     all_stats['information_ratio'] = np.nan
     all_stats['skewness'] = stats.skew(returns)
     all_stats['kurtosis'] = stats.kurtosis(returns)
