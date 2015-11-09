@@ -26,7 +26,9 @@ from datetime import datetime
 
 import pandas as pd
 import numpy as np
-import pandas.io.data as web
+
+from pandas_datareader import data as web
+
 from pandas.tseries.offsets import BDay
 
 import zipfile
