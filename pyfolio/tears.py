@@ -593,8 +593,9 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     fama_french = False
     if benchmark_rets is None:
         benchmark_rets = pd.DataFrame(utils.get_symbol_rets('SPY',
-                                               start=returns.index[0],
-                                               end=returns.index[-1]))
+                                                            start=returns.index[
+                                                                0],
+                                                            end=returns.index[-1]))
     # unless user indicates otherwise
     elif benchmark_rets == 'Fama-French':
         fama_french = True
@@ -707,8 +708,8 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         betas = ['SMB', 'HML', 'UMD']
         nbeta = trace_alpha_beta['beta'].shape[1]
         for i in range(nbeta):
-            sns.distplot(trace_alpha_beta['beta'][100:, i], ax=ax_beta, 
-                    label=betas[i])
+            sns.distplot(trace_alpha_beta['beta'][100:, i], ax=ax_beta,
+                         label=betas[i])
         plt.legend()
     else:
         sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1,

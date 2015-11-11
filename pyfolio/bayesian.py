@@ -80,11 +80,11 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         X = bmark.loc[data_no_missing.index]
         X['ones'] = np.ones(len(X))
         y = data_no_missing
-        alphabeta_init = np.linalg.lstsq(X, y)[0]#[:2]
+        alphabeta_init = np.linalg.lstsq(X, y)[0]  # [:2]
 
         alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alphabeta_init[-1])
-        beta_reg = pm.Normal('beta', mu=0, sd=1, 
-                testval=alphabeta_init[:-1], shape=Nbmark)
+        beta_reg = pm.Normal('beta', mu=0, sd=1,
+                             testval=alphabeta_init[:-1], shape=Nbmark)
         bmark_theano = tt.as_tensor_variable(bmark.ix[data_no_missing.index].T)
         mu_reg = alpha_reg + tt.dot(beta_reg, bmark_theano)
         pm.T('returns',
