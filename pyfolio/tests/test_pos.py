@@ -113,6 +113,6 @@ class PositionsTestCase(TestCase):
             assert_frame_equal(result_sector_exposure,
                                expected_sector_exposure)
             if warning_expected:
-                assert len(w) == 1
+                self.assertEqual(len(w), 1)
             else:
-                assert len(w) == 0
+                self.assertEqual(len(w), 0)
