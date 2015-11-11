@@ -34,7 +34,7 @@ def get_percent_alloc(values):
         Positions and their allocations.
     """
     return values.divide(
-        values.abs().sum(axis='columns'),
+        values.sum(axis='columns'),
         axis='rows'
     )
 
