@@ -592,10 +592,10 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     # start by benchmark is S&P500
     fama_french = False
     if benchmark_rets is None:
-        benchmark_rets = pd.DataFrame(utils.get_symbol_rets('SPY',
-                                                            start=returns.index[
-                                                                0],
-                                                            end=returns.index[-1]))
+        benchmark_rets = pd.DataFrame(
+            utils.get_symbol_rets('SPY',
+                                  start=returns.index[0],
+                                  end=returns.index[-1]))
     # unless user indicates otherwise
     elif benchmark_rets == 'Fama-French':
         fama_french = True
