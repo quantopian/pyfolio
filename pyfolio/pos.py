@@ -162,7 +162,7 @@ def get_sector_exposures(positions, symbol_sector_map):
     positions = positions.drop('cash', axis=1)
 
     unmapped_pos = np.setdiff1d(positions.columns.values,
-                                symbol_sector_map.keys())
+                                list(symbol_sector_map.keys()))
     if len(unmapped_pos) > 0:
         warn_message = """Warning: Symbols {} have no sector mapping.
         They will not be included in sector allocations""".format(
