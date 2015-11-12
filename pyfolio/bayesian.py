@@ -53,7 +53,9 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
 
     Returns
     -------
-    pymc3.sampling.BaseTrace object
+    model : pymc.Model object
+        PyMC3 model containing all random variables.
+    trace : pymc3.sampling.BaseTrace object
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
     """
@@ -69,7 +71,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         Nbmark = 1
     data_no_missing = data.dropna()
 
-    with pm.Model():
+    with pm.Model() as model:
         sigma = pm.HalfCauchy(
             'sigma',
             beta=1,
@@ -96,7 +98,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         step = pm.NUTS(scaling=start)
         trace = pm.sample(samples, step, start=start)
 
-    return trace
+    return model, trace
 
 
 def model_returns_normal(data, samples=500):
@@ -115,12 +117,14 @@ def model_returns_normal(data, samples=500):
 
     Returns
     -------
-    pymc3.sampling.BaseTrace object
+    model : pymc.Model object
+        PyMC3 model containing all random variables.
+    trace : pymc3.sampling.BaseTrace object
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
 
     """
-    with pm.Model():
+    with pm.Model() as model:
         mu = pm.Normal('mean returns', mu=0, sd=.01, testval=data.mean())
         sigma = pm.HalfCauchy('volatility', beta=1, testval=data.std())
         returns = pm.Normal('returns', mu=mu, sd=sigma, observed=data)
@@ -137,7 +141,7 @@ def model_returns_normal(data, samples=500):
         start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
         step = pm.NUTS(scaling=start)
         trace = pm.sample(samples, step, start=start)
-    return trace
+    return model, trace
 
 
 def model_returns_t(data, samples=500):
@@ -152,13 +156,15 @@ def model_returns_t(data, samples=500):
 
     Returns
     -------
-    pymc3.sampling.BaseTrace object
+    model : pymc.Model object
+        PyMC3 model containing all random variables.
+    trace : pymc3.sampling.BaseTrace object
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
 
     """
 
-    with pm.Model():
+    with pm.Model() as model:
         mu = pm.Normal('mean returns', mu=0, sd=.01, testval=data.mean())
         sigma = pm.HalfCauchy('volatility', beta=1, testval=data.std())
         nu = pm.Exponential('nu_minus_two', 1. / 10., testval=3.)
@@ -174,7 +180,7 @@ def model_returns_t(data, samples=500):
         start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
         step = pm.NUTS(scaling=start)
         trace = pm.sample(samples, step, start=start)
-    return trace
+    return model, trace
 
 
 def model_best(y1, y2, samples=1000):
@@ -201,7 +207,9 @@ def model_best(y1, y2, samples=1000):
 
     Returns
     -------
-    pymc3.sampling.BaseTrace object
+    model : pymc.Model object
+        PyMC3 model containing all random variables.
+    trace : pymc3.sampling.BaseTrace object
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
 
@@ -217,7 +225,7 @@ def model_best(y1, y2, samples=1000):
 
     sigma_low = np.std(y) / 1000
     sigma_high = np.std(y) * 1000
-    with pm.Model():
+    with pm.Model() as model:
         group1_mean = pm.Normal('group1_mean', mu=mu_m, tau=mu_p,
                                 testval=y1.mean())
         group2_mean = pm.Normal('group2_mean', mu=mu_m, tau=mu_p,
@@ -258,7 +266,7 @@ def model_best(y1, y2, samples=1000):
         step = pm.NUTS()
 
         trace = pm.sample(samples, step)
-    return trace
+    return model, trace
 
 
 def plot_best(trace=None, data_train=None, data_test=None,
@@ -366,7 +374,9 @@ def model_stoch_vol(data, samples=2000):
 
     Returns
     -------
-    pymc3.sampling.BaseTrace object
+    model : pymc.Model object
+        PyMC3 model containing all random variables.
+    trace : pymc3.sampling.BaseTrace object
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
 
@@ -376,7 +386,7 @@ def model_stoch_vol(data, samples=2000):
     """
     from pymc3.distributions.timeseries import GaussianRandomWalk
 
-    with pm.Model():
+    with pm.Model() as model:
         nu = pm.Exponential('nu', 1. / 10, testval=5.)
         sigma = pm.Exponential('sigma', 1. / .02, testval=.1)
         s = GaussianRandomWalk('s', sigma**-2, shape=len(data))
@@ -393,7 +403,7 @@ def model_stoch_vol(data, samples=2000):
         trace = pm.sample(samples, step, start=trace[-1],
                           progressbar=False, njobs=2)
 
-    return trace
+    return model, trace
 
 
 def plot_stoch_vol(data, trace=None, ax=None):
@@ -526,7 +536,7 @@ def _plot_bayes_cone(returns_train, returns_test,
 
 
 def run_model(model, returns_train, returns_test=None,
-              bmark=None, samples=500):
+              bmark=None, samples=500, ppc=False):
     """Run one of the Bayesian models.
 
     Parameters
@@ -544,38 +554,48 @@ def run_model(model, returns_train, returns_test=None,
         If bmark has more recent returns than returns_train, these dates
         will be treated as missing values and predictions will be
         generated for them taking market correlations into account.
+    samples : int (optional)
+        Number of posterior samples to draw.
+    ppc : boolean (optional)
+        Whether to run a posterior predictive check. Will generate
+        samples of length returns_test.  Returns a second argument
+        that contains the PPC of shape samples x len(returns_test).
 
     Returns
     -------
-    pymc3.sampling.BaseTrace object
+    trace : pymc3.sampling.BaseTrace object
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
-    """
-    if returns_test is not None:
-        period = returns_train.index.append(returns_test.index)
-        rets = pd.Series(returns_train, period)
-    else:
-        rets = returns_train
+
+    ppc : numpy.array (if ppc==True)
+       PPC of shape samples x len(returns_test).
+
+"""
 
     if model == 'alpha_beta':
-        trace = model_returns_t_alpha_beta(returns_train, bmark, samples)
+        model, trace = model_returns_t_alpha_beta(returns_train,
+                                                  bmark, samples)
     elif model == 't':
-        trace = model_returns_t(rets, samples)
+        model, trace = model_returns_t(returns_train, samples)
     elif model == 'normal':
-        trace = model_returns_normal(rets, samples)
+        model, trace = model_returns_normal(returns_train, samples)
     elif model == 'best':
-        trace = model_best(returns_train, returns_test, samples=samples)
+        model, trace = model_best(returns_train, returns_test, samples=samples)
     else:
         raise NotImplementedError(
             'Model {} not found.'
             'Use alpha_beta, t, normal, or best.'.format(model))
 
+    if ppc:
+        ppc_samples = pm.sample_ppc(trace, samples=samples,
+                                    model=model, size=len(returns_test))
+        return trace, ppc_samples['returns']
+
     return trace
 
 
-def plot_bayes_cone(returns_train, returns_test, bmark=None, model='t',
-                    trace=None, plot_train_len=50, ax=None,
-                    samples=500):
+def plot_bayes_cone(returns_train, returns_test, ppc,
+                    plot_train_len=50, ax=None):
     """Generate cumulative returns plot with Bayesian cone.
 
     Parameters
@@ -586,22 +606,14 @@ def plot_bayes_cone(returns_train, returns_test, bmark=None, model='t',
         Out-of-sample returns. Datetimes in returns_test will be added to
         returns_train as missing values and predictions will be generated
         for them.
-    bmark : pd.Series (optional)
-        Only used for alpha_beta to estimate regression coefficients.
-        If bmark has more recent returns than returns_train, these dates
-        will be treated as missing values and predictions will be
-        generated for them taking market correlations into account.
-    model : {None, 'alpha_beta', 't', 'normal'} (optional)
-        Which model to run. If none, assume trace is being passed in.
-    trace : pymc3.sampling.BaseTrace (optional)
-        Trace of a previously run model.
+    ppc : np.array
+        Posterior predictive samples of shape samples x
+        len(returns_test).
     plot_train_len : int (optional)
         How many data points to plot of returns_train. Useful to zoom in on
         the prediction if there is a long backtest period.
     ax : matplotlib.Axis (optional)
         Axes upon which to plot.
-    samples : int (optional)
-        Number of posterior samples to draw.
 
     Returns
     -------
@@ -610,19 +622,16 @@ def plot_bayes_cone(returns_train, returns_test, bmark=None, model='t',
     trace : pymc3.sampling.BaseTrace
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
-    """
 
-    # generate cone
-    if trace is None:
-        trace = run_model(model, returns_train, returns_test=returns_test,
-                          bmark=bmark, samples=samples)
+"""
 
-    score = compute_consistency_score(returns_test, trace['returns_missing'])
+    score = compute_consistency_score(returns_test,
+                                      ppc)
 
     ax = _plot_bayes_cone(
         returns_train,
         returns_test,
-        trace['returns_missing'],
+        ppc,
         plot_train_len=plot_train_len,
         ax=ax)
     ax.text(
@@ -636,4 +645,4 @@ def plot_bayes_cone(returns_train, returns_test, bmark=None, model='t',
     )
 
     ax.set_ylabel('Cumulative returns', fontsize=14)
-    return score, trace
+    return score

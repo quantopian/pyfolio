@@ -613,8 +613,9 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     # track the total run time of the Bayesian tear sheet
     start_time = previous_time
 
-    trace_t = bayesian.run_model('t', df_train, returns_test=df_test,
-                                 samples=samples)
+    trace_t, ppc_t = bayesian.run_model('t', df_train,
+                                        returns_test=df_test,
+                                        samples=samples, ppc=True)
     previous_time = timer("T model", previous_time)
 
     # Compute BEST model
@@ -634,9 +635,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
 
     # Plot Bayesian cone
     ax_cone = plt.subplot(gs[row, :])
-    bayesian.plot_bayes_cone(df_train, df_test,
-                             trace=trace_t,
-                             ax=ax_cone)
+    bayesian.plot_bayes_cone(df_train, df_test, ppc_t, ax=ax_cone)
     previous_time = timer("plotting Bayesian cone", previous_time)
 
     # Plot BEST results
@@ -660,7 +659,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     row += 1
     ax_ret_pred_day = plt.subplot(gs[row, 0])
     ax_ret_pred_week = plt.subplot(gs[row, 1])
-    day_pred = trace_t['returns_missing'][:, 0]
+    day_pred = ppc_t[:, 0]
     p5 = scipy.stats.scoreatpercentile(day_pred, 5)
     sns.distplot(day_pred,
                  ax=ax_ret_pred_day
@@ -676,7 +675,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
 
     # Plot Bayesian VaRs
     week_pred = (
-        np.cumprod(trace_t['returns_missing'][:, :5] + 1, 1) - 1)[:, -1]
+        np.cumprod(ppc_t[:, :5] + 1, 1) - 1)[:, -1]
     p5 = scipy.stats.scoreatpercentile(week_pred, 5)
     sns.distplot(week_pred,
                  ax=ax_ret_pred_week
