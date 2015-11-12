@@ -134,6 +134,8 @@
     
         <li class="main active"><a href="#whats-new">What's New</a></li>
         
+            <li><a href="#v031-nov-12-2015">v0.3.1 (Nov 12, 2015)</a></li>
+        
             <li><a href="#v03-oct-23-2015">v0.3 (Oct 23, 2015)</a></li>
         
             <li><a href="#v02-oct-16-2015">v0.2 (Oct 16, 2015)</a></li>
@@ -145,9 +147,38 @@
 
 <h1 id="whats-new">What's New</h1>
 <p>These are new features and improvements of note in each release.</p>
+<h2 id="v031-nov-12-2015">v0.3.1 (Nov 12, 2015)</h2>
+<p>This is a minor release from 0.3 that includes mostly bugfixes but also some new features. We recommend that all users upgrade to this new version.</p>
+<h3 id="new-features">New features</h3>
+<ul>
+<li>Add Information Ratio <a href="https://github.com/quantopian/pyfolio/pull/194">PR194</a> by @MridulS</li>
+<li>Bayesian tear-sheet now accepts 'Fama-French' option to do Bayesian multivariate regression against Fama-French risk factors <a href="https://github.com/quantopian/pyfolio/pull/200">PR200</a> by Shane Bussman</li>
+<li>Plotting of monthly returns <a href="https://github.com/quantopian/pyfolio/pull/195">PR195</a></li>
+</ul>
+<h3 id="bug-fixes">Bug fixes</h3>
+<ul>
+<li><code>pos.get_percent_alloc</code> was not handling short allocations correctly <a href="https://github.com/quantopian/pyfolio/pull/201">PR201</a></li>
+<li>UTC bug with cached Fama-French factors <a href="https://github.com/quantopian/pyfolio/commit/709553a55b5df7c908d17f443cb17b51854a65be">commit</a></li>
+<li>Sector map was not being passed from <code>create_returns_tearsheet</code> <a href="https://github.com/quantopian/pyfolio/commit/894b753e365f9cb4861ffca2ef214c5a64b2bef4">commit</a></li>
+<li>New sector mapping feature was not Python 3 compatible <a href="https://github.com/quantopian/pyfolio/pull/201">PR201</a></li>
+</ul>
+<h3 id="maintenance">Maintenance</h3>
+<ul>
+<li>We now depend on pandas-datareader as the yahoo finance loaders from pandas will be deprecated <a href="https://github.com/quantopian/pyfolio/pull/181">PR181</a> by @tswrightsandpointe</li>
+</ul>
+<h3 id="contributors">Contributors</h3>
+<p>Besiders the core developers, we have seen an increase in outside contributions which we greatly appreciate. Specifically, these people contributed to this release:</p>
+<ul>
+<li>Shane Bussman</li>
+<li>@MridulS</li>
+<li>@YihaoLu</li>
+<li>@jkrauss82</li>
+<li>@tswrightsandpointe</li>
+<li>@cgdeboer</li>
+</ul>
 <h2 id="v03-oct-23-2015">v0.3 (Oct 23, 2015)</h2>
 <p>This is a major release from 0.2 that includes many exciting new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features">New features</h3>
+<h3 id="new-features_1">New features</h3>
 <ul>
 <li>Sector exposures: sum positions by sector given a dictionary or series of symbol to sector mappings <a href="https://github.com/quantopian/pyfolio/pull/166">PR166</a></li>
 <li>Ability to make cones with multiple shades stdev regions <a href="https://github.com/quantopian/pyfolio/pull/168">PR168</a></li>
@@ -155,20 +186,20 @@
 <li>Stochastic volatility model in Bayesian tear sheet <a href="https://github.com/quantopian/pyfolio/pull/174">PR174</a></li>
 <li>Ability to suppress display of position information <a href="https://github.com/quantopian/pyfolio/pull/177">PR177</a></li>
 </ul>
-<h3 id="bug-fixes">Bug fixes</h3>
+<h3 id="bug-fixes_1">Bug fixes</h3>
 <ul>
 <li>Various fixes to make pyfolio pandas 0.17 compatible</li>
 </ul>
 <h2 id="v02-oct-16-2015">v0.2 (Oct 16, 2015)</h2>
 <p>This is a major release from 0.1 that includes mainly bugfixes and refactorings but also some new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_1">New features</h3>
+<h3 id="new-features_2">New features</h3>
 <ul>
 <li>Volatility matched cumulative returns plot <a href="https://github.com/quantopian/pyfolio/pull/126">PR126</a>.</li>
 <li>Allow for different periodicity (annualization factors) in the annual_() methods <a href="https://github.com/quantopian/pyfolio/pull/164">PR164</a>.</li>
 <li>Users can supply their own interesting periods <a href="https://github.com/quantopian/pyfolio/pull/163">PR163</a>.</li>
 <li>Ability to weight a portfolio of holdings by a metric valued <a href="https://github.com/quantopian/pyfolio/pull/161">PR161</a>.</li>
 </ul>
-<h3 id="bug-fixes_1">Bug fixes</h3>
+<h3 id="bug-fixes_2">Bug fixes</h3>
 <ul>
 <li>Fix drawdown overlaps <a href="https://github.com/quantopian/pyfolio/pull/150">PR150</a>.</li>
 <li>Monthly returns distribution should not stack by year <a href="https://github.com/quantopian/pyfolio/pull/162">PR162</a>.</li>

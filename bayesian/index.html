@@ -158,6 +158,8 @@
 import pyfolio as pf
 </code></pre>
 
+<pre><code>Couldn't import dot_parser, loading of dot files will not be possible.
+</code></pre>
 <h2 id="fetch-the-daily-returns-for-a-stock">Fetch the daily returns for a stock</h2>
 <pre><code class="python">stock_rets = pf.utils.get_symbol_rets('FB')
 </code></pre>
@@ -166,40 +168,32 @@ import pyfolio as pf
 <pre><code class="python">out_of_sample = stock_rets.index[-40]
 </code></pre>
 
-<pre><code class="python">pf.create_bayesian_tear_sheet(stock_rets, live_start_date=out_of_sample, stoch_vol=True)
+<pre><code class="python">pf.create_bayesian_tear_sheet(stock_rets, live_start_date=out_of_sample)
 </code></pre>
 
 <pre><code>Running T model
- [-----------------100%-----------------] 2000 of 2000 complete in 7.0 sec
-Finished T model (required 27.89 seconds).
+ [-----------------100%-----------------] 2000 of 2000 complete in 9.4 sec
+Finished T model (required 53.15 seconds).
 
 Running BEST model
- [-----------------100%-----------------] 2000 of 2000 complete in 7.1 sec
-Finished BEST model (required 59.35 seconds).
+ [-----------------100%-----------------] 2000 of 2000 complete in 9.7 sec
+Finished BEST model (required 85.73 seconds).
 
-Finished plotting Bayesian cone (required 0.10 seconds).
+Finished plotting Bayesian cone (required 0.12 seconds).
 
-Finished plotting BEST results (required 0.73 seconds).
+Finished plotting BEST results (required 0.90 seconds).
 
-Finished computing Bayesian predictions (required 0.14 seconds).
+Finished computing Bayesian predictions (required 0.15 seconds).
 
-Finished plotting Bayesian VaRs estimate (required 0.07 seconds).
+Finished plotting Bayesian VaRs estimate (required 0.06 seconds).
 
 Running alpha beta model
- [-----------------100%-----------------] 2000 of 2000 complete in 4.4 sec
-Finished running alpha beta model (required 30.92 seconds).
+ [-----------------100%-----------------] 2000 of 2000 complete in 5.8 sec
+Finished running alpha beta model (required 47.52 seconds).
 
-Finished plotting alpha beta model (required 0.17 seconds).
+Finished plotting alpha beta model (required 0.18 seconds).
 
-Running stochastic volatility model on most recent 400 days of returns
-
-Finished running stochastic volatility model (required 88.54 seconds).
-
-Plotting stochastic volatility model
-
-Finished plotting stochastic volatility model (required 0.41 seconds).
-
-Total runtime was 208.33 seconds.
+Total runtime was 187.82 seconds.
 </code></pre>
 <p><img alt="png" src="../bayesian_files/bayesian_8_1.png" /></p>
 <p>Lets go through these row by row:</p>
@@ -209,11 +203,11 @@ Total runtime was 208.33 seconds.
 <li>The next couple of rows follow the same pattern but are an estimate of annual volatility, Sharpe ratio and their respective differences.</li>
 <li>The 5th row shows the effect size or the difference of means normalized by the standard deviation and gives you a general sense how far apart the two distributions are. Intuitively, even if the means are significantly different, it may not be very meaningful if the standard deviation is huge amounting to a tiny difference of the two returns distributions.</li>
 <li>The 6th row shows predicted returns (based on the backtest) for tomorrow, and 5 days from now. The blue line indicates the probability of losing more than 5% of your portfolio value and can be interpeted as a Bayesian VaR estimate.</li>
-<li>The 7th row shows a Bayesian estimate of annual alpha and beta. In addition to uncertainty estimates, this model, like all above ones, assumes returns to be T-distributed which leads to more robust estimates than a standard linear regression would.</li>
-<li>The 8th row shows Bayesian estimates for log(sigma) and log(nu), two parameters of the <a href="http://pymc-devs.github.io/pymc3/stochastic_volatility/">stochastic volatility model</a>.</li>
-<li>The last row shows the volatility measured by the stochastic voatility model, overlaid on the absolute value of the returns.</li>
-<li>Note that the last two rows are only shown when stoch_vol=True.  By default, stoch_vol=False because running the stochastic volatility model is computationally expensive.</li>
-<li>Finally, only the most recent 400 days of returns are used when computing the stochastic volatility model.  This is to minimize computational time.</li>
+<li>The 7th row shows a Bayesian estimate of annual alpha and beta. In addition to uncertainty estimates, this model, like all above ones, assumes returns to be T-distributed which leads to more robust estimates than a standard linear regression would.  The default benchmark is the S&amp;P500.  Alternatively, users may use the Fama-French model as a bunchmark by setting benchmark_rets="Fama-French".  </li>
+<li>[only present if stoch_vol=True] The 8th row shows Bayesian estimates for log(sigma) and log(nu), two parameters of the <a href="http://pymc-devs.github.io/pymc3/stochastic_volatility/">stochastic volatility model</a>.</li>
+<li>[only present if stoch_vol=True] The 9th row shows the volatility measured by the stochastic voatility model, overlaid on the absolute value of the returns.</li>
+<li>By default, stoch_vol=False because running the stochastic volatility model is computationally expensive.</li>
+<li>Only the most recent 400 days of returns are used when computing the stochastic volatility model.  This is to minimize computational time.</li>
 </ul>
 <h2 id="running-models-directly">Running models directly</h2>
 <p>You can also run individual models. All models can be found in <code>pyfolio.bayesian</code> and run via the <code>run_model()</code> function.</p>
