@@ -1362,3 +1362,27 @@ def information_ratio(returns, benchmark_returns):
     if np.isnan(tracking_error):
         return 0.0
     return np.mean(active_return) / tracking_error
+
+
+def cents_per_share(returns, capital_base, txn_volume):
+    """
+    Calculates average cents per share earned (or lost).
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    capital_base : float
+        Amount of capital deployed to strategy
+    txn_volume : pd.Series
+        Daily transaction volume in currency.
+
+    Returns
+    -------
+    float
+        Cents per share
+
+    """
+    pnl = returns * capital_base
+    return 100 * pnl.mean() / txn_volume.mean()
