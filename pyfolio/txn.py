@@ -98,7 +98,7 @@ def get_txn_vol(transactions):
         Daily transaction volume and number of shares.
          - See full explanation in tears.create_full_tear_sheet.
     """
-
+    transactions.index = transactions.index.normalize()
     amounts = transactions.amount.abs()
     prices = transactions.price
     values = amounts * prices
@@ -186,8 +186,8 @@ def get_turnover(transactions, positions, period=None, average=True):
 
     Parameters
     ----------
-    transactions_df : pd.DataFrame
-        Contains transactions data.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
         - See full explanation in tears.create_full_tear_sheet
     positions : pd.DataFrame
         Contains daily position values including cash
@@ -204,8 +204,8 @@ def get_turnover(transactions, positions, period=None, average=True):
     turnover_rate : pd.Series
         timeseries of portfolio turnover rates.
     """
-
-    traded_value = transactions.txn_volume
+    txn_vol = get_txn_vol(transactions)
+    traded_value = txn_vol.txn_volume
     portfolio_value = positions.sum(axis=1)
     if period is not None:
         traded_value = traded_value.resample(period, how='sum')
@@ -214,4 +214,5 @@ def get_turnover(transactions, positions, period=None, average=True):
     # this is divided by 2.0 to get the average of the two.
     turnover = traded_value / 2.0 if average else traded_value
     turnover_rate = turnover.div(portfolio_value, axis='index')
+    turnover_rate = turnover_rate.fillna(0)
     return turnover_rate

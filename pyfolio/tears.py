@@ -87,13 +87,15 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
             2004-01-12    14492.6300     -14624.8700     27.1821
             2004-01-13    -13853.2800    13653.6400      -43.6375
     transactions : pd.DataFrame, optional
-        Daily transaction quantity (txn_shares) and dollar amount
-        (txn_volume).
+        Executed trade volumes and fill prices.
+        - One row per trade.
+        - Trades on different names that occur at the
+          same time will have identical indicies.
         - Example:
-            index         txn_volume      txn_shares
-            2004-01-09    99288.441805    6361
-            2004-01-12    1226.039520     102
-            2004-01-13    752.354630      73
+            index                  amount   price    symbol
+            2004-01-09 12:18:01    483      324.12   'AAPL'
+            2004-01-09 12:18:01    122      83.10    'MSFT'
+            2004-01-13 14:12:23    -75      340.43   'AAPL'
     gross_lev : pd.Series, optional
         The leverage of a strategy.
          - Time series of the sum of long and short exposure per share
@@ -429,7 +431,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
         Daily net position values.
          - See full explanation in create_full_tear_sheet.
     transactions : pd.DataFrame
-         Daily transaction volume and dollar ammount.
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in create_full_tear_sheet.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
