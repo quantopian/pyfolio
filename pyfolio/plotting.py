@@ -16,11 +16,13 @@ from __future__ import division
 
 import pandas as pd
 import numpy as np
+import scipy as sp
 
 import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
+import matplotlib.lines as mlines
 
 from sklearn import preprocessing
 
@@ -1402,3 +1404,116 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     ax.set_xticklabels(xticks_label)
 
     return ax
+
+
+def plot_round_trip_life_times(round_trips, ax=None):
+    """
+    Plots timespans and directions of round trip trades.
+
+    Parameters
+    ----------
+    round_trips : pd.DataFrame
+        DataFrame with one row per round trip trade.
+        - See full explanation in txn.extract_round_trips
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+    if ax is None:
+        ax = plt.subplot()
+
+    symbols = round_trips.symbol.unique()
+    symbol_idx = pd.Series(np.arange(len(symbols)), index=symbols)
+
+    for symbol, sym_round_trips in round_trips.groupby('symbol'):
+        for _, row in sym_round_trips.iterrows():
+            c = 'b' if row.long else 'r'
+            y_ix = symbol_idx[symbol]
+            ax.plot([row['open_dt'], row['close_dt']],
+                    [y_ix, y_ix], color=c)
+
+    ax.set_yticklabels(symbols)
+
+    red_line = mlines.Line2D([], [], color='r', label='Long')
+    blue_line = mlines.Line2D([], [], color='b', label='Short')
+    ax.legend(handles=[red_line, blue_line], loc=0)
+
+    return ax
+
+
+def show_profit_attribtion(round_trips):
+    """
+    Prints the share of total PnL contributed by each
+    traded name.
+
+    Parameters
+    ----------
+    round_trips : pd.DataFrame
+        DataFrame with one row per round trip trade.
+        - See full explanation in txn.extract_round_trips
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
+    total_pnl = round_trips['pnl'].sum()
+    pct_profit_attribution = round_trips.groupby(
+        'symbol')['pnl'].sum() / total_pnl
+
+    print('\nProfitability (PnL / PnL total) per name:')
+    print(pct_profit_attribution.sort(inplace=False, ascending=False))
+
+
+def plot_prob_profit_trade(round_trips, ax=None):
+    """
+    Plots a probability distribution for the event of making
+    a profitable trade.
+
+    Parameters
+    ----------
+    round_trips : pd.DataFrame
+        DataFrame with one row per round trip trade.
+        - See full explanation in txn.extract_round_trips
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
+    x = np.linspace(0, 1., 500)
+
+    round_trips['profitable'] = round_trips.pnl > 0
+
+    dist = sp.stats.beta(round_trips.profitable.sum(),
+                         (~round_trips.profitable).sum())
+    y = dist.pdf(x)
+    lower_perc = dist.ppf(.025)
+    upper_perc = dist.ppf(.975)
+
+    lower_plot = dist.ppf(.001)
+    upper_plot = dist.ppf(.999)
+    if ax is None:
+        ax = plt.subplot()
+    ax.plot(x, y)
+    ax.axvline(lower_perc, color='0.5')
+    ax.axvline(upper_perc, color='0.5')
+
+    ax.set(xlabel='Probability making a profitable decision', ylabel='Belief',
+           xlim=(lower_plot, upper_plot), ylim=(0, y.max() + 1.))
