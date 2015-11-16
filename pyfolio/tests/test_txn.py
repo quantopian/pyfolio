@@ -31,8 +31,9 @@ class TransactionsTestCase(TestCase):
 
         positions = DataFrame([[0.0, 10.0]]*len(dates),
                               columns=[0, 'cash'], index=dates)
-        transactions = DataFrame([[0, 0]]*len(dates),
-                                 columns=['txn_volume', 'txn_shares'],
+
+        transactions = DataFrame(data=[],
+                                 columns=['sid', 'amount', 'price', 'symbol'],
                                  index=dates)
 
         # Test with no transactions
@@ -46,9 +47,8 @@ class TransactionsTestCase(TestCase):
         result = get_turnover(transactions, positions, period='M')
         assert_series_equal(result, expected)
 
-        # Test with 0.5 daily turnover
-        transactions = DataFrame([[10.0, 0]]*len(dates),
-                                 columns=['txn_volume', 'txn_shares'],
+        transactions = DataFrame(data=[[1, 1, 10, 'A']]*len(dates),
+                                 columns=['sid', 'amount', 'price', 'symbol'],
                                  index=dates)
 
         expected = Series([0.5]*len(dates), index=dates)
@@ -67,9 +67,10 @@ class TransactionsTestCase(TestCase):
                               columns=[0, 'cash'], index=dates)
 
         # 100% total, 50% average daily turnover
-        transactions = DataFrame([[10.0, 0]]*len(dates),
-                                 columns=['txn_volume', 'txn_shares'],
+        transactions = DataFrame(data=[[1, 1, 10, 'A']]*len(dates),
+                                 columns=['sid', 'amount', 'price', 'symbol'],
                                  index=dates)
+
         returns = Series([0.05]*len(dates), index=dates)
         # 0.001% slippage per dollar traded
         slippage_bps = 10

@@ -337,7 +337,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
         Daily net position values.
          - See full explanation in tears.create_full_tear_sheet.
     transactions : pd.DataFrame
-        Daily transaction volume and dollar ammount.
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     gross_lev : pd.Series, optional
         The leverage of a strategy.
@@ -368,9 +368,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
         raise ValueError("The backtest does not have any positions.")
     positions = pd.concat(raw_positions)
     positions = pos.extract_pos(positions, backtest.ending_cash)
-    transactions_frame = txn.make_transaction_frame(backtest.transactions)
-    transactions = txn.get_txn_vol(transactions_frame)
-    transactions.index = transactions.index.normalize()
+    transactions = txn.make_transaction_frame(backtest.transactions)
     if transactions.index.tzinfo is None:
         transactions.index = transactions.index.tz_localize('utc')
 

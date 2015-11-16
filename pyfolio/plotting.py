@@ -1061,7 +1061,7 @@ def plot_turnover(returns, transactions, positions,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     transactions : pd.DataFrame
-        Daily transaction volume and dollar ammount.
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
@@ -1121,7 +1121,7 @@ def plot_slippage_sweep(returns, transactions, positions,
         Timeseries of portfolio returns to be adjusted for various
         degrees of slippage.
     transactions : pd.DataFrame
-        Daily transaction volume and dollar ammount.
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
@@ -1172,7 +1172,7 @@ def plot_slippage_sensitivity(returns, transactions, positions,
         Timeseries of portfolio returns to be adjusted for various
         degrees of slippage.
     transactions : pd.DataFrame
-        Daily transaction volume and dollar ammount.
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
@@ -1217,7 +1217,7 @@ def plot_daily_turnover_hist(transactions, positions,
     Parameters
     ----------
     transactions : pd.DataFrame
-        Daily transaction volume and dollar ammount.
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
@@ -1254,7 +1254,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     transactions : pd.DataFrame
-        Daily transaction volume and dollar ammount.
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -1270,9 +1270,9 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
 
     if ax is None:
         ax = plt.gca()
-
-    transactions.txn_shares.plot(alpha=1.0, lw=0.5, ax=ax, **kwargs)
-    ax.axhline(transactions.txn_shares.mean(), color='steelblue',
+    daily_txn = txn.get_txn_vol(transactions)
+    daily_txn.txn_shares.plot(alpha=1.0, lw=0.5, ax=ax, **kwargs)
+    ax.axhline(daily_txn.txn_shares.mean(), color='steelblue',
                linestyle='--', lw=3, alpha=1.0)
     ax.set_title('Daily Trading Volume')
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
