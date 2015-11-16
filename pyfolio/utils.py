@@ -31,16 +31,6 @@ from pandas_datareader import data as web
 
 from pandas.tseries.offsets import BDay
 
-import zipfile
-
-from io import BytesIO, StringIO
-
-try:
-    # For Python 3.0 and later
-    from urllib.request import urlopen
-except:
-    from urllib2 import urlopen
-
 from . import pos
 from . import txn
 
