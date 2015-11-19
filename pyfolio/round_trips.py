@@ -177,8 +177,11 @@ def add_closing_transactions(positions, transactions):
 
     closed_txns = transactions.copy()
 
-    open_pos = positions.drop('cash', axis=1).iloc[-1].dropna()
-    end_dt = open_pos.name
+    pos_at_end = positions.drop('cash', axis=1).iloc[-1]
+    open_pos = pos_at_end.replace(0, np.nan).dropna()
+    # Add closing trades one second after the close to be sure
+    # they don't conflict with other trades executed at that time.
+    end_dt = open_pos.name + pd.Timedelta(seconds = 1)
 
     for sym, ending_val in open_pos.iteritems():
         txn_sym = transactions[transactions.symbol == sym]
@@ -204,7 +207,7 @@ def apply_sector_mappings_to_round_trips(round_trips, sector_mappings):
     ----------
     round_trips : pd.DataFrame
         DataFrame with one row per round trip trade.
-        - See full explanation in txn.extract_round_trips
+        - See full explanation in round_trips.extract_round_trips
     sector_mappings : dict or pd.Series, optional
         Security identifier to sector mapping.
         Security ids as keys, sectors as values.
