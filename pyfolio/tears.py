@@ -20,6 +20,7 @@ from . import timeseries
 from . import utils
 from . import pos
 from . import txn
+from . import round_trips
 from . import plotting
 from .plotting import plotting_context
 
@@ -506,8 +507,8 @@ def create_round_trip_tear_sheet(transactions, positions,
         If True, returns the figure that was plotted on.
     """
 
-    transactions_closed = txn.add_closing_transactions(positions, transactions)
-    trades = txn.extract_round_trips(transactions_closed)
+    transactions_closed = round_trips.add_closing_transactions(positions, transactions)
+    trades = round_trips.extract_round_trips(transactions_closed)
 
     if len(trades) < 5:
         warnings.warn(

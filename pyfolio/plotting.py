@@ -30,6 +30,7 @@ from . import utils
 from . import timeseries
 from . import pos
 from . import txn
+from . import round_trips
 
 from .utils import APPROX_BDAYS_PER_MONTH
 
@@ -1414,7 +1415,7 @@ def plot_round_trip_life_times(round_trips, ax=None):
     ----------
     round_trips : pd.DataFrame
         DataFrame with one row per round trip trade.
-        - See full explanation in txn.extract_round_trips
+        - See full explanation in round_trips.extract_round_trips
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -1456,7 +1457,7 @@ def show_profit_attribtion(round_trips):
     ----------
     round_trips : pd.DataFrame
         DataFrame with one row per round trip trade.
-        - See full explanation in txn.extract_round_trips
+        - See full explanation in round_trips.extract_round_trips
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -1485,7 +1486,7 @@ def plot_prob_profit_trade(round_trips, ax=None):
     ----------
     round_trips : pd.DataFrame
         DataFrame with one row per round trip trade.
-        - See full explanation in txn.extract_round_trips
+        - See full explanation in round_trips.extract_round_trips
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
