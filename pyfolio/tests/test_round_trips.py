@@ -104,8 +104,8 @@ class RoundTripTestCase(TestCase):
                             index_col=0, parse_dates=0)
 
         transactions_closed = add_closing_transactions(test_pos, test_txn)
-        transactions_closed['txn_dollars'] = transactions_closed.amount * -1. * \
-            transactions_closed.price
+        transactions_closed['txn_dollars'] = transactions_closed.amount * \
+            -1. *  transactions_closed.price
         round_trips = extract_round_trips(transactions_closed)
 
         self.assertAlmostEqual(round_trips.pnl.sum(),

@@ -30,7 +30,6 @@ from . import utils
 from . import timeseries
 from . import pos
 from . import txn
-from . import round_trips
 
 from .utils import APPROX_BDAYS_PER_MONTH
 
