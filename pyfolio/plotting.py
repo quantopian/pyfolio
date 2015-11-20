@@ -1441,8 +1441,8 @@ def plot_round_trip_life_times(round_trips, ax=None):
 
     ax.set_yticklabels(symbols)
 
-    red_line = mlines.Line2D([], [], color='r', label='Long')
-    blue_line = mlines.Line2D([], [], color='b', label='Short')
+    red_line = mlines.Line2D([], [], color='r', label='Short')
+    blue_line = mlines.Line2D([], [], color='b', label='Long')
     ax.legend(handles=[red_line, blue_line], loc=0)
 
     return ax
