@@ -242,7 +242,7 @@ def apply_sector_mappings_to_round_trips(round_trips, sector_mappings):
 
     sector_round_trips = round_trips.copy()
     sector_round_trips.symbol = sector_round_trips.symbol.apply(
-        lambda x: sector_mappings.get(x, 'No Sector'))
+        lambda x: sector_mappings.get(x, 'No Sector Mapping'))
     sector_round_trips = sector_round_trips.dropna(axis=0)
 
     return sector_round_trips
