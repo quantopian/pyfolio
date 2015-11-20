@@ -4,13 +4,23 @@ from unittest import TestCase
 
 from pandas import (
     DataFrame,
+    DatetimeIndex,
     date_range,
-    Timedelta
+    Timedelta,
+    read_csv
 )
+from pandas.util.testing import (assert_frame_equal)
+
+import os
+
 from pyfolio.round_trips import (extract_round_trips,
                                  add_closing_transactions)
 
-@parameterized.expand([
+
+class RoundTripTestCase(TestCase):
+    dates = date_range(start='2015-01-01', freq='D', periods=20)
+
+    @parameterized.expand([
         (DataFrame(data=[[2, 10, 'A'],
                          [-2, 15, 'A']],
                    columns=['amount', 'price', 'symbol'],
@@ -52,21 +62,43 @@ from pyfolio.round_trips import (extract_round_trips,
         assert_frame_equal(round_trips, expected)
 
     def test_add_closing_trades(self):
-        dates = date_range(start='2015-01-01', freq='D', periods=20)
+        dates = date_range(start='2015-01-01', periods=20)
         transactions = DataFrame(data=[[2, 10, 'A'],
-                                       [-5, 10, 'A']],
+                                       [-5, 10, 'A'],
+                                       [-1, 10, 'B']],
                                  columns=['amount', 'price', 'symbol'],
-                                 index=[dates[:2]])
-        positions = DataFrame(data=[[20, 0],
-                                    [-30, 30],
-                                    [-60, 30]],
-                              columns=['A', 'cash'],
+                                 index=[dates[:3]])
+        positions = DataFrame(data=[[20, 10, 0],
+                                    [-30, 10, 30],
+                                    [-60, 0, 30]],
+                              columns=['A', 'B', 'cash'],
                               index=[dates[:3]])
+
+        expected_ix = dates[:3].append(DatetimeIndex([dates[2] +
+                                       Timedelta(seconds=1)]))
         expected = DataFrame(data=[[2, 10, 'A'],
                                    [-5, 10, 'A'],
+                                   [-1, 10., 'B'],
                                    [3, 20., 'A']],
                              columns=['amount', 'price', 'symbol'],
-                             index=[dates[:3]])
+                             index=expected_ix)
 
         transactions_closed = add_closing_transactions(positions, transactions)
         assert_frame_equal(transactions_closed, expected)
+
+    def test_txn_pnl_matches_round_trip_pnl(self):
+        __location__ = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+        test_txn = read_csv(__location__ + '/test_data/test_txn.csv',
+                            index_col=0, parse_dates=0)
+        test_pos = read_csv(__location__ + '/test_data/test_pos.csv',
+                            index_col=0, parse_dates=0)
+
+        transactions_closed = add_closing_transactions(test_pos, test_txn)
+        transactions_closed['txn_dollars'] = transactions_closed.amount*-1.* \
+            transactions_closed.price
+        round_trips = extract_round_trips(transactions_closed)
+
+        self.assertAlmostEqual(round_trips.pnl.sum(),
+                               transactions_closed.txn_dollars.sum())
