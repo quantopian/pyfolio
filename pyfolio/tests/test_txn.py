@@ -1,12 +1,9 @@
-from nose_parameterized import parameterized
-
 from unittest import TestCase
 
 from pandas import (
     Series,
     DataFrame,
-    date_range,
-    Timedelta
+    date_range
 )
 from pandas.util.testing import (assert_series_equal)
 
@@ -15,7 +12,6 @@ from pyfolio.txn import (get_turnover,
 
 
 class TransactionsTestCase(TestCase):
-    dates = date_range(start='2015-01-01', freq='D', periods=20)
 
     def test_get_turnover(self):
         """

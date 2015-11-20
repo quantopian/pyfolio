@@ -507,7 +507,8 @@ def create_round_trip_tear_sheet(transactions, positions,
         If True, returns the figure that was plotted on.
     """
 
-    transactions_closed = round_trips.add_closing_transactions(positions, transactions)
+    transactions_closed = round_trips.add_closing_transactions(positions,
+                                                               transactions)
     trades = round_trips.extract_round_trips(transactions_closed)
 
     if len(trades) < 5:

@@ -181,7 +181,7 @@ def add_closing_transactions(positions, transactions):
     open_pos = pos_at_end.replace(0, np.nan).dropna()
     # Add closing trades one second after the close to be sure
     # they don't conflict with other trades executed at that time.
-    end_dt = open_pos.name + pd.Timedelta(seconds = 1)
+    end_dt = open_pos.name + pd.Timedelta(seconds=1)
 
     for sym, ending_val in open_pos.iteritems():
         txn_sym = transactions[transactions.symbol == sym]

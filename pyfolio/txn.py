@@ -16,6 +16,7 @@ from __future__ import division
 
 import pandas as pd
 
+
 def map_transaction(txn):
     """
     Maps a single transaction row to a dictionary.
