@@ -509,39 +509,39 @@ def create_round_trip_tear_sheet(transactions, positions,
 
     transactions_closed = round_trips.add_closing_transactions(positions,
                                                                transactions)
-    trades = round_trips.extract_round_trips(transactions_closed)
+    round_trips = round_trips.extract_round_trips(transactions_closed)
 
-    if len(trades) < 5:
+    if len(round_trips) < 5:
         warnings.warn(
-            """Fewer than 5 round-trip trades made.
+            """Fewer than 5 round-trip round_trips made.
                Skipping round trip tearsheet.""", UserWarning)
         return
 
     ndays = len(positions)
 
-    print(trades.drop(['open_dt', 'close_dt', 'symbol'],
+    print(round_trips.drop(['open_dt', 'close_dt', 'symbol'],
                       axis='columns').describe())
-    print('Percent of trades profitable = {:.4}%'.format(
-          (trades.pnl > 0).mean() * 100))
+    print('Percent of round trips profitable = {:.4}%'.format(
+          (round_trips.pnl > 0).mean() * 100))
 
-    winning_trades = trades[trades.pnl > 0]
-    losing_trades = trades[trades.pnl < 0]
-    print('Mean profits per winning trade = {:.4}'.format(
-        winning_trades.pnl.mean()))
-    print('Mean loss per losing trade = {:.4}').format(
-        losing_trades.pnl.abs().mean())
+    winning_round_trips = round_trips[round_trips.pnl > 0]
+    losing_round_trips = round_trips[round_trips.pnl < 0]
+    print('Mean return per winning round trip = {:.4}'.format(
+        winning_round_trips.return.mean()))
+    print('Mean return per losing round trip = {:.4}').format(
+        losing_round_trips.return.mean())
 
-    print('A decision is made every {:.4} days.'.format(ndays / len(trades)))
-    print('{:.4} trading decisions per day.'.format(len(trades) * 1. / ndays))
+    print('A decision is made every {:.4} days.'.format(ndays / len(round_trips)))
+    print('{:.4} trading decisions per day.'.format(len(round_trips) * 1. / ndays))
     print('{:.4} trading decisions per month.'.format(
-        len(trades) * 1. / (ndays / 21)))
+        len(round_trips) * 1. / (ndays / 21)))
 
-    plotting.show_profit_attribtion(trades)
+    plotting.show_profit_attribtion(round_trips)
 
     if sector_mappings is not None:
-        sector_trades = txn.apply_sector_mappings_to_round_trips(
-            trades, sector_mappings)
-        plotting.show_profit_attribtion(sector_trades)
+        sector_round_trips = txn.apply_sector_mappings_to_round_trips(
+            round_trips, sector_mappings)
+        plotting.show_profit_attribtion(sector_round_trips)
 
     fig = plt.figure(figsize=(14, 3 * 6))
 
@@ -554,18 +554,18 @@ def create_round_trip_tear_sheet(transactions, positions,
     ax_pnl_per_round_trip_dollars = plt.subplot(gs[2, 0])
     ax_pnl_per_round_trip_pct = plt.subplot(gs[2, 1])
 
-    plotting.plot_round_trip_life_times(trades, ax=ax_trade_lifetimes)
+    plotting.plot_round_trip_life_times(round_trips, ax=ax_trade_lifetimes)
 
-    plotting.plot_prob_profit_trade(trades, ax=ax_prob_profit_trade)
+    plotting.plot_prob_profit_trade(round_trips, ax=ax_prob_profit_trade)
 
-    trade_holding_times = [x.days for x in trades['duration']]
+    trade_holding_times = [x.days for x in round_trips['duration']]
     sns.distplot(trade_holding_times, kde=False, ax=ax_holding_time)
     ax_holding_time.set(xlabel='holding time in days')
 
-    sns.distplot(trades.pnl, kde=False, ax=ax_pnl_per_round_trip_dollars)
+    sns.distplot(round_trips.pnl, kde=False, ax=ax_pnl_per_round_trip_dollars)
     ax_pnl_per_round_trip_dollars.set(xlabel='PnL per round-trip trade in $')
 
-    pnl_pct = trades.pnl / trades.pnl.sum() * 100
+    pnl_pct = round_trips.pnl / round_trips.pnl.sum() * 100
     sns.distplot(pnl_pct, kde=False, ax=ax_pnl_per_round_trip_pct)
     ax_pnl_per_round_trip_pct.set(
         xlabel='PnL per round-trip trade in % of total profit')

@@ -25,10 +25,12 @@ class RoundTripTestCase(TestCase):
                          [-2, 15, 'A']],
                    columns=['amount', 'price', 'symbol'],
                    index=dates[:2]),
-         DataFrame(data=[[dates[0], dates[1], Timedelta(days=1),
-                          10, True, 'A']],
+         DataFrame(data=[[dates[0], dates[1],
+                          Timedelta(days=1), 10, .5,
+                          True, 'A']],
                    columns=['open_dt', 'close_dt',
-                            'duration', 'pnl', 'long', 'symbol'],
+                            'duration', 'pnl', 'returns',
+                            'long', 'symbol'],
                    index=[0])
          ),
         (DataFrame(data=[[2, 10, 'A'],
@@ -36,10 +38,12 @@ class RoundTripTestCase(TestCase):
                          [-9, 10, 'A']],
                    columns=['amount', 'price', 'symbol'],
                    index=dates[:3]),
-         DataFrame(data=[[dates[0], dates[2], Timedelta(days=2),
-                          -10, True, 'A']],
+         DataFrame(data=[[dates[0], dates[2], 
+                          Timedelta(days=2), -10, -.2,
+                          True, 'A']],
                    columns=['open_dt', 'close_dt',
-                            'duration', 'pnl', 'long', 'symbol'],
+                            'duration', 'pnl', 'returns',
+                            'long', 'symbol'],
                    index=[0])
          ),
         (DataFrame(data=[[2, 10, 'A'],
@@ -47,18 +51,22 @@ class RoundTripTestCase(TestCase):
                          [3, 20, 'A']],
                    columns=['amount', 'price', 'symbol'],
                    index=dates[:3]),
-         DataFrame(data=[[dates[0], dates[1], Timedelta(days=1),
-                          10, True, 'A'],
+         DataFrame(data=[[dates[0], dates[1], 
+                          Timedelta(days=1), 10, .5,
+                          True, 'A'],
                          [dates[1] + Timedelta(seconds=1), dates[2],
                           Timedelta(days=1) - Timedelta(seconds=1),
-                          -10, False, 'A']],
+                          -10, (-1./3),
+                          False, 'A']],
                    columns=['open_dt', 'close_dt',
-                            'duration', 'pnl', 'long', 'symbol'],
+                            'duration', 'pnl', 'returns',
+                            'long', 'symbol'],
                    index=[0, 1])
          )
     ])
     def test_extract_round_trips(self, transactions, expected):
         round_trips = extract_round_trips(transactions)
+
         assert_frame_equal(round_trips, expected)
 
     def test_add_closing_trades(self):

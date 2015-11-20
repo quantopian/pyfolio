@@ -44,7 +44,8 @@ def extract_round_trips(transactions):
     round_trips : pd.DataFrame
         DataFrame with one row per round trip.
     """
-
+    # Transactions that cross zero must be split into separate
+    # long and short transactions that end/start on zero.
     transactions_split = split_trades(transactions)
 
     transactions_split['txn_dollars'] =  \
@@ -55,9 +56,9 @@ def extract_round_trips(transactions):
     for sym, trans_sym in transactions_split.groupby('symbol'):
         trans_sym = trans_sym.sort_index()
         amount_cumsum = trans_sym.amount.cumsum()
-
+        # Find indicies where the position amount returns to zero.
         closed_idx = np.where(amount_cumsum == 0)[0] + 1
-        # identify the first trade as an endpoint.
+        # Identify the first trade as the beginning of a round trip.
         closed_idx = np.insert(closed_idx, 0, 0)
 
         for trade_start, trade_end in zip(closed_idx, closed_idx[1:]):
@@ -66,21 +67,34 @@ def extract_round_trips(transactions):
             if len(txn) == 0:
                 continue
 
+            assert txn.amount.sum() == 0
+            long_trade = txn.amount.iloc[0] > 0
             pnl = txn.txn_dollars.sum()
             round_trips['symbol'].append(sym)
             round_trips['pnl'].append(pnl)
             round_trips['duration'].append(txn.index[-1] - txn.index[0])
-            round_trips['long'].append(txn.amount.iloc[0] > 0)
+            round_trips['long'].append(long_trade)
             round_trips['open_dt'].append(txn.index[0])
             round_trips['close_dt'].append(txn.index[-1])
+
+            # Investing txns push the position amount farther from zero.
+            # invested is always a positive value. Returned - Invested = PnL.
+            if long_trade:
+                invested = -txn.query('txn_dollars < 0').txn_dollars.sum()
+            else:
+                invested = txn.query('txn_dollars > 0').txn_dollars.sum()
+
+            if invested == 0:
+                round_trips['returns'].append(0)
+            else:
+                round_trips['returns'].append(pnl / invested)
 
     if len(round_trips) == 0:
         return pd.DataFrame([])
 
     round_trips = pd.DataFrame(round_trips)
-
-    round_trips = round_trips[
-        ['open_dt', 'close_dt', 'duration', 'pnl', 'long', 'symbol']]
+    round_trips = round_trips[['open_dt', 'close_dt', 'duration',
+                               'pnl', 'returns', 'long', 'symbol']]
 
     return round_trips
 
@@ -122,6 +136,7 @@ def split_trades(transactions):
 
         while True:
             cum_amount = trans_sym.amount.cumsum()
+            # find the indicies where position amount crosses zero
             sign_flip = np.where(np.abs(np.diff(np.sign(cum_amount))) == 2)[0]
 
             if len(sign_flip) == 0:
@@ -132,6 +147,7 @@ def split_trades(transactions):
             txn = trans_sym.iloc[:sign_flip]
 
             left_over_txn_amount = txn.amount.sum()
+            assert left_over_txn_amount != 0
 
             split_txn_1 = txn.iloc[[-1]].copy()
             split_txn_2 = txn.iloc[[-1]].copy()
@@ -142,12 +158,18 @@ def split_trades(transactions):
             # Delay 2nd trade by a second to avoid overlapping indices
             split_txn_2.index += pd.Timedelta(seconds=1)
 
+            assert split_txn_1.amount.iloc[0] + \
+                split_txn_2.amount.iloc[0] == txn.iloc[-1].amount
+            assert trans_sym.iloc[:sign_flip - 1].amount.sum() + \
+                split_txn_1.amount.iloc[0] == 0
+
             # Recreate transactions so far with split transaction
             trans_sym = pd.concat([trans_sym.iloc[:sign_flip - 1],
                                    split_txn_1,
                                    split_txn_2,
                                    trans_sym.iloc[sign_flip:]])
 
+        assert np.all(np.abs(np.diff(np.sign(trans_sym.amount.cumsum()))) != 2)
         trans_split.append(trans_sym)
 
     transactions_split = pd.concat(trans_split)
@@ -220,7 +242,7 @@ def apply_sector_mappings_to_round_trips(round_trips, sector_mappings):
 
     sector_round_trips = round_trips.copy()
     sector_round_trips.symbol = sector_round_trips.symbol.apply(
-        lambda x: sector_mappings.get(x, np.nan))
+        lambda x: sector_mappings.get(x, 'No Sector'))
     sector_round_trips = sector_round_trips.dropna(axis=0)
 
     return sector_round_trips
