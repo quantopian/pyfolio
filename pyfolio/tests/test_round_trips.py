@@ -38,7 +38,7 @@ class RoundTripTestCase(TestCase):
                          [-9, 10, 'A']],
                    columns=['amount', 'price', 'symbol'],
                    index=dates[:3]),
-         DataFrame(data=[[dates[0], dates[2], 
+         DataFrame(data=[[dates[0], dates[2],
                           Timedelta(days=2), -10, -.2,
                           True, 'A']],
                    columns=['open_dt', 'close_dt',
@@ -51,12 +51,12 @@ class RoundTripTestCase(TestCase):
                          [3, 20, 'A']],
                    columns=['amount', 'price', 'symbol'],
                    index=dates[:3]),
-         DataFrame(data=[[dates[0], dates[1], 
+         DataFrame(data=[[dates[0], dates[1],
                           Timedelta(days=1), 10, .5,
                           True, 'A'],
                          [dates[1] + Timedelta(seconds=1), dates[2],
                           Timedelta(days=1) - Timedelta(seconds=1),
-                          -10, (-1./3),
+                          -10, (-1. / 3),
                           False, 'A']],
                    columns=['open_dt', 'close_dt',
                             'duration', 'pnl', 'returns',
@@ -104,7 +104,7 @@ class RoundTripTestCase(TestCase):
                             index_col=0, parse_dates=0)
 
         transactions_closed = add_closing_transactions(test_pos, test_txn)
-        transactions_closed['txn_dollars'] = transactions_closed.amount*-1.* \
+        transactions_closed['txn_dollars'] = transactions_closed.amount * -1. * \
             transactions_closed.price
         round_trips = extract_round_trips(transactions_closed)
 

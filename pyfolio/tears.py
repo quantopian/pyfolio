@@ -536,12 +536,12 @@ def create_round_trip_tear_sheet(transactions, positions,
     print('{:.4} trading decisions per month.'.format(
         len(trades) * 1. / (ndays / 21)))
 
-    plotting.show_profit_attribtion(trades)
+    plotting.show_profit_attribution(trades)
 
     if sector_mappings is not None:
         sector_trades = round_trips.apply_sector_mappings_to_round_trips(
             trades, sector_mappings)
-        plotting.show_profit_attribtion(sector_trades)
+        plotting.show_profit_attribution(sector_trades)
 
     fig = plt.figure(figsize=(14, 3 * 6))
 

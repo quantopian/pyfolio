@@ -1418,8 +1418,6 @@ def plot_round_trip_life_times(round_trips, ax=None):
         - See full explanation in round_trips.extract_round_trips
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
-    **kwargs, optional
-        Passed to seaborn plotting function.
 
     Returns
     -------
@@ -1448,7 +1446,7 @@ def plot_round_trip_life_times(round_trips, ax=None):
     return ax
 
 
-def show_profit_attribtion(round_trips):
+def show_profit_attribution(round_trips):
     """
     Prints the share of total PnL contributed by each
     traded name.
@@ -1460,8 +1458,6 @@ def show_profit_attribtion(round_trips):
         - See full explanation in round_trips.extract_round_trips
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
-    **kwargs, optional
-        Passed to seaborn plotting function.
 
     Returns
     -------
@@ -1489,8 +1485,6 @@ def plot_prob_profit_trade(round_trips, ax=None):
         - See full explanation in round_trips.extract_round_trips
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
-    **kwargs, optional
-        Passed to seaborn plotting function.
 
     Returns
     -------
