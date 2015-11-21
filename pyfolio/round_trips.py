@@ -87,7 +87,7 @@ def extract_round_trips(transactions):
             if invested == 0:
                 round_trips['returns'].append(0)
             else:
-                round_trips['returns'].append(pnl / invested)
+                round_trips['returns'].append(1. * pnl / invested)
 
     if len(round_trips) == 0:
         return pd.DataFrame([])
