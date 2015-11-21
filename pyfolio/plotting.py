@@ -1503,11 +1503,15 @@ def plot_prob_profit_trade(round_trips, ax=None):
 
     lower_plot = dist.ppf(.001)
     upper_plot = dist.ppf(.999)
+
     if ax is None:
         ax = plt.subplot()
+
     ax.plot(x, y)
     ax.axvline(lower_perc, color='0.5')
     ax.axvline(upper_perc, color='0.5')
 
     ax.set(xlabel='Probability making a profitable decision', ylabel='Belief',
            xlim=(lower_plot, upper_plot), ylim=(0, y.max() + 1.))
+
+    return ax
