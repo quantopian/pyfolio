@@ -20,6 +20,7 @@ from . import timeseries
 from . import utils
 from . import pos
 from . import txn
+from . import round_trips
 from . import plotting
 from .plotting import plotting_context
 
@@ -166,6 +167,9 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
             create_txn_tear_sheet(returns, positions, transactions,
                                   unadjusted_returns=unadjusted_returns,
                                   set_context=set_context)
+
+            create_round_trip_tear_sheet(transactions, positions,
+                                         sector_mappings=sector_mappings)
 
     if bayesian:
         create_bayesian_tear_sheet(returns,
@@ -402,12 +406,12 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
 
     if sector_mappings is not None:
         sector_exposures = pos.get_sector_exposures(positions, sector_mappings)
-
-        sector_alloc = pos.get_percent_alloc(sector_exposures)
-        sector_alloc = sector_alloc.drop('cash', axis='columns')
-        ax_sector_alloc = plt.subplot(gs[4, :], sharex=ax_gross_leverage)
-        plotting.plot_sector_allocations(returns, sector_alloc,
-                                         ax=ax_sector_alloc)
+        if len(sector_exposures.columns) > 1:
+            sector_alloc = pos.get_percent_alloc(sector_exposures)
+            sector_alloc = sector_alloc.drop('cash', axis='columns')
+            ax_sector_alloc = plt.subplot(gs[4, :], sharex=ax_gross_leverage)
+            plotting.plot_sector_allocations(returns, sector_alloc,
+                                             ax=ax_sector_alloc)
 
     plt.show()
     if return_fig:
@@ -435,8 +439,6 @@ def create_txn_tear_sheet(returns, positions, transactions,
          - See full explanation in create_full_tear_sheet.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
-    set_context : boolean, optional
-        If True, set default plotting style context.
     """
     vertical_sections = 5 if unadjusted_returns is not None else 3
 
@@ -473,6 +475,102 @@ def create_txn_tear_sheet(returns, positions, transactions,
                                            positions,
                                            ax=ax_slippage_sensitivity
                                            )
+
+    plt.show()
+    if return_fig:
+        return fig
+
+
+@plotting_context
+def create_round_trip_tear_sheet(transactions, positions,
+                                 sector_mappings=None,
+                                 return_fig=False):
+    """
+    Generate a number of figures and plots describing the duration,
+    frequency, and profitability of trade "round trips."
+    A round trip is started when a new long or short position is
+    opened and is only completed when the number of shares in that
+    position returns to or crosses zero.
+
+    Parameters
+    ----------
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
+         - See full explanation in create_full_tear_sheet.
+    sector_mappings : dict or pd.Series, optional
+        Security identifier to sector mapping.
+        Security ids as keys, sectors as values.
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
+    """
+
+    transactions_closed = round_trips.add_closing_transactions(positions,
+                                                               transactions)
+    trades = round_trips.extract_round_trips(transactions_closed)
+
+    if len(trades) < 5:
+        warnings.warn(
+            """Fewer than 5 round-trip trades made.
+               Skipping round trip tearsheet.""", UserWarning)
+        return
+
+    ndays = len(positions)
+
+    print(trades.drop(['open_dt', 'close_dt', 'symbol'],
+                      axis='columns').describe())
+    print('Percent of round trips profitable = {:.4}%'.format(
+          (trades.pnl > 0).mean() * 100))
+
+    winning_round_trips = trades[trades.pnl > 0]
+    losing_round_trips = trades[trades.pnl < 0]
+    print('Mean return per winning round trip = {:.4}'.format(
+        winning_round_trips.returns.mean()))
+    print('Mean return per losing round trip = {:.4}').format(
+        losing_round_trips.returns.mean())
+
+    print('A decision is made every {:.4} days.'.format(ndays / len(trades)))
+    print('{:.4} trading decisions per day.'.format(len(trades) * 1. / ndays))
+    print('{:.4} trading decisions per month.'.format(
+        len(trades) * 1. / (ndays / 21)))
+
+    plotting.show_profit_attribution(trades)
+
+    if sector_mappings is not None:
+        sector_trades = round_trips.apply_sector_mappings_to_round_trips(
+            trades, sector_mappings)
+        plotting.show_profit_attribution(sector_trades)
+
+    fig = plt.figure(figsize=(14, 3 * 6))
+
+    fig = plt.figure(figsize=(14, 3 * 6))
+    gs = gridspec.GridSpec(3, 2, wspace=0.5, hspace=0.5)
+
+    ax_trade_lifetimes = plt.subplot(gs[0, :])
+    ax_prob_profit_trade = plt.subplot(gs[1, 0])
+    ax_holding_time = plt.subplot(gs[1, 1])
+    ax_pnl_per_round_trip_dollars = plt.subplot(gs[2, 0])
+    ax_pnl_per_round_trip_pct = plt.subplot(gs[2, 1])
+
+    plotting.plot_round_trip_life_times(trades, ax=ax_trade_lifetimes)
+
+    plotting.plot_prob_profit_trade(trades, ax=ax_prob_profit_trade)
+
+    trade_holding_times = [x.days for x in trades['duration']]
+    sns.distplot(trade_holding_times, kde=False, ax=ax_holding_time)
+    ax_holding_time.set(xlabel='holding time in days')
+
+    sns.distplot(trades.pnl, kde=False, ax=ax_pnl_per_round_trip_dollars)
+    ax_pnl_per_round_trip_dollars.set(xlabel='PnL per round-trip trade in $')
+
+    pnl_pct = trades.pnl / trades.pnl.sum() * 100
+    sns.distplot(pnl_pct, kde=False, ax=ax_pnl_per_round_trip_pct)
+    ax_pnl_per_round_trip_pct.set(
+        xlabel='PnL per round-trip trade in % of total profit')
+
+    gs.tight_layout(fig)
 
     plt.show()
     if return_fig:

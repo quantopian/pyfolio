@@ -14,8 +14,6 @@
 # limitations under the License.
 from __future__ import division
 
-from collections import defaultdict
-
 import pandas as pd
 
 
@@ -39,7 +37,7 @@ def map_transaction(txn):
         symbol = txn['sid']['symbol']
     else:
         sid = txn['sid']
-        symbol = None
+        symbol = txn['sid']
 
     return {'sid': sid,
             'symbol': symbol,
@@ -132,47 +130,6 @@ def adjust_returns_for_slippage(returns, turnover, slippage_bps):
     # Only include returns in the period where the algo traded.
     trim_returns = returns.loc[turnover.index]
     return trim_returns - turnover * slippage
-
-
-def create_txn_profits(transactions):
-    """
-    Compute per-trade profits.
-
-    Generates a new transactions DataFrame with a profits column
-
-    Parameters
-    ----------
-    transactions : pd.DataFrame
-        Daily transaction volume and number of shares.
-         - See full explanation in tears.create_full_tear_sheet.
-
-    Returns
-    -------
-    profits_dts : pd.DataFrame
-        DataFrame containing transactions and their profits, datetimes,
-        amounts, current prices, prior prices, and symbols.
-    """
-
-    txn_descr = defaultdict(list)
-
-    for symbol, transactions_sym in transactions.groupby('symbol'):
-        transactions_sym = transactions_sym.reset_index()
-
-        for i, (amount, price, dt) in transactions_sym.iloc[1:][
-                ['amount', 'price', 'date_time_utc']].iterrows():
-            prev_amount, prev_price, prev_dt = transactions_sym.loc[
-                i - 1, ['amount', 'price', 'date_time_utc']]
-            profit = (price - prev_price) * -amount
-            txn_descr['profits'].append(profit)
-            txn_descr['dts'].append(dt - prev_dt)
-            txn_descr['amounts'].append(amount)
-            txn_descr['prices'].append(price)
-            txn_descr['prev_prices'].append(prev_price)
-            txn_descr['symbols'].append(symbol)
-
-    profits_dts = pd.DataFrame(txn_descr)
-
-    return profits_dts
 
 
 def get_turnover(transactions, positions, period=None, average=True):
