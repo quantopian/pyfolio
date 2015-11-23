@@ -521,21 +521,21 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
     print(perf_stats)
 
 
-def plot_rolling_returns(
-        returns,
-        factor_returns=None,
-        live_start_date=None,
-        cone_std=None,
-        legend_loc='best',
-        volatility_match=False,
-        ax=None, **kwargs):
-    """Plots cumulative rolling returns versus some benchmarks'.
+def plot_rolling_returns(returns,
+                         factor_returns=None,
+                         live_start_date=None,
+                         cone_std=None,
+                         legend_loc='best',
+                         volatility_match=False,
+                         ax=None, **kwargs):
+    """
+    Plots cumulative rolling returns versus some benchmarks'.
 
     Backtest returns are in green, and out-of-sample (live trading)
     returns are in red.
 
-    Additionally, a linear cone plot may be added to the out-of-sample
-    returns region.
+    Additionally, a non-parametric cone plot may be added to the
+    out-of-sample returns region.
 
     Parameters
     ----------
@@ -546,13 +546,12 @@ def plot_rolling_returns(
         Daily noncumulative returns of a risk factor.
          - This is in the same style as returns.
     live_start_date : datetime, optional
-        The point in time when the strategy began live trading, after
-        its backtest period.
+        The date when the strategy began live trading, after
+        its backtest period. This date should be normalized.
     cone_std : float, or tuple, optional
         If float, The standard deviation to use for the cone plots.
         If tuple, Tuple of standard deviation values to use for the cone plots
-         - The cone is a normal distribution with this standard deviation
-             centered around a linear regression.
+         - See timeseries.forecast_cone_bounds for more details.
     legend_loc : matplotlib.loc, optional
         The location of the legend on the plot.
     volatility_match : bool, optional
@@ -570,26 +569,11 @@ def plot_rolling_returns(
         The axes that were plotted on.
 
 """
-    def draw_cone(returns, num_stdev, live_start_date, ax):
-        cone_df = timeseries.cone_rolling(
-            returns,
-            num_stdev=num_stdev,
-            cone_fit_end_date=live_start_date)
-
-        cone_in_sample = cone_df[cone_df.index < live_start_date]
-        cone_out_of_sample = cone_df[cone_df.index > live_start_date]
-        cone_out_of_sample = cone_out_of_sample[
-            cone_out_of_sample.index < returns.index[-1]]
-
-        ax.fill_between(cone_out_of_sample.index,
-                        cone_out_of_sample.sd_down,
-                        cone_out_of_sample.sd_up,
-                        color='steelblue', alpha=0.25)
-
-        return cone_in_sample, cone_out_of_sample
-
     if ax is None:
         ax = plt.gca()
+
+    ax.set_ylabel('Cumulative returns')
+    ax.set_xlabel('')
 
     if volatility_match and factor_returns is None:
         raise ValueError('volatility_match requires passing of'
@@ -598,65 +582,55 @@ def plot_rolling_returns(
         bmark_vol = factor_returns.loc[returns.index].std()
         returns = (returns / returns.std()) * bmark_vol
 
-    df_cum_rets = timeseries.cum_returns(returns, 1.0)
+    cum_rets = timeseries.cum_returns(returns, 1.0)
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     if factor_returns is not None:
-        timeseries.cum_returns(factor_returns[df_cum_rets.index], 1.0).plot(
-            lw=2, color='gray', label=factor_returns.name, alpha=0.60,
-            ax=ax, **kwargs)
+        cum_factor_returns = timeseries.cum_returns(
+            factor_returns[cum_rets.index], 1.0)
+        cum_factor_returns.plot(lw=2, color='gray',
+                                label=factor_returns.name, alpha=0.60,
+                                ax=ax, **kwargs)
+
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
-
-    if (live_start_date is None) or (df_cum_rets.index[-1] <=
-                                     live_start_date):
-        df_cum_rets.plot(lw=3, color='forestgreen', alpha=0.6,
-                         label='Backtest', ax=ax, **kwargs)
+        is_cum_returns = cum_rets.loc[returns.index < live_start_date]
+        oos_cum_returns = cum_rets.loc[returns.index >= live_start_date]
     else:
-        df_cum_rets[:live_start_date].plot(
-            lw=3, color='forestgreen', alpha=0.6,
-            label='Backtest', ax=ax, **kwargs)
-        df_cum_rets[live_start_date:].plot(
-            lw=4, color='red', alpha=0.6,
-            label='Live', ax=ax, **kwargs)
+        is_cum_returns = cum_rets
+        oos_cum_returns = pd.Series([])
+
+    is_cum_returns.plot(lw=3, color='forestgreen', alpha=0.6,
+                        label='Backtest', ax=ax, **kwargs)
+
+    if len(oos_cum_returns) > 0:
+        oos_cum_returns.plot(lw=4, color='red', alpha=0.6,
+                             label='Live', ax=ax, **kwargs)
 
         if cone_std is not None:
-            # check to see if cone_std was passed as a single value and,
-            # if so, just convert to list automatically
-            if isinstance(cone_std, float):
+            if isinstance(cone_std, (float, int)):
                 cone_std = [cone_std]
 
-            for cone_i in cone_std:
-                cone_in_sample, cone_out_of_sample = draw_cone(
-                    returns,
-                    cone_i,
-                    live_start_date,
-                    ax)
+            is_daily_returns = is_cum_returns.pct_change().dropna()
+            cone_bounds = timeseries.forecast_cone_bounds(
+                is_daily_returns,
+                len(oos_cum_returns),
+                cone_std,
+                starting_value=is_cum_returns[-1])
 
-            cone_in_sample['line'].plot(
-                ax=ax,
-                ls='--',
-                label='Backtest trend',
-                lw=2,
-                color='forestgreen',
-                alpha=0.7,
-                **kwargs)
-            cone_out_of_sample['line'].plot(
-                ax=ax,
-                ls='--',
-                label='Predicted trend',
-                lw=2,
-                color='red',
-                alpha=0.7,
-                **kwargs)
+            cone_bounds = cone_bounds.set_index(oos_cum_returns.index)
 
+            for std in cone_std:
+                ax.fill_between(cone_bounds.index,
+                                cone_bounds[str(std)],
+                                cone_bounds[str(-std)],
+                                color='steelblue', alpha=0.5)
+
+    if legend_loc is not None:
+        ax.legend(loc=legend_loc)
     ax.axhline(1.0, linestyle='--', color='black', lw=2)
-    ax.set_ylabel('Cumulative returns')
-    ax.set_title('Cumulative Returns')
-    ax.legend(loc=legend_loc)
-    ax.set_xlabel('')
 
     return ax
 

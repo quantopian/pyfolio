@@ -120,7 +120,7 @@ def create_full_tear_sheet(returns,
         - See txn.adjust_returns_for_slippage for more details.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
-        after its backtest period.
+        after its backtest period. This datetime should be normalized.
     hide_positions : bool, optional
         If True, will not output any symbol names.
     bayesian: boolean, optional
@@ -275,6 +275,8 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         live_start_date=live_start_date,
         cone_std=cone_std,
         ax=ax_rolling_returns)
+    ax_rolling_returns.set_title(
+        'Cumulative Returns')
 
     plotting.plot_rolling_returns(
         returns,
@@ -282,6 +284,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         live_start_date=live_start_date,
         cone_std=None,
         volatility_match=True,
+        legend_loc=None,
         ax=ax_rolling_returns_vol_match)
     ax_rolling_returns_vol_match.set_title(
         'Cumulative returns volatility matched to benchmark.')

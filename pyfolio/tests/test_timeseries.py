@@ -2,6 +2,7 @@ from __future__ import division
 
 from unittest import TestCase
 from nose_parameterized import parameterized
+from numpy.testing import assert_allclose
 
 import numpy as np
 import pandas as pd
@@ -365,3 +366,28 @@ class TestMultifactor(TestCase):
                 returns,
                 factors).values.tolist(),
             expected)
+
+
+class TestCone(TestCase):
+    def test_bootstrap_cone_against_linear_cone_normal_returns(self):
+        np.random.seed(100)
+        days_forward = 20
+        cone_stdevs = [1, 1.5, 2]
+        mu = .005
+        sigma = .002
+        rets = pd.Series(np.random.normal(mu, sigma, 1000))
+
+        midline = np.cumprod(1 + (rets.mean() * np.ones(days_forward)))
+        stdev = rets.std() * np.sqrt(np.arange(days_forward)+1)
+
+        normal_cone = pd.DataFrame()
+        for s in cone_stdevs:
+            normal_cone[str(s)] = midline + s * stdev
+            normal_cone[str(-s)] = midline - s * stdev
+
+        bootstrap_cone = timeseries.forecast_cone_bounds(rets, days_forward,
+                                                         cone_stdevs,
+                                                         starting_value=1)
+        for col, vals in bootstrap_cone.iteritems():
+            expected = normal_cone[col].values
+            assert_allclose(vals.values, expected, rtol=.005)
