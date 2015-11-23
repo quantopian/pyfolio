@@ -624,10 +624,10 @@ def plot_rolling_returns(
         df_cum_rets.plot(lw=3, color='forestgreen', alpha=0.6,
                          label='Backtest', ax=ax, **kwargs)
     else:
-        df_cum_rets[:live_start_date].plot(
+        df_cum_rets[:live_start_date + pd.Timedelta(days=1)].plot(
             lw=3, color='forestgreen', alpha=0.6,
             label='Backtest', ax=ax, **kwargs)
-        df_cum_rets[live_start_date:].plot(
+        df_cum_rets[live_start_date + pd.Timedelta(days=1):].plot(
             lw=4, color='red', alpha=0.6,
             label='Live', ax=ax, **kwargs)
 
