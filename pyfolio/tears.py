@@ -138,7 +138,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         returns = returns[returns.index > benchmark_rets.index[0]]
 
     if slippage is not None and transactions is not None:
-        turnover = txn.get_turnover(transactions, positions,
+        turnover = txn.get_turnover(positions, transactions,
                                     period=None, average=False)
         unadjusted_returns = returns.copy()
         returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)

@@ -38,13 +38,13 @@ class TransactionsTestCase(TestCase):
 
         # Test with no transactions
         expected = Series([0.0]*len(dates), index=dates)
-        result = get_turnover(transactions, positions)
+        result = get_turnover(positions, transactions)
         assert_series_equal(result, expected)
 
         # Monthly freq
         index = date_range('01-01-2015', freq='M', periods=1)
         expected = Series([0.0], index=index)
-        result = get_turnover(transactions, positions, period='M')
+        result = get_turnover(positions, transactions, period='M')
         assert_series_equal(result, expected)
 
         transactions = DataFrame(data=[[1, 1, 10, 'A']]*len(dates),
@@ -52,11 +52,11 @@ class TransactionsTestCase(TestCase):
                                  index=dates)
 
         expected = Series([0.5]*len(dates), index=dates)
-        result = get_turnover(transactions, positions)
+        result = get_turnover(positions, transactions)
         assert_series_equal(result, expected)
 
         # Monthly freq: should be the sum of the daily freq
-        result = get_turnover(transactions, positions, period='M')
+        result = get_turnover(positions, transactions, period='M')
         expected = Series([10.0], index=index)
         assert_series_equal(result, expected)
 

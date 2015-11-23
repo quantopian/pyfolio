@@ -1088,7 +1088,7 @@ def plot_turnover(returns, transactions, positions,
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_turnover = txn.get_turnover(transactions, positions)
+    df_turnover = txn.get_turnover(positions, transactions)
     df_turnover_by_month = df_turnover.resample("M")
     df_turnover.plot(color='steelblue', alpha=1.0, lw=0.5, ax=ax, **kwargs)
     df_turnover_by_month.plot(
@@ -1145,7 +1145,7 @@ def plot_slippage_sweep(returns, transactions, positions,
     if ax is None:
         ax = plt.gca()
 
-    turnover = txn.get_turnover(transactions, positions,
+    turnover = txn.get_turnover(positions, transactions,
                                 period=None, average=False)
 
     slippage_sweep = pd.DataFrame()
@@ -1193,7 +1193,7 @@ def plot_slippage_sensitivity(returns, transactions, positions,
     if ax is None:
         ax = plt.gca()
 
-    turnover = txn.get_turnover(transactions, positions,
+    turnover = txn.get_turnover(positions, transactions,
                                 period=None, average=False)
     avg_returns_given_slippage = pd.Series()
     for bps in range(1, 100):
@@ -1238,7 +1238,7 @@ def plot_daily_turnover_hist(transactions, positions,
 
     if ax is None:
         ax = plt.gca()
-    turnover = txn.get_turnover(transactions, positions, period=None)
+    turnover = txn.get_turnover(positions, transactions, period=None)
     sns.distplot(turnover, ax=ax, **kwargs)
     ax.set_title('Distribution of Daily Turnover Rates')
     ax.set_xlabel('Turnover Rate')

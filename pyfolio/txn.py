@@ -132,7 +132,7 @@ def adjust_returns_for_slippage(returns, turnover, slippage_bps):
     return trim_returns - turnover * slippage
 
 
-def get_turnover(transactions, positions, period=None, average=True):
+def get_turnover(positions, transactions, period=None, average=True):
     """
     Portfolio Turnover Rate:
 
@@ -143,11 +143,11 @@ def get_turnover(transactions, positions, period=None, average=True):
 
     Parameters
     ----------
-    transactions : pd.DataFrame
-        Prices and amounts of executed trades. One row per trade.
-        - See full explanation in tears.create_full_tear_sheet
     positions : pd.DataFrame
         Contains daily position values including cash
+        - See full explanation in tears.create_full_tear_sheet
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
         - See full explanation in tears.create_full_tear_sheet
     period : str, optional
         Takes the same arguments as df.resample.
