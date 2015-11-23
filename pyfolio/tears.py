@@ -528,8 +528,8 @@ def create_round_trip_tear_sheet(positions, transactions,
     losing_round_trips = trades[trades.pnl < 0]
     print('Mean return per winning round trip = {:.4}'.format(
         winning_round_trips.returns.mean()))
-    print('Mean return per losing round trip = {:.4}').format(
-        losing_round_trips.returns.mean())
+    print('Mean return per losing round trip = {:.4}'.format(
+        losing_round_trips.returns.mean()))
 
     print('A decision is made every {:.4} days.'.format(ndays / len(trades)))
     print('{:.4} trading decisions per day.'.format(len(trades) * 1. / ndays))
