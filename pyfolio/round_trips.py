@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import division
 from collections import defaultdict
 
 import pandas as pd
@@ -87,7 +87,7 @@ def extract_round_trips(transactions):
             if invested == 0:
                 round_trips['returns'].append(0)
             else:
-                round_trips['returns'].append(1. * pnl / invested)
+                round_trips['returns'].append(pnl / invested)
 
     if len(round_trips) == 0:
         return pd.DataFrame([])
@@ -210,7 +210,7 @@ def add_closing_transactions(positions, transactions):
 
         ending_amount = txn_sym.amount.sum()
 
-        ending_price = 1. * ending_val / ending_amount
+        ending_price = ending_val / ending_amount
         closing_txn = {'symbol': sym,
                        'amount': -ending_amount,
                        'price': ending_price}
