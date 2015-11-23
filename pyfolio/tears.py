@@ -482,7 +482,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
 
 
 @plotting_context
-def create_round_trip_tear_sheet(transactions, positions,
+def create_round_trip_tear_sheet(positions, transactions,
                                  sector_mappings=None,
                                  return_fig=False):
     """
