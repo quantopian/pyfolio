@@ -459,7 +459,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
     try:
         plotting.plot_daily_turnover_hist(transactions, positions,
                                           ax=ax_turnover_hist)
-    except AttributeError:
+    except ValueError:
         warnings.warn('Unable to generate turnover plot.', UserWarning)
 
     if unadjusted_returns is not None:
