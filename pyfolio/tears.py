@@ -565,10 +565,10 @@ def create_round_trip_tear_sheet(positions, transactions,
     sns.distplot(trades.pnl, kde=False, ax=ax_pnl_per_round_trip_dollars)
     ax_pnl_per_round_trip_dollars.set(xlabel='PnL per round-trip trade in $')
 
-    pnl_pct = trades.pnl / trades.pnl.sum() * 100
-    sns.distplot(pnl_pct, kde=False, ax=ax_pnl_per_round_trip_pct)
+    sns.distplot(trades.returns * 100, kde=False,
+                 ax=ax_pnl_per_round_trip_pct)
     ax_pnl_per_round_trip_pct.set(
-        xlabel='PnL per round-trip trade in % of total profit')
+        xlabel='Round-trip returns in %')
 
     gs.tight_layout(fig)
 
