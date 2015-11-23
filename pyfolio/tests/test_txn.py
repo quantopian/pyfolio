@@ -76,7 +76,7 @@ class TransactionsTestCase(TestCase):
         slippage_bps = 10
         expected = Series([0.049]*len(dates), index=dates)
 
-        turnover = get_turnover(transactions, positions, average=False)
+        turnover = get_turnover(positions, transactions, average=False)
         result = adjust_returns_for_slippage(returns, turnover, slippage_bps)
 
         assert_series_equal(result, expected)
