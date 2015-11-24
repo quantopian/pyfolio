@@ -271,14 +271,12 @@ class TestStats(TestCase):
         )
 
     @parameterized.expand([
-        (simple_rets, 'calendar', 0.8624740045072119),
-        (simple_rets, 'compound', 1.3297007080039505)
+        (simple_rets, 1.2333396776895436)
     ])
-    def test_sharpe(self, returns, returns_style, expected):
+    def test_sharpe(self, returns, expected):
         self.assertAlmostEqual(
             timeseries.sharpe_ratio(
-                returns,
-                returns_style=returns_style),
+                returns),
             expected, DECIMAL_PLACES)
 
     @parameterized.expand([
