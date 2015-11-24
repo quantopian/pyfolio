@@ -450,7 +450,7 @@ def downside_risk(returns, required_return=0, period=DAILY):
     return dside_risk
 
 
-def sharpe_ratio(returns, returns_style='compound', period=DAILY):
+def sharpe_ratio(returns, risk_free=0, period=DAILY):
     """
     Determines the Sharpe ratio of a strategy.
 
@@ -476,13 +476,11 @@ def sharpe_ratio(returns, returns_style='compound', period=DAILY):
     See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
-    numer = annual_return(returns, style=returns_style, period=period)
-    denom = annual_volatility(returns, period=period)
+    returns_risk_adj = returns - risk_free
 
-    if denom > 0.0:
-        return numer / denom
-    else:
-        return np.nan
+    return np.mean(returns_risk_adj) / \
+        np.std(returns_risk_adj) * \
+        np.sqrt(ANNUALIZATION_FACTORS[period])
 
 
 def stability_of_timeseries(returns):
