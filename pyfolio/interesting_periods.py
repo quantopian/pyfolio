@@ -65,10 +65,14 @@ PERIODS['Oct14'] = (pd.Timestamp('20141001'), pd.Timestamp('20141101'))
 PERIODS['Fall2015'] = (pd.Timestamp('20150815'), pd.Timestamp('20150930'))
 
 # Market regimes
-PERIODS['Low Volatility Bull Market'] = (pd.Timestamp('20050101', pd.Timestamp('20070801')))
+PERIODS['Low Volatility Bull Market'] = (pd.Timestamp('20050101'),
+                                         pd.Timestamp('20070801'))
 
-PERIODS['GFC Crash'] = (pd.Timestamp('20070801', pd.Timestamp('20090401')))
+PERIODS['GFC Crash'] = (pd.Timestamp('20070801'),
+                        pd.Timestamp('20090401'))
 
-PERIODS['Recovery'] = (pd.Timestamp('20090401', pd.Timestamp('20130101')))
+PERIODS['Recovery'] = (pd.Timestamp('20090401'),
+                       pd.Timestamp('20130101'))
 
-PERIODS['New Normal'] = (pd.Timestamp('20130101', pd.Timestamp('today')))
+PERIODS['New Normal'] = (pd.Timestamp('20130101'),
+                         pd.Timestamp('today'))
