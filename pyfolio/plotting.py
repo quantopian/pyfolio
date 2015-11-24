@@ -579,26 +579,13 @@ def plot_rolling_returns(
         The axes that were plotted on.
 
 """
-    def draw_cone(returns, num_stdev, live_start_date, ax):
-        cone_df = timeseries.cone_rolling(
-            returns,
-            num_stdev=num_stdev,
-            cone_fit_end_date=live_start_date)
-
-        cone_in_sample = cone_df[cone_df.index < live_start_date]
-        cone_out_of_sample = cone_df[cone_df.index > live_start_date]
-        cone_out_of_sample = cone_out_of_sample[
-            cone_out_of_sample.index < returns.index[-1]]
-
-        ax.fill_between(cone_out_of_sample.index,
-                        cone_out_of_sample.sd_down,
-                        cone_out_of_sample.sd_up,
-                        color='steelblue', alpha=0.25)
-
-        return cone_in_sample, cone_out_of_sample
-
     if ax is None:
         ax = plt.gca()
+
+    # ax.axhline(1.0, linestyle='--', color='black', lw=2)
+    # ax.legend(loc=legend_loc)
+    # ax.set_xlabel('')
+    # ax.set_ylabel('Cumulative returns')
 
     if volatility_match and factor_returns is None:
         raise ValueError('volatility_match requires passing of'
@@ -613,59 +600,50 @@ def plot_rolling_returns(
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     if factor_returns is not None:
-        timeseries.cum_returns(factor_returns[df_cum_rets.index], 1.0).plot(
-            lw=2, color='gray', label=factor_returns.name, alpha=0.60,
-            ax=ax, **kwargs)
+        cum_factor_returns = timeseries.cum_returns(factor_returns[df_cum_rets.index], 1.0)
+        cum_factor_returns.plot(lw=2, color='gray', label=factor_returns.name, alpha=0.60,
+                                ax=ax, **kwargs)
+
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
+        is_cum_returns = df_cum_rets[:live_start_date + pd.Timedelta(days=1)]
+        oos_cum_returns = df_cum_rets[live_start_date + pd.Timedelta(days=1):]
 
-    if (live_start_date is None) or (df_cum_rets.index[-1] <=
-                                     live_start_date):
-        df_cum_rets.plot(lw=3, color='forestgreen', alpha=0.6,
-                         label='Backtest', ax=ax, **kwargs)
-    else:
-        df_cum_rets[:live_start_date + pd.Timedelta(days=1)].plot(
-            lw=3, color='forestgreen', alpha=0.6,
-            label='Backtest', ax=ax, **kwargs)
-        df_cum_rets[live_start_date + pd.Timedelta(days=1):].plot(
-            lw=4, color='red', alpha=0.6,
-            label='Live', ax=ax, **kwargs)
+    is_cum_returns.plot(lw=3, color='forestgreen', alpha=0.6,
+                        label='Backtest', ax=ax, **kwargs)
 
-        if cone_std is not None:
-            # check to see if cone_std was passed as a single value and,
-            # if so, just convert to list automatically
-            if isinstance(cone_std, float):
-                cone_std = [cone_std]
+    is_fit_line, is_slope, _ = timeseries.fit_line_to_cumulative_returns(is_cum_returns)
+    
+    is_fit_line.plot(ax=ax, ls='--', label='Backtest trend', lw=2, color='forestgreen',
+                     alpha=0.7, **kwargs)
 
-            for cone_i in cone_std:
-                cone_in_sample, cone_out_of_sample = draw_cone(
-                    returns,
-                    cone_i,
-                    live_start_date,
-                    ax)
+    if len(oos_cum_returns) == 0:
+        return ax
 
-            cone_in_sample['line'].plot(
-                ax=ax,
-                ls='--',
-                label='Backtest trend',
-                lw=2,
-                color='forestgreen',
-                alpha=0.7,
-                **kwargs)
-            cone_out_of_sample['line'].plot(
-                ax=ax,
-                ls='--',
-                label='Predicted trend',
-                lw=2,
-                color='red',
-                alpha=0.7,
-                **kwargs)
+    oos_cum_returns.plot(lw=4, color='red', alpha=0.6,
+                         label='Live', ax=ax, **kwargs)
 
-    ax.axhline(1.0, linestyle='--', color='black', lw=2)
-    ax.set_ylabel('Cumulative returns')
-    ax.set_title('Cumulative Returns')
-    ax.legend(loc=legend_loc)
-    ax.set_xlabel('')
+    oos_proj_line_y = is_slope * (np.array(range(len(oos_cum_returns))) + 1) + is_cum_returns[-1]
+    oos_proj_line = pd.Series(oos_proj_line_y, index=oos_cum_returns.index)
+    oos_proj_line.plot(ax=ax, ls='--', label='Predicted trend', lw=2, color='red',
+                       alpha=0.7, **kwargs)    
+
+    if cone_std is not None:
+        if isinstance(cone_std, (float, int)):
+            cone_std = [cone_std]
+
+        cone_bounds = timeseries.future_cone_bounds(is_cum_returns.pct_change().dropna(),
+                                      len(oos_cum_returns),
+                                      cone_std,
+                                      starting_value=is_cum_returns[-1])
+
+        cone_bounds = cone_bounds.set_index(oos_cum_returns.index)
+
+        for std in cone_std:
+            ax.fill_between(cone_bounds.index,
+                            cone_bounds['{}_stdev_upper'.format(std)],
+                            cone_bounds['{}_stdev_lower'.format(std)],
+                            color='steelblue', alpha=0.25)
 
     return ax
 
