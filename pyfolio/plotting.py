@@ -582,11 +582,6 @@ def plot_rolling_returns(
     if ax is None:
         ax = plt.gca()
 
-    # ax.axhline(1.0, linestyle='--', color='black', lw=2)
-    # ax.legend(loc=legend_loc)
-    # ax.set_xlabel('')
-    # ax.set_ylabel('Cumulative returns')
-
     if volatility_match and factor_returns is None:
         raise ValueError('volatility_match requires passing of'
                          'factor_returns.')
@@ -616,8 +611,13 @@ def plot_rolling_returns(
     
     is_fit_line.plot(ax=ax, ls='--', label='Backtest trend', lw=2, color='forestgreen',
                      alpha=0.7, **kwargs)
+    
+    ax.set_ylabel('Cumulative returns')
+    ax.legend(loc=legend_loc)
+    ax.set_xlabel('')
 
     if len(oos_cum_returns) == 0:
+        ax.axhline(1.0, linestyle='--', color='black', lw=2)
         return ax
 
     oos_cum_returns.plot(lw=4, color='red', alpha=0.6,
@@ -644,6 +644,8 @@ def plot_rolling_returns(
                             cone_bounds['{}_stdev_upper'.format(std)],
                             cone_bounds['{}_stdev_lower'.format(std)],
                             color='steelblue', alpha=0.25)
+
+    ax.axhline(1.0, linestyle='--', color='black', lw=2)
 
     return ax
 
