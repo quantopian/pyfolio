@@ -285,6 +285,38 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     return five_factors.loc[start:end]
 
 
+def get_treasury_yield(start=None, end=None, period='3MO'):
+    """Load treasury yields from FRED.
+
+    Parameters
+    ----------
+    start : date, optional
+        Earliest date to fetch data for.
+        Defaults to earliest date available.
+    end : date, optional
+        Latest date to fetch data for.
+        Defaults to latest date available.
+    period : {'1MO', '3MO', '6MO', 1', '5', '10'}, optional
+        Which maturity to use.
+
+    Returns
+    -------
+    pd.Series
+        Annual treasury yield for every day.
+    """
+    if start is None:
+        start = '1/1/1970'
+    if end is None:
+        end = pd.Timestamp(datetime.today()).normalize() - BDay()
+
+    treasury = web.DataReader("DGS3{}".format(period), "fred",
+                              start, end)
+
+    treasury = treasury.ffill()
+
+    return treasury
+
+
 def extract_rets_pos_txn_from_zipline(backtest):
     """Extract returns, positions, transactions and leverage from the
     backtest data structure returned by zipline.TradingAlgorithm.run().
