@@ -135,12 +135,12 @@ def plot_rolling_fama_french(
     if ax is None:
         ax = plt.gca()
 
-    num_months_str = '%.0f' % (rolling_window / APPROX_BDAYS_PER_MONTH)
-
     ax.set_title(
-        "Rolling Fama-French Single Factor Betas (" +
-        num_months_str +
-        '-month)')
+        "Rolling Fama-French Single Factor Betas (%.0f-month)" % (
+            rolling_window / APPROX_BDAYS_PER_MONTH
+        )
+    )
+
     ax.set_ylabel('beta')
 
     rolling_beta = timeseries.rolling_fama_french(
