@@ -702,7 +702,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    ax.set_title("Rolling Portfolio Beta to " + factor_returns.name)
+    ax.set_title("Rolling Portfolio Beta to " + str(factor_returns.name))
     ax.set_ylabel('Beta')
     rb_1 = timeseries.rolling_beta(
         returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6)
