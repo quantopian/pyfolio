@@ -135,12 +135,12 @@ def plot_rolling_fama_french(
     if ax is None:
         ax = plt.gca()
 
-    num_months_str = '%.0f' % (rolling_window / APPROX_BDAYS_PER_MONTH)
-
     ax.set_title(
-        "Rolling Fama-French Single Factor Betas (" +
-        num_months_str +
-        '-month)')
+        "Rolling Fama-French Single Factor Betas (%.0f-month)" % (
+            rolling_window / APPROX_BDAYS_PER_MONTH
+        )
+    )
+
     ax.set_ylabel('beta')
 
     rolling_beta = timeseries.rolling_fama_french(
@@ -702,7 +702,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    ax.set_title("Rolling Portfolio Beta to " + factor_returns.name)
+    ax.set_title("Rolling Portfolio Beta to " + str(factor_returns.name))
     ax.set_ylabel('Beta')
     rb_1 = timeseries.rolling_beta(
         returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6)
