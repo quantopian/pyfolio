@@ -762,7 +762,7 @@ def perf_stats(
     all_stats['annual_volatility'] = annual_volatility(returns, period=period)
     all_stats['sharpe_ratio'] = sharpe_ratio(
         returns,
-        returns_style=returns_style, period=period)
+        period=period)
     all_stats['calmar_ratio'] = calmar_ratio(
         returns,
         returns_style=returns_style, period=period)
