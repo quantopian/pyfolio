@@ -490,19 +490,13 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
         returns_live = returns[returns.index > live_start_date]
 
         perf_stats_live = np.round(timeseries.perf_stats(
-            returns_live, returns_style='arithmetic'), 2)
-        perf_stats_live_ab = np.round(
-            timeseries.calc_alpha_beta(returns_live, factor_returns), 2)
-        perf_stats_live.loc['alpha'] = perf_stats_live_ab[0]
-        perf_stats_live.loc['beta'] = perf_stats_live_ab[1]
+            returns_live, returns_style='arithmetic',
+            factor_returns=factor_returns), 2)
         perf_stats_live.columns = ['Out_of_Sample']
 
         perf_stats_all = np.round(timeseries.perf_stats(
-            returns, returns_style='arithmetic'), 2)
-        perf_stats_all_ab = np.round(
-            timeseries.calc_alpha_beta(returns, factor_returns), 2)
-        perf_stats_all.loc['alpha'] = perf_stats_all_ab[0]
-        perf_stats_all.loc['beta'] = perf_stats_all_ab[1]
+            returns, returns_style='arithmetic',
+            factor_returns=factor_returns), 2)
         perf_stats_all.columns = ['All_History']
 
         print('Out-of-Sample Months: ' +
@@ -514,11 +508,8 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
           str(int(len(returns_backtest) / APPROX_BDAYS_PER_MONTH)))
 
     perf_stats = np.round(timeseries.perf_stats(
-        returns_backtest, returns_style='arithmetic'), 2)
-    perf_stats_ab = np.round(
-        timeseries.calc_alpha_beta(returns_backtest, factor_returns), 2)
-    perf_stats.loc['alpha'] = perf_stats_ab[0]
-    perf_stats.loc['beta'] = perf_stats_ab[1]
+        returns_backtest, returns_style='arithmetic',
+        factor_returns=factor_returns), 2)
     perf_stats.columns = ['Backtest']
 
     if live_start_date is not None:
