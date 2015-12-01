@@ -168,7 +168,7 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
                                   unadjusted_returns=unadjusted_returns,
                                   set_context=set_context)
 
-            create_round_trip_tear_sheet(transactions, positions,
+            create_round_trip_tear_sheet(positions, transactions,
                                          sector_mappings=sector_mappings)
 
     if bayesian:
