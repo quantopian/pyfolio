@@ -35,4 +35,5 @@ before_script:
   - "flake8 pyfolio"
 
 script:
+  - python -c "import matplotlib, numpy"
   - nosetests -v -s pyfolio.tests
