@@ -35,4 +35,4 @@ before_script:
   - "flake8 pyfolio"
 
 script:
-  - nosetests -v -s $TESTCMD
+  - nosetests -v -s pyfolio.tests
