@@ -22,7 +22,7 @@ before_install:
   - conda info -a
 
 install:
-  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8 scikit-learn seaborn pytables networkx pandas-datareader
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8 scikit-learn seaborn pytables networkx pandas-datareader nbformat
   - source activate testenv
   - pip install --no-deps nose_parameterized contextlib2 logbook==0.10.1 runipy
   - pip install --no-deps git+https://github.com/quantopian/zipline
