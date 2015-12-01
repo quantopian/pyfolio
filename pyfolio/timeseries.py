@@ -730,6 +730,7 @@ def perf_stats(
         returns,
         returns_style='compound',
         return_as_dict=False,
+        factor_returns=None,
         period=DAILY):
     """Calculates various performance metrics of a strategy, for use in
     plotting.show_perf_stats.
@@ -747,6 +748,10 @@ def perf_stats(
         - defines the periodicity of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
         - defaults to 'daily'.
+    factor_returns : pd.Series (optional)
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
+        If None, do not compute alpha, beta, and information ratio.
 
     Returns
     -------
@@ -761,8 +766,7 @@ def perf_stats(
         style=returns_style, period=period)
     all_stats['annual_volatility'] = annual_volatility(returns, period=period)
     all_stats['sharpe_ratio'] = sharpe_ratio(
-        returns,
-        period=period)
+        returns)
     all_stats['calmar_ratio'] = calmar_ratio(
         returns,
         returns_style=returns_style, period=period)
@@ -770,14 +774,15 @@ def perf_stats(
     all_stats['max_drawdown'] = max_drawdown(returns)
     all_stats['omega_ratio'] = omega_ratio(returns)
     all_stats['sortino_ratio'] = sortino_ratio(returns)
-    # TODO: The information_ratio method requires
-    # a second argument for benchmark returns.
-    # Setting information_ratio to NaN until
-    # benchmark returns are added as an argument
-    # to this method.
-    all_stats['information_ratio'] = np.nan
     all_stats['skewness'] = stats.skew(returns)
     all_stats['kurtosis'] = stats.kurtosis(returns)
+    if factor_returns is not None:
+        all_stats['information_ratio'] = information_ratio(returns,
+                                                           factor_returns)
+        alpha, beta = calc_alpha_beta(returns, factor_returns)
+        all_stats['alpha'] = alpha
+        all_stats['beta'] = beta
+
     if return_as_dict:
         return all_stats
     else:
@@ -1334,7 +1339,7 @@ def min_max_vol_bounds(value, lower_bound=0.12, upper_bound=0.24):
     return annual_vol
 
 
-def information_ratio(returns, benchmark_returns):
+def information_ratio(returns, factor_returns):
     """
     Determines the Information ratio of a strategy.
 
@@ -1343,7 +1348,7 @@ def information_ratio(returns, benchmark_returns):
     returns : pd.Series or pd.DataFrame
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    benchmark_returns: float / series
+    factor_returns: float / series
 
     Returns
     -------
@@ -1355,7 +1360,7 @@ def information_ratio(returns, benchmark_returns):
     See https://en.wikipedia.org/wiki/information_ratio for more details.
 
     """
-    active_return = returns - benchmark_returns
+    active_return = returns - factor_returns
     tracking_error = np.std(active_return, ddof=1)
     if np.isnan(tracking_error):
         return 0.0
