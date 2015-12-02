@@ -197,7 +197,7 @@ def add_closing_transactions(positions, transactions):
         Transactions with closing transactions appended.
     """
 
-    closed_txns = transactions.copy()
+    closed_txns = transactions[['symbol', 'amount', 'price']]
 
     pos_at_end = positions.drop('cash', axis=1).iloc[-1]
     open_pos = pos_at_end.replace(0, np.nan).dropna()
