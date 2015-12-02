@@ -50,14 +50,19 @@ def timer(msg_body, previous_time):
     return current_time
 
 
-def create_full_tear_sheet(returns, positions=None, transactions=None,
+def create_full_tear_sheet(returns,
+                           positions=None,
+                           transactions=None,
                            benchmark_rets=None,
                            gross_lev=None,
                            slippage=None,
-                           live_start_date=None, bayesian=False,
-                           hide_positions=False,
+                           live_start_date=None,
                            sector_mappings=None,
-                           cone_std=(1.0, 1.5, 2.0), set_context=True):
+                           bayesian=False,
+                           round_trips=False,
+                           hide_positions=False,
+                           cone_std=(1.0, 1.5, 2.0),
+                           set_context=True):
     """
     Generate a number of tear sheets that are useful
     for analyzing a strategy's performance.
@@ -120,6 +125,8 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
         If True, will not output any symbol names.
     bayesian: boolean, optional
         If True, causes the generation of a Bayesian tear sheet.
+    round_trips: boolean, optional
+        If True, causes the generation of a round trip tear sheet.
     cone_std : float, or tuple, optional
         If float, The standard deviation to use for the cone plots.
         If tuple, Tuple of standard deviation values to use for the cone plots
@@ -167,12 +174,11 @@ def create_full_tear_sheet(returns, positions=None, transactions=None,
             create_txn_tear_sheet(returns, positions, transactions,
                                   unadjusted_returns=unadjusted_returns,
                                   set_context=set_context)
-
-            create_round_trip_tear_sheet(
-                positions=positions,
-                transactions=transactions,
-                sector_mappings=sector_mappings,
-            )
+            if round_trips:
+                create_round_trip_tear_sheet(
+                    positions=positions,
+                    transactions=transactions,
+                    sector_mappings=sector_mappings)
 
     if bayesian:
         create_bayesian_tear_sheet(returns,
