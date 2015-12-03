@@ -919,6 +919,37 @@ def show_and_plot_top_positions(returns, positions_alloc,
         return ax
 
 
+def plot_max_median_position_concentration(positions, ax=None, **kwargs):
+    """
+    Plots the max and median of long and short position concentrations
+    over the time.
+
+    Parameters
+    ----------
+    positions : pd.DataFrame
+        The positions that the strategy takes over time.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+    if ax is None:
+        ax = plt.gcf()
+
+    alloc_summary = pos.get_max_median_position_concentration(positions)
+    colors = ['mediumblue', 'steelblue', 'tomato', 'firebrick']
+    alloc_summary.plot(linewidth=1, color=colors, alpha=0.6, ax=ax)
+
+    ax.legend(loc='center left')
+    ax.set_ylabel('Exposure')
+    ax.set_title('Long/Short Max and Median Position Concentration')
+
+    return ax
+
+
 def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
     """Plots the sector exposures of the portfolio over time.
 
