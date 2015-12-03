@@ -1027,9 +1027,10 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=[1, 1.5, 2],
     """
 
     samples = np.empty((num_samples, num_days))
+    seed = np.random.RandomState(seed=random_seed)
     for i in range(num_samples):
         samples[i, :] = is_returns.sample(num_days, replace=True,
-                                          random_state=random_seed)
+                                          random_state=seed)
 
     cum_samples = np.cumprod(1 + samples, axis=1) * starting_value
 

@@ -560,11 +560,11 @@ def plot_rolling_returns(returns,
         benchmark returns. This helps compare strategies with different
         volatilities. Requires passing of benchmark_rets.
     cone_function : function, optional
-        Function to use when generating forecast probability cone. 
+        Function to use when generating forecast probability cone.
         The function signiture must follow the form:
-        def cone(in_sample_returns (pd.Series), 
+        def cone(in_sample_returns (pd.Series),
                  days_to_project_forward (int),
-                 cone_std= (float, or tuple), 
+                 cone_std= (float, or tuple),
                  starting_value= (int, or float))
         See timeseries.forecast_cone_bootstrap for an example.
     ax : matplotlib.Axes, optional
