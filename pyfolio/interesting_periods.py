@@ -48,7 +48,7 @@ PERIODS['EZB IR Event'] = (
 
 # August 2007, March and September of 2008, Q1 & Q2 2009,
 PERIODS['Aug07'] = (pd.Timestamp('20070801'), pd.Timestamp('20070901'))
-PERIODS['Mar08'] = (pd.Timestamp('20080301'), pd.Timestamp('20070401'))
+PERIODS['Mar08'] = (pd.Timestamp('20080301'), pd.Timestamp('20080401'))
 PERIODS['Sept08'] = (pd.Timestamp('20080901'), pd.Timestamp('20081001'))
 PERIODS['2009Q1'] = (pd.Timestamp('20090101'), pd.Timestamp('20090301'))
 PERIODS['2009Q2'] = (pd.Timestamp('20090301'), pd.Timestamp('20090601'))
