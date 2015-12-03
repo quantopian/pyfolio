@@ -490,12 +490,12 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
         returns_live = returns[returns.index > live_start_date]
 
         perf_stats_live = np.round(timeseries.perf_stats(
-            returns_live, returns_style='arithmetic',
+            returns_live,
             factor_returns=factor_returns), 2)
         perf_stats_live.columns = ['Out_of_Sample']
 
         perf_stats_all = np.round(timeseries.perf_stats(
-            returns, returns_style='arithmetic',
+            returns,
             factor_returns=factor_returns), 2)
         perf_stats_all.columns = ['All_History']
 
@@ -508,7 +508,7 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
           str(int(len(returns_backtest) / APPROX_BDAYS_PER_MONTH)))
 
     perf_stats = np.round(timeseries.perf_stats(
-        returns_backtest, returns_style='arithmetic',
+        returns_backtest,
         factor_returns=factor_returns), 2)
     perf_stats.columns = ['Backtest']
 
@@ -1204,7 +1204,7 @@ def plot_slippage_sensitivity(returns, transactions, positions,
     for bps in range(1, 100):
         adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
         avg_returns = timeseries.annual_return(
-            adj_returns, style='calendar')
+            adj_returns)
         avg_returns_given_slippage.loc[bps] = avg_returns
 
     avg_returns_given_slippage.plot(alpha=1.0, lw=2, ax=ax)
