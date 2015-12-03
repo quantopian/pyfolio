@@ -527,6 +527,7 @@ def plot_rolling_returns(returns,
                          cone_std=None,
                          legend_loc='best',
                          volatility_match=False,
+                         cone_function=timeseries.forecast_cone_bootstrap,
                          ax=None, **kwargs):
     """
     Plots cumulative rolling returns versus some benchmarks'.
@@ -558,6 +559,14 @@ def plot_rolling_returns(returns,
         Whether to normalize the volatility of the returns to those of the
         benchmark returns. This helps compare strategies with different
         volatilities. Requires passing of benchmark_rets.
+    cone_function : function, optional
+        Function to use when generating forecast probability cone. 
+        The function signiture must follow the form:
+        def cone(in_sample_returns (pd.Series), 
+                 days_to_project_forward (int),
+                 cone_std= (float, or tuple), 
+                 starting_value= (int, or float))
+        See timeseries.forecast_cone_bootstrap for an example.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -596,8 +605,8 @@ def plot_rolling_returns(returns,
 
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
-        is_cum_returns = cum_rets.loc[returns.index < live_start_date]
-        oos_cum_returns = cum_rets.loc[returns.index >= live_start_date]
+        is_cum_returns = cum_rets.loc[cum_rets.index < live_start_date]
+        oos_cum_returns = cum_rets.loc[cum_rets.index >= live_start_date]
     else:
         is_cum_returns = cum_rets
         oos_cum_returns = pd.Series([])
@@ -613,19 +622,19 @@ def plot_rolling_returns(returns,
             if isinstance(cone_std, (float, int)):
                 cone_std = [cone_std]
 
-            is_daily_returns = is_cum_returns.pct_change().dropna()
-            cone_bounds = timeseries.forecast_cone_bounds(
-                is_daily_returns,
+            is_returns = returns.loc[returns.index < live_start_date]
+            cone_bounds = cone_function(
+                is_returns,
                 len(oos_cum_returns),
-                cone_std,
+                cone_std=cone_std,
                 starting_value=is_cum_returns[-1])
 
             cone_bounds = cone_bounds.set_index(oos_cum_returns.index)
 
             for std in cone_std:
                 ax.fill_between(cone_bounds.index,
-                                cone_bounds[str(std)],
-                                cone_bounds[str(-std)],
+                                cone_bounds[float(std)],
+                                cone_bounds[float(-std)],
                                 color='steelblue', alpha=0.5)
 
     if legend_loc is not None:

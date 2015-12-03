@@ -370,7 +370,8 @@ class TestMultifactor(TestCase):
 
 class TestCone(TestCase):
     def test_bootstrap_cone_against_linear_cone_normal_returns(self):
-        np.random.seed(100)
+        random_seed = 100
+        np.random.seed(random_seed)
         days_forward = 20
         cone_stdevs = [1, 1.5, 2]
         mu = .005
@@ -387,7 +388,8 @@ class TestCone(TestCase):
 
         bootstrap_cone = timeseries.forecast_cone_bounds(rets, days_forward,
                                                          cone_stdevs,
-                                                         starting_value=1)
+                                                         starting_value=1,
+                                                         random_seed=random_seed)
         for col, vals in bootstrap_cone.iteritems():
             expected = normal_cone[col].values
             assert_allclose(vals.values, expected, rtol=.005)
