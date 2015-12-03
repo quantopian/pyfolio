@@ -191,7 +191,7 @@ def max_drawdown(returns):
     return -1 * MDD
 
 
-def annual_return(returns, style='compound', period=DAILY):
+def annual_return(returns, period=DAILY):
     """Determines the annual returns of a strategy.
 
     Parameters
@@ -199,12 +199,6 @@ def annual_return(returns, style='compound', period=DAILY):
     returns : pd.Series
         Periodic returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    style : str, optional
-        - If 'compound', then return will be calculated in geometric
-          terms: (1+mean(all_daily_returns))^252 - 1.
-        - If 'calendar', then return will be calculated as
-          ((last_value - start_value)/start_value)/num_of_years.
-        - Otherwise, return is simply mean(all_daily_returns)*252.
     period : str, optional
         - defines the periodicity of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
@@ -213,7 +207,7 @@ def annual_return(returns, style='compound', period=DAILY):
     Returns
     -------
     float
-        Annual returns.
+        Annual Return as CAGR (Compounded Annual Growth Rate)
 
     """
 
@@ -230,16 +224,15 @@ def annual_return(returns, style='compound', period=DAILY):
             )
         )
 
-    if style == 'calendar':
-        num_years = len(returns) / ann_factor
-        df_cum_rets = cum_returns(returns, starting_value=100)
-        start_value = df_cum_rets[0]
-        end_value = df_cum_rets[-1]
-        return ((end_value - start_value) / start_value) / num_years
-    if style == 'compound':
-        return pow((1 + returns.mean()), ann_factor) - 1
-    else:
-        return returns.mean() * ann_factor
+    num_years = float(len(returns)) / ann_factor
+    df_cum_rets = cum_returns(returns, starting_value=100)
+    start_value = 100
+    end_value = df_cum_rets[-1]
+
+    total_return = (end_value - start_value) / start_value
+    annual_return = (1. + total_return) ** (1 / num_years) - 1
+
+    return annual_return
 
 
 def annual_volatility(returns, period=DAILY):
@@ -278,7 +271,7 @@ def annual_volatility(returns, period=DAILY):
     return returns.std() * np.sqrt(ann_factor)
 
 
-def calmar_ratio(returns, returns_style='calendar', period=DAILY):
+def calmar_ratio(returns, period=DAILY):
     """
     Determines the Calmar ratio, or drawdown ratio, of a strategy.
 
@@ -287,8 +280,6 @@ def calmar_ratio(returns, returns_style='calendar', period=DAILY):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    returns_style : str, optional
-        See annual_returns' style
     period : str, optional
         - defines the periodicity of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
@@ -309,7 +300,6 @@ def calmar_ratio(returns, returns_style='calendar', period=DAILY):
     if temp_max_dd < 0:
         temp = annual_return(
             returns=returns,
-            style=returns_style,
             period=period
         ) / abs(max_drawdown(returns=returns))
     else:
@@ -368,8 +358,6 @@ def sortino_ratio(returns, required_return=0, period=DAILY):
     returns : pd.Series or pd.DataFrame
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    returns_style : str, optional
-        See annual_returns' style
     required_return: float / series
         minimum acceptable return
     period : str, optional
@@ -459,8 +447,6 @@ def sharpe_ratio(returns, risk_free=0, period=DAILY):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    returns_style : str, optional
-        See annual_returns' style
     period : str, optional
         - defines the periodicity of the 'returns' data for purposes of
         annualizing. Can be 'monthly', 'weekly', or 'daily'
@@ -761,15 +747,11 @@ def perf_stats(
     """
 
     all_stats = OrderedDict()
-    all_stats['annual_return'] = annual_return(
-        returns,
-        style=returns_style, period=period)
+    all_stats['annual_return'] = annual_return(returns, period=period)
     all_stats['annual_volatility'] = annual_volatility(returns, period=period)
     all_stats['sharpe_ratio'] = sharpe_ratio(
         returns)
-    all_stats['calmar_ratio'] = calmar_ratio(
-        returns,
-        returns_style=returns_style, period=period)
+    all_stats['calmar_ratio'] = calmar_ratio(returns, period=period)
     all_stats['stability'] = stability_of_timeseries(returns)
     all_stats['max_drawdown'] = max_drawdown(returns)
     all_stats['omega_ratio'] = omega_ratio(returns)
