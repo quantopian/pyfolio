@@ -14,22 +14,15 @@
 # limitations under the License.
 
 from __future__ import division
-from os.path import (
-    abspath,
-    dirname,
-    join,
-    isfile
-)
+from datetime import datetime
+from os import mkdir
+from os.path import expanduser, join, getmtime
 import warnings
 
-from datetime import datetime
-
 import pandas as pd
-import numpy as np
-
-from pandas_datareader import data as web
-
 from pandas.tseries.offsets import BDay
+from pandas_datareader import data as web
+import numpy as np
 
 from . import pos
 from . import txn
@@ -51,13 +44,11 @@ ANNUALIZATION_FACTORS = {
     MONTHLY: MONTHS_PER_YEAR
 }
 
-
-def pyfolio_root():
-    return dirname(abspath(__file__))
+cache_dir = expanduser('~/.cache/pyfolio/')
 
 
 def data_path(name):
-    return join(pyfolio_root(), 'data', name)
+    return join(cache_dir, name)
 
 
 def one_dec_places(x, pos):
@@ -107,6 +98,13 @@ def get_utc_timestamp(dt):
     return dt
 
 
+_1_bday = BDay()
+
+
+def _1_bday_ago():
+    return pd.Timestamp.now().normalize() - _1_bday
+
+
 def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
     """Get returns from a cached file if the cache is recent enough,
     otherwise, try to retrieve via a provided update function and
@@ -130,18 +128,21 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
     """
     update_cache = False
 
-    if not isfile(filepath):
+    try:
+        mtime = getmtime(filepath)
+    except IOError:
         update_cache = True
     else:
-        returns = pd.read_csv(filepath, index_col=0,
-                              parse_dates=True)
-        returns.index = returns.index.tz_localize("UTC")
-        if returns.index[-1] < latest_dt:
+        if pd.Timestamp(mtime, unit='s') < _1_bday_ago():
             update_cache = True
+        else:
+            returns = pd.read_csv(filepath, index_col=0, parse_dates=True)
+            returns.index = returns.index.tz_localize("UTC")
 
     if update_cache:
         returns = update_func(**kwargs)
         try:
+            mkdir(cache_dir)
             returns.to_csv(filepath)
         except IOError as e:
             warnings.warn('Could not update cache {}.'
@@ -202,7 +203,7 @@ def default_returns_func(symbol, start=None, end=None):
     if start is None:
         start = '1/1/1970'
     if end is None:
-        end = pd.Timestamp(datetime.today()).normalize() - BDay()
+        end = _1_bday_ago()
 
     start = get_utc_timestamp(start)
     end = get_utc_timestamp(end)
@@ -270,7 +271,7 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     if start is None:
         start = '1/1/1970'
     if end is None:
-        end = pd.Timestamp(datetime.today()).normalize() - BDay()
+        end = _1_bday_ago()
 
     start = get_utc_timestamp(start)
     end = get_utc_timestamp(end)
@@ -307,7 +308,7 @@ def get_treasury_yield(start=None, end=None, period='3MO'):
     if start is None:
         start = '1/1/1970'
     if end is None:
-        end = pd.Timestamp(datetime.today()).normalize() - BDay()
+        end = _1_bday_ago()
 
     treasury = web.DataReader("DGS3{}".format(period), "fred",
                               start, end)
