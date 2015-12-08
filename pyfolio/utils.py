@@ -15,7 +15,7 @@
 
 from __future__ import division
 from datetime import datetime
-from os import mkdir
+from os import mkdir, environ
 from os.path import expanduser, join, getmtime
 import warnings
 
@@ -44,11 +44,22 @@ ANNUALIZATION_FACTORS = {
     MONTHLY: MONTHS_PER_YEAR
 }
 
-cache_dir = expanduser('~/.cache/pyfolio/')
+
+def cache_dir(environ=environ):
+    try:
+        return environ['PYFOLIO_CACHE_DIR']
+    except KeyError:
+        return join(
+            environ.get(
+                'XDG_CACHE_HOME',
+                expanduser('~/.cache/'),
+            ),
+            'pyfolio',
+        )
 
 
 def data_path(name):
-    return join(cache_dir, name)
+    return join(cache_dir(), name)
 
 
 def one_dec_places(x, pos):
