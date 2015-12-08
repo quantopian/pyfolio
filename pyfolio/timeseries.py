@@ -714,7 +714,6 @@ def calc_alpha_beta(returns, factor_returns):
 
 def perf_stats(
         returns,
-        returns_style='compound',
         return_as_dict=False,
         factor_returns=None,
         period=DAILY):
@@ -726,8 +725,6 @@ def perf_stats(
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    returns_style : str, optional
-       See annual_returns' style
     return_as_dict : boolean, optional
        If True, returns the computed metrics in a dictionary.
     period : str, optional
