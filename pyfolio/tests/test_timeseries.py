@@ -40,8 +40,8 @@ class TestDrawdown(TestCase):
         # Need to use isnull because the result can be NaN, NaT, etc.
         self.assertTrue(
             pd.isnull(peak)) if expected_peak is None else self.assertEqual(
-            peak,
-            expected_peak)
+                peak,
+                expected_peak)
         self.assertTrue(
             pd.isnull(valley)) if expected_valley is None else \
             self.assertEqual(
@@ -235,21 +235,20 @@ class TestStats(TestCase):
         [10, -10, 10]) / 100.  # Ends in drawdown
     dt = pd.date_range('2000-1-3', periods=3, freq='D')
 
+    px_list_2 = [1.0, 1.2, 1.0, 0.8, 0.7, 0.8, 0.8, 0.8]
+    dt_2 = pd.date_range('2000-1-3', periods=8, freq='D')
+
     @parameterized.expand([
-        (simple_rets, 'calendar', utils.DAILY, 0.10584000000000014),
-        (simple_rets, 'compound', utils.DAILY, 0.16317653888658334),
-        (simple_rets, 'calendar', utils.DAILY, 0.10584000000000014),
-        (simple_rets, 'compound', utils.DAILY, 0.16317653888658334),
-        (simple_week_rets, 'compound', utils.WEEKLY, 0.031682168889005213),
-        (simple_week_rets, 'calendar', utils.WEEKLY, 0.021840000000000033),
-        (simple_month_rets, 'compound', utils.MONTHLY, 0.0072238075842128158),
-        (simple_month_rets, 'calendar', utils.MONTHLY, 0.0050400000000000071)
+        (simple_rets, utils.DAILY, 0.15500998835658075),
+        (simple_week_rets, utils.WEEKLY, 0.030183329386562319),
+        (simple_month_rets, utils.MONTHLY, 0.006885932704891129)
     ])
-    def test_annual_ret(self, returns, style, period, expected):
+    def test_annual_ret(self, returns, period, expected):
         self.assertEqual(
             timeseries.annual_return(
                 returns,
-                style=style, period=period),
+                period=period
+            ),
             expected)
 
     @parameterized.expand([
@@ -306,16 +305,13 @@ class TestStats(TestCase):
             expected)
 
     @parameterized.expand([
-        (pd.Series(px_list,
-                   index=dt), 'calendar', -8.3999999999999559),
-        (pd.Series(px_list,
-                   index=dt), 'arithmetic', 84.000000000000014)
+        (pd.Series(px_list_2,
+                   index=dt_2).pct_change().dropna(), -2.3992211554712197)
     ])
-    def test_calmar(self, returns, returns_style, expected):
+    def test_calmar(self, returns, expected):
         self.assertEqual(
             timeseries.calmar_ratio(
-                returns,
-                returns_style=returns_style),
+                returns),
             expected)
 
     @parameterized.expand([
