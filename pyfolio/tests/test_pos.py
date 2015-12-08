@@ -13,13 +13,15 @@ from pandas.util.testing import (assert_frame_equal)
 from numpy import (
     arange,
     zeros_like,
+    nan,
 )
 
 import warnings
 
 from pyfolio.pos import (get_percent_alloc,
                          extract_pos,
-                         get_sector_exposures)
+                         get_sector_exposures,
+                         get_max_median_position_concentration)
 
 
 class PositionsTestCase(TestCase):
@@ -115,3 +117,24 @@ class PositionsTestCase(TestCase):
                 self.assertEqual(len(w), 1)
             else:
                 self.assertEqual(len(w), 0)
+
+    @parameterized.expand([
+        (DataFrame([[1.0, 2.0, 3.0, 14.0]]*len(dates),
+                   columns=[0, 1, 2, 'cash'], index=dates),
+         DataFrame([[0.15, 0.1, nan, nan]]*len(dates),
+                   columns=['max_long', 'median_long',
+                            'median_short', 'max_short'], index=dates)),
+        (DataFrame([[1.0, -2.0, -13.0, 15.0]]*len(dates),
+                   columns=[0, 1, 2, 'cash'], index=dates),
+         DataFrame([[1.0, 1.0, -7.5, -13.0]]*len(dates),
+                   columns=['max_long', 'median_long',
+                            'median_short', 'max_short'], index=dates)),
+        (DataFrame([[nan, 2.0, nan, 8.0]]*len(dates),
+                   columns=[0, 1, 2, 'cash'], index=dates),
+         DataFrame([[0.2, 0.2, nan, nan]]*len(dates),
+                   columns=['max_long', 'median_long',
+                            'median_short', 'max_short'], index=dates))
+    ])
+    def test_max_median_exposure(self, positions, expected):
+        alloc_summary = get_max_median_position_concentration(positions)
+        assert_frame_equal(expected, alloc_summary)
