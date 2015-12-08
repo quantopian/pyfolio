@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup
-import sys
+
+import versioneer
 
 
 DISTNAME = 'pyfolio'
@@ -59,18 +60,21 @@ extras_reqs = {
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
 
 if __name__ == "__main__":
-    setup(name=DISTNAME,
-          version=VERSION,
-          maintainer=MAINTAINER,
-          maintainer_email=MAINTAINER_EMAIL,
-          description=DESCRIPTION,
-          license=LICENSE,
-          url=URL,
-          long_description=LONG_DESCRIPTION,
-          packages=['pyfolio', 'pyfolio.tests'],
-          package_data={'pyfolio': ['data/*.*']},
-          classifiers=classifiers,
-          install_requires=install_reqs,
-          extras_requires=extras_reqs,
-          tests_require=test_reqs,
-          test_suite='nose.collector')
+    setup(
+        name=DISTNAME,
+        cmdclass=versioneer.get_cmdclass(),
+        version=versioneer.get_version(),
+        maintainer=MAINTAINER,
+        maintainer_email=MAINTAINER_EMAIL,
+        description=DESCRIPTION,
+        license=LICENSE,
+        url=URL,
+        long_description=LONG_DESCRIPTION,
+        packages=['pyfolio', 'pyfolio.tests'],
+        package_data={'pyfolio': ['data/*.*']},
+        classifiers=classifiers,
+        install_requires=install_reqs,
+        extras_requires=extras_reqs,
+        tests_require=test_reqs,
+        test_suite='nose.collector',
+    )
