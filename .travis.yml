@@ -36,3 +36,6 @@ before_script:
 
 script:
   - nosetests $TESTCMD
+
+notifications:
+  email: false
