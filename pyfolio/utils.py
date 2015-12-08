@@ -252,7 +252,7 @@ def get_fama_french():
     five_factors /= 100.
     five_factors.index = five_factors.index.tz_localize('utc')
 
-    return five_factors
+    return five_factors.loc['1/1/1970':]
 
 
 def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
