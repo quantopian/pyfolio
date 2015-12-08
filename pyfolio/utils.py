@@ -15,6 +15,7 @@
 
 from __future__ import division
 from datetime import datetime
+import errno
 from os import mkdir, environ
 from os.path import expanduser, join, getmtime
 import warnings
@@ -141,7 +142,9 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
 
     try:
         mtime = getmtime(filepath)
-    except IOError:
+    except OSError as e:
+        if e.errno != errno.ENOENT:
+            raise
         update_cache = True
     else:
         if pd.Timestamp(mtime, unit='s') < _1_bday_ago():
@@ -153,7 +156,7 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
     if update_cache:
         returns = update_func(**kwargs)
         try:
-            mkdir(cache_dir)
+            mkdir(cache_dir())
             returns.to_csv(filepath)
         except IOError as e:
             warnings.warn('Could not update cache {}.'
