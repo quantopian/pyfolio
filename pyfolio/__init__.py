@@ -7,6 +7,7 @@ from . import txn
 
 from .tears import *  # noqa
 from .plotting import *  # noqa
+from ._version import get_versions
 
 try:
     from . import bayesian
@@ -15,5 +16,8 @@ except ImportError:
         "Could not import bayesian submodule due to missing pymc3 dependency.",
         ImportWarning)
 
-__version__ = '0.3.1'
+
+__version__ = get_versions()['version']
+del get_versions
+
 __all__ = ['utils', 'timeseries', 'pos', 'txn', 'bayesian']
