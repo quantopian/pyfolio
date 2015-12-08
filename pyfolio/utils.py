@@ -16,8 +16,8 @@
 from __future__ import division
 from datetime import datetime
 import errno
-from os import mkdir, environ
-from os.path import expanduser, join, getmtime
+from os import makedirs, environ
+from os.path import expanduser, join, getmtime, isdir
 import warnings
 
 import pandas as pd
@@ -61,6 +61,17 @@ def cache_dir(environ=environ):
 
 def data_path(name):
     return join(cache_dir(), name)
+
+
+def ensure_directory(path):
+    """
+    Ensure that a directory named "path" exists.
+    """
+    try:
+        makedirs(path)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST or not isdir(path):
+            raise
 
 
 def one_dec_places(x, pos):
@@ -156,12 +167,24 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
     if update_cache:
         returns = update_func(**kwargs)
         try:
-            mkdir(cache_dir())
+            ensure_directory(cache_dir())
+        except OSError as e:
+            warnings.warn(
+                'could not update cache: {}. {}: {}'.format(
+                    filepath, type(e).__name__, e,
+                ),
+                UserWarning,
+            )
+
+        try:
             returns.to_csv(filepath)
-        except IOError as e:
-            warnings.warn('Could not update cache {}.'
-                          'Exception: {}'.format(filepath, e),
-                          UserWarning)
+        except OSError as e:
+            warnings.warn(
+                'could not update cache {}. {}: {}'.format(
+                    filepath, type(e).__name__, e,
+                ),
+                UserWarning,
+            )
 
     return returns
 
