@@ -401,7 +401,7 @@ def model_stoch_vol(data, samples=2000):
         # Start next run at the last sampled position.
         step = pm.NUTS(scaling=trace[-1], gamma=.25)
         trace = pm.sample(samples, step, start=trace[-1],
-                          progressbar=False, njobs=2)
+                          progressbar=False)
 
     return model, trace
 
