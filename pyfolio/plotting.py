@@ -419,7 +419,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
 
     ax.set_title('Top %i Drawdown Periods' % top)
     ax.set_ylabel('Cumulative returns')
-    ax.legend(['Portfolio'], 'upper left')
+    ax.legend(['Portfolio'], loc='upper left')
     ax.set_xlabel('')
     return ax
 
