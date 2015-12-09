@@ -369,7 +369,7 @@ class TestCone(TestCase):
         random_seed = 100
         np.random.seed(random_seed)
         days_forward = 200
-        cone_stdevs = [1, 1.5, 2]
+        cone_stdevs = (1., 1.5, 2.)
         mu = .005
         sigma = .002
         rets = pd.Series(np.random.normal(mu, sigma, 10000))

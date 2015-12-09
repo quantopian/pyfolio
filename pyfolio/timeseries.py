@@ -964,7 +964,7 @@ def rolling_sharpe(returns, rolling_sharpe_window):
         * np.sqrt(APPROX_BDAYS_PER_YEAR)
 
 
-def forecast_cone_bootstrap(is_returns, num_days, cone_std=[1, 1.5, 2],
+def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
                             starting_value=1, num_samples=1000,
                             random_seed=None):
     """

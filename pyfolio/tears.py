@@ -453,6 +453,11 @@ def create_txn_tear_sheet(returns, positions, transactions,
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
          - See full explanation in create_full_tear_sheet.
+    unadjusted_returns : pd.Series, optional
+        Daily unadjusted returns of the strategy, noncumulative.
+        Will plot additional swippage sweep analysis.
+         - See pyfolio.plotting.plot_swippage_sleep and
+           pyfolio.plotting.plot_slippage_sensitivity
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
