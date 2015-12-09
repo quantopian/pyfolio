@@ -10,3 +10,5 @@ pages:
   - 'Zipline algorithm': 'zipline_algo_example.md'
   - 'Bayesian analysis': 'bayesian.md'
   - 'Sector analysis': 'sector_mapping_example.md'
+  - 'Round trip analysis': 'round_trip_example.md'
+  - 'Slippage analysis': 'slippage_example.md'
