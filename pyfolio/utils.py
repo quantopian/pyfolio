@@ -282,15 +282,16 @@ def get_fama_french():
     pandas.DataFrame
         Percent change of Fama-French factors
     """
+    start = '1/1/1970'
     research_factors = web.DataReader('F-F_Research_Data_Factors_daily',
-                                      'famafrench')[0]
+                                      'famafrench', start=start)[0]
     momentum_factor = web.DataReader('F-F_Momentum_Factor_daily',
-                                     'famafrench')[0]
+                                     'famafrench', start=start)[0]
     five_factors = research_factors.join(momentum_factor).dropna()
     five_factors /= 100.
     five_factors.index = five_factors.index.tz_localize('utc')
 
-    return five_factors.loc['1/1/1970':]
+    return five_factors
 
 
 def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
