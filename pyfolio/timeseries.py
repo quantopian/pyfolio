@@ -1282,3 +1282,28 @@ def information_ratio(returns, factor_returns):
     if np.isnan(tracking_error):
         return 0.0
     return np.mean(active_return) / tracking_error
+
+
+def cents_per_share(returns, positions, txn_volume):
+    """
+    Calculates average cents per share earned (or lost).
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily holindgs in currency.
+         - See full explanation in tears.create_full_tear_sheet.
+    txn_volume : pd.Series
+        Daily transaction volume in currency.
+
+    Returns
+    -------
+    float
+        Cents per share
+
+    """
+    pnl = returns * positions.sum(axis='columns')
+    return 100 * pnl.mean() / txn_volume.mean()
