@@ -9,7 +9,7 @@
         
         <link rel="shortcut icon" href="../img/favicon.ico">
 
-	<title>Releases - pyfolio</title>
+	<title>Sector analysis - pyfolio</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -59,13 +59,13 @@
                 
                 
                 
-                    <li class="active">
-                        <a href="./">Releases</a>
+                    <li >
+                        <a href="../whatsnew/">Releases</a>
                     </li>
                 
                 
                 
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorial <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
@@ -88,8 +88,8 @@
 
                         
                             
-<li >
-    <a href="../sector_mapping_example/">Sector analysis</a>
+<li class="active">
+    <a href="./">Sector analysis</a>
 </li>
 
                         
@@ -108,12 +108,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="..">
+                        <a rel="next" href="../bayesian/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../single_stock_example/">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -138,79 +138,171 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#whats-new">What's New</a></li>
-        
-            <li><a href="#v031-nov-12-2015">v0.3.1 (Nov 12, 2015)</a></li>
-        
-            <li><a href="#v03-oct-23-2015">v0.3 (Oct 23, 2015)</a></li>
-        
-            <li><a href="#v02-oct-16-2015">v0.2 (Oct 16, 2015)</a></li>
+        <li class="main active"><a href="#sector-mappings">Sector Mappings</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="whats-new">What's New</h1>
-<p>These are new features and improvements of note in each release.</p>
-<h2 id="v031-nov-12-2015">v0.3.1 (Nov 12, 2015)</h2>
-<p>This is a minor release from 0.3 that includes mostly bugfixes but also some new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features">New features</h3>
-<ul>
-<li>Add Information Ratio <a href="https://github.com/quantopian/pyfolio/pull/194">PR194</a> by @MridulS</li>
-<li>Bayesian tear-sheet now accepts 'Fama-French' option to do Bayesian multivariate regression against Fama-French risk factors <a href="https://github.com/quantopian/pyfolio/pull/200">PR200</a> by Shane Bussman</li>
-<li>Plotting of monthly returns <a href="https://github.com/quantopian/pyfolio/pull/195">PR195</a></li>
-</ul>
-<h3 id="bug-fixes">Bug fixes</h3>
-<ul>
-<li><code>pos.get_percent_alloc</code> was not handling short allocations correctly <a href="https://github.com/quantopian/pyfolio/pull/201">PR201</a></li>
-<li>UTC bug with cached Fama-French factors <a href="https://github.com/quantopian/pyfolio/commit/709553a55b5df7c908d17f443cb17b51854a65be">commit</a></li>
-<li>Sector map was not being passed from <code>create_returns_tearsheet</code> <a href="https://github.com/quantopian/pyfolio/commit/894b753e365f9cb4861ffca2ef214c5a64b2bef4">commit</a></li>
-<li>New sector mapping feature was not Python 3 compatible <a href="https://github.com/quantopian/pyfolio/pull/201">PR201</a></li>
-</ul>
-<h3 id="maintenance">Maintenance</h3>
-<ul>
-<li>We now depend on pandas-datareader as the yahoo finance loaders from pandas will be deprecated <a href="https://github.com/quantopian/pyfolio/pull/181">PR181</a> by @tswrightsandpointe</li>
-</ul>
-<h3 id="contributors">Contributors</h3>
-<p>Besiders the core developers, we have seen an increase in outside contributions which we greatly appreciate. Specifically, these people contributed to this release:</p>
-<ul>
-<li>Shane Bussman</li>
-<li>@MridulS</li>
-<li>@YihaoLu</li>
-<li>@jkrauss82</li>
-<li>@tswrightsandpointe</li>
-<li>@cgdeboer</li>
-</ul>
-<h2 id="v03-oct-23-2015">v0.3 (Oct 23, 2015)</h2>
-<p>This is a major release from 0.2 that includes many exciting new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_1">New features</h3>
-<ul>
-<li>Sector exposures: sum positions by sector given a dictionary or series of symbol to sector mappings <a href="https://github.com/quantopian/pyfolio/pull/166">PR166</a></li>
-<li>Ability to make cones with multiple shades stdev regions <a href="https://github.com/quantopian/pyfolio/pull/168">PR168</a></li>
-<li>Slippage sweep: See how an algorithm performs with various levels of slippage <a href="https://github.com/quantopian/pyfolio/pull/170">PR170</a></li>
-<li>Stochastic volatility model in Bayesian tear sheet <a href="https://github.com/quantopian/pyfolio/pull/174">PR174</a></li>
-<li>Ability to suppress display of position information <a href="https://github.com/quantopian/pyfolio/pull/177">PR177</a></li>
-</ul>
-<h3 id="bug-fixes_1">Bug fixes</h3>
-<ul>
-<li>Various fixes to make pyfolio pandas 0.17 compatible</li>
-</ul>
-<h2 id="v02-oct-16-2015">v0.2 (Oct 16, 2015)</h2>
-<p>This is a major release from 0.1 that includes mainly bugfixes and refactorings but also some new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_2">New features</h3>
-<ul>
-<li>Volatility matched cumulative returns plot <a href="https://github.com/quantopian/pyfolio/pull/126">PR126</a>.</li>
-<li>Allow for different periodicity (annualization factors) in the annual_() methods <a href="https://github.com/quantopian/pyfolio/pull/164">PR164</a>.</li>
-<li>Users can supply their own interesting periods <a href="https://github.com/quantopian/pyfolio/pull/163">PR163</a>.</li>
-<li>Ability to weight a portfolio of holdings by a metric valued <a href="https://github.com/quantopian/pyfolio/pull/161">PR161</a>.</li>
-</ul>
-<h3 id="bug-fixes_2">Bug fixes</h3>
-<ul>
-<li>Fix drawdown overlaps <a href="https://github.com/quantopian/pyfolio/pull/150">PR150</a>.</li>
-<li>Monthly returns distribution should not stack by year <a href="https://github.com/quantopian/pyfolio/pull/162">PR162</a>.</li>
-<li>Fix gross leverage <a href="https://github.com/quantopian/pyfolio/pull/147">PR147</a></li>
-</ul></div>
+<h1 id="sector-mappings">Sector Mappings</h1>
+<p>To generate sector allocation plots in the positions tearsheet and PnL by sector in the round trips tearsheet, you must pass pyfolio a dictionary (or dict-like data struction) of symbol-sector mappings, where symbols are keys and sectors are values. <code>create_full_tearsheet</code> will also take symbol-sector mappings as keyword argument <code>sector_mappings</code>.</p>
+<pre><code class="python">%matplotlib inline
+import pyfolio as pf
+import gzip
+import os
+import pandas as pd
+</code></pre>
+
+<pre><code class="python">transactions = pd.read_csv(gzip.open('../tests/test_data/test_txn.csv.gz'),
+                    index_col=0, parse_dates=0)
+positions = pd.read_csv(gzip.open('../tests/test_data/test_pos.csv.gz'),
+                    index_col=0, parse_dates=0)
+returns = pd.read_csv(gzip.open('../tests/test_data/test_returns.csv.gz'),
+                    index_col=0, parse_dates=0, header=None)[1]
+gross_lev = pd.read_csv(gzip.open('../tests/test_data/test_gross_lev.csv.gz'),
+                    index_col=0, parse_dates=0, header=None)[1]
+</code></pre>
+
+<pre><code class="python">returns.index = returns.index.tz_localize(&quot;UTC&quot;)
+positions.index = positions.index.tz_localize(&quot;UTC&quot;)
+transactions.index = transactions.index.tz_localize(&quot;UTC&quot;)
+gross_lev.index = gross_lev.index.tz_localize(&quot;UTC&quot;)
+
+</code></pre>
+
+<pre><code class="python">positions.head(2)
+</code></pre>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>AMD</th>
+      <th>CERN</th>
+      <th>COST</th>
+      <th>DELL</th>
+      <th>GPS</th>
+      <th>INTC</th>
+      <th>MMM</th>
+      <th>cash</th>
+    </tr>
+    <tr>
+      <th>index</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2004-01-09 00:00:00+00:00</th>
+      <td>6961.92</td>
+      <td>21017.07875</td>
+      <td>7282.266152</td>
+      <td>21264.55188</td>
+      <td>7091.080020</td>
+      <td>21259.33389</td>
+      <td>21316.129606</td>
+      <td>-6192.360298</td>
+    </tr>
+    <tr>
+      <th>2004-01-12 00:00:00+00:00</th>
+      <td>18198.58</td>
+      <td>18071.25000</td>
+      <td>17675.836401</td>
+      <td>10804.31924</td>
+      <td>10685.411865</td>
+      <td>17872.47748</td>
+      <td>10882.026400</td>
+      <td>-3329.289887</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<pre><code class="python">sect_map = {'COST': 'Consumer Goods', 
+            'INTC': 'Technology', 
+            'CERN': 'Healthcare', 
+            'GPS': 'Technology',
+            'MMM': 'Construction', 
+            'DELL': 'Technology', 
+            'AMD': 'Technology'}
+</code></pre>
+
+<pre><code class="python">pf.create_position_tear_sheet(returns, positions, gross_lev=gross_lev, sector_mappings=sect_map)
+
+</code></pre>
+
+<pre><code>Top 10 long positions of all time (and max%)
+['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
+[ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
+
+
+Top 10 short positions of all time (and max%)
+['AMD' 'DELL' 'CERN' 'MMM' 'GPS' 'INTC' 'COST']
+[-0.301 -0.266 -0.255 -0.226 -0.201 -0.185 -0.164]
+
+
+Top 10 positions of all time (and max%)
+['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
+[ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
+
+
+All positions ever held
+['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
+[ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
+</code></pre>
+<p><img alt="png" src="../sector_mapping_example_files/sector_mapping_example_7_1.png" /></p>
+<pre><code class="python">pf.create_round_trip_tear_sheet(positions, transactions, sector_mappings=sect_map)
+</code></pre>
+
+<pre><code>                      duration           pnl      returns      long
+count                     1430   1430.000000  1430.000000      1430
+mean    9 days 16:40:56.154545     45.737238     0.003543  0.523077
+std    22 days 02:16:41.165898   1616.537844     0.031288  0.499642
+min            0 days 00:00:00 -30697.460000    -0.218045     False
+25%            0 days 23:59:59     -5.773144    -0.011450         0
+50%            2 days 23:59:59      0.871629     0.003885         1
+75%            5 days 23:59:59     40.438366     0.018126         1
+max          286 days 00:00:00  17835.869482     0.204385      True
+Percent of round trips profitable = 57.2%
+Mean return per winning round trip = 0.02181
+Mean return per losing round trip = -0.02108
+A decision is made every 1.053 days.
+0.9495 trading decisions per day.
+19.94 trading decisions per month.
+
+Profitability (PnL / PnL total) per name:
+symbol
+COST    0.398964
+INTC    0.382659
+CERN    0.323077
+MMM     0.221479
+GPS     0.049385
+AMD    -0.064091
+DELL   -0.311473
+Name: pnl, dtype: float64
+
+Profitability (PnL / PnL total) per name:
+symbol
+Consumer Goods    0.398964
+Healthcare        0.323077
+Construction      0.221479
+Technology        0.056480
+Name: pnl, dtype: float64
+
+
+
+&lt;matplotlib.figure.Figure at 0x109d0f650&gt;
+</code></pre>
+<p><img alt="png" src="../sector_mapping_example_files/sector_mapping_example_8_2.png" /></p></div>
             
         </div>
 
