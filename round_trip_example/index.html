@@ -9,7 +9,7 @@
         
         <link rel="shortcut icon" href="../img/favicon.ico">
 
-	<title>Sector analysis - pyfolio</title>
+	<title>Round trip analysis - pyfolio</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -88,14 +88,14 @@
 
                         
                             
-<li class="active">
-    <a href="./">Sector analysis</a>
+<li >
+    <a href="../sector_mapping_example/">Sector analysis</a>
 </li>
 
                         
                             
-<li >
-    <a href="../round_trip_example/">Round trip analysis</a>
+<li class="active">
+    <a href="./">Round trip analysis</a>
 </li>
 
                         
@@ -114,12 +114,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../bayesian/">
+                        <a rel="next" href="../sector_mapping_example/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../round_trip_example/">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -144,20 +144,23 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#sector-mappings">Sector Mappings</a></li>
+        <li class="main active"><a href="#round-trip-tearsheet">Round Trip Tearsheet</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="sector-mappings">Sector Mappings</h1>
-<p>To generate sector allocation plots in the positions tearsheet and PnL by sector in the round trips tearsheet, you must pass pyfolio a dictionary (or dict-like data struction) of symbol-sector mappings, where symbols are keys and sectors are values. <code>create_full_tearsheet</code> will also take symbol-sector mappings as keyword argument <code>sector_mappings</code>.</p>
+<h1 id="round-trip-tearsheet">Round Trip Tearsheet</h1>
+<p>When evaluating the performance of an investing strategy, it is helpful to quantify the frequency, duration, and profitability of its independent bets, or "round trip" trades. A round trip trade is started when a new long or short position is opened and is only completed when the number of shares in that position returns to or crosses zero. </p>
+<p>The intent of the round trip tearsheet is to help differentiate strategies that profited off a few lucky trades from strategies that profited repeatedly from genuine alpha. Breaking down round trip profitability by traded name and sector can also help inform universe selection and identify exposure risks. For example, even if your equity curve looks robust, if only two securities in your universe of fifteen names contributed to overall profitability, you may have reason to question the logic of your strategy.</p>
+<p>To identify round trips, pyfolio groups transactions by symbol and identifies the points at which each position amount leaves and returns to zero. Behind the scenes, transactions that cause position amounts to flip directly from long to short or short to long are divided into separate transactions so that distinct round trips can be identified. In calculating round trips, pyfolio will also append position closing transactions at the last timestamp in the positions data. This closing transaction will cause the PnL from any open positions to realized as completed round trips.</p>
+<p><strong>Note: The round trip method of quantifying performance is not applicable to every style of strategy.</strong> For instance, simple rebalancing algorithms make very few, if any, round trip trades. The results of the round trip tearsheet will be less informative for any strategy that doesn't entirely exit positions.</p>
 <pre><code class="python">%matplotlib inline
-import pyfolio as pf
 import gzip
 import os
 import pandas as pd
+import pyfolio as pf
 </code></pre>
 
 <pre><code class="python">transactions = pd.read_csv(gzip.open('../tests/test_data/test_txn.csv.gz'),
@@ -165,108 +168,16 @@ import pandas as pd
 positions = pd.read_csv(gzip.open('../tests/test_data/test_pos.csv.gz'),
                     index_col=0, parse_dates=0)
 returns = pd.read_csv(gzip.open('../tests/test_data/test_returns.csv.gz'),
-                    index_col=0, parse_dates=0, header=None)[1]
-gross_lev = pd.read_csv(gzip.open('../tests/test_data/test_gross_lev.csv.gz'),
-                    index_col=0, parse_dates=0, header=None)[1]
+                    index_col=0, parse_dates=0)
 </code></pre>
 
-<pre><code class="python">returns.index = returns.index.tz_localize(&quot;UTC&quot;)
-positions.index = positions.index.tz_localize(&quot;UTC&quot;)
-transactions.index = transactions.index.tz_localize(&quot;UTC&quot;)
-gross_lev.index = gross_lev.index.tz_localize(&quot;UTC&quot;)
-
+<pre><code class="python"># Optional: Sector mappings may be passed in as a dict or pd.Series. If a mapping is
+# provided, PnL from symbols with mappings will be summed to display profitability by sector.
+sect_map = {'COST': 'Consumer Goods', 'INTC':'Technology', 'CERN':'Healthcare', 'GPS':'Technology',
+            'MMM': 'Construction', 'DELL': 'Technology', 'AMD':'Technology'}
 </code></pre>
 
-<pre><code class="python">positions.head(2)
-</code></pre>
-
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>AMD</th>
-      <th>CERN</th>
-      <th>COST</th>
-      <th>DELL</th>
-      <th>GPS</th>
-      <th>INTC</th>
-      <th>MMM</th>
-      <th>cash</th>
-    </tr>
-    <tr>
-      <th>index</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2004-01-09 00:00:00+00:00</th>
-      <td>6961.92</td>
-      <td>21017.07875</td>
-      <td>7282.266152</td>
-      <td>21264.55188</td>
-      <td>7091.080020</td>
-      <td>21259.33389</td>
-      <td>21316.129606</td>
-      <td>-6192.360298</td>
-    </tr>
-    <tr>
-      <th>2004-01-12 00:00:00+00:00</th>
-      <td>18198.58</td>
-      <td>18071.25000</td>
-      <td>17675.836401</td>
-      <td>10804.31924</td>
-      <td>10685.411865</td>
-      <td>17872.47748</td>
-      <td>10882.026400</td>
-      <td>-3329.289887</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<pre><code class="python">sect_map = {'COST': 'Consumer Goods', 
-            'INTC': 'Technology', 
-            'CERN': 'Healthcare', 
-            'GPS': 'Technology',
-            'MMM': 'Construction', 
-            'DELL': 'Technology', 
-            'AMD': 'Technology'}
-</code></pre>
-
-<pre><code class="python">pf.create_position_tear_sheet(returns, positions, gross_lev=gross_lev, sector_mappings=sect_map)
-
-</code></pre>
-
-<pre><code>Top 10 long positions of all time (and max%)
-['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
-[ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
-
-
-Top 10 short positions of all time (and max%)
-['AMD' 'DELL' 'CERN' 'MMM' 'GPS' 'INTC' 'COST']
-[-0.301 -0.266 -0.255 -0.226 -0.201 -0.185 -0.164]
-
-
-Top 10 positions of all time (and max%)
-['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
-[ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
-
-
-All positions ever held
-['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
-[ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
-</code></pre>
-<p><img alt="png" src="../sector_mapping_example_files/sector_mapping_example_7_1.png" /></p>
-<pre><code class="python">pf.create_round_trip_tear_sheet(positions, transactions, sector_mappings=sect_map)
+<pre><code class="python">pf.tears.create_round_trip_tear_sheet(positions, transactions, sector_mappings=sect_map)
 </code></pre>
 
 <pre><code>                      duration           pnl      returns      long
@@ -306,9 +217,9 @@ Name: pnl, dtype: float64
 
 
 
-&lt;matplotlib.figure.Figure at 0x109d0f650&gt;
+&lt;matplotlib.figure.Figure at 0x7f334aae1f28&gt;
 </code></pre>
-<p><img alt="png" src="../sector_mapping_example_files/sector_mapping_example_8_2.png" /></p></div>
+<p><img alt="png" src="../round_trip_example_files/round_trip_example_5_2.png" /></p></div>
             
         </div>
 
