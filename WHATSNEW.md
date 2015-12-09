@@ -2,6 +2,26 @@
 
 These are new features and improvements of note in each release.
 
+## v0.4.0 (Dec 10, 2015)
+
+This is a major release from 0.3.1 that includes new features and quite a few bug fixes. We recommend that all users upgrade to this new version.
+
+### New features
+
+* Round-trip analysis [PR210](https://github.com/quantopian/pyfolio/pull/210) Andrew, Thomas
+* Improved cone to forecast returns that uses a bootstrap instead of linear forecasting [PR233](https://github.com/quantopian/pyfolio/pull/233) Andrew, Thomas
+* Plot max and median long/short exposures [PR237](https://github.com/quantopian/pyfolio/pull/237) Andrew
+
+### Bug fixes
+
+* Sharpe ratio was calculated incorrectly [PR219](https://github.com/quantopian/pyfolio/pull/219) Thomas, Justin
+* annual_return() now only computes CAGR in the correct way [PR234](https://github.com/quantopian/pyfolio/pull/234) Justin
+* Cache SPY and Fama-French returns in home-directory instead of install-directory [PR241](https://github.com/quantopian/pyfolio/pull/241) Joe
+* Remove data files from package [PR241](https://github.com/quantopian/pyfolio/pull/241) Joe
+* Cast factor.name to str [PR223](https://github.com/quantopian/pyfolio/pull/223) Scotty
+* Test all `create_*_tear_sheet` functions in all configurations [PR247](https://github.com/quantopian/pyfolio/pull/247) Thomas
+
+
 ## v0.3.1 (Nov 12, 2015)
 
 This is a minor release from 0.3 that includes mostly bugfixes but also some new features. We recommend that all users upgrade to this new version.
