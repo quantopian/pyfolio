@@ -49,6 +49,12 @@
      <changefreq>daily</changefreq>
     </url>
         
+    <url>
+     <loc>None/slippage_example/</loc>
+     <lastmod>2015-12-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
     
 
 </urlset>

@@ -9,7 +9,7 @@
         
         <link rel="shortcut icon" href="../img/favicon.ico">
 
-	<title>Sector analysis - pyfolio</title>
+	<title>Slippage analysis - pyfolio</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
@@ -88,8 +88,8 @@
 
                         
                             
-<li class="active">
-    <a href="./">Sector analysis</a>
+<li >
+    <a href="../sector_mapping_example/">Sector analysis</a>
 </li>
 
                         
@@ -100,8 +100,8 @@
 
                         
                             
-<li >
-    <a href="../slippage_example/">Slippage analysis</a>
+<li class="active">
+    <a href="./">Slippage analysis</a>
 </li>
 
                         
@@ -120,12 +120,12 @@
                 </li>
                 
                     <li >
-                        <a rel="next" href="../bayesian/">
+                        <a rel="next" href="../round_trip_example/">
                             <i class="fa fa-arrow-left"></i> Previous
                         </a>
                     </li>
-                    <li >
-                        <a rel="prev" href="../round_trip_example/">
+                    <li class="disabled">
+                        <a rel="prev" >
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
@@ -150,19 +150,21 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
-        <li class="main active"><a href="#sector-mappings">Sector Mappings</a></li>
+        <li class="main active"><a href="#slippage-analysis">Slippage Analysis</a></li>
         
     
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
-<h1 id="sector-mappings">Sector Mappings</h1>
-<p>To generate sector allocation plots in the positions tearsheet and PnL by sector in the round trips tearsheet, you must pass pyfolio a dictionary (or dict-like data struction) of symbol-sector mappings, where symbols are keys and sectors are values. <code>create_full_tearsheet</code> will also take symbol-sector mappings as keyword argument <code>sector_mappings</code>.</p>
+<h1 id="slippage-analysis">Slippage Analysis</h1>
+<p>When evaluating a strategy using backtest results, we often want to know how sensitive it's performance is to implementation shortfall or slippage. pyfolio's transactions tear sheet can create "slippage sweep" plots that display strategy performance under various slippage assumptions. </p>
+<p>Additional per-dollar slippage can be applied to returns before running a tear sheet by providing <code>create_full_tearsheet</code> with the a level of slippage in basis points (1% == 100 basis points) as the <code>slippage</code> keyword argument. The slippage plots in the transactions tear sheet will display returns with slippage added to the <strong>unadjusted</strong> returns. </p>
+<p>For example, if you run a backtest with no transaction costs and call <code>create_full_tearsheet(returns, positions, transactions, slippage=5)</code>, 5 bps of slippage will be applied to <code>returns</code> before all plots and figures, with the exception of the slippage sweep plots, are generated.</p>
+<p>It is important to emphasize that the slippage plots will display performance under <strong>additional</strong> slippage. If the passed performance data already has slippage applied, the 5 bps slippage equity curve will represent performance under 5 bps of slippage in addition to the already simulated slippage penalty. If slippage is already applied to the performance results, pass <code>slippage=0</code> to the <code>create_full_tearsheet</code> to trigger the creation of the additional slippage sweep plots without applying any additional slippage to the returns time series used throughout the rest of the tear sheet.</p>
 <pre><code class="python">%matplotlib inline
 import pyfolio as pf
 import gzip
-import os
 import pandas as pd
 </code></pre>
 
@@ -174,84 +176,62 @@ returns = pd.read_csv(gzip.open('../tests/test_data/test_returns.csv.gz'),
                     index_col=0, parse_dates=0, header=None)[1]
 gross_lev = pd.read_csv(gzip.open('../tests/test_data/test_gross_lev.csv.gz'),
                     index_col=0, parse_dates=0, header=None)[1]
-</code></pre>
-
-<pre><code class="python">returns.index = returns.index.tz_localize(&quot;UTC&quot;)
+returns.index = returns.index.tz_localize(&quot;UTC&quot;)
 positions.index = positions.index.tz_localize(&quot;UTC&quot;)
 transactions.index = transactions.index.tz_localize(&quot;UTC&quot;)
 gross_lev.index = gross_lev.index.tz_localize(&quot;UTC&quot;)
-
 </code></pre>
 
-<pre><code class="python">positions.head(2)
+<pre><code class="python">pf.create_full_tear_sheet(returns, positions, transactions, gross_lev=gross_lev, slippage=0)
 </code></pre>
 
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>AMD</th>
-      <th>CERN</th>
-      <th>COST</th>
-      <th>DELL</th>
-      <th>GPS</th>
-      <th>INTC</th>
-      <th>MMM</th>
-      <th>cash</th>
-    </tr>
-    <tr>
-      <th>index</th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2004-01-09 00:00:00+00:00</th>
-      <td>6961.92</td>
-      <td>21017.07875</td>
-      <td>7282.266152</td>
-      <td>21264.55188</td>
-      <td>7091.080020</td>
-      <td>21259.33389</td>
-      <td>21316.129606</td>
-      <td>-6192.360298</td>
-    </tr>
-    <tr>
-      <th>2004-01-12 00:00:00+00:00</th>
-      <td>18198.58</td>
-      <td>18071.25000</td>
-      <td>17675.836401</td>
-      <td>10804.31924</td>
-      <td>10685.411865</td>
-      <td>17872.47748</td>
-      <td>10882.026400</td>
-      <td>-3329.289887</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+<pre><code>Entire data start date: 2004-01-09
+Entire data end date: 2009-12-31
 
-<pre><code class="python">sect_map = {'COST': 'Consumer Goods', 
-            'INTC': 'Technology', 
-            'CERN': 'Healthcare', 
-            'GPS': 'Technology',
-            'MMM': 'Construction', 
-            'DELL': 'Technology', 
-            'AMD': 'Technology'}
+
+Backtest Months: 71
+                   Backtest
+annual_return          0.12
+annual_volatility      0.26
+sharpe_ratio           0.45
+calmar_ratio           0.20
+stability              0.00
+max_drawdown          -0.60
+omega_ratio            1.09
+sortino_ratio          0.66
+skewness               0.14
+kurtosis               5.88
+information_ratio      0.03
+alpha                  0.08
+beta                   0.83
+
+Worst Drawdown Periods
+   net drawdown in %  peak date valley date recovery date duration
+0              60.39 2007-11-06  2009-03-09           NaT      NaN
+1              24.10 2005-07-28  2006-09-07    2007-05-22      474
+4              11.89 2004-06-25  2004-08-12    2004-11-05       96
+2              10.87 2004-11-15  2005-04-18    2005-07-14      174
+3               9.51 2007-07-16  2007-08-06    2007-09-13       44
+
+
+2-sigma returns daily    -0.033
+2-sigma returns weekly   -0.068
+dtype: float64
 </code></pre>
-
-<pre><code class="python">pf.create_position_tear_sheet(returns, positions, gross_lev=gross_lev, sector_mappings=sect_map)
-
+<p><img alt="png" src="../slippage_example_files/slippage_example_4_1.png" /></p>
+<pre><code>Stress Events
+                             mean    min    max
+Lehmann                    -0.003 -0.047  0.041
+Aug07                       0.003 -0.030  0.029
+Mar08                      -0.004 -0.033  0.034
+Sept08                     -0.007 -0.044  0.041
+2009Q1                     -0.004 -0.050  0.034
+2009Q2                      0.007 -0.040  0.061
+Low Volatility Bull Market  0.000 -0.061  0.064
+GFC Crash                  -0.001 -0.118  0.101
+Recovery                    0.004 -0.040  0.060
 </code></pre>
-
+<p><img alt="png" src="../slippage_example_files/slippage_example_4_3.png" /></p>
 <pre><code>Top 10 long positions of all time (and max%)
 ['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
 [ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
@@ -271,50 +251,8 @@ All positions ever held
 ['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
 [ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
 </code></pre>
-<p><img alt="png" src="../sector_mapping_example_files/sector_mapping_example_7_1.png" /></p>
-<pre><code class="python">pf.create_round_trip_tear_sheet(positions, transactions, sector_mappings=sect_map)
-</code></pre>
-
-<pre><code>                      duration           pnl      returns      long
-count                     1430   1430.000000  1430.000000      1430
-mean    9 days 16:40:56.154545     45.737238     0.003543  0.523077
-std    22 days 02:16:41.165898   1616.537844     0.031288  0.499642
-min            0 days 00:00:00 -30697.460000    -0.218045     False
-25%            0 days 23:59:59     -5.773144    -0.011450         0
-50%            2 days 23:59:59      0.871629     0.003885         1
-75%            5 days 23:59:59     40.438366     0.018126         1
-max          286 days 00:00:00  17835.869482     0.204385      True
-Percent of round trips profitable = 57.2%
-Mean return per winning round trip = 0.02181
-Mean return per losing round trip = -0.02108
-A decision is made every 1.053 days.
-0.9495 trading decisions per day.
-19.94 trading decisions per month.
-
-Profitability (PnL / PnL total) per name:
-symbol
-COST    0.398964
-INTC    0.382659
-CERN    0.323077
-MMM     0.221479
-GPS     0.049385
-AMD    -0.064091
-DELL   -0.311473
-Name: pnl, dtype: float64
-
-Profitability (PnL / PnL total) per name:
-symbol
-Consumer Goods    0.398964
-Healthcare        0.323077
-Construction      0.221479
-Technology        0.056480
-Name: pnl, dtype: float64
-
-
-
-&lt;matplotlib.figure.Figure at 0x109d0f650&gt;
-</code></pre>
-<p><img alt="png" src="../sector_mapping_example_files/sector_mapping_example_8_2.png" /></p></div>
+<p><img alt="png" src="../slippage_example_files/slippage_example_4_5.png" /></p>
+<p><img alt="png" src="../slippage_example_files/slippage_example_4_6.png" /></p></div>
             
         </div>
 
