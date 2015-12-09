@@ -14,7 +14,14 @@
 # limitations under the License.
 from __future__ import division
 
+from time import time
 import warnings
+
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+import numpy as np
+import scipy.stats
+import pandas as pd
 
 from . import timeseries
 from . import utils
@@ -22,6 +29,7 @@ from . import pos
 from . import txn
 from . import round_trips
 from . import plotting
+from . import _seaborn as sns
 from .plotting import plotting_context
 
 try:
@@ -30,15 +38,6 @@ except ImportError:
     warnings.warn(
         "Could not import bayesian submodule due to missing pymc3 dependency.",
         ImportWarning)
-
-import numpy as np
-import scipy.stats
-import pandas as pd
-
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import seaborn as sns
-from time import time
 
 
 def timer(msg_body, previous_time):

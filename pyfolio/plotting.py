@@ -18,7 +18,6 @@ import pandas as pd
 import numpy as np
 import scipy as sp
 
-import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
@@ -29,6 +28,7 @@ from sklearn import preprocessing
 from . import utils
 from . import timeseries
 from . import pos
+from . import _seaborn as sns
 from . import txn
 
 from .utils import APPROX_BDAYS_PER_MONTH
