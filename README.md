@@ -11,11 +11,12 @@ financial portfolios developed by
 At the core of pyfolio is a so-called tear sheet that consists of
 various individual plots that provide a comprehensive image of the
 performance of a trading algorithm. Here is an example of a tear sheet of a the Zipline algo included as one of our example notebooks:
-
+![example tear 0](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_0.png "Example tear sheet created from a Zipline algo")
 ![example tear 1](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_1.png "Example tear sheet created from a Zipline algo")
 ![example tear 2](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_2.png)
 ![example tear 3](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_3.png)
 ![example tear 4](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_4.png)
+![example tear 5](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_5.png)
 
 
 See also [slides of a recent talk about pyfolio.](http://nbviewer.ipython.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/overview_slides.ipynb#/)
@@ -60,5 +61,6 @@ If you want to contribute, a great place to start would be the [help-wanted issu
 * Jessica Stauth (jstauth@quantopian.com)
 * Karen Rubin (karen@quantopian.com)
 * David Edwards (dedwards@quantopian.com)
+* Andrew Campbell (andrew@quantopian.com)
 
 For a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.
