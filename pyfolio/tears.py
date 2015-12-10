@@ -345,6 +345,9 @@ def create_returns_tear_sheet(returns, live_start_date=None,
             title='Similarity without variance\nand mean normalization',
             ax=ax_daily_similarity_no_var_no_mean)
 
+    for ax in fig.axes:
+        plt.setp(ax.get_xticklabels(), visible=True)
+
     plt.show()
     if return_fig:
         return fig
@@ -427,6 +430,8 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
             ax_sector_alloc = plt.subplot(gs[5, :], sharex=ax_gross_leverage)
             plotting.plot_sector_allocations(returns, sector_alloc,
                                              ax=ax_sector_alloc)
+    for ax in fig.axes:
+        plt.setp(ax.get_xticklabels(), visible=True)
 
     plt.show()
     if return_fig:
@@ -495,6 +500,8 @@ def create_txn_tear_sheet(returns, positions, transactions,
                                            positions,
                                            ax=ax_slippage_sensitivity
                                            )
+    for ax in fig.axes:
+        plt.setp(ax.get_xticklabels(), visible=True)
 
     plt.show()
     if return_fig:
