@@ -16,6 +16,8 @@ performance of a trading algorithm. Here is an example of a tear sheet of a the 
 ![example tear 2](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_2.png)
 ![example tear 3](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_3.png)
 ![example tear 4](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_4.png)
+![example tear 6](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_6.png)
+![example tear 7](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_7.png)
 ![example tear 5](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_5.png)
 
 
