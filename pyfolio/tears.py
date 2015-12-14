@@ -724,7 +724,8 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
                                   start=returns.index[0],
                                   end=returns.index[-1]))
     # unless user indicates otherwise
-    elif benchmark_rets == 'Fama-French':
+    elif isinstance(benchmark_rets, str) and (benchmark_rets ==
+                                              'Fama-French'):
         fama_french = True
         rolling_window = utils.APPROX_BDAYS_PER_MONTH * 6
         benchmark_rets = timeseries.rolling_fama_french(
