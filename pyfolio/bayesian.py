@@ -59,17 +59,16 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
     """
-
-    bmark = bmark.dropna()
-
     if data.shape[0] != bmark.shape[0]:
         data = pd.Series(data, index=bmark.index)
 
-    if bmark.ndim > 1:
-        Nbmark = bmark.shape[1]
-    else:
-        Nbmark = 1
     data_no_missing = data.dropna()
+
+    if bmark.ndim == 1:
+        bmark = pd.DataFrame(bmark)
+
+    bmark = bmark.loc[data_no_missing.index]
+    n_bmark = bmark.shape[1]
 
     with pm.Model() as model:
         sigma = pm.HalfCauchy(
@@ -79,15 +78,15 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         nu = pm.Exponential('nu_minus_two', 1. / 10., testval=.3)
 
         # alpha and beta
-        X = pd.DataFrame(bmark.loc[data_no_missing.index])
+        X = bmark.loc[data_no_missing.index]
         X.loc[:, 'ones'] = 1.
         y = data_no_missing
-        alphabeta_init = np.linalg.lstsq(X, y)[0]  # [:2]
+        alphabeta_init = np.linalg.lstsq(X, y)[0]
 
         alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alphabeta_init[-1])
         beta_reg = pm.Normal('beta', mu=0, sd=1,
-                             testval=alphabeta_init[:-1], shape=Nbmark)
-        bmark_theano = tt.as_tensor_variable(bmark.ix[data_no_missing.index].T)
+                             testval=alphabeta_init[:-1], shape=n_bmark)
+        bmark_theano = tt.as_tensor_variable(bmark.values.T)
         mu_reg = alpha_reg + tt.dot(beta_reg, bmark_theano)
         pm.T('returns',
              nu=nu + 2,
