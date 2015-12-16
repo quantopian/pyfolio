@@ -44,6 +44,11 @@ the IPython kernel when you make changes.
  - [pymc3](https://github.com/pymc-devs/pymc3) (optional)
  - [zipline](https://github.com/quantopian/zipline) (optional; requires master, *not* 0.7.0)
 
+If you are on OSX and using a non-framework build of python you may need to set your backend:
+``` bash
+echo "backend: TkAgg" > ~/.matplotlib/matplotlibrc
+```
+
 ## Questions?
 
 If you find a bug, feel free to open an issue on our github tracker.
