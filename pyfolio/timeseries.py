@@ -464,6 +464,9 @@ def sharpe_ratio(returns, risk_free=0, period=DAILY):
 
     returns_risk_adj = returns - risk_free
 
+    if (len(returns_risk_adj) < 5) or np.all(returns_risk_adj == 0):
+        return np.nan
+
     return np.mean(returns_risk_adj) / \
         np.std(returns_risk_adj) * \
         np.sqrt(ANNUALIZATION_FACTORS[period])
