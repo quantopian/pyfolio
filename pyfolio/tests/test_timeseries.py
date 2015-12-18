@@ -2,7 +2,7 @@ from __future__ import division
 
 from unittest import TestCase
 from nose_parameterized import parameterized
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_almost_equal
 
 import numpy as np
 import pandas as pd
@@ -271,10 +271,12 @@ class TestStats(TestCase):
         )
 
     @parameterized.expand([
-        (simple_rets, 1.2333396776895436)
+        (simple_rets, 1.2333396776895436),
+        (np.zeros(10), np.nan),
+        ([0.1, 0.2, 0.3], np.nan)
     ])
     def test_sharpe(self, returns, expected):
-        self.assertAlmostEqual(
+        assert_almost_equal(
             timeseries.sharpe_ratio(
                 returns),
             expected, DECIMAL_PLACES)
