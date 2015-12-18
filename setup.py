@@ -46,10 +46,8 @@ install_reqs = [
     'pyparsing>=2.0.3',
     'python-dateutil>=2.4.2',
     'pytz>=2014.10',
-    'scikit-learn>=0.15.0',
     'scipy>=0.14.0',
     'seaborn>=0.6.0',
-    'statsmodels>=0.5.0',
     'pandas-datareader>=0.2',
 ]
 
