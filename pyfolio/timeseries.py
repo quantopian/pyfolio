@@ -731,6 +731,7 @@ def perf_stats(returns, factor_returns=None):
 
     return stats
 
+
 def get_max_drawdown_underwater(underwater):
     """Determines peak, valley, and recovery dates given and 'underwater'
     DataFrame.
