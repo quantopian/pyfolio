@@ -786,6 +786,48 @@ def get_max_drawdown_underwater(underwater):
     return peak, valley, recovery
 
 
+def perf_stats_bootstrap(returns, factor_returns=None):
+    """Calculates various performance metrics of a strategy, for use in
+    plotting.show_perf_stats.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    factor_returns : pd.Series (optional)
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
+        If None, do not compute alpha, beta, and information ratio.
+
+    Returns
+    -------
+    pd.DataFrame
+        Performance metrics.
+
+    """
+
+    stats = pd.DataFrame(columns=['mean', '5%', '95%'])
+
+    def do_boostrap(stat_func, *args):
+        stat_name = stat_func.__name__
+        bootstrap_values = calc_bootstrap(stat_func, *args)
+        bootstrap_stats = \
+            calc_distribution_stats(bootstrap_values)
+        stats.loc[stat_name, 'mean'] = bootstrap_stats['mean']
+        stats.loc[stat_name, '5%'] = bootstrap_stats['5%']
+        stats.loc[stat_name, '95%'] = bootstrap_stats['95%']
+
+    for stat_func in simple_stat_funcs:
+        do_boostrap(stat_func, returns)
+
+    if factor_returns is not None:
+        for stat_func in factor_stat_funcs:
+            do_bootstrap(stat_func, returns, factor_returns)
+
+    return stats
+
+
 def get_max_drawdown(returns):
     """
     Finds maximum drawdown.
@@ -915,6 +957,36 @@ def gen_drawdown_table(returns, top=10):
         unit='D')
 
     return df_drawdowns
+
+
+def calc_bootstrap(func, returns, *args, **kwargs):
+    n_samples = kwargs.pop('n_samples', 1000)
+    out = np.empty(n_samples)
+
+    if len(args) > 0:
+        factor_returns = args.pop(0)
+    else:
+        factor_returns = None
+
+    for i in range(n_samples):
+        idx = np.random.randint(len(data), size=len(data))
+        if factor_returns is not None:
+            out[i] = func(returns.iloc[idx], factor_returns.iloc[idx], *args, **kwargs)
+        else:
+            out[i] = func(returns.iloc[idx], *args, **kwargs)
+
+    return out
+
+
+def calc_distribution_stats(values):
+    return pd.Series({'mean': np.mean(values),
+                      'median': np.median(values),
+                      'std': np.std(values),
+                      '5%': stats.percentage(values, 5),
+                      '25%': stats.percentage(values, 25),
+                      '75%': stats.percentage(values, 75),
+                      '95%': stats.percentage(values, 95),
+    })
 
 
 def rolling_sharpe(returns, rolling_sharpe_window):
