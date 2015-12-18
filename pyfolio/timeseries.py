@@ -474,6 +474,30 @@ def beta(returns, factor_returns):
 
     return alpha_beta(returns, factor_returns)[1]
 
+def stability_of_timeseries(returns):
+    """Determines R-squared of a linear fit to the cumulative
+    log returns. Computes an ordinary least squares linear fit,
+    and returns R-squared.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+
+    Returns
+    -------
+    float
+        R-squared.
+
+    """
+
+    cum_log_returns = np.log(1 + returns).cumsum()
+    rhat = stats.linregress(np.arange(len(cum_log_returns)),
+                            cum_log_returns.values)[2]
+
+    return rhat
+
 
 SIMPLE_STAT_FUNCS = [
     annual_return,

@@ -289,7 +289,7 @@ class TestStats(TestCase):
             returns, rolling_sharpe_window).values.tolist()), expected)
 
     @parameterized.expand([
-        (simple_rets, 0.010766923838471554)
+        (simple_rets, 0.10376378866671222)
     ])
     def test_stability_of_timeseries(self, returns, expected):
         self.assertAlmostEqual(
