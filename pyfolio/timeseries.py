@@ -697,40 +697,7 @@ def rolling_fama_french(returns, factor_returns=None,
                         rolling_window=rolling_window)
 
 
-def calc_alpha_beta(returns, factor_returns):
-    """Calculates both alpha and beta.
-
-    Parameters
-    ----------
-    returns : pd.Series
-        Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
-    factor_returns : pd.Series
-         Daily noncumulative returns of the factor to which beta is
-         computed. Usually a benchmark such as the market.
-         - This is in the same style as returns.
-
-    Returns
-    -------
-    float
-        Alpha.
-    float
-        Beta.
-
-"""
-
-    ret_index = returns.index
-    beta, alpha = sp.stats.linregress(factor_returns.loc[ret_index].values,
-                                      returns.values)[:2]
-
-    return alpha * APPROX_BDAYS_PER_YEAR, beta
-
-
-def perf_stats(
-        returns,
-        return_as_dict=False,
-        factor_returns=None,
-        period=DAILY):
+def perf_stats(returns, factor_returns=None):
     """Calculates various performance metrics of a strategy, for use in
     plotting.show_perf_stats.
 
@@ -739,12 +706,6 @@ def perf_stats(
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    return_as_dict : boolean, optional
-       If True, returns the computed metrics in a dictionary.
-    period : str, optional
-        - defines the periodicity of the 'returns' data for purposes of
-        annualizing. Can be 'monthly', 'weekly', or 'daily'
-        - defaults to 'daily'.
     factor_returns : pd.Series (optional)
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
@@ -752,39 +713,23 @@ def perf_stats(
 
     Returns
     -------
-    dict / pd.DataFrame
+    pd.Series
         Performance metrics.
 
     """
 
-    all_stats = OrderedDict()
-    all_stats['annual_return'] = annual_return(returns, period=period)
-    all_stats['annual_volatility'] = annual_volatility(returns, period=period)
-    all_stats['sharpe_ratio'] = sharpe_ratio(
-        returns)
-    all_stats['calmar_ratio'] = calmar_ratio(returns, period=period)
-    all_stats['stability'] = stability_of_timeseries(returns)
-    all_stats['max_drawdown'] = max_drawdown(returns)
-    all_stats['omega_ratio'] = omega_ratio(returns)
-    all_stats['sortino_ratio'] = sortino_ratio(returns)
-    all_stats['skewness'] = stats.skew(returns)
-    all_stats['kurtosis'] = stats.kurtosis(returns)
+    stats = pd.Series()
+
+    for stat_func in simple_stat_funcs:
+        stats[stat_func.__name__] = stat_func(returns)
+
     if factor_returns is not None:
-        all_stats['information_ratio'] = information_ratio(returns,
-                                                           factor_returns)
-        alpha, beta = calc_alpha_beta(returns, factor_returns)
-        all_stats['alpha'] = alpha
-        all_stats['beta'] = beta
+        for stat_func in factor_stat_funcs:
+            stat_name = stat_func.__name__
+            stats[stat_func.__name__] = stat_func(returns,
+                                                  factor_returns)
 
-    if return_as_dict:
-        return all_stats
-    else:
-        all_stats_df = pd.DataFrame(
-            index=list(all_stats.keys()),
-            data=list(all_stats.values()))
-        all_stats_df.columns = ['perf_stats']
-        return all_stats_df
-
+    return stats
 
 def get_max_drawdown_underwater(underwater):
     """Determines peak, valley, and recovery dates given and 'underwater'
