@@ -474,6 +474,7 @@ def beta(returns, factor_returns):
 
     return alpha_beta(returns, factor_returns)[1]
 
+
 def stability_of_timeseries(returns):
     """Determines R-squared of a linear fit to the cumulative
     log returns. Computes an ordinary least squares linear fit,
@@ -680,7 +681,7 @@ def rolling_beta(returns, factor_returns,
         out = pd.Series(index=returns.index)
         for beg, end in zip(returns.index[0:-rolling_window],
                             returns.index[rolling_window:]):
-            out.loc[end] = calc_alpha_beta(
+            out.loc[end] = alpha_beta(
                 returns.loc[beg:end],
                 factor_returns.loc[beg:end])[1]
 
@@ -744,12 +745,11 @@ def perf_stats(returns, factor_returns=None):
 
     stats = pd.Series()
 
-    for stat_func in simple_stat_funcs:
+    for stat_func in SIMPLE_STAT_FUNCS:
         stats[stat_func.__name__] = stat_func(returns)
 
     if factor_returns is not None:
-        for stat_func in factor_stat_funcs:
-            stat_name = stat_func.__name__
+        for stat_func in FACTOR_STAT_FUNCS:
             stats[stat_func.__name__] = stat_func(returns,
                                                   factor_returns)
 
