@@ -752,40 +752,6 @@ def perf_stats(returns, factor_returns=None):
     return stats
 
 
-def get_max_drawdown_underwater(underwater):
-    """Determines peak, valley, and recovery dates given and 'underwater'
-    DataFrame.
-
-    An underwater DataFrame is a DataFrame that has precomputed
-    rolling drawdown.
-
-    Parameters
-    ----------
-    underwater : pd.Series
-       Underwater returns (rolling drawdown) of a strategy.
-
-    Returns
-    -------
-    peak : datetime
-        The maximum drawdown's peak.
-    valley : datetime
-        The maximum drawdown's valley.
-    recovery : datetime
-        The maximum drawdown's recovery.
-
-    """
-
-    valley = np.argmax(underwater)  # end of the period
-    # Find first 0
-    peak = underwater[:valley][underwater[:valley] == 0].index[-1]
-    # Find last 0
-    try:
-        recovery = underwater[valley:][underwater[valley:] == 0].index[0]
-    except IndexError:
-        recovery = np.nan  # drawdown not recovered
-    return peak, valley, recovery
-
-
 def perf_stats_bootstrap(returns, factor_returns=None):
     """Calculates various performance metrics of a strategy, for use in
     plotting.show_perf_stats.
@@ -818,14 +784,48 @@ def perf_stats_bootstrap(returns, factor_returns=None):
         stats.loc[stat_name, '5%'] = bootstrap_stats['5%']
         stats.loc[stat_name, '95%'] = bootstrap_stats['95%']
 
-    for stat_func in simple_stat_funcs:
+    for stat_func in SIMPLE_STAT_FUNCS:
         do_boostrap(stat_func, returns)
 
     if factor_returns is not None:
-        for stat_func in factor_stat_funcs:
+        for stat_func in FACTOR_STAT_FUNCS:
             do_bootstrap(stat_func, returns, factor_returns)
 
     return stats
+
+
+def get_max_drawdown_underwater(underwater):
+    """Determines peak, valley, and recovery dates given and 'underwater'
+    DataFrame.
+
+    An underwater DataFrame is a DataFrame that has precomputed
+    rolling drawdown.
+
+    Parameters
+    ----------
+    underwater : pd.Series
+       Underwater returns (rolling drawdown) of a strategy.
+
+    Returns
+    -------
+    peak : datetime
+        The maximum drawdown's peak.
+    valley : datetime
+        The maximum drawdown's valley.
+    recovery : datetime
+        The maximum drawdown's recovery.
+
+    """
+
+    valley = np.argmax(underwater)  # end of the period
+    # Find first 0
+    peak = underwater[:valley][underwater[:valley] == 0].index[-1]
+    # Find last 0
+    try:
+        recovery = underwater[valley:][underwater[valley:] == 0].index[0]
+    except IndexError:
+        recovery = np.nan  # drawdown not recovered
+    return peak, valley, recovery
 
 
 def get_max_drawdown(returns):
