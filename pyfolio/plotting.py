@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import division
+from collections import OrderedDict
 
 import pandas as pd
 import numpy as np
@@ -510,13 +511,13 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
     perf_stats = np.round(timeseries.perf_stats(
         returns_backtest,
         factor_returns=factor_returns), 2)
-    perf_stats.columns = ['Backtest']
 
     if live_start_date is not None:
-        perf_stats = perf_stats.join(perf_stats_live,
-                                     how='inner')
-        perf_stats = perf_stats.join(perf_stats_all,
-                                     how='inner')
+        perf_stats = pd.DataFrame(OrderedDict([
+            ('Backtest', perf_stats),
+            ('Out of sample', perf_stats_live),
+            ('All history', perf_stats_all),
+        ]))
 
     print(perf_stats)
 
