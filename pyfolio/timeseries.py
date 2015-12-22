@@ -601,7 +601,6 @@ def aggregate_returns(df_daily_rets, convert_to):
     if convert_to == WEEKLY:
         return df_daily_rets.groupby(
             [lambda x: x.year,
-             lambda x: x.month,
              lambda x: x.isocalendar()[1]]).apply(cumulate_returns)
     elif convert_to == MONTHLY:
         return df_daily_rets.groupby(
