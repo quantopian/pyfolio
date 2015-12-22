@@ -28,9 +28,6 @@ from .utils import DAILY, WEEKLY, MONTHLY, YEARLY, ANNUALIZATION_FACTORS
 from .interesting_periods import PERIODS
 
 
-#####################################
-# Risk metrics
-
 def var_cov_var_normal(P, c, mu=0, sigma=1):
     """Variance-covariance calculation of daily Value-at-Risk in a
     portfolio.
