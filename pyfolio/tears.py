@@ -263,11 +263,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     ax_monthly_dist = plt.subplot(gs[8, 2])
     ax_return_quantiles = plt.subplot(gs[9, :])
 
-    if live_start_date is not None:
-        ax_daily_similarity_scale = plt.subplot(gs[10, 0])
-        ax_daily_similarity_no_var = plt.subplot(gs[10, 1])
-        ax_daily_similarity_no_var_no_mean = plt.subplot(gs[10, 2])
-
     plotting.plot_rolling_returns(
         returns,
         factor_returns=benchmark_rets,
@@ -321,29 +316,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         df_weekly,
         df_monthly,
         ax=ax_return_quantiles)
-
-    if live_start_date is not None:
-        returns_backtest = returns[returns.index < live_start_date]
-        returns_live = returns[returns.index > live_start_date]
-
-        plotting.plot_daily_returns_similarity(
-            returns_backtest,
-            returns_live,
-            title='Daily Returns Similarity',
-            ax=ax_daily_similarity_scale)
-        plotting.plot_daily_returns_similarity(
-            returns_backtest,
-            returns_live,
-            scale_kws={'with_std': False},
-            title='Similarity without\nvariance normalization',
-            ax=ax_daily_similarity_no_var)
-        plotting.plot_daily_returns_similarity(
-            returns_backtest,
-            returns_live,
-            scale_kws={'with_std': False,
-                       'with_mean': False},
-            title='Similarity without variance\nand mean normalization',
-            ax=ax_daily_similarity_no_var_no_mean)
 
     for ax in fig.axes:
         plt.setp(ax.get_xticklabels(), visible=True)
