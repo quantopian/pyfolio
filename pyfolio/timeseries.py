@@ -775,7 +775,7 @@ def perf_stats_bootstrap(returns, factor_returns=None):
 
     stats = pd.DataFrame(columns=['mean', '5%', '95%'])
 
-    def do_boostrap(stat_func, *args):
+    def do_bootstrap(stat_func, *args):
         stat_name = stat_func.__name__
         bootstrap_values = calc_bootstrap(stat_func, *args)
         bootstrap_stats = \
@@ -785,7 +785,7 @@ def perf_stats_bootstrap(returns, factor_returns=None):
         stats.loc[stat_name, '95%'] = bootstrap_stats['95%']
 
     for stat_func in SIMPLE_STAT_FUNCS:
-        do_boostrap(stat_func, returns)
+        do_bootstrap(stat_func, returns)
 
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
