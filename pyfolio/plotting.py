@@ -462,6 +462,40 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     return ax
 
 
+def plot_perf_stats(returns, factor_returns, ax=None):
+    """Create box plot of some performance metrics of the strategy.
+    The width of the box whiskers is determined by a bootstrap.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    factor_returns : pd.DataFrame, optional
+        data set containing the Fama-French risk factors. See
+        utils.load_portfolio_risk_factors.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    bootstrap_values = timeseries.perf_stats_bootstrap(returns,
+                                                       factor_returns,
+                                                       return_stats=False)
+    bootstrap_values = bootstrap_values.drop('kurtosis', axis='columns')
+
+    sns.boxplot(bootstrap_values, orient='h', ax=ax)
+
+    return ax
+
+
 def show_perf_stats(returns, factor_returns, live_start_date=None,
                     bootstrap=False):
     """Prints some performance metrics of the strategy.

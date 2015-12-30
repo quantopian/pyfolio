@@ -752,7 +752,7 @@ def perf_stats(returns, factor_returns=None):
     return stats
 
 
-def perf_stats_bootstrap(returns, factor_returns=None):
+def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True):
     """Calculates various bootstrapped performance metrics of a strategy.
 
     Parameters
@@ -764,34 +764,42 @@ def perf_stats_bootstrap(returns, factor_returns=None):
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
         If None, do not compute alpha, beta, and information ratio.
+    return_stats : boolean (optional)
+        If True, returns a DataFrame of mean, 5 and 95 percentiles for
+        each perf metric.
+        If False, returns a DataFrame with the bootstrap samples for
+        each perf metric.
 
     Returns
     -------
     pd.DataFrame
-        Distributional statistics of bootstrapped sampling
+        if return_stats is True:
+        - Distributional statistics of bootstrapped sampling
         distribution of performance metrics.
-
+        if return_stats is False:
+        - Bootstrap samples for each performance metric.
     """
-
-    stats = pd.DataFrame(columns=['mean', '5%', '95%'], dtype=np.float64)
-
-    def do_bootstrap(stat_func, *args):
-        stat_name = stat_func.__name__
-        bootstrap_values = calc_bootstrap(stat_func, *args)
-        bootstrap_stats = \
-            calc_distribution_stats(bootstrap_values)
-        stats.loc[stat_name, 'mean'] = bootstrap_stats['mean']
-        stats.loc[stat_name, '5%'] = bootstrap_stats['5%']
-        stats.loc[stat_name, '95%'] = bootstrap_stats['95%']
+    bootstrap_values = OrderedDict()
 
     for stat_func in SIMPLE_STAT_FUNCS:
-        do_bootstrap(stat_func, returns)
+        stat_name = stat_func.__name__
+        bootstrap_values[stat_name] = calc_bootstrap(stat_func,
+                                                     returns)
 
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
-            do_bootstrap(stat_func, returns, factor_returns)
+            stat_name = stat_func.__name__
+            bootstrap_values[stat_name] = calc_bootstrap(stat_func,
+                                                         returns,
+                                                         factor_returns)
+    bootstrap_values = pd.DataFrame(bootstrap_values)
 
-    return stats
+    if return_stats:
+        stats = bootstrap_values.apply(calc_distribution_stats,
+                                       axis='columns')
+        return stats[['mean', '5%', '95%']]
+    else:
+        return bootstrap_values
 
 
 def calc_bootstrap(func, returns, *args, **kwargs):

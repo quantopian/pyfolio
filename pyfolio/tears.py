@@ -258,6 +258,9 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     else:
         vertical_sections = 10
 
+    if bootstrap:
+        vertical_sections += 1
+
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
     ax_rolling_returns = plt.subplot(gs[:2, :])
@@ -326,6 +329,11 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         df_weekly,
         df_monthly,
         ax=ax_return_quantiles)
+
+    if bootstrap:
+        ax_bootstrap = plt.subplot(gs[10, :])
+        plotting.plot_perf_stats(returns, benchmark_rets,
+                                 ax=ax_bootstrap)
 
     for ax in fig.axes:
         plt.setp(ax.get_xticklabels(), visible=True)
