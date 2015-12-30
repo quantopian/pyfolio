@@ -795,9 +795,8 @@ def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True):
     bootstrap_values = pd.DataFrame(bootstrap_values)
 
     if return_stats:
-        stats = bootstrap_values.apply(calc_distribution_stats,
-                                       axis='columns')
-        return stats[['mean', '5%', '95%']]
+        stats = bootstrap_values.apply(calc_distribution_stats)
+        return stats.T[['mean', '5%', '95%']]
     else:
         return bootstrap_values
 
