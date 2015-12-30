@@ -811,7 +811,9 @@ def calc_bootstrap(func, returns, *args, **kwargs):
     factor_returns : pd.Series (optional)
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
-
+    n_samples : int (optional)
+        Number of bootstrap samples to draw. Default is 1000.
+        Increasing this will lead to more stable / accurate estimates.
     Returns
     -------
     numpy.ndarray
