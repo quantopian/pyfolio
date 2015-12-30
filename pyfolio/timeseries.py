@@ -126,7 +126,7 @@ def annual_return(returns, period=DAILY):
     num_years = float(len(returns)) / ann_factor
     df_cum_rets = cum_returns(returns, starting_value=100)
     start_value = 100
-    end_value = df_cum_rets[-1]
+    end_value = df_cum_rets.iloc[-1]
 
     total_return = (end_value - start_value) / start_value
     annual_return = (1. + total_return) ** (1 / num_years) - 1
