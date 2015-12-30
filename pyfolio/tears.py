@@ -249,8 +249,8 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     print('\n')
 
     plotting.show_perf_stats(returns, benchmark_rets,
-                            bootstrap=bootstrap,
-                            live_start_date=live_start_date)
+                             bootstrap=bootstrap,
+                             live_start_date=live_start_date)
 
     if live_start_date is not None:
         vertical_sections = 11
