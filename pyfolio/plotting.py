@@ -534,13 +534,13 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
         returns_backtest = returns[returns.index < live_start_date]
         returns_live = returns[returns.index > live_start_date]
 
-        perf_stats_live = perf_func(
+        perf_stats_live = np.round(perf_func(
             returns_live,
-            factor_returns=factor_returns).round(2)
+            factor_returns=factor_returns), 2)
 
-        perf_stats_all = perf_func(
+        perf_stats_all = np.round(perf_func(
             returns,
-            factor_returns=factor_returns).round(2)
+            factor_returns=factor_returns), 2)
 
         print('Out-of-Sample Months: ' +
               str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
@@ -550,9 +550,9 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
     print('Backtest Months: ' +
           str(int(len(returns_backtest) / APPROX_BDAYS_PER_MONTH)))
 
-    perf_stats = perf_func(
+    perf_stats = np.round(perf_func(
         returns_backtest,
-        factor_returns=factor_returns).round(2)
+        factor_returns=factor_returns), 2)
 
     if live_start_date is not None:
         perf_stats = pd.concat(OrderedDict([
