@@ -753,8 +753,7 @@ def perf_stats(returns, factor_returns=None):
 
 
 def perf_stats_bootstrap(returns, factor_returns=None):
-    """Calculates various performance metrics of a strategy, for use in
-    plotting.show_perf_stats.
+    """Calculates various bootstrapped performance metrics of a strategy.
 
     Parameters
     ----------
@@ -769,7 +768,8 @@ def perf_stats_bootstrap(returns, factor_returns=None):
     Returns
     -------
     pd.DataFrame
-        Performance metrics.
+        Distributional statistics of bootstrapped sampling
+        distribution of performance metrics.
 
     """
 
@@ -792,6 +792,76 @@ def perf_stats_bootstrap(returns, factor_returns=None):
             do_bootstrap(stat_func, returns, factor_returns)
 
     return stats
+
+
+def calc_bootstrap(func, returns, *args, **kwargs):
+    """Performs a bootstrap analysis on a user-defined function returning
+    a summary statistic.
+
+    Parameters
+    ----------
+    func : function
+        Function that either takes a single array (commonly returns)
+        or two arrays (commonly returns and factor returns) and
+        returns a single value (commonly a summary
+        statistic). Additional args and kwargs are passed as well.
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    factor_returns : pd.Series (optional)
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
+
+    Returns
+    -------
+    numpy.ndarray
+        Bootstrapped sampling distribution of passed in func.
+    """
+
+    n_samples = kwargs.pop('n_samples', 1000)
+    out = np.empty(n_samples)
+
+    if len(args) > 0:
+        factor_returns = args.pop(0)
+    else:
+        factor_returns = None
+
+    for i in range(n_samples):
+        idx = np.random.randint(len(returns), size=len(returns))
+        if factor_returns is not None:
+            out[i] = func(returns.iloc[idx],
+                          factor_returns.iloc[idx],
+                          *args, **kwargs)
+        else:
+            out[i] = func(returns.iloc[idx],
+                          *args, **kwargs)
+
+    return out
+
+
+def calc_distribution_stats(values):
+    """Calculate various summary statistics of data.
+
+    Parameters
+    ----------
+    values : numpy.ndarray or pandas.Series
+        Array to compute summary statistics for.
+
+    Returns
+    -------
+    pandas.Series
+        Series containing mean, median, std, as well as 5, 25, 75 and
+        95 percentiles of passed in values.
+
+    """
+    return pd.Series({'mean': np.mean(values),
+                      'median': np.median(values),
+                      'std': np.std(values),
+                      '5%': stats.percentage(values, 5),
+                      '25%': stats.percentage(values, 25),
+                      '75%': stats.percentage(values, 75),
+                      '95%': stats.percentage(values, 95),
+                      })
 
 
 def get_max_drawdown_underwater(underwater):
@@ -957,36 +1027,6 @@ def gen_drawdown_table(returns, top=10):
         unit='D')
 
     return df_drawdowns
-
-
-def calc_bootstrap(func, returns, *args, **kwargs):
-    n_samples = kwargs.pop('n_samples', 1000)
-    out = np.empty(n_samples)
-
-    if len(args) > 0:
-        factor_returns = args.pop(0)
-    else:
-        factor_returns = None
-
-    for i in range(n_samples):
-        idx = np.random.randint(len(data), size=len(data))
-        if factor_returns is not None:
-            out[i] = func(returns.iloc[idx], factor_returns.iloc[idx], *args, **kwargs)
-        else:
-            out[i] = func(returns.iloc[idx], *args, **kwargs)
-
-    return out
-
-
-def calc_distribution_stats(values):
-    return pd.Series({'mean': np.mean(values),
-                      'median': np.median(values),
-                      'std': np.std(values),
-                      '5%': stats.percentage(values, 5),
-                      '25%': stats.percentage(values, 25),
-                      '75%': stats.percentage(values, 75),
-                      '95%': stats.percentage(values, 95),
-    })
 
 
 def rolling_sharpe(returns, rolling_sharpe_window):
