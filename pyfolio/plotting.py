@@ -462,7 +462,8 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     return ax
 
 
-def show_perf_stats(returns, factor_returns, live_start_date=None):
+def show_perf_stats(returns, factor_returns, live_start_date=None,
+                    bootstrap=False):
     """Prints some performance metrics of the strategy.
 
     - Shows amount of time the strategy has been run in backtest and
@@ -482,23 +483,30 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
     factor_returns : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
+    bootstrap : boolean (optional)
+        Whether to perform bootstrap analysis for the performance
+        metrics.
+         - For more information, see timeseries.perf_stats_bootstrap
 
     """
+
+    if bootstrap:
+        perf_func = timeseries.perf_stats_bootstrap
+    else:
+        perf_func = timeseries.perf_stats
 
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
         returns_backtest = returns[returns.index < live_start_date]
         returns_live = returns[returns.index > live_start_date]
 
-        perf_stats_live = np.round(timeseries.perf_stats(
+        perf_stats_live = perf_func(
             returns_live,
-            factor_returns=factor_returns), 2)
-        perf_stats_live.columns = ['Out_of_Sample']
+            factor_returns=factor_returns).round(2)
 
-        perf_stats_all = np.round(timeseries.perf_stats(
+        perf_stats_all = perf_func(
             returns,
-            factor_returns=factor_returns), 2)
-        perf_stats_all.columns = ['All_History']
+            factor_returns=factor_returns).round(2)
 
         print('Out-of-Sample Months: ' +
               str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
@@ -508,16 +516,16 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
     print('Backtest Months: ' +
           str(int(len(returns_backtest) / APPROX_BDAYS_PER_MONTH)))
 
-    perf_stats = np.round(timeseries.perf_stats(
+    perf_stats = perf_func(
         returns_backtest,
-        factor_returns=factor_returns), 2)
+        factor_returns=factor_returns).round(2)
 
     if live_start_date is not None:
-        perf_stats = pd.DataFrame(OrderedDict([
+        perf_stats = pd.concat(OrderedDict([
             ('Backtest', perf_stats),
             ('Out of sample', perf_stats_live),
             ('All history', perf_stats_all),
-        ]))
+        ]), axis=1)
 
     print(perf_stats)
 
