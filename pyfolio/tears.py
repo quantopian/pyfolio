@@ -61,6 +61,7 @@ def create_full_tear_sheet(returns,
                            round_trips=False,
                            hide_positions=False,
                            cone_std=(1.0, 1.5, 2.0),
+                           bootstrap=False,
                            set_context=True):
     """
     Generate a number of tear sheets that are useful
@@ -131,6 +132,9 @@ def create_full_tear_sheet(returns,
         If tuple, Tuple of standard deviation values to use for the cone plots
          - The cone is a normal distribution with this standard deviation
              centered around a linear regression.
+    bootstrap : boolean (optional)
+        Whether to perform bootstrap analysis for the performance
+        metrics. Takes a few minutes longer.
     set_context : boolean, optional
         If True, set default plotting style context.
          - See plotting.context().
@@ -156,6 +160,7 @@ def create_full_tear_sheet(returns,
         live_start_date=live_start_date,
         cone_std=cone_std,
         benchmark_rets=benchmark_rets,
+        bootstrap=bootstrap,
         set_context=set_context)
 
     create_interesting_times_tear_sheet(returns,
@@ -190,6 +195,7 @@ def create_full_tear_sheet(returns,
 def create_returns_tear_sheet(returns, live_start_date=None,
                               cone_std=(1.0, 1.5, 2.0),
                               benchmark_rets=None,
+                              bootstrap=False,
                               return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's returns.
@@ -218,6 +224,9 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     benchmark_rets : pd.Series, optional
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
+    bootstrap : boolean (optional)
+        Whether to perform bootstrap analysis for the performance
+        metrics. Takes a few minutes longer.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional

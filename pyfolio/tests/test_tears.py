@@ -59,6 +59,7 @@ class PositionsTestCase(TestCase):
                            ({'round_trips': True},),
                            ({'hide_positions': True},),
                            ({'cone_std': 1},),
+                           ({'bootstrap': True})
                            ])
     @cleanup
     def test_create_full_tear_sheet_breakdown(self, kwargs):
@@ -73,6 +74,7 @@ class PositionsTestCase(TestCase):
                            ({'live_start_date':
                              test_returns.index[-20]},),
                            ({'cone_std': 1},),
+                           ({'bootstrap': True})
                            ])
     @cleanup
     def test_create_returns_tear_sheet_breakdown(self, kwargs):
