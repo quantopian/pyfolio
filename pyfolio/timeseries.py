@@ -773,7 +773,7 @@ def perf_stats_bootstrap(returns, factor_returns=None):
 
     """
 
-    stats = pd.DataFrame(columns=['mean', '5%', '95%'])
+    stats = pd.DataFrame(columns=['mean', '5%', '95%'], dtype=np.float64)
 
     def do_bootstrap(stat_func, *args):
         stat_name = stat_func.__name__
