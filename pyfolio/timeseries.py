@@ -824,18 +824,22 @@ def calc_bootstrap(func, returns, *args, **kwargs):
     out = np.empty(n_samples)
 
     if len(args) > 0:
-        factor_returns = args.pop(0)
+        factor_returns = args[0]
+        args = args[1:]
+        # Ensure that factor_returns have same index
+        factor_returns = factor_returns[returns.index]
     else:
         factor_returns = None
 
     for i in range(n_samples):
         idx = np.random.randint(len(returns), size=len(returns))
+        returns_i = returns.iloc[idx].reset_index(drop=True)
         if factor_returns is not None:
-            out[i] = func(returns.iloc[idx],
-                          factor_returns.iloc[idx],
+            factor_returns_i = factor_returns.iloc[idx].reset_index(drop=True)
+            out[i] = func(returns_i, factor_returns_i,
                           *args, **kwargs)
         else:
-            out[i] = func(returns.iloc[idx],
+            out[i] = func(returns_i,
                           *args, **kwargs)
 
     return out
@@ -859,10 +863,10 @@ def calc_distribution_stats(values):
     return pd.Series({'mean': np.mean(values),
                       'median': np.median(values),
                       'std': np.std(values),
-                      '5%': stats.percentage(values, 5),
-                      '25%': stats.percentage(values, 25),
-                      '75%': stats.percentage(values, 75),
-                      '95%': stats.percentage(values, 95),
+                      '5%': stats.scoreatpercentile(values, 5),
+                      '25%': stats.scoreatpercentile(values, 25),
+                      '75%': stats.scoreatpercentile(values, 75),
+                      '95%': stats.scoreatpercentile(values, 95),
                       })
 
 
