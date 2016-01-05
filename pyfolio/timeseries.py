@@ -871,7 +871,8 @@ def calc_distribution_stats(x):
                       '25%': np.percentile(x, 25),
                       '75%': np.percentile(x, 75),
                       '95%': np.percentile(x, 95),
-                      'IQR': np.subtract(*np.percentile(x, [75, 25])),
+                      'IQR': np.subtract.reduce(
+                          np.percentile(x, [75, 25])),
                       })
 
 
