@@ -765,8 +765,8 @@ def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True):
          - This is in the same style as returns.
         If None, do not compute alpha, beta, and information ratio.
     return_stats : boolean (optional)
-        If True, returns a DataFrame of mean, 5 and 95 percentiles for
-        each perf metric.
+        If True, returns a DataFrame of mean, median, 5 and 95 percentiles
+        for each perf metric.
         If False, returns a DataFrame with the bootstrap samples for
         each perf metric.
 
