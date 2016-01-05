@@ -849,12 +849,12 @@ def calc_bootstrap(func, returns, *args, **kwargs):
     return out
 
 
-def calc_distribution_stats(values):
+def calc_distribution_stats(x):
     """Calculate various summary statistics of data.
 
     Parameters
     ----------
-    values : numpy.ndarray or pandas.Series
+    x : numpy.ndarray or pandas.Series
         Array to compute summary statistics for.
 
     Returns
@@ -864,13 +864,13 @@ def calc_distribution_stats(values):
         95 percentiles of passed in values.
 
     """
-    return pd.Series({'mean': np.mean(values),
-                      'median': np.median(values),
-                      'std': np.std(values),
-                      '5%': stats.scoreatpercentile(values, 5),
-                      '25%': stats.scoreatpercentile(values, 25),
-                      '75%': stats.scoreatpercentile(values, 75),
-                      '95%': stats.scoreatpercentile(values, 95),
+    return pd.Series({'mean': np.mean(x),
+                      'median': np.median(x),
+                      'std': np.std(x),
+                      '5%': np.percentile(x, 5),
+                      '25%': np.percentile(x, 25),
+                      '75%': np.percentile(x, 75),
+                      '95%': np.percentile(x, 95),
                       'IQR': np.subtract(*np.percentile(x, [75, 25])),
                       })
 
