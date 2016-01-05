@@ -462,7 +462,42 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     return ax
 
 
-def show_perf_stats(returns, factor_returns, live_start_date=None):
+def plot_perf_stats(returns, factor_returns, ax=None):
+    """Create box plot of some performance metrics of the strategy.
+    The width of the box whiskers is determined by a bootstrap.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    factor_returns : pd.DataFrame, optional
+        data set containing the Fama-French risk factors. See
+        utils.load_portfolio_risk_factors.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    bootstrap_values = timeseries.perf_stats_bootstrap(returns,
+                                                       factor_returns,
+                                                       return_stats=False)
+    bootstrap_values = bootstrap_values.drop('kurtosis', axis='columns')
+
+    sns.boxplot(bootstrap_values, orient='h', ax=ax)
+
+    return ax
+
+
+def show_perf_stats(returns, factor_returns, live_start_date=None,
+                    bootstrap=False):
     """Prints some performance metrics of the strategy.
 
     - Shows amount of time the strategy has been run in backtest and
@@ -482,23 +517,30 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
     factor_returns : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
+    bootstrap : boolean (optional)
+        Whether to perform bootstrap analysis for the performance
+        metrics.
+         - For more information, see timeseries.perf_stats_bootstrap
 
     """
+
+    if bootstrap:
+        perf_func = timeseries.perf_stats_bootstrap
+    else:
+        perf_func = timeseries.perf_stats
 
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
         returns_backtest = returns[returns.index < live_start_date]
         returns_live = returns[returns.index > live_start_date]
 
-        perf_stats_live = np.round(timeseries.perf_stats(
+        perf_stats_live = np.round(perf_func(
             returns_live,
             factor_returns=factor_returns), 2)
-        perf_stats_live.columns = ['Out_of_Sample']
 
-        perf_stats_all = np.round(timeseries.perf_stats(
+        perf_stats_all = np.round(perf_func(
             returns,
             factor_returns=factor_returns), 2)
-        perf_stats_all.columns = ['All_History']
 
         print('Out-of-Sample Months: ' +
               str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
@@ -508,16 +550,16 @@ def show_perf_stats(returns, factor_returns, live_start_date=None):
     print('Backtest Months: ' +
           str(int(len(returns_backtest) / APPROX_BDAYS_PER_MONTH)))
 
-    perf_stats = np.round(timeseries.perf_stats(
+    perf_stats = np.round(perf_func(
         returns_backtest,
         factor_returns=factor_returns), 2)
 
     if live_start_date is not None:
-        perf_stats = pd.DataFrame(OrderedDict([
+        perf_stats = pd.concat(OrderedDict([
             ('Backtest', perf_stats),
             ('Out of sample', perf_stats_live),
             ('All history', perf_stats_all),
-        ]))
+        ]), axis=1)
 
     print(perf_stats)
 

@@ -391,3 +391,41 @@ class TestCone(TestCase):
         for col, vals in bootstrap_cone.iteritems():
             expected = normal_cone[col].values
             assert_allclose(vals.values, expected, rtol=.005)
+
+
+class TestBootstrap(TestCase):
+    @parameterized.expand([
+        (0., 1., 1000),
+        (1., 2., 500),
+        (-1., 0.1, 10),
+    ])
+    def test_calc_bootstrap(self, true_mean, true_sd, n):
+        """Compare bootstrap distribution of the mean to sampling distribution
+        of the mean.
+
+        """
+        np.random.seed(123)
+        func = np.mean
+        returns = pd.Series((np.random.randn(n) * true_sd) +
+                            true_mean)
+
+        samples = timeseries.calc_bootstrap(func, returns,
+                                            n_samples=10000)
+
+        # Calculate statistics of sampling distribution of the mean
+        mean_of_mean = np.mean(returns)
+        sd_of_mean = np.std(returns) / np.sqrt(n)
+
+        assert_almost_equal(
+            np.mean(samples),
+            mean_of_mean,
+            3,
+            'Mean of bootstrap does not match theoretical mean of'
+            'sampling distribution')
+
+        assert_almost_equal(
+            np.std(samples),
+            sd_of_mean,
+            3,
+            'SD of bootstrap does not match theoretical SD of'
+            'sampling distribution')

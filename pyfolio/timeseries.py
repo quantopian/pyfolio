@@ -126,7 +126,7 @@ def annual_return(returns, period=DAILY):
     num_years = float(len(returns)) / ann_factor
     df_cum_rets = cum_returns(returns, starting_value=100)
     start_value = 100
-    end_value = df_cum_rets[-1]
+    end_value = df_cum_rets.iloc[-1]
 
     total_return = (end_value - start_value) / start_value
     annual_return = (1. + total_return) ** (1 / num_years) - 1
@@ -750,6 +750,130 @@ def perf_stats(returns, factor_returns=None):
                                                   factor_returns)
 
     return stats
+
+
+def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True):
+    """Calculates various bootstrapped performance metrics of a strategy.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    factor_returns : pd.Series (optional)
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
+        If None, do not compute alpha, beta, and information ratio.
+    return_stats : boolean (optional)
+        If True, returns a DataFrame of mean, median, 5 and 95 percentiles
+        for each perf metric.
+        If False, returns a DataFrame with the bootstrap samples for
+        each perf metric.
+
+    Returns
+    -------
+    pd.DataFrame
+        if return_stats is True:
+        - Distributional statistics of bootstrapped sampling
+        distribution of performance metrics.
+        if return_stats is False:
+        - Bootstrap samples for each performance metric.
+    """
+    bootstrap_values = OrderedDict()
+
+    for stat_func in SIMPLE_STAT_FUNCS:
+        stat_name = stat_func.__name__
+        bootstrap_values[stat_name] = calc_bootstrap(stat_func,
+                                                     returns)
+
+    if factor_returns is not None:
+        for stat_func in FACTOR_STAT_FUNCS:
+            stat_name = stat_func.__name__
+            bootstrap_values[stat_name] = calc_bootstrap(
+                stat_func,
+                returns,
+                factor_returns=factor_returns)
+
+    bootstrap_values = pd.DataFrame(bootstrap_values)
+
+    if return_stats:
+        stats = bootstrap_values.apply(calc_distribution_stats)
+        return stats.T[['mean', 'median', '5%', '95%']]
+    else:
+        return bootstrap_values
+
+
+def calc_bootstrap(func, returns, *args, **kwargs):
+    """Performs a bootstrap analysis on a user-defined function returning
+    a summary statistic.
+
+    Parameters
+    ----------
+    func : function
+        Function that either takes a single array (commonly returns)
+        or two arrays (commonly returns and factor returns) and
+        returns a single value (commonly a summary
+        statistic). Additional args and kwargs are passed as well.
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    factor_returns : pd.Series (optional)
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
+    n_samples : int (optional)
+        Number of bootstrap samples to draw. Default is 1000.
+        Increasing this will lead to more stable / accurate estimates.
+
+    Returns
+    -------
+    numpy.ndarray
+        Bootstrapped sampling distribution of passed in func.
+    """
+
+    n_samples = kwargs.pop('n_samples', 1000)
+    out = np.empty(n_samples)
+
+    factor_returns = kwargs.pop('factor_returns', None)
+
+    for i in range(n_samples):
+        idx = np.random.randint(len(returns), size=len(returns))
+        returns_i = returns.iloc[idx].reset_index(drop=True)
+        if factor_returns is not None:
+            factor_returns_i = factor_returns.iloc[idx].reset_index(drop=True)
+            out[i] = func(returns_i, factor_returns_i,
+                          *args, **kwargs)
+        else:
+            out[i] = func(returns_i,
+                          *args, **kwargs)
+
+    return out
+
+
+def calc_distribution_stats(x):
+    """Calculate various summary statistics of data.
+
+    Parameters
+    ----------
+    x : numpy.ndarray or pandas.Series
+        Array to compute summary statistics for.
+
+    Returns
+    -------
+    pandas.Series
+        Series containing mean, median, std, as well as 5, 25, 75 and
+        95 percentiles of passed in values.
+
+    """
+    return pd.Series({'mean': np.mean(x),
+                      'median': np.median(x),
+                      'std': np.std(x),
+                      '5%': np.percentile(x, 5),
+                      '25%': np.percentile(x, 25),
+                      '75%': np.percentile(x, 75),
+                      '95%': np.percentile(x, 95),
+                      'IQR': np.subtract.reduce(
+                          np.percentile(x, [75, 25])),
+                      })
 
 
 def get_max_drawdown_underwater(underwater):
