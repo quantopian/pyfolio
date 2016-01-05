@@ -789,9 +789,11 @@ def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True):
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
             stat_name = stat_func.__name__
-            bootstrap_values[stat_name] = calc_bootstrap(stat_func,
-                                                         returns,
-                                                         factor_returns)
+            bootstrap_values[stat_name] = calc_bootstrap(
+                stat_func,
+                returns,
+                factor_returns=factor_returns)
+
     bootstrap_values = pd.DataFrame(bootstrap_values)
 
     if return_stats:
@@ -821,6 +823,7 @@ def calc_bootstrap(func, returns, *args, **kwargs):
     n_samples : int (optional)
         Number of bootstrap samples to draw. Default is 1000.
         Increasing this will lead to more stable / accurate estimates.
+
     Returns
     -------
     numpy.ndarray
@@ -830,13 +833,7 @@ def calc_bootstrap(func, returns, *args, **kwargs):
     n_samples = kwargs.pop('n_samples', 1000)
     out = np.empty(n_samples)
 
-    if len(args) > 0:
-        factor_returns = args[0]
-        args = args[1:]
-        # Ensure that factor_returns have same index
-        factor_returns = factor_returns[returns.index]
-    else:
-        factor_returns = None
+    factor_returns = kwargs.pop('factor_returns', None)
 
     for i in range(n_samples):
         idx = np.random.randint(len(returns), size=len(returns))
