@@ -1,0 +1,48 @@
+package:
+  name: pyfolio
+  version: "0.4.0"
+
+source:
+  fn: pyfolio-0.4.0.tar.gz
+  url: https://pypi.python.org/packages/source/p/pyfolio/pyfolio-0.4.0.tar.gz
+  md5: a7cb7cfb2327c9042805b0f5f1371d92
+
+build:
+  noarch_python: True
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  run:
+    - python
+    - funcsigs >=0.4
+    - matplotlib >=1.4.0
+    - mock >=1.1.2
+    - numpy >=1.9.1
+    - pandas >=0.15.0
+    - pyparsing >=2.0.3
+    - python-dateutil >=2.4.2
+    - pytz >=2014.10
+    - scikit-learn >=0.15.0
+    - scipy >=0.14.0
+    - seaborn >=0.6.0
+    - statsmodels >=0.5.0
+    - pandas-datareader >=0.2
+
+test:
+  # Python imports
+  imports:
+    - pyfolio
+    - pyfolio.tests
+
+  #commands:
+  #  - nosetests  # You can put test commands to be run here.  Use this to test that the
+  #  # entry points work.
+
+about:
+  home: http://quantopian.github.io/pyfolio/
+  license: Apache Software License
+  summary: 'pyfolio is a Python library for performance and risk analysis of financial portfolios'
+
