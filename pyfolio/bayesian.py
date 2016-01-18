@@ -24,6 +24,11 @@ import matplotlib.pyplot as plt
 
 import pymc3 as pm
 
+try:
+    from pymc3 import StudentT
+except ImportError:
+    from pymc3 import T as StudentT
+
 from . import _seaborn as sns
 from .timeseries import cum_returns
 
@@ -88,11 +93,11 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
                              testval=alphabeta_init[:-1], shape=n_bmark)
         bmark_theano = tt.as_tensor_variable(bmark.values.T)
         mu_reg = alpha_reg + tt.dot(beta_reg, bmark_theano)
-        pm.T('returns',
-             nu=nu + 2,
-             mu=mu_reg,
-             sd=sigma,
-             observed=data)
+        StudentT('returns',
+                 nu=nu + 2,
+                 mu=mu_reg,
+                 sd=sigma,
+                 observed=data)
         start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
         step = pm.NUTS(scaling=start)
         trace = pm.sample(samples, step, start=start)
@@ -168,7 +173,8 @@ def model_returns_t(data, samples=500):
         sigma = pm.HalfCauchy('volatility', beta=1, testval=data.std())
         nu = pm.Exponential('nu_minus_two', 1. / 10., testval=3.)
 
-        returns = pm.T('returns', nu=nu + 2, mu=mu, sd=sigma, observed=data)
+        returns = StudentT('returns', nu=nu + 2, mu=mu, sd=sigma,
+                           observed=data)
         pm.Deterministic('annual volatility',
                          returns.distribution.variance**.5 * np.sqrt(252))
 
@@ -235,10 +241,10 @@ def model_best(y1, y2, samples=1000):
                                 upper=sigma_high, testval=y2.std())
         nu = pm.Exponential('nu_minus_two', 1 / 29., testval=4.) + 2.
 
-        returns_group1 = pm.T('group1', nu=nu, mu=group1_mean,
-                              lam=group1_std**-2, observed=y1)
-        returns_group2 = pm.T('group2', nu=nu, mu=group2_mean,
-                              lam=group2_std**-2, observed=y2)
+        returns_group1 = StudentT('group1', nu=nu, mu=group1_mean,
+                                  lam=group1_std**-2, observed=y1)
+        returns_group2 = StudentT('group2', nu=nu, mu=group2_mean,
+                                  lam=group2_std**-2, observed=y2)
 
         diff_of_means = pm.Deterministic('difference of means',
                                          group2_mean - group1_mean)
@@ -391,7 +397,7 @@ def model_stoch_vol(data, samples=2000):
         s = GaussianRandomWalk('s', sigma**-2, shape=len(data))
         volatility_process = pm.Deterministic('volatility_process',
                                               pm.exp(-2 * s))
-        pm.T('r', nu, lam=volatility_process, observed=data)
+        StudentT('r', nu, lam=volatility_process, observed=data)
         start = pm.find_MAP(vars=[s], fmin=sp.optimize.fmin_l_bfgs_b)
 
         step = pm.NUTS(scaling=start)
