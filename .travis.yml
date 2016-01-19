@@ -4,6 +4,7 @@ sudo: false
 python:
   - "2.7"
   - "3.4"
+  - "3.5"
 
 before_install:
   # We do this conditionally because it saves us some downloading if the
