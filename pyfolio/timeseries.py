@@ -499,6 +499,9 @@ def stability_of_timeseries(returns):
 def tail_ratio(returns):
     """Determines the ratio between the right (95%) and left tail (5%).
 
+    For example, a ratio of 0.25 means that losses are four times
+    as bad as profits.
+
     Parameters
     ----------
     returns : pd.Series
