@@ -517,15 +517,15 @@ def tail_ratio(returns):
     """
 
     return np.abs(np.percentile(returns, 95)) / \
-           np.abs(np.percentile(returns, 5))
+        np.abs(np.percentile(returns, 5))
 
 
 def common_sense_ratio(returns):
     """Common sense ratio is the multiplication of the tail ratio and the
     Gain-to-Pain-Ratio -- sum(profits) / sum(losses).
 
-    See https://www.quora.com/Under-what-market-conditions-does-mean-reversion-work-better-than-trend-following
-    for more information on motivation of this metric.
+    See http://bit.ly/1ORzGBk for more information on motivation of
+    this metric.
 
 
     Parameters

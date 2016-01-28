@@ -344,8 +344,7 @@ class TestStats(TestCase):
             timeseries.tail_ratio(returns),
             1., DECIMAL_PLACES)
 
-
-    def test_tail_ratio(self):
+    def test_common_sense_ratio(self):
         returns = pd.Series(np.random.randn(1000) + .1)
         self.assertAlmostEqual(
             timeseries.common_sense_ratio(returns),
