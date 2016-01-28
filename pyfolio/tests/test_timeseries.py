@@ -338,6 +338,19 @@ class TestStats(TestCase):
             timeseries.sortino_ratio(returns),
             expected, DECIMAL_PLACES)
 
+    def test_tail_ratio(self):
+        returns = np.random.randn(1000)
+        self.assertAlmostEqual(
+            timeseries.tail_ratio(returns),
+            1., DECIMAL_PLACES)
+
+
+    def test_tail_ratio(self):
+        returns = pd.Series(np.random.randn(1000) + .1)
+        self.assertAlmostEqual(
+            timeseries.common_sense_ratio(returns),
+            0.024031933021535612, DECIMAL_PLACES)
+
 
 class TestMultifactor(TestCase):
     simple_rets = pd.Series(

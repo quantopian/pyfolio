@@ -496,6 +496,7 @@ def stability_of_timeseries(returns):
 
     return rhat
 
+
 def tail_ratio(returns):
     """Determines the ratio between the right (95%) and left tail (5%).
 
@@ -515,8 +516,32 @@ def tail_ratio(returns):
 
     """
 
-    return np.abs(np.percentile(returns, 95)) /
+    return np.abs(np.percentile(returns, 95)) / \
            np.abs(np.percentile(returns, 5))
+
+
+def common_sense_ratio(returns):
+    """Common sense ratio is the multiplication of the tail ratio and the
+    Gain-to-Pain-Ratio -- sum(profits) / sum(losses).
+
+    See https://www.quora.com/Under-what-market-conditions-does-mean-reversion-work-better-than-trend-following
+    for more information on motivation of this metric.
+
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+
+    Returns
+    -------
+    float
+        common sense ratio
+
+    """
+    return tail_ratio(returns) * (1 + annual_return(returns))
+
 
 SIMPLE_STAT_FUNCS = [
     annual_return,
@@ -529,7 +554,8 @@ SIMPLE_STAT_FUNCS = [
     sortino_ratio,
     stats.skew,
     stats.kurtosis,
-    tail_ratio
+    tail_ratio,
+    common_sense_ratio,
 ]
 
 FACTOR_STAT_FUNCS = [
