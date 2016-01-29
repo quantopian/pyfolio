@@ -339,7 +339,7 @@ class TestStats(TestCase):
             expected, DECIMAL_PLACES)
 
     def test_tail_ratio(self):
-        returns = np.random.randn(1000)
+        returns = np.random.randn(10000)
         self.assertAlmostEqual(
             timeseries.tail_ratio(returns),
             1., DECIMAL_PLACES)
