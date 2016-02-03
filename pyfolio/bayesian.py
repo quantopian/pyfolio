@@ -106,11 +106,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
 
 
 def model_returns_normal(data, samples=500):
-    """Run Bayesian model assuming returns are Student-T distributed.
-
-    Compared with the normal model, this model assumes returns be
-    T-distributed and thus has a 3rd parameter (nu) that controls the
-    mass in the tails.
+    """Run Bayesian model assuming returns are normally distributed.
 
     Parameters
     ----------
@@ -149,7 +145,11 @@ def model_returns_normal(data, samples=500):
 
 
 def model_returns_t(data, samples=500):
-    """Run Bayesian model assuming returns are normally distributed.
+    """Run Bayesian model assuming returns are Student-T distributed.
+
+    Compared with the normal model, this model assumes returns are
+    T-distributed and thus have a 3rd parameter (nu) that controls the
+    mass in the tails.
 
     Parameters
     ----------
