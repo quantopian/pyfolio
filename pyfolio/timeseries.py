@@ -76,18 +76,9 @@ def max_drawdown(returns):
         return np.nan
 
     df_cum_rets = cum_returns(returns, starting_value=100)
+    cum_max_return = df_cum_rets.cummax()
 
-    MDD = 0
-    DD = 0
-    peak = -99999
-    for value in df_cum_rets:
-        if (value > peak):
-            peak = value
-        else:
-            DD = (peak - value) / peak
-        if (DD > MDD):
-            MDD = DD
-    return -1 * MDD
+    return df_cum_rets.sub(cum_max_return).div(cum_max_return).min()
 
 
 def annual_return(returns, period=DAILY):
@@ -925,7 +916,7 @@ def calc_distribution_stats(x):
 
 
 def get_max_drawdown_underwater(underwater):
-    """Determines peak, valley, and recovery dates given and 'underwater'
+    """Determines peak, valley, and recovery dates given an 'underwater'
     DataFrame.
 
     An underwater DataFrame is a DataFrame that has precomputed
