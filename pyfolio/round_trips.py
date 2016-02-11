@@ -218,6 +218,8 @@ def add_closing_transactions(positions, transactions):
         closing_txn = pd.DataFrame(closing_txn, index=[end_dt])
         closed_txns = closed_txns.append(closing_txn)
 
+    closed_txns = closed_txns[closed_txns.amount != 0]
+
     return closed_txns
 
 
