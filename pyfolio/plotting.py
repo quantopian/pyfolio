@@ -31,8 +31,10 @@ from . import timeseries
 from . import pos
 from . import _seaborn as sns
 from . import txn
+from . import capacity
 
-from .utils import APPROX_BDAYS_PER_MONTH
+from .utils import (APPROX_BDAYS_PER_MONTH,
+                    MM_DISPLAY_UNIT)
 
 from functools import wraps
 
@@ -1253,6 +1255,38 @@ def plot_slippage_sensitivity(returns, transactions, positions,
            xticks=np.arange(0, 100, 10),
            ylabel='Average Annual Return',
            xlabel='Per-Dollar Slippage (bps)')
+
+    return ax
+
+
+def plot_capacity_sweep(returns, transactions, market_data,
+                        bt_starting_capital,
+                        min_pv=100000,
+                        max_pv=300000000,
+                        step_size=1000000,
+                        ax=None):
+    txn_daily_w_bar = capacity.daily_txns_with_bar_data(transactions,
+                                                        market_data)
+
+    captial_base_sweep = pd.Series()
+    for start_pv in range(min_pv, max_pv, step_size):
+        adj_ret = capacity.apply_slippage_penalty(returns,
+                                                  txn_daily_w_bar,
+                                                  start_pv,
+                                                  bt_starting_capital)
+        sharpe = timeseries.sharpe_ratio(adj_ret)
+        if sharpe < -1:
+            break
+        captial_base_sweep.loc[start_pv] = sharpe
+    captial_base_sweep.index = captial_base_sweep.index / MM_DISPLAY_UNIT
+
+    if ax is None:
+        ax = plt.gca()
+
+    captial_base_sweep.plot(ax=ax)
+    ax.set(xlabel='Capital Base ($mm)',
+           ylabel='Sharpe Ratio',
+           title='Capital Base Performance Sweep')
 
     return ax
 
