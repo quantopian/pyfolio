@@ -632,7 +632,7 @@ def plot_rolling_returns(returns,
                          'factor_returns.')
     elif volatility_match and factor_returns is not None:
         bmark_vol = factor_returns.loc[returns.index].std()
-        returns = (returns / returns.std()) * bmark_vol
+        returns = returns * (returns.std() / bmark_vol)
 
     cum_rets = timeseries.cum_returns(returns, 1.0)
 
