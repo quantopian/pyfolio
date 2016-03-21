@@ -1092,7 +1092,7 @@ def show_return_range(returns, df_weekly):
                           index=['2-sigma returns daily',
                                  '2-sigma returns weekly'])
 
-    print(var_sigma.round(3))
+    print(var_sigma.round(3).values)
 
 
 def plot_turnover(returns, transactions, positions,
