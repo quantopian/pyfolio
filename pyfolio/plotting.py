@@ -536,11 +536,11 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
 
         perf_stats_live = np.round(perf_func(
             returns_live,
-            factor_returns=factor_returns), 2)
+            factor_returns=factor_returns).values, 2)
 
         perf_stats_all = np.round(perf_func(
             returns,
-            factor_returns=factor_returns), 2)
+            factor_returns=factor_returns).values, 2)
 
         print('Out-of-Sample Months: ' +
               str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
@@ -552,7 +552,7 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
 
     perf_stats = np.round(perf_func(
         returns_backtest,
-        factor_returns=factor_returns), 2)
+        factor_returns=factor_returns).values, 2)
 
     if live_start_date is not None:
         perf_stats = pd.concat(OrderedDict([
@@ -1092,7 +1092,7 @@ def show_return_range(returns, df_weekly):
                           index=['2-sigma returns daily',
                                  '2-sigma returns weekly'])
 
-    print(np.round(var_sigma, 3))
+    print(var_sigma.round(3).values)
 
 
 def plot_turnover(returns, transactions, positions,
