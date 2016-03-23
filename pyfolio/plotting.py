@@ -536,11 +536,11 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
 
         perf_stats_live = np.round(perf_func(
             returns_live,
-            factor_returns=factor_returns), 2)
+            factor_returns=factor_returns).values, 2)
 
         perf_stats_all = np.round(perf_func(
             returns,
-            factor_returns=factor_returns), 2)
+            factor_returns=factor_returns).values, 2)
 
         print('Out-of-Sample Months: ' +
               str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
