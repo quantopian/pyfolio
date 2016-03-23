@@ -552,7 +552,7 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
 
     perf_stats = np.round(perf_func(
         returns_backtest,
-        factor_returns=factor_returns), 2)
+        factor_returns=factor_returns).values, 2)
 
     if live_start_date is not None:
         perf_stats = pd.concat(OrderedDict([
