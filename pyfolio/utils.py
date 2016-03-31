@@ -471,6 +471,7 @@ def get_symbol_rets(symbol, start=None, end=None):
                                     start=start,
                                     end=end)
 
+
 def print_table(table, name=None, fmt=None):
     """Pretty print a pandas DataFrame.
 
@@ -500,7 +501,7 @@ def print_table(table, name=None, fmt=None):
         table.columns.name = name
 
     try:
-        get_ipython()
+        get_ipython()  # noqa
         from IPython.display import display, HTML
         display(HTML(table.to_html()))
     except:

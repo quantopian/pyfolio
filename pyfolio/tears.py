@@ -629,7 +629,9 @@ def create_interesting_times_tear_sheet(
         return
 
     utils.print_table(pd.DataFrame(rets_interesting).describe().transpose().loc[
-        :, ['mean', 'min', 'max']] * 100, name='Stress Events', fmt='{0:.2f}%')
+        :, ['mean', 'min', 'max']] * 100,
+                      name='Stress Events',
+                      fmt='{0:.2f}%')
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')

@@ -563,8 +563,7 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
         perf_stats = pd.DataFrame(perf_stats, columns=['Backtest'])
 
     utils.print_table(perf_stats, name='Performance statistics',
-                      fmt='{0:.2f}'
-    )
+                      fmt='{0:.2f}')
 
 
 def plot_rolling_returns(returns,
@@ -1395,7 +1394,6 @@ def show_worst_drawdown_periods(returns, top=5):
                       name='Worst Drawdown Periods', fmt='{0:.2f}')
 
 
-
 def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     """
     Plots monthly returns as a timeseries.
@@ -1516,8 +1514,7 @@ def show_profit_attribution(round_trips):
     utils.print_table(pct_profit_attribution.sort(inplace=False,
                                                   ascending=False),
                       name='Profitability (PnL / PnL total) per name',
-                      fmt='{0:.2f}%'
-    )
+                      fmt='{0:.2f}%')
 
 
 def plot_prob_profit_trade(round_trips, ax=None):
