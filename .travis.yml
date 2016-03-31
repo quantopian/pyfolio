@@ -29,7 +29,7 @@ install:
   - pip install nose_parameterized contextlib2 logbook==0.10.1
   #- pip install --no-deps git+https://github.com/quantopian/zipline
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock enum34; fi
-  - pip install --no-deps git+https://github.com/Theano/Theano.git@557fe6fab49262706241f0e774f3269a2ec0275b
+  - pip install --no-deps git+https://github.com/Theano/Theano.git@rel-0.8.1
   - pip install --no-deps git+https://github.com/pymc-devs/pymc3.git
   - python setup.py build_ext --inplace
 
