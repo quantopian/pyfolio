@@ -628,8 +628,9 @@ def create_interesting_times_tear_sheet(
                       'interesting times.', UserWarning)
         return
 
-    utils.print_table(pd.DataFrame(rets_interesting).describe().transpose().loc[
-        :, ['mean', 'min', 'max']] * 100,
+    utils.print_table(pd.DataFrame(rets_interesting)
+                      .describe().transpose()
+                      .loc[:, ['mean', 'min', 'max']] * 100,
                       name='Stress Events',
                       fmt='{0:.2f}%')
 
