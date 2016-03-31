@@ -485,7 +485,7 @@ def print_table(table, name=None, fmt=None):
         Table name to display in upper left corner.
     fmt : str, optional
         Formatter to use for displaying table elements.
-        E.g. '{:.3}%' for displaying 100 as '100.0%'.
+        E.g. '{0:.2f}%' for displaying 100 as '100.00%'.
         Restores original setting after displaying.
 
     """
