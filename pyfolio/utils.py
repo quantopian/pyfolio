@@ -20,6 +20,7 @@ from os import makedirs, environ
 from os.path import expanduser, join, getmtime, isdir
 import warnings
 
+from IPython.display import display
 import pandas as pd
 from pandas.tseries.offsets import BDay
 from pandas_datareader import data as web
@@ -500,12 +501,7 @@ def print_table(table, name=None, fmt=None):
     if name is not None:
         table.columns.name = name
 
-    try:
-        get_ipython()  # noqa
-        from IPython.display import display, HTML
-        display(HTML(table.to_html()))
-    except:
-        print(table)
+    display(table)
 
     if fmt is not None:
         pd.set_option('display.float_format', prev_option)
