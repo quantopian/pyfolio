@@ -1,5 +1,5 @@
 #
-# Copyright 2015 Quantopian, Inc.
+# Copyright 2016 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -628,9 +628,11 @@ def create_interesting_times_tear_sheet(
                       'interesting times.', UserWarning)
         return
 
-    print('\nStress Events')
-    print(np.round(pd.DataFrame(rets_interesting).describe().transpose().loc[
-          :, ['mean', 'min', 'max']], 3))
+    utils.print_table(pd.DataFrame(rets_interesting)
+                      .describe().transpose()
+                      .loc[:, ['mean', 'min', 'max']] * 100,
+                      name='Stress Events',
+                      fmt='{0:.2f}%')
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
