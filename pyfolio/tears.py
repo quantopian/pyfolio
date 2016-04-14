@@ -398,16 +398,12 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
-    ax_gross_leverage = plt.subplot(gs[0, :])
-    ax_exposures = plt.subplot(gs[1, :], sharex=ax_gross_leverage)
-    ax_top_positions = plt.subplot(gs[2, :], sharex=ax_gross_leverage)
-    ax_max_median_pos = plt.subplot(gs[3, :], sharex=ax_gross_leverage)
-    ax_holdings = plt.subplot(gs[4, :], sharex=ax_gross_leverage)
+    ax_exposures = plt.subplot(gs[0, :])
+    ax_top_positions = plt.subplot(gs[1, :], sharex=ax_exposures)
+    ax_max_median_pos = plt.subplot(gs[2, :], sharex=ax_exposures)
+    ax_holdings = plt.subplot(gs[3, :], sharex=ax_exposures)
 
     positions_alloc = pos.get_percent_alloc(positions)
-
-    if gross_lev is not None:
-        plotting.plot_gross_leverage(returns, gross_lev, ax=ax_gross_leverage)
 
     plotting.plot_exposures(returns, positions_alloc, ax=ax_exposures)
 
@@ -431,6 +427,11 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
             ax_sector_alloc = plt.subplot(gs[5, :], sharex=ax_gross_leverage)
             plotting.plot_sector_allocations(returns, sector_alloc,
                                              ax=ax_sector_alloc)
+
+    if gross_lev is not None:
+        ax_gross_leverage = plt.subplot(gs[4, :], sharex=ax_exposures)
+        plotting.plot_gross_leverage(returns, gross_lev, ax=ax_gross_leverage)
+
     for ax in fig.axes:
         plt.setp(ax.get_xticklabels(), visible=True)
 
