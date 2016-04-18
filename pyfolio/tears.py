@@ -744,16 +744,16 @@ def create_capacity_tear_sheet(returns, positions, transactions,
 
     llt = capacity.get_low_liquidity_transactions(transactions, market_data)
     print('Tickers with daily transactions consuming >{}% of daily bar \n'
-          'all backtest:'.format(trade_daily_vol_limit*100))
+          'all backtest:'.format(trade_daily_vol_limit * 100))
     utils.print_table(
-        llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit*100])
+        llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit * 100])
 
     llt = capacity.get_low_liquidity_transactions(
         transactions, market_data, last_n_days=last_n_days)
 
     print("last {} trading days:".format(last_n_days))
     utils.print_table(
-        llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit*100])
+        llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit * 100])
 
     bt_starting_capital = positions.iloc[0].sum() / (1 + returns.iloc[0])
     fig, ax_capacity_sweep = plt.subplots(figsize=(14, 6))

@@ -18,7 +18,7 @@ import gzip
 from pyfolio.round_trips import (extract_round_trips,
                                  add_closing_transactions,
                                  _groupby_consecutive,
-)
+                                 )
 
 
 class RoundTripTestCase(TestCase):
@@ -46,8 +46,8 @@ class RoundTripTestCase(TestCase):
                          [2, 20., 'A'],
                          [2, 10., 'A'],
                          ],
-                    columns=['amount', 'price', 'symbol'],
-                    index=dates_intraday[[0, 1, 4, 5]]),
+                   columns=['amount', 'price', 'symbol'],
+                   index=dates_intraday[[0, 1, 4, 5]]),
          DataFrame(data=[[4, 15., 'A'],
                          [4, 15., 'A'],
                          ],
@@ -159,7 +159,7 @@ class RoundTripTestCase(TestCase):
                               index=[dates[:3]])
 
         expected_ix = dates[:3].append(DatetimeIndex([dates[2] +
-                                       Timedelta(seconds=1)]))
+                                                      Timedelta(seconds=1)]))
         expected = DataFrame(data=[[2, 10, 'A'],
                                    [-5, 10, 'A'],
                                    [-1, 10., 'B'],

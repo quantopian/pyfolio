@@ -15,7 +15,7 @@
 from __future__ import division
 from math import copysign
 import warnings
-from collections import deque, defaultdict, OrderedDict
+from collections import deque, OrderedDict
 
 import pandas as pd
 import numpy as np
@@ -123,7 +123,8 @@ def _groupby_consecutive(txn, max_delta=pd.Timedelta('8h')):
             1) != t.order_sign).astype(int).cumsum()
         t['block_time'] = ((t.dt - t.dt.shift(1)) >
                            max_delta).astype(int).cumsum()
-        grouped_price = t.groupby(['block_dir', 'block_time'])[['price', 'amount']]\
+        grouped_price = t.groupby(['block_dir',
+                                   'block_time'])[['price', 'amount']]\
                          .apply(vwap)
         grouped_price.name = 'price'
         grouped_rest = t.groupby(['block_dir', 'block_time']).agg({
@@ -197,7 +198,8 @@ def extract_round_trips(transactions,
         dt_stack = deque()
         for dt, t in trans_sym.iterrows():
             if t.price < 0:
-                warnings.warn('Negative price detected, ignoring for round-trip.')
+                warnings.warn('Negative price detected, ignoring for'
+                              'round-trip.')
                 continue
             signed_price = t.price * np.sign(t.amount)
             abs_amount = int(abs(t.amount))
@@ -246,7 +248,10 @@ def extract_round_trips(transactions,
         pv = pd.DataFrame(portfolio_value,
                           columns=['portfolio_value'])\
             .assign(date=portfolio_value.index)
-        roundtrips['date'] = roundtrips.close_dt.apply(lambda x: x.replace(hour=0, minute=0, second=0))
+        roundtrips['date'] = roundtrips.close_dt.apply(lambda x:
+                                                       x.replace(hour=0,
+                                                                 minute=0,
+                                                                 second=0))
 
         tmp = roundtrips.assign(date=roundtrips.close_dt)\
                         .join(pv, on='date', lsuffix='_')
