@@ -230,9 +230,7 @@ def extract_round_trips(transactions,
                         dt_stack.append(dt)
 
                 roundtrips.append({'pnl': pnl,
-                                   #'duration': np.median(cur_durations),
-                                   'open_dt': cur_open_dts[len(cur_open_dts) //
-                                                           2],
+                                   'open_dt': cur_open_dts[0],
                                    'close_dt': dt,
                                    'long': price < 0,
                                    'rt_returns': pnl / invested,
