@@ -149,7 +149,7 @@ def extract_round_trips(transactions,
     changes from long to short and vice-versa are handled correctly.
 
     Under the hood, we reconstruct the individual shares in a
-    portfolio over time and match round_trips in a LIFO-order.
+    portfolio over time and match round_trips in a FIFO-order.
 
     For example, the following transactions would constitute one round trip:
     index                  amount   price    symbol
@@ -193,8 +193,8 @@ def extract_round_trips(transactions,
 
     for sym, trans_sym in transactions.groupby('symbol'):
         trans_sym = trans_sym.sort_index()
-        price_stack = []
-        dt_stack = []
+        price_stack = deque()
+        dt_stack = deque()
         for dt, t in trans_sym.iterrows():
             if t.price < 0:
                 warnings.warn('Negative price detected, ignoring for round-trip.')
@@ -215,10 +215,10 @@ def extract_round_trips(transactions,
                 for price in indiv_prices:
                     if len(price_stack) != 0 and \
                        (copysign(1, price_stack[-1]) != copysign(1, price)):
-                        # Retrieve last dt, stock-price pair from
+                        # Retrieve first dt, stock-price pair from
                         # stack
-                        prev_price = price_stack.pop()
-                        prev_dt = dt_stack.pop()
+                        prev_price = price_stack.popleft()
+                        prev_dt = dt_stack.popleft()
 
                         pnl += -(price + prev_price)
                         cur_open_dts.append(prev_dt)
