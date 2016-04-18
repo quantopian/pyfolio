@@ -419,18 +419,24 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
+    last_pos = 4
+    if gross_lev is not None:
+        ax_gross_leverage = plt.subplot(gs[last_pos, :],
+                                        sharex=ax_exposures)
+        plotting.plot_gross_leverage(returns, gross_lev,
+                                     ax=ax_gross_leverage)
+        last_pos += 1
+
     if sector_mappings is not None:
-        sector_exposures = pos.get_sector_exposures(positions, sector_mappings)
+        sector_exposures = pos.get_sector_exposures(positions,
+                                                    sector_mappings)
         if len(sector_exposures.columns) > 1:
             sector_alloc = pos.get_percent_alloc(sector_exposures)
             sector_alloc = sector_alloc.drop('cash', axis='columns')
-            ax_sector_alloc = plt.subplot(gs[5, :], sharex=ax_gross_leverage)
+            ax_sector_alloc = plt.subplot(gs[last_pos, :],
+                                          sharex=ax_exposures)
             plotting.plot_sector_allocations(returns, sector_alloc,
                                              ax=ax_sector_alloc)
-
-    if gross_lev is not None:
-        ax_gross_leverage = plt.subplot(gs[4, :], sharex=ax_exposures)
-        plotting.plot_gross_leverage(returns, gross_lev, ax=ax_gross_leverage)
 
     for ax in fig.axes:
         plt.setp(ax.get_xticklabels(), visible=True)
