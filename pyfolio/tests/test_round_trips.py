@@ -3,6 +3,7 @@ from nose_parameterized import parameterized
 from unittest import TestCase
 
 from pandas import (
+    Series,
     DataFrame,
     DatetimeIndex,
     date_range,
@@ -60,6 +61,7 @@ class RoundTripTestCase(TestCase):
         assert_frame_equal(grouped_txn.sort(axis=1), expected.sort(axis=1))
 
     @parameterized.expand([
+        # Simple round-trip
         (DataFrame(data=[[2, 10., 'A'],
                          [-2, 15., 'A']],
                    columns=['amount', 'price', 'symbol'],
@@ -72,6 +74,7 @@ class RoundTripTestCase(TestCase):
                             'long', 'symbol'],
                    index=[0])
          ),
+        # Round-trip with left-over txn that shouldn't be counted
         (DataFrame(data=[[2, 10., 'A'],
                          [2, 15., 'A'],
                          [-9, 10., 'A']],
@@ -85,6 +88,7 @@ class RoundTripTestCase(TestCase):
                             'long', 'symbol'],
                    index=[0])
          ),
+        # Round-trip with sell that crosses 0 and should be split
         (DataFrame(data=[[2, 10., 'A'],
                          [-4, 15., 'A'],
                          [3, 20., 'A']],
@@ -101,10 +105,42 @@ class RoundTripTestCase(TestCase):
                             'duration', 'pnl', 'rt_returns',
                             'long', 'symbol'],
                    index=[0, 1])
-         )
+         ),
+        # Round-trip that does not cross 0
+        (DataFrame(data=[[4, 10., 'A'],
+                         [-2, 15., 'A'],
+                         [2, 20., 'A']],
+                   columns=['amount', 'price', 'symbol'],
+                   index=dates[:3]),
+         DataFrame(data=[[dates[0], dates[1],
+                          Timedelta(days=1), 10., .5,
+                          True, 'A']],
+                   columns=['open_dt', 'close_dt',
+                            'duration', 'pnl', 'rt_returns',
+                            'long', 'symbol'],
+                   index=[0])
+         ),
+        # Round-trip that does not cross 0 and has portfolio value
+        (DataFrame(data=[[4, 10., 'A'],
+                         [-2, 15., 'A'],
+                         [2, 20., 'A']],
+                   columns=['amount', 'price', 'symbol'],
+                   index=dates[:3]),
+         DataFrame(data=[[dates[0], dates[1],
+                          Timedelta(days=1), 10., .5,
+                          True, 'A', 0.1]],
+                   columns=['open_dt', 'close_dt',
+                            'duration', 'pnl', 'rt_returns',
+                            'long', 'symbol', 'returns'],
+                   index=[0]),
+         Series([100., 100., 100.], index=dates[:3]),
+         ),
+
     ])
-    def test_extract_round_trips(self, transactions, expected):
-        round_trips = extract_round_trips(transactions)
+    def test_extract_round_trips(self, transactions, expected,
+                                 portfolio_value=None):
+        round_trips = extract_round_trips(transactions,
+                                          portfolio_value=portfolio_value)
 
         assert_frame_equal(round_trips.sort(axis=1),
                            expected.sort(axis=1))
