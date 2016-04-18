@@ -62,7 +62,7 @@ DURATION_STATS = OrderedDict(
      ('Avg # round_trips per day', lambda x: float(len(x)) /
       (x.max() - x.min()).days),
      ('Avg # round_trips per month', lambda x: float(len(x)) /
-      (((x.max() - x.min()).days) / 21)),
+      (((x.max() - x.min()).days) / utils.APPROX_BDAYS_PER_MONTH)),
      ])
 
 
