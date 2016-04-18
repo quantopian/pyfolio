@@ -568,9 +568,57 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
                       fmt='{0:.2f}')
 
 
+def plot_returns(returns,
+                 live_start_date=None,
+                 ax=None):
+    """
+    Plots raw returns over time.
+
+    Backtest returns are in green, and out-of-sample (live trading)
+    returns are in red.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    live_start_date : datetime, optional
+        The date when the strategy began live trading, after
+        its backtest period. This date should be normalized.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+
+    """
+
+    if ax is None:
+        ax = plt.gca()
+
+    ax.set(xlabel='', ylabel='Returns')
+
+    if live_start_date is not None:
+        live_start_date = utils.get_utc_timestamp(live_start_date)
+        is_returns = returns.loc[returns.index < live_start_date]
+        oos_returns = returns.loc[returns.index >= live_start_date]
+        is_returns.plot(ax=ax, color='g')
+        oos_returns.plot(ax=ax, color='r')
+
+    else:
+        returns.plot(ax=ax, color='g')
+
+    return ax
+
+
 def plot_rolling_returns(returns,
                          factor_returns=None,
                          live_start_date=None,
+                         logy=False,
                          cone_std=None,
                          legend_loc='best',
                          volatility_match=False,
@@ -596,6 +644,8 @@ def plot_rolling_returns(returns,
     live_start_date : datetime, optional
         The date when the strategy began live trading, after
         its backtest period. This date should be normalized.
+    logy : bool, optional
+        Whether to log-scale the y-axis.
     cone_std : float, or tuple, optional
         If float, The standard deviation to use for the cone plots.
         If tuple, Tuple of standard deviation values to use for the cone plots
@@ -624,12 +674,12 @@ def plot_rolling_returns(returns,
     ax : matplotlib.Axes
         The axes that were plotted on.
 
-"""
+    """
     if ax is None:
         ax = plt.gca()
 
-    ax.set_ylabel('Cumulative returns')
-    ax.set_xlabel('')
+    ax.set(xlabel='', ylabel='Cumulative returns',
+           yscale='log' if logy else 'linear')
 
     if volatility_match and factor_returns is None:
         raise ValueError('volatility_match requires passing of'

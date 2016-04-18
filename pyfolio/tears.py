@@ -264,11 +264,11 @@ def create_returns_tear_sheet(returns, live_start_date=None,
                              bootstrap=bootstrap,
                              live_start_date=live_start_date)
 
+    vertical_sections = 12
+
     if live_start_date is not None:
-        vertical_sections = 11
+        vertical_sections += 1
         live_start_date = utils.get_utc_timestamp(live_start_date)
-    else:
-        vertical_sections = 10
 
     if bootstrap:
         vertical_sections += 1
@@ -276,17 +276,33 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
     ax_rolling_returns = plt.subplot(gs[:2, :])
-    ax_rolling_returns_vol_match = plt.subplot(gs[2, :],
+
+    i = 2
+    ax_rolling_returns_vol_match = plt.subplot(gs[i, :],
                                                sharex=ax_rolling_returns)
-    ax_rolling_beta = plt.subplot(gs[3, :], sharex=ax_rolling_returns)
-    ax_rolling_sharpe = plt.subplot(gs[4, :], sharex=ax_rolling_returns)
-    ax_rolling_risk = plt.subplot(gs[5, :], sharex=ax_rolling_returns)
-    ax_drawdown = plt.subplot(gs[6, :], sharex=ax_rolling_returns)
-    ax_underwater = plt.subplot(gs[7, :], sharex=ax_rolling_returns)
-    ax_monthly_heatmap = plt.subplot(gs[8, 0])
-    ax_annual_returns = plt.subplot(gs[8, 1])
-    ax_monthly_dist = plt.subplot(gs[8, 2])
-    ax_return_quantiles = plt.subplot(gs[9, :])
+    i += 1
+    ax_rolling_returns_log = plt.subplot(gs[i, :],
+                                         sharex=ax_rolling_returns)
+    i += 1
+    ax_returns = plt.subplot(gs[i, :],
+                             sharex=ax_rolling_returns)
+    i += 1
+    ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+    i += 1
+    ax_rolling_sharpe = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+    i += 1
+    ax_rolling_risk = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+    i += 1
+    ax_drawdown = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+    i += 1
+    ax_underwater = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+    i += 1
+    ax_monthly_heatmap = plt.subplot(gs[i, 0])
+    ax_annual_returns = plt.subplot(gs[i, 1])
+    ax_monthly_dist = plt.subplot(gs[i, 2])
+    i += 1
+    ax_return_quantiles = plt.subplot(gs[i, :])
+    i += 1
 
     plotting.plot_rolling_returns(
         returns,
@@ -307,6 +323,24 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         ax=ax_rolling_returns_vol_match)
     ax_rolling_returns_vol_match.set_title(
         'Cumulative returns volatility matched to benchmark.')
+
+    plotting.plot_rolling_returns(
+        returns,
+        factor_returns=benchmark_rets,
+        logy=True,
+        live_start_date=live_start_date,
+        cone_std=cone_std,
+        ax=ax_rolling_returns_log)
+    ax_rolling_returns_log.set_title(
+        'Cumulative Returns on logarithmic scale')
+
+    plotting.plot_returns(
+        returns,
+        live_start_date=live_start_date,
+        ax=ax_returns,
+    )
+    ax_returns.set_title(
+        'Returns')
 
     plotting.plot_rolling_beta(
         returns, benchmark_rets, ax=ax_rolling_beta)
@@ -343,7 +377,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         ax=ax_return_quantiles)
 
     if bootstrap:
-        ax_bootstrap = plt.subplot(gs[10, :])
+        ax_bootstrap = plt.subplot(gs[i, :])
         plotting.plot_perf_stats(returns, benchmark_rets,
                                  ax=ax_bootstrap)
 
