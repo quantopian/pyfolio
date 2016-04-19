@@ -198,14 +198,16 @@ def extract_round_trips(transactions,
         trans_sym = trans_sym.sort_index()
         price_stack = deque()
         dt_stack = deque()
+        trans_sym['signed_price'] = trans_sym.price * \
+                                    np.sign(trans_sym.amount)
+        trans_sym['abs_amount'] = trans_sym.amount.abs().astype(int)
         for dt, t in trans_sym.iterrows():
             if t.price < 0:
                 warnings.warn('Negative price detected, ignoring for'
                               'round-trip.')
                 continue
-            signed_price = t.price * np.sign(t.amount)
-            abs_amount = int(abs(t.amount))
-            indiv_prices = [signed_price] * abs_amount
+
+            indiv_prices = [t.signed_price] * t.abs_amount
             if (len(price_stack) == 0) or \
                (copysign(1, price_stack[-1]) == copysign(1, t.amount)):
                 price_stack.extend(indiv_prices)
