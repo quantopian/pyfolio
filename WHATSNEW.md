@@ -2,6 +2,14 @@
 
 These are new features and improvements of note in each release.
 
+## v0.5.0 (upcoming)
+
+### New features
+
+* Refactored round-trip analysis to be more general and have better output. Now does full portfolio reconstruction to match trades [PR293](https://github.com/quantopian/pyfolio/pull/293). Thomas, Andrew
+
+### Bug fixes
+
 ## v0.4.0 (Dec 10, 2015)
 
 This is a major release from 0.3.1 that includes new features and quite a few bug fixes. We recommend that all users upgrade to this new version.

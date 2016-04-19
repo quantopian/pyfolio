@@ -13,168 +13,259 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import division
-from collections import defaultdict
+from math import copysign
+import warnings
+from collections import deque, OrderedDict
 
 import pandas as pd
 import numpy as np
 
+from .utils import print_table, APPROX_BDAYS_PER_MONTH
 
-def extract_round_trips(transactions):
-    """
-    Group transactions into "round trips." A round trip is started when a new
-    long or short position is opened and is only completed when the number
-    of shares in that position returns to or crosses zero.
-    Computes pnl for each round trip.
+PNL_STATS = OrderedDict(
+    [('Total profit', lambda x: x.sum()),
+     ('Gross profit', lambda x: x[x > 0].sum()),
+     ('Gross loss', lambda x: x[x < 0].sum()),
+     ('Profit factor', lambda x: x[x > 0].sum() / x[x < 0].abs().sum()
+      if x[x < 0].abs().sum() != 0 else np.nan),
+     ('Avg. trade net profit', 'mean'),
+     ('Avg. winning trade', lambda x: x[x > 0].mean()),
+     ('Avg. losing trade', lambda x: x[x < 0].mean()),
+     ('Ratio Avg. Win:Avg. Loss', lambda x: x[x > 0].mean() /
+      x[x < 0].abs().mean() if x[x < 0].abs().mean() != 0 else np.nan),
+     ('Largest winning trade', 'max'),
+     ('Largest losing trade', 'min'),
+     ])
 
-    For example, the following transactions would constitute one round trip:
-    index                  amount   price    symbol
-    2004-01-09 12:18:01    186      324.12   'AAPL'
-    2004-01-09 15:12:53    -10      344.54   'AAPL'
-    2004-01-13 14:41:23    24       320.21   'AAPL'
-    2004-01-30 10:23:34    -200     340.43   'AAPL'
+SUMMARY_STATS = OrderedDict(
+    [('Total number of round_trips', 'count'),
+     ('Percent profitable', lambda x: len(x[x > 0]) / float(len(x))),
+     ('Winning round_trips', lambda x: len(x[x > 0])),
+     ('Losing round_trips', lambda x: len(x[x < 0])),
+     ('Even round_trips', lambda x: len(x[x == 0])),
+     ])
+
+RETURN_STATS = OrderedDict(
+    [('Avg returns all round_trips', lambda x: x.mean()),
+     ('Avg returns winning', lambda x: x[x > 0].mean()),
+     ('Avg returns losing', lambda x: x[x < 0].mean()),
+     ('Median returns all round_trips', lambda x: x.median()),
+     ('Median returns winning', lambda x: x[x > 0].median()),
+     ('Median returns losing', lambda x: x[x < 0].median()),
+     ('Largest winning trade', 'max'),
+     ('Largest losing trade', 'min'),
+     ])
+
+DURATION_STATS = OrderedDict(
+    [('Avg duration', lambda x: x.mean()),
+     ('Median duration', lambda x: x.median()),
+     ('Avg # round_trips per day', lambda x: float(len(x)) /
+      (x.max() - x.min()).days),
+     ('Avg # round_trips per month', lambda x: float(len(x)) /
+      (((x.max() - x.min()).days) / APPROX_BDAYS_PER_MONTH)),
+     ])
+
+
+def agg_all_long_short(round_trips, col, stats_dict):
+    stats_all = (round_trips
+                 .assign(ones=1)
+                 .groupby('ones')[col]
+                 .agg(stats_dict)
+                 .T
+                 .rename_axis({1.0: 'All trades'},
+                              axis='columns'))
+    stats_long_short = (round_trips
+                        .groupby('long')[col]
+                        .agg(stats_dict)
+                        .T
+                        .rename_axis({False: 'Short trades',
+                                      True: 'Long trades'},
+                                     axis='columns'))
+
+    return stats_all.join(stats_long_short)[['All trades',
+                                             'Long trades',
+                                             'Short trades']]
+
+
+def _groupby_consecutive(txn, max_delta=pd.Timedelta('8h')):
+    """Merge transactions of the same direction separated by less than
+    max_delta time duration.
 
     Parameters
     ----------
     transactions : pd.DataFrame
-        Prices and amounts of executed trades. One row per trade.
+        Prices and amounts of executed round_trips. One row per trade.
         - See full explanation in tears.create_full_tear_sheet
+
+    max_delta : pandas.Timedelta (optional)
+        Merge transactions in the same direction separated by less
+        than max_delta time duration.
+
+
+    Returns
+    -------
+    transactions : pd.DataFrame
+
+    """
+    def vwap(transaction):
+        if transaction.amount.sum() == 0:
+            warnings.warn('Zero transacted shares, setting vwap to nan.')
+            return np.nan
+        return (transaction.amount * transaction.price).sum() / \
+            transaction.amount.sum()
+
+    out = []
+    for sym, t in txn.groupby('symbol'):
+        t = t.sort_index()
+        t.index.name = 'dt'
+        t = t.reset_index()
+
+        t['order_sign'] = t.amount > 0
+        t['block_dir'] = (t.order_sign.shift(
+            1) != t.order_sign).astype(int).cumsum()
+        t['block_time'] = ((t.dt - t.dt.shift(1)) >
+                           max_delta).astype(int).cumsum()
+        grouped_price = t.groupby(['block_dir',
+                                   'block_time'])[['price', 'amount']]\
+                         .apply(vwap)
+        grouped_price.name = 'price'
+        grouped_rest = t.groupby(['block_dir', 'block_time']).agg({
+            'amount': 'sum',
+            'symbol': 'first',
+            'dt': 'first'})
+
+        grouped = grouped_rest.join(grouped_price)
+
+        out.append(grouped)
+
+    out = pd.concat(out)
+    out = out.set_index('dt')
+    return out
+
+
+def extract_round_trips(transactions,
+                        portfolio_value=None):
+    """Group transactions into "round trips". First, transactions are
+    grouped by day and directionality. Then, long and short
+    transactions are matched to create round-trip round_trips for which
+    PnL, duration and returns are computed. Crossings where a position
+    changes from long to short and vice-versa are handled correctly.
+
+    Under the hood, we reconstruct the individual shares in a
+    portfolio over time and match round_trips in a FIFO-order.
+
+    For example, the following transactions would constitute one round trip:
+    index                  amount   price    symbol
+    2004-01-09 12:18:01    10       50      'AAPL'
+    2004-01-09 15:12:53    10       100      'AAPL'
+    2004-01-13 14:41:23    -10      100      'AAPL'
+    2004-01-13 15:23:34    -10      200       'AAPL'
+
+    First, the first two and last two round_trips will be merged into a two
+    single transactions (computing the price via vwap). Then, during
+    the portfolio reconstruction, the two resulting transactions will
+    be merged and result in 1 round-trip trade with a PnL of
+    (150 * 20) - (75 * 20) = 1500.
+
+    Note, that round trips do not have to close out positions
+    completely. For example, we could have removed the last
+    transaction in the example above and still generated a round-trip
+    over 10 shares with 10 shares left in the portfolio to be matched
+    with a later transaction.
+
+    Parameters
+    ----------
+    transactions : pd.DataFrame
+        Prices and amounts of executed round_trips. One row per trade.
+        - See full explanation in tears.create_full_tear_sheet
+
+    portfolio_value : pd.Series (optional)
+        Portfolio value (all net assets including cash) over time.
+        Note that portfolio_value needs to beginning of day, so either
+        use .shift() or positions.sum(axis='columns') / (1+returns).
 
     Returns
     -------
     round_trips : pd.DataFrame
-        DataFrame with one row per round trip.
-    """
-    # Transactions that cross zero must be split into separate
-    # long and short transactions that end/start on zero.
-    transactions_split = split_trades(transactions)
-
-    transactions_split['txn_dollars'] =  \
-        -transactions_split['amount'] * transactions_split['price']
-
-    round_trips = defaultdict(list)
-
-    for sym, trans_sym in transactions_split.groupby('symbol'):
-        trans_sym = trans_sym.sort_index()
-        amount_cumsum = trans_sym.amount.cumsum()
-        # Find indicies where the position amount returns to zero.
-        closed_idx = np.where(amount_cumsum == 0)[0] + 1
-        # Identify the first trade as the beginning of a round trip.
-        closed_idx = np.insert(closed_idx, 0, 0)
-
-        for trade_start, trade_end in zip(closed_idx, closed_idx[1:]):
-            txn = trans_sym.iloc[trade_start:trade_end]
-
-            if len(txn) == 0:
-                continue
-
-            assert txn.amount.sum() == 0
-            long_trade = txn.amount.iloc[0] > 0
-            pnl = txn.txn_dollars.sum()
-            round_trips['symbol'].append(sym)
-            round_trips['pnl'].append(pnl)
-            round_trips['duration'].append(txn.index[-1] - txn.index[0])
-            round_trips['long'].append(long_trade)
-            round_trips['open_dt'].append(txn.index[0])
-            round_trips['close_dt'].append(txn.index[-1])
-
-            # Investing txns push the position amount farther from zero.
-            # invested is always a positive value. Returned - Invested = PnL.
-            if long_trade:
-                invested = -txn.query('txn_dollars < 0').txn_dollars.sum()
-            else:
-                invested = txn.query('txn_dollars > 0').txn_dollars.sum()
-
-            if invested == 0:
-                round_trips['returns'].append(0)
-            else:
-                round_trips['returns'].append(pnl / invested)
-
-    if len(round_trips) == 0:
-        return pd.DataFrame([])
-
-    round_trips = pd.DataFrame(round_trips)
-    round_trips = round_trips[['open_dt', 'close_dt', 'duration',
-                               'pnl', 'returns', 'long', 'symbol']]
-
-    return round_trips
-
-
-def split_trades(transactions):
-    """
-    Splits transactions that cause total position amount to cross zero.
-    In other words, separates of the closing of one short/long position
-    with the opening of a new long/short position.
-
-    For example, the second transaction in this transactions DataFrame
-    would be divided as shown in the second DataFrame:
-    index                  amount   price    symbol
-    2004-01-09 12:18:01    180      324.12   'AAPL'
-    2004-01-09 15:12:53    -200     344.54   'AAPL'
-
-    index                  amount   price    symbol
-    2004-01-09 12:18:01    180      324.12   'AAPL'
-    2004-01-09 15:12:53    -180     344.54   'AAPL'
-    2004-01-09 15:12:54    -20      344.54   'AAPL'
-
-    Parameters
-    ----------
-    transactions : pd.DataFrame
-        Prices and amounts of executed trades. One row per trade.
-        - See full explanation in tears.create_full_tear_sheet
-
-    Returns
-    -------
-    transactions_split : pd.DataFrame
-        Prices and amounts of executed trades. Trades that cause
-        total position amount to cross zero are divided.
+        DataFrame with one row per round trip.  The returns column
+        contains returns in respect to the portfolio value while
+        rt_returns are the returns in regards to the invested capital
+        into that partiulcar round-trip.
     """
 
-    trans_split = []
+    transactions = _groupby_consecutive(transactions)
+    roundtrips = []
 
     for sym, trans_sym in transactions.groupby('symbol'):
         trans_sym = trans_sym.sort_index()
+        price_stack = deque()
+        dt_stack = deque()
+        trans_sym['signed_price'] = trans_sym.price * \
+            np.sign(trans_sym.amount)
+        trans_sym['abs_amount'] = trans_sym.amount.abs().astype(int)
+        for dt, t in trans_sym.iterrows():
+            if t.price < 0:
+                warnings.warn('Negative price detected, ignoring for'
+                              'round-trip.')
+                continue
 
-        while True:
-            cum_amount = trans_sym.amount.cumsum()
-            # find the indicies where position amount crosses zero
-            sign_flip = np.where(np.abs(np.diff(np.sign(cum_amount))) == 2)[0]
+            indiv_prices = [t.signed_price] * t.abs_amount
+            if (len(price_stack) == 0) or \
+               (copysign(1, price_stack[-1]) == copysign(1, t.amount)):
+                price_stack.extend(indiv_prices)
+                dt_stack.extend([dt] * len(indiv_prices))
+            else:
+                # Close round-trip
+                pnl = 0
+                invested = 0
+                cur_open_dts = []
 
-            if len(sign_flip) == 0:
-                break  # all sign flips are converted
+                for price in indiv_prices:
+                    if len(price_stack) != 0 and \
+                       (copysign(1, price_stack[-1]) != copysign(1, price)):
+                        # Retrieve first dt, stock-price pair from
+                        # stack
+                        prev_price = price_stack.popleft()
+                        prev_dt = dt_stack.popleft()
 
-            sign_flip = sign_flip[0] + 2
+                        pnl += -(price + prev_price)
+                        cur_open_dts.append(prev_dt)
+                        invested += abs(prev_price)
 
-            txn = trans_sym.iloc[:sign_flip]
+                    else:
+                        # Push additional stock-prices onto stack
+                        price_stack.append(price)
+                        dt_stack.append(dt)
 
-            left_over_txn_amount = txn.amount.sum()
-            assert left_over_txn_amount != 0
+                roundtrips.append({'pnl': pnl,
+                                   'open_dt': cur_open_dts[0],
+                                   'close_dt': dt,
+                                   'long': price < 0,
+                                   'rt_returns': pnl / invested,
+                                   'symbol': sym,
+                                   })
 
-            split_txn_1 = txn.iloc[[-1]].copy()
-            split_txn_2 = txn.iloc[[-1]].copy()
+    roundtrips = pd.DataFrame(roundtrips)
 
-            split_txn_1['amount'] -= left_over_txn_amount
-            split_txn_2['amount'] = left_over_txn_amount
+    roundtrips['duration'] = roundtrips['close_dt'] - roundtrips['open_dt']
 
-            # Delay 2nd trade by a second to avoid overlapping indices
-            split_txn_2.index += pd.Timedelta(seconds=1)
+    if portfolio_value is not None:
+        # Need to normalize so that we can join
+        pv = pd.DataFrame(portfolio_value,
+                          columns=['portfolio_value'])\
+            .assign(date=portfolio_value.index)
+        roundtrips['date'] = roundtrips.close_dt.apply(lambda x:
+                                                       x.replace(hour=0,
+                                                                 minute=0,
+                                                                 second=0))
 
-            assert split_txn_1.amount.iloc[0] + \
-                split_txn_2.amount.iloc[0] == txn.iloc[-1].amount
-            assert trans_sym.iloc[:sign_flip - 1].amount.sum() + \
-                split_txn_1.amount.iloc[0] == 0
+        tmp = roundtrips.assign(date=roundtrips.close_dt)\
+                        .join(pv, on='date', lsuffix='_')
 
-            # Recreate transactions so far with split transaction
-            trans_sym = pd.concat([trans_sym.iloc[:sign_flip - 1],
-                                   split_txn_1,
-                                   split_txn_2,
-                                   trans_sym.iloc[sign_flip:]])
+        roundtrips['returns'] = tmp.pnl / tmp.portfolio_value
+        roundtrips = roundtrips.drop('date', axis='columns')
 
-        assert np.all(np.abs(np.diff(np.sign(trans_sym.amount.cumsum()))) != 2)
-        trans_split.append(trans_sym)
-
-    transactions_split = pd.concat(trans_split)
-
-    return transactions_split
+    return roundtrips
 
 
 def add_closing_transactions(positions, transactions):
@@ -188,7 +279,7 @@ def add_closing_transactions(positions, transactions):
     positions : pd.DataFrame
         The positions that the strategy takes over time.
     transactions : pd.DataFrame
-        Prices and amounts of executed trades. One row per trade.
+        Prices and amounts of executed round_trips. One row per trade.
         - See full explanation in tears.create_full_tear_sheet
 
     Returns
@@ -201,8 +292,8 @@ def add_closing_transactions(positions, transactions):
 
     pos_at_end = positions.drop('cash', axis=1).iloc[-1]
     open_pos = pos_at_end.replace(0, np.nan).dropna()
-    # Add closing trades one second after the close to be sure
-    # they don't conflict with other trades executed at that time.
+    # Add closing round_trips one second after the close to be sure
+    # they don't conflict with other round_trips executed at that time.
     end_dt = open_pos.name + pd.Timedelta(seconds=1)
 
     for sym, ending_val in open_pos.iteritems():
@@ -248,3 +339,67 @@ def apply_sector_mappings_to_round_trips(round_trips, sector_mappings):
     sector_round_trips = sector_round_trips.dropna(axis=0)
 
     return sector_round_trips
+
+
+def gen_round_trip_stats(round_trips):
+    """Generate various round-trip statistics.
+
+    Parameters
+    ----------
+    round_trips : pd.DataFrame
+        DataFrame with one row per round trip trade.
+        - See full explanation in round_trips.extract_round_trips
+
+    Returns
+    -------
+    stats : dict
+       A dictionary where each value is a pandas DataFrame containing
+       various round-trip statistics.
+
+    See also
+    --------
+    round_trips.print_round_trip_stats
+    """
+
+    stats = {}
+    stats['pnl'] = agg_all_long_short(round_trips, 'pnl', PNL_STATS)
+    stats['summary'] = agg_all_long_short(round_trips, 'pnl',
+                                          SUMMARY_STATS)
+    stats['duration'] = agg_all_long_short(round_trips, 'duration',
+                                           DURATION_STATS)
+    stats['returns'] = agg_all_long_short(round_trips, 'returns',
+                                          RETURN_STATS)
+
+    stats['symbols'] = \
+        round_trips.groupby('symbol')['returns'].agg(RETURN_STATS).T
+
+    return stats
+
+
+def print_round_trip_stats(round_trips, hide_pos=False):
+    """Print various round-trip statistics. Tries to pretty-print tables
+    with HTML output if run inside IPython NB.
+
+    Parameters
+    ----------
+    round_trips : pd.DataFrame
+        DataFrame with one row per round trip trade.
+        - See full explanation in round_trips.extract_round_trips
+
+    See also
+    --------
+    round_trips.gen_round_trip_stats
+    """
+
+    stats = gen_round_trip_stats(round_trips)
+
+    print_table(stats['summary'], fmt='{:.2f}', name='Summary stats')
+    print_table(stats['pnl'], fmt='${:.2f}', name='PnL stats')
+    print_table(stats['duration'], fmt='{:.2f}',
+                name='Duration stats')
+    print_table(stats['returns'] * 100, fmt='{:.2f}%',
+                name='Return stats')
+
+    if not hide_pos:
+        print_table(stats['symbols'] * 100,
+                    fmt='{:.2f}%', name='Symbol stats')

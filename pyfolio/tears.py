@@ -64,6 +64,7 @@ def create_full_tear_sheet(returns,
                            hide_positions=False,
                            cone_std=(1.0, 1.5, 2.0),
                            bootstrap=False,
+                           unadjusted_returns=None,
                            set_context=True):
     """
     Generate a number of tear sheets that are useful
@@ -153,13 +154,12 @@ def create_full_tear_sheet(returns,
     if returns.index[0] < benchmark_rets.index[0]:
         returns = returns[returns.index > benchmark_rets.index[0]]
 
-    if slippage is not None and transactions is not None:
+    if (unadjusted_returns is None) and (slippage is not None) and\
+       (transactions is not None):
         turnover = txn.get_turnover(positions, transactions,
                                     period=None, average=False)
         unadjusted_returns = returns.copy()
         returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
-    else:
-        unadjusted_returns = None
 
     create_returns_tear_sheet(
         returns,
@@ -186,6 +186,7 @@ def create_full_tear_sheet(returns,
                                   set_context=set_context)
             if round_trips:
                 create_round_trip_tear_sheet(
+                    returns=returns,
                     positions=positions,
                     transactions=transactions,
                     sector_mappings=sector_mappings)
@@ -517,7 +518,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
 
 
 @plotting_context
-def create_round_trip_tear_sheet(positions, transactions,
+def create_round_trip_tear_sheet(returns, positions, transactions,
                                  sector_mappings=None,
                                  return_fig=False):
     """
@@ -529,6 +530,9 @@ def create_round_trip_tear_sheet(positions, transactions,
 
     Parameters
     ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
          - See full explanation in create_full_tear_sheet.
@@ -544,7 +548,11 @@ def create_round_trip_tear_sheet(positions, transactions,
 
     transactions_closed = round_trips.add_closing_transactions(positions,
                                                                transactions)
-    trades = round_trips.extract_round_trips(transactions_closed)
+    # extract_round_trips requires BoD portfolio_value
+    trades = round_trips.extract_round_trips(
+        transactions_closed,
+        portfolio_value=positions.sum(axis='columns') / (1 + returns)
+    )
 
     if len(trades) < 5:
         warnings.warn(
@@ -552,24 +560,7 @@ def create_round_trip_tear_sheet(positions, transactions,
                Skipping round trip tearsheet.""", UserWarning)
         return
 
-    ndays = len(positions)
-
-    print(trades.drop(['open_dt', 'close_dt', 'symbol'],
-                      axis='columns').describe())
-    print('Percent of round trips profitable = {:.4}%'.format(
-          (trades.pnl > 0).mean() * 100))
-
-    winning_round_trips = trades[trades.pnl > 0]
-    losing_round_trips = trades[trades.pnl < 0]
-    print('Mean return per winning round trip = {:.4}'.format(
-        winning_round_trips.returns.mean()))
-    print('Mean return per losing round trip = {:.4}'.format(
-        losing_round_trips.returns.mean()))
-
-    print('A decision is made every {:.4} days.'.format(ndays / len(trades)))
-    print('{:.4} trading decisions per day.'.format(len(trades) * 1. / ndays))
-    print('{:.4} trading decisions per month.'.format(
-        len(trades) * 1. / (ndays / 21)))
+    round_trips.print_round_trip_stats(trades)
 
     plotting.show_profit_attribution(trades)
 
@@ -600,7 +591,7 @@ def create_round_trip_tear_sheet(positions, transactions,
     sns.distplot(trades.pnl, kde=False, ax=ax_pnl_per_round_trip_dollars)
     ax_pnl_per_round_trip_dollars.set(xlabel='PnL per round-trip trade in $')
 
-    sns.distplot(trades.returns * 100, kde=False,
+    sns.distplot(trades.returns.dropna() * 100, kde=False,
                  ax=ax_pnl_per_round_trip_pct)
     ax_pnl_per_round_trip_pct.set(
         xlabel='Round-trip returns in %')
@@ -760,16 +751,16 @@ def create_capacity_tear_sheet(returns, positions, transactions,
 
     llt = capacity.get_low_liquidity_transactions(transactions, market_data)
     print('Tickers with daily transactions consuming >{}% of daily bar \n'
-          'all backtest:'.format(trade_daily_vol_limit*100))
+          'all backtest:'.format(trade_daily_vol_limit * 100))
     utils.print_table(
-        llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit*100])
+        llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit * 100])
 
     llt = capacity.get_low_liquidity_transactions(
         transactions, market_data, last_n_days=last_n_days)
 
     print("last {} trading days:".format(last_n_days))
     utils.print_table(
-        llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit*100])
+        llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit * 100])
 
     bt_starting_capital = positions.iloc[0].sum() / (1 + returns.iloc[0])
     fig, ax_capacity_sweep = plt.subplots(figsize=(14, 6))
