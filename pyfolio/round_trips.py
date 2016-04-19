@@ -20,7 +20,7 @@ from collections import deque, OrderedDict
 import pandas as pd
 import numpy as np
 
-from .utils import print_table
+from .utils import print_table, APPROX_BDAYS_PER_MONTH
 
 PNL_STATS = OrderedDict(
     [('Total profit', lambda x: x.sum()),
@@ -62,23 +62,25 @@ DURATION_STATS = OrderedDict(
      ('Avg # round_trips per day', lambda x: float(len(x)) /
       (x.max() - x.min()).days),
      ('Avg # round_trips per month', lambda x: float(len(x)) /
-      (((x.max() - x.min()).days) / utils.APPROX_BDAYS_PER_MONTH)),
+      (((x.max() - x.min()).days) / APPROX_BDAYS_PER_MONTH)),
      ])
 
 
 def agg_all_long_short(round_trips, col, stats_dict):
-    stats_all = (round_trips.assign(ones=1)
-        .groupby('ones')[col]
-        .agg(stats_dict)
-        .T
-        .rename_axis({1.0: 'All trades'},
-                     axis='columns'))
-    stats_long_short = (round_trips.groupby('long')[col]
-        .agg(stats_dict)
-        .T
-        .rename_axis({False: 'Short trades',
-                      True: 'Long trades'},
-                     axis='columns'))
+    stats_all = (round_trips
+                 .assign(ones=1)
+                 .groupby('ones')[col]
+                 .agg(stats_dict)
+                 .T
+                 .rename_axis({1.0: 'All trades'},
+                              axis='columns'))
+    stats_long_short = (round_trips
+                        .groupby('long')[col]
+                        .agg(stats_dict)
+                        .T
+                        .rename_axis({False: 'Short trades',
+                                      True: 'Long trades'},
+                                     axis='columns'))
 
     return stats_all.join(stats_long_short)[['All trades',
                                              'Long trades',
@@ -199,7 +201,7 @@ def extract_round_trips(transactions,
         price_stack = deque()
         dt_stack = deque()
         trans_sym['signed_price'] = trans_sym.price * \
-                                    np.sign(trans_sym.amount)
+            np.sign(trans_sym.amount)
         trans_sym['abs_amount'] = trans_sym.amount.abs().astype(int)
         for dt, t in trans_sym.iterrows():
             if t.price < 0:
