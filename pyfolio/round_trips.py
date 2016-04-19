@@ -179,6 +179,8 @@ def extract_round_trips(transactions,
 
     portfolio_value : pd.Series (optional)
         Portfolio value (all net assets including cash) over time.
+        Note that portfolio_value needs to beginning of day, so either
+        use .shift() or positions.sum(axis='columns') / (1+returns).
 
     Returns
     -------

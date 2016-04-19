@@ -186,6 +186,7 @@ def create_full_tear_sheet(returns,
                                   set_context=set_context)
             if round_trips:
                 create_round_trip_tear_sheet(
+                    returns=returns,
                     positions=positions,
                     transactions=transactions,
                     sector_mappings=sector_mappings)
@@ -517,7 +518,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
 
 
 @plotting_context
-def create_round_trip_tear_sheet(positions, transactions,
+def create_round_trip_tear_sheet(returns, positions, transactions,
                                  sector_mappings=None,
                                  return_fig=False):
     """
@@ -529,6 +530,9 @@ def create_round_trip_tear_sheet(positions, transactions,
 
     Parameters
     ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
          - See full explanation in create_full_tear_sheet.
@@ -544,8 +548,11 @@ def create_round_trip_tear_sheet(positions, transactions,
 
     transactions_closed = round_trips.add_closing_transactions(positions,
                                                                transactions)
-    trades = round_trips.extract_round_trips(transactions_closed,
-        portfolio_value=positions.sum(axis='columns'))
+    # extract_round_trips requires BoD portfolio_value
+    trades = round_trips.extract_round_trips(
+        transactions_closed,
+        portfolio_value=positions.sum(axis='columns') / (1 + returns)
+    )
 
     if len(trades) < 5:
         warnings.warn(
