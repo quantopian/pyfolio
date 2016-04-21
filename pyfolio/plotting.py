@@ -1599,8 +1599,8 @@ def show_profit_attribution(round_trips):
     utils.print_table(pct_profit_attribution.sort_values(
         inplace=False,
         ascending=False),
-                      name='Profitability (PnL / PnL total) per name',
-                      fmt='{0:.2f}%')
+        name='Profitability (PnL / PnL total) per name',
+        fmt='{0:.2f}%')
 
 
 def plot_prob_profit_trade(round_trips, ax=None):
