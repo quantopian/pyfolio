@@ -8,9 +8,9 @@ This is a major release from `0.4.0` that includes many new analyses and feature
 
 ### New features
 
-* New capacity tear-sheet to assess how much capital can be traded on a strategy [PR284](https://github.com/quantopian/pyfolio/pull/284). [Andrew Campbell](https://github.com/a-campbell)
-* Bootstrap analysis to assess uncertainty in performance metrics [PR261](https://github.com/quantopian/pyfolio/pull/261)[Thomas Wiecki](https://github.com/twiecki)
-* Refactored round-trip analysis to be more general and have better output. Now does full portfolio reconstruction to match trades [PR293](https://github.com/quantopian/pyfolio/pull/293). [Thomas Wiecki](https://github.com/twiecki), [Andrew Campbell](https://github.com/a-campbell)
+* New capacity tear-sheet to assess how much capital can be traded on a strategy [PR284](https://github.com/quantopian/pyfolio/pull/284). [Andrew Campbell](https://github.com/a-campbell).
+* Bootstrap analysis to assess uncertainty in performance metrics [PR261](https://github.com/quantopian/pyfolio/pull/261). [Thomas Wiecki](https://github.com/twiecki)
+* Refactored round-trip analysis to be more general and have better output. Now does full portfolio reconstruction to match trades [PR293](https://github.com/quantopian/pyfolio/pull/293). [Thomas Wiecki](https://github.com/twiecki), [Andrew Campbell](https://github.com/a-campbell). See the [tutorial](http://quantopian.github.io/pyfolio/round_trip_example/) for more information.
 * Prettier printing of tables in notebooks [PR289](https://github.com/quantopian/pyfolio/pull/289). [Thomas Wiecki](https://github.com/twiecki)
 * Faster max-drawdown calculation [PR281](https://github.com/quantopian/pyfolio/pull/281). [Devin Stevenson](https://github.com/devinstevenson)
 * New metrics tail-ratio and common sense ratio [PR276](https://github.com/quantopian/pyfolio/pull/276). [Thomas Wiecki](https://github.com/twiecki)
