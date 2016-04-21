@@ -105,8 +105,9 @@ class TestDrawdown(TestCase):
         spy_rets = utils.get_symbol_rets('SPY',
                                          start='1997-01-01',
                                          end='2004-12-31')
-        spy_drawdowns = timeseries.gen_drawdown_table(spy_rets, top=20).sort(
-            'peak date')
+        spy_drawdowns = timeseries.gen_drawdown_table(
+            spy_rets,
+            top=20).sort_values(by='peak date')
         # Compare the recovery date of each drawdown with the peak of the next
         # Last pair might contain a NaT if drawdown didn't finish, so ignore it
         pairs = list(zip(spy_drawdowns['recovery date'],

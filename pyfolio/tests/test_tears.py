@@ -111,7 +111,8 @@ class PositionsTestCase(TestCase):
                            ])
     @cleanup
     def test_create_round_trip_tear_sheet_breakdown(self, kwargs):
-        create_round_trip_tear_sheet(self.test_pos,
+        create_round_trip_tear_sheet(self.test_returns,
+                                     self.test_pos,
                                      self.test_txn,
                                      **kwargs
                                      )
