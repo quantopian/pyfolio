@@ -82,9 +82,7 @@ def agg_all_long_short(round_trips, col, stats_dict):
                                       True: 'Long trades'},
                                      axis='columns'))
 
-    return stats_all.join(stats_long_short)[['All trades',
-                                             'Long trades',
-                                             'Short trades']]
+    return stats_all.join(stats_long_short)
 
 
 def _groupby_consecutive(txn, max_delta=pd.Timedelta('8h')):
