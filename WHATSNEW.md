@@ -4,7 +4,7 @@ These are new features and improvements of note in each release.
 
 ## v0.5.0 (April 21, 2016)
 
-This is a major release from `0.4.0` that includes many new analyses and features. We recommend that all users upgrade to this new version. Also update your dependencies, specifically, `pandas>=0.18.0`, `seaborn>=0.8.0` and `zipline>=0.8.4`.
+This is a major release from `0.4.0` that includes many new analyses and features. We recommend that all users upgrade to this new version. Also update your dependencies, specifically, `pandas>=0.18.0`, `seaborn>=0.6.0` and `zipline>=0.8.4`.
 
 ### New features
 
@@ -17,7 +17,7 @@ This is a major release from `0.4.0` that includes many new analyses and feature
 * Log-scaled cumulative returns plot and raw returns plot [PR294](https://github.com/quantopian/pyfolio/pull/294). [Thomas Wiecki](https://github.com/twiecki)
 
 ### Bug fixes
-* Many depracation fixes for Pandas 0.18.0, seaborn 0.8.0, and zipline 0.8.4
+* Many depracation fixes for Pandas 0.18.0, seaborn 0.6.0, and zipline 0.8.4
 
 
 ## v0.4.0 (Dec 10, 2015)
