@@ -2,7 +2,7 @@
 
 These are new features and improvements of note in each release.
 
-## v0.5.0 (April 21, 2016)
+## v0.5.0 (April 21, 2016) -- Olympia
 
 This is a major release from `0.4.0` that includes many new analyses and features. We recommend that all users upgrade to this new version. Also update your dependencies, specifically, `pandas>=0.18.0`, `seaborn>=0.6.0` and `zipline>=0.8.4`.
 
