@@ -2,13 +2,23 @@
 
 These are new features and improvements of note in each release.
 
-## v0.5.0 (upcoming)
+## v0.5.0 (April 21, 2016)
+
+This is a major release from `0.4.0` that includes many new analyses and features. We recommend that all users upgrade to this new version. Also update your dependencies, specifically, `pandas>=0.18.0`, `seaborn>=0.8.0` and `zipline>=0.8.4`.
 
 ### New features
 
-* Refactored round-trip analysis to be more general and have better output. Now does full portfolio reconstruction to match trades [PR293](https://github.com/quantopian/pyfolio/pull/293). Thomas, Andrew
+* New capacity tear-sheet to assess how much capital can be traded on a strategy [PR284](https://github.com/quantopian/pyfolio/pull/284). [Andrew Campbell](https://github.com/a-campbell)
+* Bootstrap analysis to assess uncertainty in performance metrics [PR261](https://github.com/quantopian/pyfolio/pull/261)[Thomas Wiecki](https://github.com/twiecki)
+* Refactored round-trip analysis to be more general and have better output. Now does full portfolio reconstruction to match trades [PR293](https://github.com/quantopian/pyfolio/pull/293). [Thomas Wiecki](https://github.com/twiecki), [Andrew Campbell](https://github.com/a-campbell)
+* Prettier printing of tables in notebooks [PR289](https://github.com/quantopian/pyfolio/pull/289). [Thomas Wiecki](https://github.com/twiecki)
+* Faster max-drawdown calculation [PR281](https://github.com/quantopian/pyfolio/pull/281). [Devin Stevenson](https://github.com/devinstevenson)
+* New metrics tail-ratio and common sense ratio [PR276](https://github.com/quantopian/pyfolio/pull/276). [Thomas Wiecki](https://github.com/twiecki)
+* Log-scaled cumulative returns plot and raw returns plot [PR294](https://github.com/quantopian/pyfolio/pull/294). [Thomas Wiecki](https://github.com/twiecki)
 
 ### Bug fixes
+* Many depracation fixes for Pandas 0.18.0, seaborn 0.8.0, and zipline 0.8.4
+
 
 ## v0.4.0 (Dec 10, 2015)
 
