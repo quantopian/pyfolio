@@ -1474,7 +1474,8 @@ def show_worst_drawdown_periods(returns, top=5):
     """
 
     drawdown_df = timeseries.gen_drawdown_table(returns, top=top)
-    utils.print_table(drawdown_df.sort('net drawdown in %', ascending=False),
+    utils.print_table(drawdown_df.sort_values('net drawdown in %',
+                                              ascending=False),
                       name='Worst Drawdown Periods', fmt='{0:.2f}')
 
 
@@ -1595,8 +1596,9 @@ def show_profit_attribution(round_trips):
     pct_profit_attribution = round_trips.groupby(
         'symbol')['pnl'].sum() / total_pnl
 
-    utils.print_table(pct_profit_attribution.sort(inplace=False,
-                                                  ascending=False),
+    utils.print_table(pct_profit_attribution.sort_values(
+        inplace=False,
+        ascending=False),
                       name='Profitability (PnL / PnL total) per name',
                       fmt='{0:.2f}%')
 
