@@ -1102,8 +1102,8 @@ def rolling_sharpe(returns, rolling_sharpe_window):
     See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
-    return pd.rolling(returns, rolling_sharpe_window).mean() \
-        / pd.rolling(returns, rolling_sharpe_window).std() \
+    return returns.rolling(rolling_sharpe_window).mean() \
+        / returns.rolling(rolling_sharpe_window).std() \
         * np.sqrt(APPROX_BDAYS_PER_YEAR)
 
 
