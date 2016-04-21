@@ -12,7 +12,7 @@
 	<title>Single stock - pyfolio</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/highlight.css">
 
@@ -158,8 +158,6 @@
         
             <li><a href="#create-a-full-tear-sheet-for-the-single-stock">Create a full tear sheet for the single stock</a></li>
         
-            <li><a href="#create-a-full-tear-sheet-for-an-equal-weight-portfolio-of">Create a full tear sheet for an equal-weight portfolio of:</a></li>
-        
     
     </ul>
 </div></div>
@@ -178,126 +176,181 @@ import pyfolio as pf
 
 <h2 id="create-a-full-tear-sheet-for-the-single-stock">Create a full tear sheet for the single stock</h2>
 <p>This will show charts about returns and shock events.</p>
-<pre><code class="python">pf.create_returns_tear_sheet(stock_rets)
+<pre><code class="python">pf.create_returns_tear_sheet(stock_rets, live_start_date='2015-12-1')
 </code></pre>
 
-<pre><code>Entire data start date: 2012-05-21 00:00:00+00:00
-Entire data end date: 2015-08-04 00:00:00+00:00
+<pre><code>Entire data start date: 2012-05-21
+Entire data end date: 2016-04-20
 
 
-Backtest Months: 38
-                   Backtest
-sortino_ratio          1.65
-omega_ratio            1.18
-max_drawdown          -0.48
-calmar_ratio           0.79
-annual_return          0.38
-stability              0.87
-sharpe_ratio           0.85
-annual_volatility      0.44
-alpha                  0.20
-beta                   0.98
-
-Worst Drawdown Periods
-   net drawdown in %                  peak date                valley date  \
-0              47.90  2012-05-21 00:00:00+00:00  2012-09-04 00:00:00+00:00   
-1              22.06  2014-03-10 00:00:00+00:00  2014-04-28 00:00:00+00:00   
-2              17.34  2013-10-18 00:00:00+00:00  2013-11-25 00:00:00+00:00   
-4               9.21  2014-10-28 00:00:00+00:00  2014-11-19 00:00:00+00:00   
-3               9.20  2015-03-24 00:00:00+00:00  2015-05-12 00:00:00+00:00
-
-               recovery date duration  
-0  2013-07-25 00:00:00+00:00      309  
-1  2014-07-24 00:00:00+00:00       99  
-2  2013-12-17 00:00:00+00:00       43  
-4  2014-12-22 00:00:00+00:00       40  
-3  2015-06-23 00:00:00+00:00       66
-
-
-2-sigma returns daily    -0.054
-2-sigma returns weekly   -0.110
-dtype: float64
-
-
-/opt/miniconda/lib/python2.7/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
-  warnings.warn(message, mplDeprecation, stacklevel=1)
+Out-of-Sample Months: 4
+Backtest Months: 42
 </code></pre>
-<p><img alt="png" src="../single_stock_example_files/single_stock_example_7_2.png" /></p>
-<h2 id="create-a-full-tear-sheet-for-an-equal-weight-portfolio-of">Create a full tear sheet for an equal-weight portfolio of:</h2>
-<ul>
-<li>Long SPY</li>
-<li>Short QQQ</li>
-<li>Long GLD</li>
-<li>Long TLT</li>
-</ul>
-<p>Additionally, we set the live start date as an example.</p>
-<pre><code class="python">stock_rets_SPY = pf.utils.get_symbol_rets('SPY')
-stock_rets_QQQ = pf.utils.get_symbol_rets('QQQ')
-stock_rets_GLD = pf.utils.get_symbol_rets('GLD')
-stock_rets_TLT = pf.utils.get_symbol_rets('TLT')
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Performance statistics</th>
+      <th>All history</th>
+      <th>Backtest</th>
+      <th>Out of sample</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>annual_return</th>
+      <td>0.32</td>
+      <td>0.33</td>
+      <td>0.14</td>
+    </tr>
+    <tr>
+      <th>annual_volatility</th>
+      <td>0.43</td>
+      <td>0.43</td>
+      <td>0.38</td>
+    </tr>
+    <tr>
+      <th>sharpe_ratio</th>
+      <td>0.85</td>
+      <td>0.87</td>
+      <td>0.52</td>
+    </tr>
+    <tr>
+      <th>calmar_ratio</th>
+      <td>0.66</td>
+      <td>0.69</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>stability_of_timeseries</th>
+      <td>0.95</td>
+      <td>0.94</td>
+      <td>0.59</td>
+    </tr>
+    <tr>
+      <th>max_drawdown</th>
+      <td>-0.48</td>
+      <td>-0.48</td>
+      <td>-0.14</td>
+    </tr>
+    <tr>
+      <th>omega_ratio</th>
+      <td>1.18</td>
+      <td>1.18</td>
+      <td>1.11</td>
+    </tr>
+    <tr>
+      <th>sortino_ratio</th>
+      <td>1.38</td>
+      <td>1.39</td>
+      <td>0.89</td>
+    </tr>
+    <tr>
+      <th>skew</th>
+      <td>1.79</td>
+      <td>1.73</td>
+      <td>2.47</td>
+    </tr>
+    <tr>
+      <th>kurtosis</th>
+      <td>19.34</td>
+      <td>19.44</td>
+      <td>16.42</td>
+    </tr>
+    <tr>
+      <th>tail_ratio</th>
+      <td>1.03</td>
+      <td>1.04</td>
+      <td>0.85</td>
+    </tr>
+    <tr>
+      <th>common_sense_ratio</th>
+      <td>1.35</td>
+      <td>1.39</td>
+      <td>0.97</td>
+    </tr>
+    <tr>
+      <th>information_ratio</th>
+      <td>0.03</td>
+      <td>0.03</td>
+      <td>0.03</td>
+    </tr>
+    <tr>
+      <th>alpha</th>
+      <td>0.20</td>
+      <td>0.21</td>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>beta</th>
+      <td>1.05</td>
+      <td>1.01</td>
+      <td>1.22</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Worst Drawdown Periods</th>
+      <th>net drawdown in %</th>
+      <th>peak date</th>
+      <th>valley date</th>
+      <th>recovery date</th>
+      <th>duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>47.90</td>
+      <td>2012-05-21</td>
+      <td>2012-09-04</td>
+      <td>2013-07-25</td>
+      <td>309</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>22.06</td>
+      <td>2014-03-10</td>
+      <td>2014-04-28</td>
+      <td>2014-07-24</td>
+      <td>99</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>16.57</td>
+      <td>2015-07-21</td>
+      <td>2015-08-24</td>
+      <td>2015-10-19</td>
+      <td>65</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>13.62</td>
+      <td>2015-11-11</td>
+      <td>2016-01-21</td>
+      <td>2016-01-28</td>
+      <td>57</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>13.51</td>
+      <td>2016-02-01</td>
+      <td>2016-02-09</td>
+      <td>2016-03-29</td>
+      <td>42</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<pre><code>[-0.052 -0.111]
 </code></pre>
-
-<pre><code class="python">portfolio_4_assets_rets = pf.timeseries.portfolio_returns([stock_rets_SPY, -1 * stock_rets_QQQ, stock_rets_GLD, stock_rets_TLT], 
-                                exclude_non_overlapping=True)
-</code></pre>
-
-<pre><code class="python">pf.create_full_tear_sheet(portfolio_4_assets_rets, live_start_date='2013-10-22')
-</code></pre>
-
-<pre><code>Entire data start date: 2004-11-19 00:00:00+00:00
-Entire data end date: 2015-08-04 00:00:00+00:00
-
-
-Out-of-Sample Months: 21
-Backtest Months: 106
-                   Backtest  Out_of_Sample  All_History
-sortino_ratio          0.96          -0.43         0.78
-omega_ratio            1.12           0.95         1.09
-max_drawdown          -0.11          -0.08        -0.13
-calmar_ratio           0.41          -0.20         0.28
-annual_return          0.05          -0.02         0.04
-stability              0.94           0.04         0.83
-sharpe_ratio           0.65          -0.28         0.53
-annual_volatility      0.07           0.06         0.07
-alpha                  0.05           0.00         0.04
-beta                  -0.04          -0.17        -0.05
-
-Worst Drawdown Periods
-   net drawdown in %                  peak date                valley date  \
-0              13.06  2012-11-13 00:00:00+00:00  2013-12-19 00:00:00+00:00   
-2               8.96  2008-03-17 00:00:00+00:00  2008-08-15 00:00:00+00:00   
-1               8.85  2008-12-30 00:00:00+00:00  2009-07-29 00:00:00+00:00   
-4               4.66  2010-10-06 00:00:00+00:00  2011-01-27 00:00:00+00:00   
-3               4.38  2012-01-31 00:00:00+00:00  2012-04-03 00:00:00+00:00
-
-               recovery date duration  
-0                        NaN      NaN  
-2  2008-12-10 00:00:00+00:00      193  
-1  2010-06-07 00:00:00+00:00      375  
-4  2011-04-27 00:00:00+00:00      146  
-3  2012-06-01 00:00:00+00:00       89
-
-
-2-sigma returns daily    -0.008
-2-sigma returns weekly   -0.016
-dtype: float64
-
-Stress Events
-                                    mean    min    max
-Lehmann                            0.001 -0.016  0.031
-US downgrade/European Debt Crisis  0.002 -0.018  0.015
-Fukushima                          0.001 -0.006  0.007
-EZB IR Event                       0.000 -0.007  0.004
-Aug07                              0.000 -0.006  0.005
-Sept08                             0.002 -0.016  0.031
-2009Q1                            -0.001 -0.012  0.015
-2009Q2                            -0.000 -0.012  0.020
-Flash Crash                        0.002 -0.009  0.015
-Apr14                              0.000 -0.005  0.009
-Oct14                             -0.000 -0.007  0.007
-</code></pre>
-<p><img alt="png" src="../single_stock_example_files/single_stock_example_12_1.png" /></p>
-<p><img alt="png" src="../single_stock_example_files/single_stock_example_12_2.png" /></p></div>
+<p><img alt="png" src="../single_stock_example_files/single_stock_example_7_4.png" /></p></div>
             
         </div>
 

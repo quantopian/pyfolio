@@ -12,7 +12,7 @@
 	<title>Bayesian analysis - pyfolio</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/highlight.css">
 
@@ -177,52 +177,59 @@ import pyfolio as pf
 </code></pre>
 
 <h2 id="fetch-the-daily-returns-for-a-stock">Fetch the daily returns for a stock</h2>
-<pre><code class="python">#stock_rets = pf.utils.get_symbol_rets('FB')
-import pandas as pd
-stock_rets = pd.read_pickle('fb.pickle')
+<pre><code class="python">stock_rets = pf.utils.get_symbol_rets('FB')
 </code></pre>
 
 <h2 id="create-bayesian-tear-sheet">Create Bayesian tear sheet</h2>
 <pre><code class="python">out_of_sample = stock_rets.index[-40]
 </code></pre>
 
-<pre><code class="python">%pdb
-</code></pre>
-
-<pre><code>Automatic pdb calling has been turned ON
-</code></pre>
 <pre><code class="python">pf.create_bayesian_tear_sheet(stock_rets, live_start_date=out_of_sample)
 </code></pre>
 
 <pre><code>Running T model
- [-----------------100%-----------------] 2000 of 2000 complete in 3.6 sec
-Finished T model (required 51.53 seconds).
+
+
+WARNING (theano.gof.compilelock): Overriding existing lock by dead process '23486' (I am process '24728')
+
+
+Applied log-transform to volatility and added transformed volatility_log to model.
+Applied log-transform to nu_minus_two and added transformed nu_minus_two_log to model.
+ [-----------------100%-----------------] 2000 of 2000 complete in 14.8 sec
+Finished T model (required 279.00 seconds).
 
 Running BEST model
- [-----------------100%-----------------] 2000 of 2000 complete in 5.7 sec
-Finished BEST model (required 51.95 seconds).
+Applied interval-transform to group1_std and added transformed group1_std_interval to model.
+Applied interval-transform to group2_std and added transformed group2_std_interval to model.
+Applied log-transform to nu_minus_two and added transformed nu_minus_two_log to model.
+ [-----------------100%-----------------] 2000 of 2000 complete in 12.6 sec
+Finished BEST model (required 132.06 seconds).
 
-Finished plotting Bayesian cone (required 0.13 seconds).
+Finished plotting Bayesian cone (required 0.21 seconds).
 
-Finished plotting BEST results (required 1.18 seconds).
 
-Finished computing Bayesian predictions (required 0.32 seconds).
+/home/wiecki/miniconda3/lib/python3.5/site-packages/matplotlib/axes/_axes.py:519: UserWarning: No labelled objects found. Use label='...' kwarg on individual plots.
+  warnings.warn("No labelled objects found. "
 
-Finished plotting Bayesian VaRs estimate (required 0.13 seconds).
+
+
+Finished plotting BEST results (required 1.45 seconds).
+
+Finished computing Bayesian predictions (required 0.26 seconds).
+
+Finished plotting Bayesian VaRs estimate (required 0.12 seconds).
 
 Running alpha beta model
- [-----------------100%-----------------] 2000 of 2000 complete in 3.5 sec
-Finished running alpha beta model (required 58.74 seconds).
+Applied log-transform to sigma and added transformed sigma_log to model.
+Applied log-transform to nu_minus_two and added transformed nu_minus_two_log to model.
+ [-----------------100%-----------------] 2000 of 2000 complete in 7.2 sec
+Finished running alpha beta model (required 130.28 seconds).
 
-Finished plotting alpha beta model (required 0.22 seconds).
+Finished plotting alpha beta model (required 0.24 seconds).
 
-Total runtime was 164.22 seconds.
-
-
-/home/wiecki/miniconda3/lib/python3.4/site-packages/matplotlib/axes/_axes.py:475: UserWarning: No labelled objects found. Use label='...' kwarg on individual plots.
-  warnings.warn("No labelled objects found. "
+Total runtime was 543.62 seconds.
 </code></pre>
-<p><img alt="png" src="../bayesian_files/bayesian_9_2.png" /></p>
+<p><img alt="png" src="../bayesian_files/bayesian_8_5.png" /></p>
 <p>Lets go through these row by row:</p>
 <ul>
 <li>The first one is the Bayesian cone plot that is the result of a summer internship project of Sepideh Sadeghi here at Quantopian. It's similar to the cone plot you already saw in the tear sheet above but has two critical additions: (i) it takes uncertainty into account (i.e. a short backtest length will result in a wider cone), and (ii) it does not assume normality of returns but instead uses a <a href="https://en.wikipedia.org/wiki/Student%27s_t-distribution">Student-T distribution</a> with heavier tails.</li>
@@ -231,8 +238,6 @@ Total runtime was 164.22 seconds.
 <li>The 5th row shows the effect size or the difference of means normalized by the standard deviation and gives you a general sense how far apart the two distributions are. Intuitively, even if the means are significantly different, it may not be very meaningful if the standard deviation is huge amounting to a tiny difference of the two returns distributions.</li>
 <li>The 6th row shows predicted returns (based on the backtest) for tomorrow, and 5 days from now. The blue line indicates the probability of losing more than 5% of your portfolio value and can be interpeted as a Bayesian VaR estimate.</li>
 <li>The 7th row shows a Bayesian estimate of annual alpha and beta. In addition to uncertainty estimates, this model, like all above ones, assumes returns to be T-distributed which leads to more robust estimates than a standard linear regression would.  The default benchmark is the S&amp;P500.  Alternatively, users may use the Fama-French model as a bunchmark by setting benchmark_rets="Fama-French".  </li>
-<li>[only present if stoch_vol=True] The 8th row shows Bayesian estimates for log(sigma) and log(nu), two parameters of the <a href="http://pymc-devs.github.io/pymc3/stochastic_volatility/">stochastic volatility model</a>.</li>
-<li>[only present if stoch_vol=True] The 9th row shows the volatility measured by the stochastic voatility model, overlaid on the absolute value of the returns.</li>
 <li>By default, stoch_vol=False because running the stochastic volatility model is computationally expensive.</li>
 <li>Only the most recent 400 days of returns are used when computing the stochastic volatility model.  This is to minimize computational time.</li>
 </ul>
@@ -241,53 +246,21 @@ Total runtime was 164.22 seconds.
 <pre><code class="python">help(pf.bayesian.run_model)
 </code></pre>
 
-<pre><code>Help on function run_model in module pyfolio.bayesian:
-
-run_model(model, returns_train, returns_test=None, bmark=None, samples=500, ppc=False)
-    Run one of the Bayesian models.
-
-    Parameters
-    ----------
-    model : {'alpha_beta', 't', 'normal', 'best'}
-        Which model to run
-    returns_train : pd.Series
-        Timeseries of simple returns
-    returns_test : pd.Series (optional)
-        Out-of-sample returns. Datetimes in returns_test will be added to
-        returns_train as missing values and predictions will be generated
-        for them.
-    bmark : pd.Series or pd.DataFrame (optional)
-        Only used for alpha_beta to estimate regression coefficients.
-        If bmark has more recent returns than returns_train, these dates
-        will be treated as missing values and predictions will be
-        generated for them taking market correlations into account.
-
-    Returns
-    -------
-    pymc3.sampling.BaseTrace object
-        A PyMC3 trace object that contains samples for each parameter
-        of the posterior.
-</code></pre>
 <p>For example, to run a model that assumes returns to be normally distributed, you can call:</p>
 <pre><code class="python"># Run model that assumes returns to be T-distributed
 trace = pf.bayesian.run_model('t', stock_rets)
 </code></pre>
 
-<pre><code> [-----------------100%-----------------] 500 of 500 complete in 1.5 sec
-</code></pre>
 <p>The returned trace object can be directly inquired. For example might we ask what the probability of the Sharpe ratio being larger than 0 is by checking what percentage of posterior samples of the Sharpe ratio are &gt; 0:</p>
 <pre><code class="python"># Check what frequency of samples from the sharpe posterior are above 0.
 print('Probability of Sharpe ratio &gt; 0 = {:3}%'.format((trace['sharpe'] &gt; 0).mean() * 100))
 </code></pre>
 
-<pre><code>Probability of Sharpe ratio &gt; 0 = 80.4%
-</code></pre>
 <p>But we can also interact with it like with any other <code>pymc3</code> trace:</p>
 <pre><code class="python">import pymc3 as pm
 pm.traceplot(trace);
 </code></pre>
 
-<p><img alt="png" src="../bayesian_files/bayesian_18_0.png" /></p>
 <h2 id="further-reading">Further reading</h2>
 <p>For more information on Bayesian statistics, check out these resources:</p>
 <ul>

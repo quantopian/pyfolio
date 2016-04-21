@@ -12,7 +12,7 @@
 	<title>Zipline algorithm - pyfolio</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/highlight.css">
 
@@ -177,24 +177,12 @@
 import pyfolio as pf
 </code></pre>
 
-<pre><code>/home/wiecki/miniconda3/lib/python3.4/site-packages/pandas/io/data.py:33: FutureWarning: 
-The pandas.io.data module is moved to a separate package (pandas-datareader) and will be removed from pandas in a future version.
-After installing the pandas-datareader package (https://github.com/pydata/pandas-datareader), you can change the import ``from pandas.io import data, wb`` to ``from pandas_datareader import data, wb``.
-  FutureWarning)
-</code></pre>
-<pre><code class="python">import numpy as np
-import pandas as pd
-
-import sys
+<pre><code class="python">import sys
 import logbook
 import numpy as np
 from datetime import datetime
 import pytz
 
-# Import Zipline, the open source backtester
-from zipline import TradingAlgorithm
-from zipline.data.loader import load_bars_from_yahoo
-from zipline.api import order_target, symbol, history, add_history, schedule_function, date_rules, time_rules
 from zipline.algorithm import TradingAlgorithm
 from zipline.utils.factory import load_from_yahoo
 from zipline.finance import commission
@@ -229,7 +217,6 @@ def initialize(algo, eps=1, window_length=5):
     algo.init = True
     algo.days = 0
     algo.window_length = window_length
-    algo.add_transform('mavg', 5)
 
     algo.set_commission(commission.PerShare(cost=0))
 
@@ -250,10 +237,11 @@ def handle_data(algo, data):
     b = np.zeros(m)
 
     # find relative moving average price for each asset
+    mavgs = data.history(algo.sids, 'price', algo.window_length, '1d').mean()
     for i, sid in enumerate(algo.sids):
-        price = data[sid].price
+        price = data.current(sid, &quot;price&quot;)
         # Relative mean deviation
-        x_tilde[i] = data[sid].mavg(algo.window_length) / price
+        x_tilde[i] = mavgs[sid] / price
 
     ###########################
     # Inside of OLMAR (algo 2)
@@ -297,7 +285,7 @@ def rebalance_portfolio(algo, data, desired_port):
 
     for i, sid in enumerate(algo.sids):
         current_amount[i] = algo.portfolio.positions[sid].amount
-        prices[i] = data[sid].price
+        prices[i] = data.current(sid, &quot;price&quot;)
 
     desired_amount = np.round(desired_port * positions_value / prices)
 
@@ -310,23 +298,19 @@ def rebalance_portfolio(algo, data, desired_port):
 
 def simplex_projection(v, b=1):
     &quot;&quot;&quot;Projection vectors to the simplex domain
-
     Implemented according to the paper: Efficient projections onto the
     l1-ball for learning in high dimensions, John Duchi, et al. ICML 2008.
     Implementation Time: 2011 June 17 by Bin@libin AT pmail.ntu.edu.sg
     Optimization Problem: min_{w}\| w - v \|_{2}^{2}
     s.t. sum_{i=1}^{m}=z, w_{i}\geq 0
-
     Input: A vector v \in R^{m}, and a scalar z &gt; 0 (default=1)
     Output: Projection vector w
-
     :Example:
     &gt;&gt;&gt; proj = simplex_projection([.4 ,.3, -.4, .5])
     &gt;&gt;&gt; print(proj)
     array([ 0.33333333, 0.23333333, 0. , 0.43333333])
     &gt;&gt;&gt; print(proj.sum())
     1.0
-
     Original matlab implementation: John Duchi (jduchi@cs.berkeley.edu)
     Python-port: Copyright 2013 by Thomas Wiecki (thomas.wiecki@gmail.com).
     &quot;&quot;&quot;
@@ -345,30 +329,33 @@ def simplex_projection(v, b=1):
     w[w &lt; 0] = 0
     return w
 
+
 start = datetime(2004, 1, 1, 0, 0, 0, 0, pytz.utc)
 end = datetime(2010, 1, 1, 0, 0, 0, 0, pytz.utc)
+
+# Load price data from yahoo.
 data = load_from_yahoo(stocks=STOCKS, indexes={}, start=start, end=end)
 data = data.dropna()
-olmar = TradingAlgorithm(handle_data=handle_data,
-                         initialize=initialize,
-                         identifiers=STOCKS)
-backtest = olmar.run(data)
+
+# Create and run the algorithm.
+olmar = TradingAlgorithm(handle_data=handle_data, initialize=initialize)
+results = olmar.run(data)
 </code></pre>
 
-<pre><code>AMD
-CERN
-COST
-DELL
-GPS
-INTC
-MMM
-[2015-10-21 14:10:42.252494] INFO: Performance: Simulated 1511 trading days out of 1511.
-[2015-10-21 14:10:42.253271] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
-[2015-10-21 14:10:42.253904] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
+<pre><code>[2016-04-21 09:37:33.915336] INFO: Loader: Loading stock: AMD
+[2016-04-21 09:37:33.926626] INFO: Loader: Loading stock: CERN
+[2016-04-21 09:37:33.936490] INFO: Loader: Loading stock: COST
+[2016-04-21 09:37:33.951613] INFO: Loader: Loading stock: DELL
+[2016-04-21 09:37:33.965023] INFO: Loader: Loading stock: GPS
+[2016-04-21 09:37:33.976631] INFO: Loader: Loading stock: INTC
+[2016-04-21 09:37:33.987218] INFO: Loader: Loading stock: MMM
+[2016-04-21 09:37:50.955240] INFO: Performance: Simulated 1511 trading days out of 1511.
+[2016-04-21 09:37:50.956092] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
+[2016-04-21 09:37:50.956915] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
 </code></pre>
 <h2 id="extract-metrics">Extract metrics</h2>
 <p>Get the returns, positions, and transactions from the zipline backtest object.</p>
-<pre><code class="python">returns, positions, transactions, gross_lev = pf.utils.extract_rets_pos_txn_from_zipline(backtest)
+<pre><code class="python">returns, positions, transactions, gross_lev = pf.utils.extract_rets_pos_txn_from_zipline(results)
 </code></pre>
 
 <h2 id="single-plot-example">Single plot example</h2>
@@ -376,20 +363,13 @@ MMM
 <pre><code class="python">pf.plot_drawdown_periods(returns, top=5).set_xlabel('Date')
 </code></pre>
 
-<pre><code>/home/wiecki/miniconda3/lib/python3.4/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
-  warnings.warn(message, mplDeprecation, stacklevel=1)
-
-
-
-
-
-&lt;matplotlib.text.Text at 0x7f7287bb0860&gt;
+<pre><code>&lt;matplotlib.text.Text at 0x7fd6ff3d9198&gt;
 </code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_10_2.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_10_1.png" /></p>
 <h2 id="full-tear-sheet-example">Full tear sheet example</h2>
 <p>Create a full tear sheet for our algorithm. As an example, set the live start date to something arbitrary.</p>
 <pre><code class="python">pf.create_full_tear_sheet(returns, positions=positions, transactions=transactions,
-                          gross_lev=gross_lev, live_start_date='2009-10-22')
+                          gross_lev=gross_lev, live_start_date='2009-10-22', round_trips=True)
 </code></pre>
 
 <pre><code>Entire data start date: 2004-01-02
@@ -398,68 +378,734 @@ Entire data end date: 2009-12-31
 
 Out-of-Sample Months: 2
 Backtest Months: 69
-                   Backtest  Out_of_Sample  All_History
-annual_return          0.12           0.06         0.12
-annual_volatility      0.26           0.22         0.25
-sharpe_ratio           0.47           0.28         0.48
-calmar_ratio           0.20           0.84         0.21
-stability              0.00           0.05         0.01
-max_drawdown          -0.60          -0.07        -0.60
-omega_ratio            1.09           1.05         1.09
-sortino_ratio          0.70           0.39         0.71
-skewness               0.28          -0.28         0.27
-kurtosis               4.10           0.46         4.05
-alpha                  0.09          -0.11         0.09
-beta                   0.81           1.18         0.81
-
-Worst Drawdown Periods
-   net drawdown in %  peak date valley date recovery date duration
-0              59.50 2007-11-06  2008-11-20           NaT      NaN
-1              22.33 2006-02-16  2006-08-31    2007-05-21      328
-2              12.52 2005-07-28  2005-10-12    2006-01-11      120
-3              11.28 2004-11-15  2005-04-28    2005-07-22      180
-4               9.44 2007-07-16  2007-08-06    2007-09-04       37
-
-
-2-sigma returns daily    -0.032
-2-sigma returns weekly   -0.065
-dtype: float64
-
-
-/home/wiecki/miniconda3/lib/python3.4/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
-  warnings.warn(message, mplDeprecation, stacklevel=1)
 </code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_2.png" /></p>
-<pre><code>Stress Events
-          mean    min    max
-Lehmann -0.003 -0.044  0.044
-Aug07    0.003 -0.030  0.030
-Sept08  -0.006 -0.043  0.040
-2009Q1  -0.004 -0.050  0.034
-2009Q2   0.007 -0.038  0.062
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Performance statistics</th>
+      <th>All history</th>
+      <th>Backtest</th>
+      <th>Out of sample</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>annual_return</th>
+      <td>0.08</td>
+      <td>0.08</td>
+      <td>0.03</td>
+    </tr>
+    <tr>
+      <th>annual_volatility</th>
+      <td>0.25</td>
+      <td>0.26</td>
+      <td>0.22</td>
+    </tr>
+    <tr>
+      <th>sharpe_ratio</th>
+      <td>0.44</td>
+      <td>0.43</td>
+      <td>0.25</td>
+    </tr>
+    <tr>
+      <th>calmar_ratio</th>
+      <td>0.14</td>
+      <td>0.14</td>
+      <td>0.42</td>
+    </tr>
+    <tr>
+      <th>stability_of_timeseries</th>
+      <td>-0.01</td>
+      <td>-0.09</td>
+      <td>0.22</td>
+    </tr>
+    <tr>
+      <th>max_drawdown</th>
+      <td>-0.60</td>
+      <td>-0.60</td>
+      <td>-0.07</td>
+    </tr>
+    <tr>
+      <th>omega_ratio</th>
+      <td>1.08</td>
+      <td>1.08</td>
+      <td>1.04</td>
+    </tr>
+    <tr>
+      <th>sortino_ratio</th>
+      <td>0.65</td>
+      <td>0.64</td>
+      <td>0.34</td>
+    </tr>
+    <tr>
+      <th>skew</th>
+      <td>0.27</td>
+      <td>0.28</td>
+      <td>-0.28</td>
+    </tr>
+    <tr>
+      <th>kurtosis</th>
+      <td>4.05</td>
+      <td>4.10</td>
+      <td>0.47</td>
+    </tr>
+    <tr>
+      <th>tail_ratio</th>
+      <td>0.97</td>
+      <td>0.99</td>
+      <td>1.24</td>
+    </tr>
+    <tr>
+      <th>common_sense_ratio</th>
+      <td>1.05</td>
+      <td>1.07</td>
+      <td>1.27</td>
+    </tr>
+    <tr>
+      <th>information_ratio</th>
+      <td>0.02</td>
+      <td>0.02</td>
+      <td>-0.05</td>
+    </tr>
+    <tr>
+      <th>alpha</th>
+      <td>0.08</td>
+      <td>0.08</td>
+      <td>-0.11</td>
+    </tr>
+    <tr>
+      <th>beta</th>
+      <td>0.81</td>
+      <td>0.81</td>
+      <td>1.18</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Worst Drawdown Periods</th>
+      <th>net drawdown in %</th>
+      <th>peak date</th>
+      <th>valley date</th>
+      <th>recovery date</th>
+      <th>duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>59.91</td>
+      <td>2007-11-06</td>
+      <td>2008-11-20</td>
+      <td>NaT</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>22.79</td>
+      <td>2006-02-16</td>
+      <td>2006-08-31</td>
+      <td>2007-05-22</td>
+      <td>329</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>12.70</td>
+      <td>2005-07-28</td>
+      <td>2005-10-12</td>
+      <td>2006-01-11</td>
+      <td>120</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>11.65</td>
+      <td>2004-11-15</td>
+      <td>2005-04-28</td>
+      <td>2005-07-28</td>
+      <td>184</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>9.50</td>
+      <td>2007-07-16</td>
+      <td>2007-08-06</td>
+      <td>2007-09-13</td>
+      <td>44</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<pre><code>[-0.032 -0.069]
 </code></pre>
 <p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_4.png" /></p>
-<pre><code>Top 10 long positions of all time (and max%)
-[2 6 1 3 0 5 4]
-[ 0.993  0.911  0.845  0.717  0.709  0.666  0.62 ]
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Stress Events</th>
+      <th>mean</th>
+      <th>min</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Lehmann</th>
+      <td>-0.26%</td>
+      <td>-4.45%</td>
+      <td>4.41%</td>
+    </tr>
+    <tr>
+      <th>Aug07</th>
+      <td>0.34%</td>
+      <td>-2.96%</td>
+      <td>3.02%</td>
+    </tr>
+    <tr>
+      <th>Mar08</th>
+      <td>-0.44%</td>
+      <td>-3.10%</td>
+      <td>3.33%</td>
+    </tr>
+    <tr>
+      <th>Sept08</th>
+      <td>-0.64%</td>
+      <td>-4.35%</td>
+      <td>3.99%</td>
+    </tr>
+    <tr>
+      <th>2009Q1</th>
+      <td>-0.36%</td>
+      <td>-4.99%</td>
+      <td>3.35%</td>
+    </tr>
+    <tr>
+      <th>2009Q2</th>
+      <td>0.71%</td>
+      <td>-3.78%</td>
+      <td>6.15%</td>
+    </tr>
+    <tr>
+      <th>Low Volatility Bull Market</th>
+      <td>0.01%</td>
+      <td>-6.13%</td>
+      <td>6.40%</td>
+    </tr>
+    <tr>
+      <th>GFC Crash</th>
+      <td>-0.08%</td>
+      <td>-7.59%</td>
+      <td>9.70%</td>
+    </tr>
+    <tr>
+      <th>Recovery</th>
+      <td>0.32%</td>
+      <td>-3.78%</td>
+      <td>6.15%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
-
-Top 10 short positions of all time (and max%)
-[]
-[]
-
-
-Top 10 positions of all time (and max%)
-[2 6 1 3 0 5 4]
-[ 0.993  0.911  0.845  0.717  0.709  0.666  0.62 ]
-
-
-All positions ever held
-[2 6 1 3 0 5 4]
-[ 0.993  0.911  0.845  0.717  0.709  0.666  0.62 ]
-</code></pre>
 <p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_6.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_7.png" /></p>
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Top 10 long positions of all time</th>
+      <th>max</th>
+    </tr>
+    <tr>
+      <th>sid</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Equity(3 [COST])</th>
+      <td>100.76%</td>
+    </tr>
+    <tr>
+      <th>Equity(7 [MMM])</th>
+      <td>92.38%</td>
+    </tr>
+    <tr>
+      <th>Equity(2 [CERN])</th>
+      <td>84.49%</td>
+    </tr>
+    <tr>
+      <th>Equity(4 [DELL])</th>
+      <td>71.71%</td>
+    </tr>
+    <tr>
+      <th>Equity(1 [AMD])</th>
+      <td>71.05%</td>
+    </tr>
+    <tr>
+      <th>Equity(6 [INTC])</th>
+      <td>66.55%</td>
+    </tr>
+    <tr>
+      <th>Equity(5 [GPS])</th>
+      <td>62.13%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Top 10 short positions of all time</th>
+      <th>max</th>
+    </tr>
+    <tr>
+      <th>sid</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Top 10 positions of all time</th>
+      <th>max</th>
+    </tr>
+    <tr>
+      <th>sid</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Equity(3 [COST])</th>
+      <td>100.76%</td>
+    </tr>
+    <tr>
+      <th>Equity(7 [MMM])</th>
+      <td>92.38%</td>
+    </tr>
+    <tr>
+      <th>Equity(2 [CERN])</th>
+      <td>84.49%</td>
+    </tr>
+    <tr>
+      <th>Equity(4 [DELL])</th>
+      <td>71.71%</td>
+    </tr>
+    <tr>
+      <th>Equity(1 [AMD])</th>
+      <td>71.05%</td>
+    </tr>
+    <tr>
+      <th>Equity(6 [INTC])</th>
+      <td>66.55%</td>
+    </tr>
+    <tr>
+      <th>Equity(5 [GPS])</th>
+      <td>62.13%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>All positions ever held</th>
+      <th>max</th>
+    </tr>
+    <tr>
+      <th>sid</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Equity(3 [COST])</th>
+      <td>100.76%</td>
+    </tr>
+    <tr>
+      <th>Equity(7 [MMM])</th>
+      <td>92.38%</td>
+    </tr>
+    <tr>
+      <th>Equity(2 [CERN])</th>
+      <td>84.49%</td>
+    </tr>
+    <tr>
+      <th>Equity(4 [DELL])</th>
+      <td>71.71%</td>
+    </tr>
+    <tr>
+      <th>Equity(1 [AMD])</th>
+      <td>71.05%</td>
+    </tr>
+    <tr>
+      <th>Equity(6 [INTC])</th>
+      <td>66.55%</td>
+    </tr>
+    <tr>
+      <th>Equity(5 [GPS])</th>
+      <td>62.13%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_11.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_12.png" /></p>
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Summary stats</th>
+      <th>All trades</th>
+      <th>Long trades</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Total number of round_trips</th>
+      <td>3729.00</td>
+      <td>3729.00</td>
+    </tr>
+    <tr>
+      <th>Percent profitable</th>
+      <td>0.43</td>
+      <td>0.43</td>
+    </tr>
+    <tr>
+      <th>Winning round_trips</th>
+      <td>1616.00</td>
+      <td>1616.00</td>
+    </tr>
+    <tr>
+      <th>Losing round_trips</th>
+      <td>2113.00</td>
+      <td>2113.00</td>
+    </tr>
+    <tr>
+      <th>Even round_trips</th>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>PnL stats</th>
+      <th>All trades</th>
+      <th>Long trades</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Total profit</th>
+      <td>$61673.54</td>
+      <td>$61673.54</td>
+    </tr>
+    <tr>
+      <th>Gross profit</th>
+      <td>$376899.39</td>
+      <td>$376899.39</td>
+    </tr>
+    <tr>
+      <th>Gross loss</th>
+      <td>$-315225.85</td>
+      <td>$-315225.85</td>
+    </tr>
+    <tr>
+      <th>Profit factor</th>
+      <td>$1.20</td>
+      <td>$1.20</td>
+    </tr>
+    <tr>
+      <th>Avg. trade net profit</th>
+      <td>$16.54</td>
+      <td>$16.54</td>
+    </tr>
+    <tr>
+      <th>Avg. winning trade</th>
+      <td>$233.23</td>
+      <td>$233.23</td>
+    </tr>
+    <tr>
+      <th>Avg. losing trade</th>
+      <td>$-149.18</td>
+      <td>$-149.18</td>
+    </tr>
+    <tr>
+      <th>Ratio Avg. Win:Avg. Loss</th>
+      <td>$1.56</td>
+      <td>$1.56</td>
+    </tr>
+    <tr>
+      <th>Largest winning trade</th>
+      <td>$15541.78</td>
+      <td>$15541.78</td>
+    </tr>
+    <tr>
+      <th>Largest losing trade</th>
+      <td>$-12468.25</td>
+      <td>$-12468.25</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Duration stats</th>
+      <th>All trades</th>
+      <th>Long trades</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Avg duration</th>
+      <td>22 days 05:36:44.023330</td>
+      <td>22 days 05:36:44.023330</td>
+    </tr>
+    <tr>
+      <th>Median duration</th>
+      <td>18 days 00:00:00</td>
+      <td>18 days 00:00:00</td>
+    </tr>
+    <tr>
+      <th>Avg # round_trips per day</th>
+      <td>34.53</td>
+      <td>34.53</td>
+    </tr>
+    <tr>
+      <th>Avg # round_trips per month</th>
+      <td>725.08</td>
+      <td>725.08</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Return stats</th>
+      <th>All trades</th>
+      <th>Long trades</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Avg returns all round_trips</th>
+      <td>0.01%</td>
+      <td>0.01%</td>
+    </tr>
+    <tr>
+      <th>Avg returns winning</th>
+      <td>0.19%</td>
+      <td>0.19%</td>
+    </tr>
+    <tr>
+      <th>Avg returns losing</th>
+      <td>-0.13%</td>
+      <td>-0.13%</td>
+    </tr>
+    <tr>
+      <th>Median returns all round_trips</th>
+      <td>-0.00%</td>
+      <td>-0.00%</td>
+    </tr>
+    <tr>
+      <th>Median returns winning</th>
+      <td>0.03%</td>
+      <td>0.03%</td>
+    </tr>
+    <tr>
+      <th>Median returns losing</th>
+      <td>-0.01%</td>
+      <td>-0.01%</td>
+    </tr>
+    <tr>
+      <th>Largest winning trade</th>
+      <td>12.12%</td>
+      <td>12.12%</td>
+    </tr>
+    <tr>
+      <th>Largest losing trade</th>
+      <td>-9.15%</td>
+      <td>-9.15%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Symbol stats</th>
+      <th>Equity(1 [AMD])</th>
+      <th>Equity(2 [CERN])</th>
+      <th>Equity(3 [COST])</th>
+      <th>Equity(4 [DELL])</th>
+      <th>Equity(5 [GPS])</th>
+      <th>Equity(6 [INTC])</th>
+      <th>Equity(7 [MMM])</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Avg returns all round_trips</th>
+      <td>-0.00%</td>
+      <td>0.03%</td>
+      <td>0.03%</td>
+      <td>-0.04%</td>
+      <td>-0.01%</td>
+      <td>0.04%</td>
+      <td>0.01%</td>
+    </tr>
+    <tr>
+      <th>Avg returns winning</th>
+      <td>0.41%</td>
+      <td>0.22%</td>
+      <td>0.15%</td>
+      <td>0.15%</td>
+      <td>0.15%</td>
+      <td>0.19%</td>
+      <td>0.12%</td>
+    </tr>
+    <tr>
+      <th>Avg returns losing</th>
+      <td>-0.34%</td>
+      <td>-0.15%</td>
+      <td>-0.06%</td>
+      <td>-0.18%</td>
+      <td>-0.10%</td>
+      <td>-0.07%</td>
+      <td>-0.08%</td>
+    </tr>
+    <tr>
+      <th>Median returns all round_trips</th>
+      <td>-0.00%</td>
+      <td>-0.00%</td>
+      <td>-0.00%</td>
+      <td>-0.00%</td>
+      <td>-0.00%</td>
+      <td>-0.00%</td>
+      <td>-0.00%</td>
+    </tr>
+    <tr>
+      <th>Median returns winning</th>
+      <td>0.10%</td>
+      <td>0.03%</td>
+      <td>0.03%</td>
+      <td>0.02%</td>
+      <td>0.04%</td>
+      <td>0.06%</td>
+      <td>0.02%</td>
+    </tr>
+    <tr>
+      <th>Median returns losing</th>
+      <td>-0.02%</td>
+      <td>-0.01%</td>
+      <td>-0.01%</td>
+      <td>-0.01%</td>
+      <td>-0.01%</td>
+      <td>-0.00%</td>
+      <td>-0.01%</td>
+    </tr>
+    <tr>
+      <th>Largest winning trade</th>
+      <td>12.12%</td>
+      <td>5.91%</td>
+      <td>2.95%</td>
+      <td>2.48%</td>
+      <td>3.52%</td>
+      <td>2.32%</td>
+      <td>2.23%</td>
+    </tr>
+    <tr>
+      <th>Largest losing trade</th>
+      <td>-9.15%</td>
+      <td>-4.68%</td>
+      <td>-3.41%</td>
+      <td>-5.87%</td>
+      <td>-8.27%</td>
+      <td>-4.61%</td>
+      <td>-3.84%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Profitability (PnL / PnL total) per name</th>
+      <th>pnl</th>
+    </tr>
+    <tr>
+      <th>symbol</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Equity(6 [INTC])</th>
+      <td>0.44%</td>
+    </tr>
+    <tr>
+      <th>Equity(3 [COST])</th>
+      <td>0.40%</td>
+    </tr>
+    <tr>
+      <th>Equity(2 [CERN])</th>
+      <td>0.34%</td>
+    </tr>
+    <tr>
+      <th>Equity(7 [MMM])</th>
+      <td>0.18%</td>
+    </tr>
+    <tr>
+      <th>Equity(5 [GPS])</th>
+      <td>0.02%</td>
+    </tr>
+    <tr>
+      <th>Equity(1 [AMD])</th>
+      <td>-0.06%</td>
+    </tr>
+    <tr>
+      <th>Equity(4 [DELL])</th>
+      <td>-0.32%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<pre><code>&lt;matplotlib.figure.Figure at 0x7fd6f7c5a6a0&gt;
+</code></pre>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_20.png" /></p>
 <h2 id="suppressing-symbol-output">Suppressing symbol output</h2>
 <p>When sharing tear sheets it might be undesirable to display which symbols where used by a strategy. To suppress these in the tear sheet you can pass <code>hide_positions=True</code>.</p>
 <pre><code class="python">pf.create_full_tear_sheet(returns, positions=positions, transactions=transactions,
@@ -473,49 +1119,244 @@ Entire data end date: 2009-12-31
 
 Out-of-Sample Months: 2
 Backtest Months: 69
-                   Backtest  Out_of_Sample  All_History
-annual_return          0.12           0.06         0.12
-annual_volatility      0.26           0.22         0.25
-sharpe_ratio           0.47           0.28         0.48
-calmar_ratio           0.20           0.84         0.21
-stability              0.00           0.05         0.01
-max_drawdown          -0.60          -0.07        -0.60
-omega_ratio            1.09           1.05         1.09
-sortino_ratio          0.70           0.39         0.71
-skewness               0.28          -0.28         0.27
-kurtosis               4.10           0.46         4.05
-alpha                  0.09          -0.11         0.09
-beta                   0.81           1.18         0.81
-
-Worst Drawdown Periods
-   net drawdown in %  peak date valley date recovery date duration
-0              59.50 2007-11-06  2008-11-20           NaT      NaN
-1              22.33 2006-02-16  2006-08-31    2007-05-21      328
-2              12.52 2005-07-28  2005-10-12    2006-01-11      120
-3              11.28 2004-11-15  2005-04-28    2005-07-22      180
-4               9.44 2007-07-16  2007-08-06    2007-09-04       37
-
-
-2-sigma returns daily    -0.032
-2-sigma returns weekly   -0.065
-dtype: float64
-
-
-/home/wiecki/miniconda3/lib/python3.4/site-packages/matplotlib/cbook.py:137: MatplotlibDeprecationWarning: The "loc" positional argument to legend is deprecated. Please use the "loc" keyword instead.
-  warnings.warn(message, mplDeprecation, stacklevel=1)
 </code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_2.png" /></p>
-<pre><code>Stress Events
-          mean    min    max
-Lehmann -0.003 -0.044  0.044
-Aug07    0.003 -0.030  0.030
-Sept08  -0.006 -0.043  0.040
-2009Q1  -0.004 -0.050  0.034
-2009Q2   0.007 -0.038  0.062
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Performance statistics</th>
+      <th>All history</th>
+      <th>Backtest</th>
+      <th>Out of sample</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>annual_return</th>
+      <td>0.08</td>
+      <td>0.08</td>
+      <td>0.03</td>
+    </tr>
+    <tr>
+      <th>annual_volatility</th>
+      <td>0.25</td>
+      <td>0.26</td>
+      <td>0.22</td>
+    </tr>
+    <tr>
+      <th>sharpe_ratio</th>
+      <td>0.44</td>
+      <td>0.43</td>
+      <td>0.25</td>
+    </tr>
+    <tr>
+      <th>calmar_ratio</th>
+      <td>0.14</td>
+      <td>0.14</td>
+      <td>0.42</td>
+    </tr>
+    <tr>
+      <th>stability_of_timeseries</th>
+      <td>-0.01</td>
+      <td>-0.09</td>
+      <td>0.22</td>
+    </tr>
+    <tr>
+      <th>max_drawdown</th>
+      <td>-0.60</td>
+      <td>-0.60</td>
+      <td>-0.07</td>
+    </tr>
+    <tr>
+      <th>omega_ratio</th>
+      <td>1.08</td>
+      <td>1.08</td>
+      <td>1.04</td>
+    </tr>
+    <tr>
+      <th>sortino_ratio</th>
+      <td>0.65</td>
+      <td>0.64</td>
+      <td>0.34</td>
+    </tr>
+    <tr>
+      <th>skew</th>
+      <td>0.27</td>
+      <td>0.28</td>
+      <td>-0.28</td>
+    </tr>
+    <tr>
+      <th>kurtosis</th>
+      <td>4.05</td>
+      <td>4.10</td>
+      <td>0.47</td>
+    </tr>
+    <tr>
+      <th>tail_ratio</th>
+      <td>0.97</td>
+      <td>0.99</td>
+      <td>1.24</td>
+    </tr>
+    <tr>
+      <th>common_sense_ratio</th>
+      <td>1.05</td>
+      <td>1.07</td>
+      <td>1.27</td>
+    </tr>
+    <tr>
+      <th>information_ratio</th>
+      <td>0.02</td>
+      <td>0.02</td>
+      <td>-0.05</td>
+    </tr>
+    <tr>
+      <th>alpha</th>
+      <td>0.08</td>
+      <td>0.08</td>
+      <td>-0.11</td>
+    </tr>
+    <tr>
+      <th>beta</th>
+      <td>0.81</td>
+      <td>0.81</td>
+      <td>1.18</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Worst Drawdown Periods</th>
+      <th>net drawdown in %</th>
+      <th>peak date</th>
+      <th>valley date</th>
+      <th>recovery date</th>
+      <th>duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>59.91</td>
+      <td>2007-11-06</td>
+      <td>2008-11-20</td>
+      <td>NaT</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>22.79</td>
+      <td>2006-02-16</td>
+      <td>2006-08-31</td>
+      <td>2007-05-22</td>
+      <td>329</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>12.70</td>
+      <td>2005-07-28</td>
+      <td>2005-10-12</td>
+      <td>2006-01-11</td>
+      <td>120</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>11.65</td>
+      <td>2004-11-15</td>
+      <td>2005-04-28</td>
+      <td>2005-07-28</td>
+      <td>184</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>9.50</td>
+      <td>2007-07-16</td>
+      <td>2007-08-06</td>
+      <td>2007-09-13</td>
+      <td>44</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<pre><code>[-0.032 -0.069]
 </code></pre>
 <p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_4.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_5.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_6.png" /></p></div>
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Stress Events</th>
+      <th>mean</th>
+      <th>min</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Lehmann</th>
+      <td>-0.26%</td>
+      <td>-4.45%</td>
+      <td>4.41%</td>
+    </tr>
+    <tr>
+      <th>Aug07</th>
+      <td>0.34%</td>
+      <td>-2.96%</td>
+      <td>3.02%</td>
+    </tr>
+    <tr>
+      <th>Mar08</th>
+      <td>-0.44%</td>
+      <td>-3.10%</td>
+      <td>3.33%</td>
+    </tr>
+    <tr>
+      <th>Sept08</th>
+      <td>-0.64%</td>
+      <td>-4.35%</td>
+      <td>3.99%</td>
+    </tr>
+    <tr>
+      <th>2009Q1</th>
+      <td>-0.36%</td>
+      <td>-4.99%</td>
+      <td>3.35%</td>
+    </tr>
+    <tr>
+      <th>2009Q2</th>
+      <td>0.71%</td>
+      <td>-3.78%</td>
+      <td>6.15%</td>
+    </tr>
+    <tr>
+      <th>Low Volatility Bull Market</th>
+      <td>0.01%</td>
+      <td>-6.13%</td>
+      <td>6.40%</td>
+    </tr>
+    <tr>
+      <th>GFC Crash</th>
+      <td>-0.08%</td>
+      <td>-7.59%</td>
+      <td>9.70%</td>
+    </tr>
+    <tr>
+      <th>Recovery</th>
+      <td>0.32%</td>
+      <td>-3.78%</td>
+      <td>6.15%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_6.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_7.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_8.png" /></p></div>
             
         </div>
 

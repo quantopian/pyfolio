@@ -12,7 +12,7 @@
 	<title>Slippage analysis - pyfolio</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/highlight.css">
 
@@ -190,69 +190,362 @@ Entire data end date: 2009-12-31
 
 
 Backtest Months: 71
-                   Backtest
-annual_return          0.12
-annual_volatility      0.26
-sharpe_ratio           0.45
-calmar_ratio           0.20
-stability              0.00
-max_drawdown          -0.60
-omega_ratio            1.09
-sortino_ratio          0.66
-skewness               0.14
-kurtosis               5.88
-information_ratio      0.03
-alpha                  0.08
-beta                   0.83
-
-Worst Drawdown Periods
-   net drawdown in %  peak date valley date recovery date duration
-0              60.39 2007-11-06  2009-03-09           NaT      NaN
-1              24.10 2005-07-28  2006-09-07    2007-05-22      474
-4              11.89 2004-06-25  2004-08-12    2004-11-05       96
-2              10.87 2004-11-15  2005-04-18    2005-07-14      174
-3               9.51 2007-07-16  2007-08-06    2007-09-13       44
-
-
-2-sigma returns daily    -0.033
-2-sigma returns weekly   -0.068
-dtype: float64
 </code></pre>
-<p><img alt="png" src="../slippage_example_files/slippage_example_4_1.png" /></p>
-<pre><code>Stress Events
-                             mean    min    max
-Lehmann                    -0.003 -0.047  0.041
-Aug07                       0.003 -0.030  0.029
-Mar08                      -0.004 -0.033  0.034
-Sept08                     -0.007 -0.044  0.041
-2009Q1                     -0.004 -0.050  0.034
-2009Q2                      0.007 -0.040  0.061
-Low Volatility Bull Market  0.000 -0.061  0.064
-GFC Crash                  -0.001 -0.118  0.101
-Recovery                    0.004 -0.040  0.060
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Performance statistics</th>
+      <th>Backtest</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>annual_return</th>
+      <td>0.09</td>
+    </tr>
+    <tr>
+      <th>annual_volatility</th>
+      <td>0.26</td>
+    </tr>
+    <tr>
+      <th>sharpe_ratio</th>
+      <td>0.45</td>
+    </tr>
+    <tr>
+      <th>calmar_ratio</th>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>stability_of_timeseries</th>
+      <td>-0.04</td>
+    </tr>
+    <tr>
+      <th>max_drawdown</th>
+      <td>-0.60</td>
+    </tr>
+    <tr>
+      <th>omega_ratio</th>
+      <td>1.09</td>
+    </tr>
+    <tr>
+      <th>sortino_ratio</th>
+      <td>0.66</td>
+    </tr>
+    <tr>
+      <th>skew</th>
+      <td>0.14</td>
+    </tr>
+    <tr>
+      <th>kurtosis</th>
+      <td>5.88</td>
+    </tr>
+    <tr>
+      <th>tail_ratio</th>
+      <td>0.99</td>
+    </tr>
+    <tr>
+      <th>common_sense_ratio</th>
+      <td>1.08</td>
+    </tr>
+    <tr>
+      <th>information_ratio</th>
+      <td>0.03</td>
+    </tr>
+    <tr>
+      <th>alpha</th>
+      <td>0.08</td>
+    </tr>
+    <tr>
+      <th>beta</th>
+      <td>0.83</td>
+    </tr>
+  </tbody>
+</table>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Worst Drawdown Periods</th>
+      <th>net drawdown in %</th>
+      <th>peak date</th>
+      <th>valley date</th>
+      <th>recovery date</th>
+      <th>duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>60.39</td>
+      <td>2007-11-06</td>
+      <td>2009-03-09</td>
+      <td>NaT</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>24.10</td>
+      <td>2005-07-28</td>
+      <td>2006-09-07</td>
+      <td>2007-05-22</td>
+      <td>474</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>11.89</td>
+      <td>2004-06-25</td>
+      <td>2004-08-12</td>
+      <td>2004-11-05</td>
+      <td>96</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>10.87</td>
+      <td>2004-11-15</td>
+      <td>2005-04-18</td>
+      <td>2005-07-14</td>
+      <td>174</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>9.51</td>
+      <td>2007-07-16</td>
+      <td>2007-08-06</td>
+      <td>2007-09-13</td>
+      <td>44</td>
+    </tr>
+  </tbody>
+</table>
+
+<pre><code>[-0.033 -0.072]
 </code></pre>
-<p><img alt="png" src="../slippage_example_files/slippage_example_4_3.png" /></p>
-<pre><code>Top 10 long positions of all time (and max%)
-['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
-[ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
+<p><img alt="png" src="../slippage_example_files/slippage_example_4_4.png" /></p>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Stress Events</th>
+      <th>mean</th>
+      <th>min</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Lehmann</th>
+      <td>-0.27%</td>
+      <td>-4.70%</td>
+      <td>4.11%</td>
+    </tr>
+    <tr>
+      <th>Aug07</th>
+      <td>0.32%</td>
+      <td>-2.96%</td>
+      <td>2.92%</td>
+    </tr>
+    <tr>
+      <th>Mar08</th>
+      <td>-0.43%</td>
+      <td>-3.26%</td>
+      <td>3.36%</td>
+    </tr>
+    <tr>
+      <th>Sept08</th>
+      <td>-0.68%</td>
+      <td>-4.38%</td>
+      <td>4.08%</td>
+    </tr>
+    <tr>
+      <th>2009Q1</th>
+      <td>-0.36%</td>
+      <td>-5.02%</td>
+      <td>3.39%</td>
+    </tr>
+    <tr>
+      <th>2009Q2</th>
+      <td>0.74%</td>
+      <td>-4.03%</td>
+      <td>6.13%</td>
+    </tr>
+    <tr>
+      <th>Low Volatility Bull Market</th>
+      <td>0.01%</td>
+      <td>-6.07%</td>
+      <td>6.43%</td>
+    </tr>
+    <tr>
+      <th>GFC Crash</th>
+      <td>-0.09%</td>
+      <td>-11.76%</td>
+      <td>10.13%</td>
+    </tr>
+    <tr>
+      <th>Recovery</th>
+      <td>0.35%</td>
+      <td>-4.03%</td>
+      <td>6.01%</td>
+    </tr>
+  </tbody>
+</table>
 
+<p><img alt="png" src="../slippage_example_files/slippage_example_4_6.png" /></p>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Top 10 long positions of all time</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>COST</th>
+      <td>90.01%</td>
+    </tr>
+    <tr>
+      <th>DELL</th>
+      <td>85.73%</td>
+    </tr>
+    <tr>
+      <th>CERN</th>
+      <td>83.53%</td>
+    </tr>
+    <tr>
+      <th>MMM</th>
+      <td>82.09%</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>78.59%</td>
+    </tr>
+    <tr>
+      <th>AMD</th>
+      <td>75.76%</td>
+    </tr>
+    <tr>
+      <th>GPS</th>
+      <td>62.24%</td>
+    </tr>
+  </tbody>
+</table>
 
-Top 10 short positions of all time (and max%)
-['AMD' 'DELL' 'CERN' 'MMM' 'GPS' 'INTC' 'COST']
-[-0.301 -0.266 -0.255 -0.226 -0.201 -0.185 -0.164]
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Top 10 short positions of all time</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>AMD</th>
+      <td>-30.12%</td>
+    </tr>
+    <tr>
+      <th>DELL</th>
+      <td>-26.58%</td>
+    </tr>
+    <tr>
+      <th>CERN</th>
+      <td>-25.51%</td>
+    </tr>
+    <tr>
+      <th>MMM</th>
+      <td>-22.62%</td>
+    </tr>
+    <tr>
+      <th>GPS</th>
+      <td>-20.09%</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>-18.47%</td>
+    </tr>
+    <tr>
+      <th>COST</th>
+      <td>-16.44%</td>
+    </tr>
+  </tbody>
+</table>
 
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Top 10 positions of all time</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>COST</th>
+      <td>90.01%</td>
+    </tr>
+    <tr>
+      <th>DELL</th>
+      <td>85.73%</td>
+    </tr>
+    <tr>
+      <th>CERN</th>
+      <td>83.53%</td>
+    </tr>
+    <tr>
+      <th>MMM</th>
+      <td>82.09%</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>78.59%</td>
+    </tr>
+    <tr>
+      <th>AMD</th>
+      <td>75.76%</td>
+    </tr>
+    <tr>
+      <th>GPS</th>
+      <td>62.24%</td>
+    </tr>
+  </tbody>
+</table>
 
-Top 10 positions of all time (and max%)
-['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
-[ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>All positions ever held</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>COST</th>
+      <td>90.01%</td>
+    </tr>
+    <tr>
+      <th>DELL</th>
+      <td>85.73%</td>
+    </tr>
+    <tr>
+      <th>CERN</th>
+      <td>83.53%</td>
+    </tr>
+    <tr>
+      <th>MMM</th>
+      <td>82.09%</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>78.59%</td>
+    </tr>
+    <tr>
+      <th>AMD</th>
+      <td>75.76%</td>
+    </tr>
+    <tr>
+      <th>GPS</th>
+      <td>62.24%</td>
+    </tr>
+  </tbody>
+</table>
 
-
-All positions ever held
-['COST' 'DELL' 'CERN' 'MMM' 'INTC' 'AMD' 'GPS']
-[ 0.9    0.857  0.835  0.821  0.786  0.758  0.622]
-</code></pre>
-<p><img alt="png" src="../slippage_example_files/slippage_example_4_5.png" /></p>
-<p><img alt="png" src="../slippage_example_files/slippage_example_4_6.png" /></p></div>
+<p><img alt="png" src="../slippage_example_files/slippage_example_4_11.png" /></p>
+<p><img alt="png" src="../slippage_example_files/slippage_example_4_12.png" /></p></div>
             
         </div>
 

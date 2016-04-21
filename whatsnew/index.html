@@ -12,7 +12,7 @@
 	<title>Releases - pyfolio</title>
 
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/highlight.css">
 
@@ -152,6 +152,8 @@
     
         <li class="main active"><a href="#whats-new">What's New</a></li>
         
+            <li><a href="#v050-april-21-2016">v0.5.0 (April 21, 2016)</a></li>
+        
             <li><a href="#v040-dec-10-2015">v0.4.0 (Dec 10, 2015)</a></li>
         
             <li><a href="#v031-nov-12-2015">v0.3.1 (Nov 12, 2015)</a></li>
@@ -167,15 +169,31 @@
 
 <h1 id="whats-new">What's New</h1>
 <p>These are new features and improvements of note in each release.</p>
+<h2 id="v050-april-21-2016">v0.5.0 (April 21, 2016)</h2>
+<p>This is a major release from <code>0.4.0</code> that includes many new analyses and features. We recommend that all users upgrade to this new version. Also update your dependencies, specifically, <code>pandas&gt;=0.18.0</code>, <code>seaborn&gt;=0.8.0</code> and <code>zipline&gt;=0.8.4</code>.</p>
+<h3 id="new-features">New features</h3>
+<ul>
+<li>New capacity tear-sheet to assess how much capital can be traded on a strategy <a href="https://github.com/quantopian/pyfolio/pull/284">PR284</a>. <a href="https://github.com/a-campbell">Andrew Campbell</a></li>
+<li>Bootstrap analysis to assess uncertainty in performance metrics <a href="https://github.com/quantopian/pyfolio/pull/261">PR261</a><a href="https://github.com/twiecki">Thomas Wiecki</a></li>
+<li>Refactored round-trip analysis to be more general and have better output. Now does full portfolio reconstruction to match trades <a href="https://github.com/quantopian/pyfolio/pull/293">PR293</a>. <a href="https://github.com/twiecki">Thomas Wiecki</a>, <a href="https://github.com/a-campbell">Andrew Campbell</a></li>
+<li>Prettier printing of tables in notebooks <a href="https://github.com/quantopian/pyfolio/pull/289">PR289</a>. <a href="https://github.com/twiecki">Thomas Wiecki</a></li>
+<li>Faster max-drawdown calculation <a href="https://github.com/quantopian/pyfolio/pull/281">PR281</a>. <a href="https://github.com/devinstevenson">Devin Stevenson</a></li>
+<li>New metrics tail-ratio and common sense ratio <a href="https://github.com/quantopian/pyfolio/pull/276">PR276</a>. <a href="https://github.com/twiecki">Thomas Wiecki</a></li>
+<li>Log-scaled cumulative returns plot and raw returns plot <a href="https://github.com/quantopian/pyfolio/pull/294">PR294</a>. <a href="https://github.com/twiecki">Thomas Wiecki</a></li>
+</ul>
+<h3 id="bug-fixes">Bug fixes</h3>
+<ul>
+<li>Many depracation fixes for Pandas 0.18.0, seaborn 0.8.0, and zipline 0.8.4</li>
+</ul>
 <h2 id="v040-dec-10-2015">v0.4.0 (Dec 10, 2015)</h2>
 <p>This is a major release from 0.3.1 that includes new features and quite a few bug fixes. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features">New features</h3>
+<h3 id="new-features_1">New features</h3>
 <ul>
 <li>Round-trip analysis <a href="https://github.com/quantopian/pyfolio/pull/210">PR210</a> Andrew, Thomas</li>
 <li>Improved cone to forecast returns that uses a bootstrap instead of linear forecasting <a href="https://github.com/quantopian/pyfolio/pull/233">PR233</a> Andrew, Thomas</li>
 <li>Plot max and median long/short exposures <a href="https://github.com/quantopian/pyfolio/pull/237">PR237</a> Andrew</li>
 </ul>
-<h3 id="bug-fixes">Bug fixes</h3>
+<h3 id="bug-fixes_1">Bug fixes</h3>
 <ul>
 <li>Sharpe ratio was calculated incorrectly <a href="https://github.com/quantopian/pyfolio/pull/219">PR219</a> Thomas, Justin</li>
 <li>annual_return() now only computes CAGR in the correct way <a href="https://github.com/quantopian/pyfolio/pull/234">PR234</a> Justin</li>
@@ -186,13 +204,13 @@
 </ul>
 <h2 id="v031-nov-12-2015">v0.3.1 (Nov 12, 2015)</h2>
 <p>This is a minor release from 0.3 that includes mostly bugfixes but also some new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_1">New features</h3>
+<h3 id="new-features_2">New features</h3>
 <ul>
 <li>Add Information Ratio <a href="https://github.com/quantopian/pyfolio/pull/194">PR194</a> by @MridulS</li>
 <li>Bayesian tear-sheet now accepts 'Fama-French' option to do Bayesian multivariate regression against Fama-French risk factors <a href="https://github.com/quantopian/pyfolio/pull/200">PR200</a> by Shane Bussman</li>
 <li>Plotting of monthly returns <a href="https://github.com/quantopian/pyfolio/pull/195">PR195</a></li>
 </ul>
-<h3 id="bug-fixes_1">Bug fixes</h3>
+<h3 id="bug-fixes_2">Bug fixes</h3>
 <ul>
 <li><code>pos.get_percent_alloc</code> was not handling short allocations correctly <a href="https://github.com/quantopian/pyfolio/pull/201">PR201</a></li>
 <li>UTC bug with cached Fama-French factors <a href="https://github.com/quantopian/pyfolio/commit/709553a55b5df7c908d17f443cb17b51854a65be">commit</a></li>
@@ -215,7 +233,7 @@
 </ul>
 <h2 id="v03-oct-23-2015">v0.3 (Oct 23, 2015)</h2>
 <p>This is a major release from 0.2 that includes many exciting new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_2">New features</h3>
+<h3 id="new-features_3">New features</h3>
 <ul>
 <li>Sector exposures: sum positions by sector given a dictionary or series of symbol to sector mappings <a href="https://github.com/quantopian/pyfolio/pull/166">PR166</a></li>
 <li>Ability to make cones with multiple shades stdev regions <a href="https://github.com/quantopian/pyfolio/pull/168">PR168</a></li>
@@ -223,20 +241,20 @@
 <li>Stochastic volatility model in Bayesian tear sheet <a href="https://github.com/quantopian/pyfolio/pull/174">PR174</a></li>
 <li>Ability to suppress display of position information <a href="https://github.com/quantopian/pyfolio/pull/177">PR177</a></li>
 </ul>
-<h3 id="bug-fixes_2">Bug fixes</h3>
+<h3 id="bug-fixes_3">Bug fixes</h3>
 <ul>
 <li>Various fixes to make pyfolio pandas 0.17 compatible</li>
 </ul>
 <h2 id="v02-oct-16-2015">v0.2 (Oct 16, 2015)</h2>
 <p>This is a major release from 0.1 that includes mainly bugfixes and refactorings but also some new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_3">New features</h3>
+<h3 id="new-features_4">New features</h3>
 <ul>
 <li>Volatility matched cumulative returns plot <a href="https://github.com/quantopian/pyfolio/pull/126">PR126</a>.</li>
 <li>Allow for different periodicity (annualization factors) in the annual_() methods <a href="https://github.com/quantopian/pyfolio/pull/164">PR164</a>.</li>
 <li>Users can supply their own interesting periods <a href="https://github.com/quantopian/pyfolio/pull/163">PR163</a>.</li>
 <li>Ability to weight a portfolio of holdings by a metric valued <a href="https://github.com/quantopian/pyfolio/pull/161">PR161</a>.</li>
 </ul>
-<h3 id="bug-fixes_3">Bug fixes</h3>
+<h3 id="bug-fixes_4">Bug fixes</h3>
 <ul>
 <li>Fix drawdown overlaps <a href="https://github.com/quantopian/pyfolio/pull/150">PR150</a>.</li>
 <li>Monthly returns distribution should not stack by year <a href="https://github.com/quantopian/pyfolio/pull/162">PR162</a>.</li>
