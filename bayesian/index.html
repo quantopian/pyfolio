@@ -246,21 +246,64 @@ Total runtime was 543.62 seconds.
 <pre><code class="python">help(pf.bayesian.run_model)
 </code></pre>
 
+<pre><code>Help on function run_model in module pyfolio.bayesian:
+
+run_model(model, returns_train, returns_test=None, bmark=None, samples=500, ppc=False)
+    Run one of the Bayesian models.
+
+    Parameters
+    ----------
+    model : {'alpha_beta', 't', 'normal', 'best'}
+        Which model to run
+    returns_train : pd.Series
+        Timeseries of simple returns
+    returns_test : pd.Series (optional)
+        Out-of-sample returns. Datetimes in returns_test will be added to
+        returns_train as missing values and predictions will be generated
+        for them.
+    bmark : pd.Series or pd.DataFrame (optional)
+        Only used for alpha_beta to estimate regression coefficients.
+        If bmark has more recent returns than returns_train, these dates
+        will be treated as missing values and predictions will be
+        generated for them taking market correlations into account.
+    samples : int (optional)
+        Number of posterior samples to draw.
+    ppc : boolean (optional)
+        Whether to run a posterior predictive check. Will generate
+        samples of length returns_test.  Returns a second argument
+        that contains the PPC of shape samples x len(returns_test).
+
+    Returns
+    -------
+    trace : pymc3.sampling.BaseTrace object
+        A PyMC3 trace object that contains samples for each parameter
+        of the posterior.
+
+    ppc : numpy.array (if ppc==True)
+       PPC of shape samples x len(returns_test).
+</code></pre>
 <p>For example, to run a model that assumes returns to be normally distributed, you can call:</p>
 <pre><code class="python"># Run model that assumes returns to be T-distributed
 trace = pf.bayesian.run_model('t', stock_rets)
 </code></pre>
 
+<pre><code>Applied log-transform to volatility and added transformed volatility_log to model.
+Applied log-transform to nu_minus_two and added transformed nu_minus_two_log to model.
+ [-----------------100%-----------------] 500 of 500 complete in 1.9 sec
+</code></pre>
 <p>The returned trace object can be directly inquired. For example might we ask what the probability of the Sharpe ratio being larger than 0 is by checking what percentage of posterior samples of the Sharpe ratio are &gt; 0:</p>
 <pre><code class="python"># Check what frequency of samples from the sharpe posterior are above 0.
 print('Probability of Sharpe ratio &gt; 0 = {:3}%'.format((trace['sharpe'] &gt; 0).mean() * 100))
 </code></pre>
 
+<pre><code>Probability of Sharpe ratio &gt; 0 = 92.0%
+</code></pre>
 <p>But we can also interact with it like with any other <code>pymc3</code> trace:</p>
 <pre><code class="python">import pymc3 as pm
 pm.traceplot(trace);
 </code></pre>
 
+<p><img alt="png" src="../bayesian_files/bayesian_17_0.png" /></p>
 <h2 id="further-reading">Further reading</h2>
 <p>For more information on Bayesian statistics, check out these resources:</p>
 <ul>
