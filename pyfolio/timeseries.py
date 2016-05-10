@@ -1067,15 +1067,10 @@ def gen_drawdown_table(returns, top=10):
         df_drawdowns.loc[i, 'net drawdown in %'] = (
             (df_cum.loc[peak] - df_cum.loc[valley]) / df_cum.loc[peak]) * 100
 
-    df_drawdowns['peak date'] = pd.to_datetime(
-        df_drawdowns['peak date'],
-        unit='D')
-    df_drawdowns['valley date'] = pd.to_datetime(
-        df_drawdowns['valley date'],
-        unit='D')
+    df_drawdowns['peak date'] = pd.to_datetime(df_drawdowns['peak date'])
+    df_drawdowns['valley date'] = pd.to_datetime(df_drawdowns['valley date'])
     df_drawdowns['recovery date'] = pd.to_datetime(
-        df_drawdowns['recovery date'],
-        unit='D')
+        df_drawdowns['recovery date'])
 
     return df_drawdowns
 
