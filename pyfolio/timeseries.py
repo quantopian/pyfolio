@@ -938,7 +938,7 @@ def get_max_drawdown_underwater(underwater):
 
     """
 
-    valley = np.argmax(underwater)  # end of the period
+    valley = np.argmin(underwater)  # end of the period
     # Find first 0
     peak = underwater[:valley][underwater[:valley] == 0].index[-1]
     # Find last 0
@@ -976,7 +976,7 @@ def get_max_drawdown(returns):
     returns = returns.copy()
     df_cum = cum_returns(returns, 1.0)
     running_max = np.maximum.accumulate(df_cum)
-    underwater = (running_max - df_cum) / running_max
+    underwater = df_cum / running_max - 1
     return get_max_drawdown_underwater(underwater)
 
 
@@ -1001,7 +1001,7 @@ def get_top_drawdowns(returns, top=10):
     returns = returns.copy()
     df_cum = cum_returns(returns, 1.0)
     running_max = np.maximum.accumulate(df_cum)
-    underwater = running_max - df_cum
+    underwater = df_cum / running_max - 1
 
     drawdowns = []
     for t in range(top):
