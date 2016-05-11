@@ -176,10 +176,10 @@ class RoundTripTestCase(TestCase):
 
         test_txn = read_csv(gzip.open(
                             __location__ + '/test_data/test_txn.csv.gz'),
-                            index_col=0, parse_dates=0)
+                            index_col=0, parse_dates=True)
         test_pos = read_csv(gzip.open(
                             __location__ + '/test_data/test_pos.csv.gz'),
-                            index_col=0, parse_dates=0)
+                            index_col=0, parse_dates=True)
 
         transactions_closed = add_closing_transactions(test_pos, test_txn)
         transactions_closed['txn_dollars'] = transactions_closed.amount * \
