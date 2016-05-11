@@ -15,6 +15,71 @@ DECIMAL_PLACES = 8
 
 
 class TestDrawdown(TestCase):
+    drawdown_list = np.array(
+        [100, 90, 75]
+    ) / 10.
+    dt = pd.date_range('2000-1-3', periods=3, freq='D')
+
+    drawdown_serie = pd.Series(drawdown_list, index=dt)
+
+    @parameterized.expand([
+        (drawdown_serie,)
+    ])
+    def test_get_max_drawdown_begins_first_day(self, px):
+        rets = px.pct_change()
+        drawdowns = timeseries.gen_drawdown_table(rets, top=1)
+        self.assertEqual(drawdowns.loc[0, 'net drawdown in %'], 25)
+
+    drawdown_list = np.array(
+        [100, 110, 120, 150, 180, 200, 100, 120,
+         160, 180, 200, 300, 400, 500, 600, 800,
+         900, 1000, 650, 600]
+    ) / 10.
+    dt = pd.date_range('2000-1-3', periods=20, freq='D')
+
+    drawdown_serie = pd.Series(drawdown_list, index=dt)
+
+    @parameterized.expand([
+        (drawdown_serie,
+         pd.Timestamp('2000-01-08'),
+         pd.Timestamp('2000-01-09'),
+         pd.Timestamp('2000-01-13'),
+         50,
+         pd.Timestamp('2000-01-20'),
+         pd.Timestamp('2000-01-22'),
+         None,
+         40
+         )
+    ])
+    def test_gen_drawdown_table_relative(
+            self, px,
+            first_expected_peak, first_expected_valley,
+            first_expected_recovery, first_net_drawdown,
+            second_expected_peak, second_expected_valley,
+            second_expected_recovery, second_net_drawdown
+            ):
+
+        rets = px.pct_change()
+
+        drawdowns = timeseries.gen_drawdown_table(rets, top=2)
+
+        self.assertEqual(np.round(drawdowns.loc[0, 'net drawdown in %']),
+                         first_net_drawdown)
+        self.assertEqual(drawdowns.loc[0, 'peak date'],
+                         first_expected_peak)
+        self.assertEqual(drawdowns.loc[0, 'valley date'],
+                         first_expected_valley)
+        self.assertEqual(drawdowns.loc[0, 'recovery date'],
+                         first_expected_recovery)
+
+        self.assertEqual(np.round(drawdowns.loc[1, 'net drawdown in %']),
+                         second_net_drawdown)
+        self.assertEqual(drawdowns.loc[1, 'peak date'],
+                         second_expected_peak)
+        self.assertEqual(drawdowns.loc[1, 'valley date'],
+                         second_expected_valley)
+        self.assertTrue(pd.isnull(drawdowns.loc[1, 'recovery date']))
+
     px_list_1 = np.array(
         [100, 120, 100, 80, 70, 110, 180, 150]) / 100.  # Simple
     px_list_2 = np.array(
