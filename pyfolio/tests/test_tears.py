@@ -37,20 +37,20 @@ class PositionsTestCase(TestCase):
     test_returns = read_csv(
         gzip.open(
             __location__ + '/test_data/test_returns.csv.gz'),
-        index_col=0, parse_dates=0)
+        index_col=0, parse_dates=True)
     test_returns = to_series(to_utc(test_returns))
     test_gross_lev = read_csv(
         gzip.open(
             __location__ + '/test_data/test_gross_lev.csv.gz'),
-        index_col=0, parse_dates=0)
+        index_col=0, parse_dates=True)
     test_gross_lev = to_series(to_utc(test_gross_lev))
     test_txn = to_utc(read_csv(
         gzip.open(
             __location__ + '/test_data/test_txn.csv.gz'),
-        index_col=0, parse_dates=0))
+        index_col=0, parse_dates=True))
     test_pos = to_utc(read_csv(
         gzip.open(__location__ + '/test_data/test_pos.csv.gz'),
-        index_col=0, parse_dates=0))
+        index_col=0, parse_dates=True))
 
     @parameterized.expand([({},),
                            ({'slippage': 1},),
