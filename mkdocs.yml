@@ -6,11 +6,11 @@ pages:
 - Overview: 'index.md'
 - Releases: 'whatsnew.md'
 - Tutorial:
-  - 'Single stock': 'single_stock_example.md'
-  - 'Zipline algorithm': 'zipline_algo_example.md'
-  - 'Bayesian analysis': 'bayesian.md'
-  - 'Sector analysis': 'sector_mapping_example.md'
-  - 'Round trip analysis': 'round_trip_example.md'
-  - 'Slippage analysis': 'slippage_example.md'
+  - 'Single stock': 'notebooks/single_stock_example.md'
+  - 'Zipline algorithm': 'notebooks/zipline_algo_example.md'
+  - 'Bayesian analysis': 'notebooks/bayesian.md'
+  - 'Sector analysis': 'notebooks/sector_mapping_example.md'
+  - 'Round trip analysis': 'notebooks/round_trip_example.md'
+  - 'Slippage analysis': 'notebooks/slippage_example.md'
 
 extra_css: [extra.css]
