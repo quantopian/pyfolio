@@ -1,3 +1,5 @@
+![pyfolio](https://media.quantopian.com/logos/open_source/pyfolio-logo-03.png "pyfolio")
+
 # pyfolio
 
 [![Join the chat at https://gitter.im/quantopian/pyfolio](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/quantopian/pyfolio?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
