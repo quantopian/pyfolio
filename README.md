@@ -27,6 +27,15 @@ See also [slides of a recent talk about pyfolio.](http://nbviewer.ipython.org/fo
 
 ## Installation
 
+### (Optional) Virtual Environment
+
+For development on pyfolio itself, you might want to use a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) to avoid dependency conflicts between `pyfolio` and other python projects you have. To get set up with a virtual env, run:
+```bash
+
+mkvirtualenv pyfolio
+```
+before running the install commands below.
+
 To install `pyfolio` via `pip` issue the following command:
 
 ```bash
