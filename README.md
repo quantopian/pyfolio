@@ -27,6 +27,15 @@ See also [slides of a recent talk about pyfolio.](http://nbviewer.ipython.org/fo
 
 ## Installation
 
+### (Optional) Virtual Environment
+
+For development on pyfolio itself, you might want to use a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) to avoid dependency conflicts between `pyfolio` and other python projects you have. To get set up with a virtual env, run:
+```bash
+
+mkvirtualenv pyfolio
+```
+before running the install commands below.
+
 To install `pyfolio` via `pip` issue the following command:
 
 ```bash
@@ -46,10 +55,36 @@ the IPython kernel when you make changes.
  - [pymc3](https://github.com/pymc-devs/pymc3) (optional)
  - [zipline](https://github.com/quantopian/zipline) (optional; requires master, *not* 0.7.0)
 
+Some of Pyfolio's functionality, such as the [Bayesian tearsheet](https://github.com/quantopian/pyfolio/blob/master/pyfolio/examples/bayesian.ipynb), requires PyMC3 and Theano. To get set up, you can run:
+
+```bash
+pip install theano
+```
+
+```bash
+pip install git+https://github.com/pymc-devs/pymc3
+```
+
 If you are on OSX and using a non-framework build of python you may need to set your backend:
 ``` bash
 echo "backend: TkAgg" > ~/.matplotlib/matplotlibrc
 ```
+
+## Usage
+
+A good way to get started is to run the examples in a [Jupyter notebook](http://jupyter.org/).
+
+To get set up with an example, you can:
+
+Run a Jupyter notebook server via:
+
+```bash
+jupyter notebook
+```
+
+From the notebook list page(usually found at `http://localhost:8888/`), navigate over to the examples directory, and open any file with a .ipynb extension.
+
+Execute the code in a notebook cell by clicking on it and hitting Shift+Enter.
 
 ## Questions?
 
