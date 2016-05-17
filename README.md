@@ -46,6 +46,16 @@ the IPython kernel when you make changes.
  - [pymc3](https://github.com/pymc-devs/pymc3) (optional)
  - [zipline](https://github.com/quantopian/zipline) (optional; requires master, *not* 0.7.0)
 
+Some of Pyfolio's functionality, such as the [Bayesian tearsheet](https://github.com/quantopian/pyfolio/blob/master/pyfolio/examples/bayesian.ipynb), requires PyMC3 and Theano. To get set up, you can run:
+
+```bash
+pip install theano
+```
+
+```bash
+pip install git+https://github.com/pymc-devs/pymc3
+```
+
 If you are on OSX and using a non-framework build of python you may need to set your backend:
 ``` bash
 echo "backend: TkAgg" > ~/.matplotlib/matplotlibrc
