@@ -70,6 +70,22 @@ If you are on OSX and using a non-framework build of python you may need to set 
 echo "backend: TkAgg" > ~/.matplotlib/matplotlibrc
 ```
 
+## Usage
+
+A good way to get started is to run the examples in a [Jupyter notebook](http://jupyter.org/).
+
+To get set up with an example, you can:
+
+Run a Jupyter notebook server via:
+
+```bash
+jupyter notebook
+```
+
+From the notebook list page(usually found at `http://localhost:8888/`), navigate over to the examples directory, and open any file with a .ipynb extension.
+
+Execute the code in a notebook cell by clicking on it and hitting Shift+Enter.
+
 ## Questions?
 
 If you find a bug, feel free to open an issue on our github tracker.
