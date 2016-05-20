@@ -62,7 +62,7 @@ def get_long_short_pos(positions):
     net_liquidation = longs - shorts + cash
     df_pos = pd.DataFrame({'long': longs.divide(net_liquidation, axis='index'),
                            'short': shorts.divide(net_liquidation,
-                            axis='index')})
+                                                  axis='index')})
     df_pos['net exposure'] = df_pos['long'] + df_pos['short']
     return df_pos
 
