@@ -911,9 +911,8 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
         ax = plt.gca()
 
     df_long_short = pos.get_long_short_pos(positions_alloc)
-
     df_long_short.plot(
-        kind='area', color=['lightblue', 'green'], alpha=1.0,
+        kind='line', style=['-g', '-r', '--k'], alpha=1.0,
         ax=ax, **kwargs)
     df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
