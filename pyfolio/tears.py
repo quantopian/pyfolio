@@ -374,6 +374,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         returns,
         df_weekly,
         df_monthly,
+        live_start_date=live_start_date,
         ax=ax_return_quantiles)
 
     if bootstrap:

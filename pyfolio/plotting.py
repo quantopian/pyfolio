@@ -1082,7 +1082,9 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
     return ax
 
 
-def plot_return_quantiles(returns, df_weekly, df_monthly, ax=None, **kwargs):
+def plot_return_quantiles(returns, df_weekly, df_monthly,
+                          live_start_date=None,
+                          ax=None, **kwargs):
     """Creates a box plot of daily, weekly, and monthly return
     distributions.
 
@@ -1097,6 +1099,9 @@ def plot_return_quantiles(returns, df_weekly, df_monthly, ax=None, **kwargs):
     df_monthly : pd.Series
         Monthly returns of the strategy, noncumulative.
          - See timeseries.aggregate_returns.
+    live_start_date : datetime, optional
+        The point in time when the strategy began live trading, after
+        its backtest period.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -1112,8 +1117,29 @@ def plot_return_quantiles(returns, df_weekly, df_monthly, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    sns.boxplot(data=[returns, df_weekly, df_monthly],
-                ax=ax, **kwargs)
+    if live_start_date is None:
+        sns.boxplot(data=[returns, df_weekly, df_monthly],
+                    ax=ax, **kwargs)
+    else:
+        week = live_start_date.week
+        month = live_start_date.month
+        year = live_start_date.year
+
+        is_returns = returns.loc[returns.index < live_start_date]
+        oos_returns = returns.loc[returns.index >= live_start_date]
+
+        is_weekly = df_weekly.loc[df_weekly.index[0]:(year, week)]
+        oos_weekly = df_weekly.loc[(year, week):df_weekly.index[-1]]
+
+        is_monthly = df_monthly.loc[df_monthly.index[0]:(year, month)]
+        oos_monthly = df_monthly.loc[(year, month): df_monthly.index[-1]]
+
+        sns.boxplot(data=[is_returns, is_weekly, is_monthly], ax=ax, **kwargs)
+        sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly],
+                      ax=ax,
+                      color="red",
+                      marker="d",
+                      **kwargs)
     ax.set_xticklabels(['daily', 'weekly', 'monthly'])
     ax.set_title('Return quantiles')
     return ax
