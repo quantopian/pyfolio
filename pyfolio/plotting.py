@@ -1105,7 +1105,7 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
         The axes that were plotted on.
 
     """
-    
+
     if ax is None:
         ax = plt.gca()
 
