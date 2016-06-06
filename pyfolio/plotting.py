@@ -1109,8 +1109,8 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    is_returns = returns if live_start_date is None else \
-                 returns.loc[returns.index < live_start_date]
+    is_returns = returns if live_start_date is None \
+        else returns.loc[returns.index < live_start_date]
     is_weekly = timeseries.aggregate_returns(is_returns, 'weekly')
     is_monthly = timeseries.aggregate_returns(is_returns, 'monthly')
     sns.boxplot(data=[is_returns, is_weekly, is_monthly], ax=ax, **kwargs)
@@ -1119,7 +1119,6 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
         oos_returns = returns.loc[returns.index >= live_start_date]
         oos_weekly = timeseries.aggregate_returns(oos_returns, 'weekly')
         oos_monthly = timeseries.aggregate_returns(oos_returns, 'monthly')
-    
         sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly], ax=ax,
                       color="red", marker="d", **kwargs)
 
