@@ -360,11 +360,8 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
     plotting.show_worst_drawdown_periods(returns)
 
-    df_weekly = timeseries.aggregate_returns(returns, 'weekly')
-    df_monthly = timeseries.aggregate_returns(returns, 'monthly')
-
     print('\n')
-    plotting.show_return_range(returns, df_weekly)
+    plotting.show_return_range(returns)
 
     plotting.plot_monthly_returns_heatmap(returns, ax=ax_monthly_heatmap)
     plotting.plot_annual_returns(returns, ax=ax_annual_returns)
@@ -372,8 +369,6 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
     plotting.plot_return_quantiles(
         returns,
-        df_weekly,
-        df_monthly,
         live_start_date=live_start_date,
         ax=ax_return_quantiles)
 

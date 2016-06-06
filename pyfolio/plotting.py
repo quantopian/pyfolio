@@ -1082,9 +1082,7 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
     return ax
 
 
-def plot_return_quantiles(returns, df_weekly, df_monthly,
-                          live_start_date=None,
-                          ax=None, **kwargs):
+def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
     """Creates a box plot of daily, weekly, and monthly return
     distributions.
 
@@ -1093,12 +1091,6 @@ def plot_return_quantiles(returns, df_weekly, df_monthly,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    df_weekly : pd.Series
-        Weekly returns of the strategy, noncumulative.
-         - See timeseries.aggregate_returns.
-    df_monthly : pd.Series
-        Monthly returns of the strategy, noncumulative.
-         - See timeseries.aggregate_returns.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
@@ -1113,39 +1105,30 @@ def plot_return_quantiles(returns, df_weekly, df_monthly,
         The axes that were plotted on.
 
     """
-
+    
     if ax is None:
         ax = plt.gca()
 
-    if live_start_date is None:
-        sns.boxplot(data=[returns, df_weekly, df_monthly],
-                    ax=ax, **kwargs)
-    else:
-        week = live_start_date.week
-        month = live_start_date.month
-        year = live_start_date.year
+    is_returns = returns if live_start_date is None else \
+                 returns.loc[returns.index < live_start_date]
+    is_weekly = timeseries.aggregate_returns(is_returns, 'weekly')
+    is_monthly = timeseries.aggregate_returns(is_returns, 'monthly')
+    sns.boxplot(data=[is_returns, is_weekly, is_monthly], ax=ax, **kwargs)
 
-        is_returns = returns.loc[returns.index < live_start_date]
+    if live_start_date is not None:
         oos_returns = returns.loc[returns.index >= live_start_date]
+        oos_weekly = timeseries.aggregate_returns(oos_returns, 'weekly')
+        oos_monthly = timeseries.aggregate_returns(oos_returns, 'monthly')
+    
+        sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly], ax=ax,
+                      color="red", marker="d", **kwargs)
 
-        is_weekly = df_weekly.loc[df_weekly.index[0]:(year, week)]
-        oos_weekly = df_weekly.loc[(year, week):df_weekly.index[-1]]
-
-        is_monthly = df_monthly.loc[df_monthly.index[0]:(year, month)]
-        oos_monthly = df_monthly.loc[(year, month): df_monthly.index[-1]]
-
-        sns.boxplot(data=[is_returns, is_weekly, is_monthly], ax=ax, **kwargs)
-        sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly],
-                      ax=ax,
-                      color="red",
-                      marker="d",
-                      **kwargs)
     ax.set_xticklabels(['daily', 'weekly', 'monthly'])
     ax.set_title('Return quantiles')
     return ax
 
 
-def show_return_range(returns, df_weekly):
+def show_return_range(returns):
     """
     Print monthly return and weekly return standard deviations.
 
@@ -1154,10 +1137,9 @@ def show_return_range(returns, df_weekly):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    df_weekly : pd.Series
-        Weekly returns of the strategy, noncumulative.
-         - See timeseries.aggregate_returns.
     """
+
+    df_weekly = timeseries.aggregate_returns(returns, 'weekly')
 
     two_sigma_daily = returns.mean() - 2 * returns.std()
     two_sigma_weekly = df_weekly.mean() - 2 * df_weekly.std()
