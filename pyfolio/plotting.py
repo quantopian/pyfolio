@@ -1082,17 +1082,7 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
     return ax
 
 
-<<<<<<< 7525aa05d72e3bb99c88339f8eeeac048f7bada6
-<<<<<<< 764bcb955865fc4d32a549a0ab90c29097170f21
 def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
-=======
-def plot_return_quantiles(returns, df_weekly, df_monthly,
-                          live_start_date=None,
-                          ax=None, **kwargs):
->>>>>>> Overlay OOS datapoints in boxplot
-=======
-def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
->>>>>>> Moved df_weekly and df_monthly variable definitions to plotting functions
     """Creates a box plot of daily, weekly, and monthly return
     distributions.
 
@@ -1101,18 +1091,6 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-<<<<<<< 7525aa05d72e3bb99c88339f8eeeac048f7bada6
-<<<<<<< 764bcb955865fc4d32a549a0ab90c29097170f21
-=======
-    df_weekly : pd.Series
-        Weekly returns of the strategy, noncumulative.
-         - See timeseries.aggregate_returns.
-    df_monthly : pd.Series
-        Monthly returns of the strategy, noncumulative.
-         - See timeseries.aggregate_returns.
->>>>>>> Overlay OOS datapoints in boxplot
-=======
->>>>>>> Moved df_weekly and df_monthly variable definitions to plotting functions
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
@@ -1135,7 +1113,9 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
         else returns.loc[returns.index < live_start_date]
     is_weekly = timeseries.aggregate_returns(is_returns, 'weekly')
     is_monthly = timeseries.aggregate_returns(is_returns, 'monthly')
-    sns.boxplot(data=[is_returns, is_weekly, is_monthly], ax=ax, **kwargs)
+    sns.boxplot(data=[is_returns, is_weekly, is_monthly],
+                palette=["#4c72B0", "#55A868", "#CCB974"],
+                ax=ax, **kwargs)
 
     if live_start_date is not None:
         oos_returns = returns.loc[returns.index >= live_start_date]
@@ -1143,16 +1123,12 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
         oos_monthly = timeseries.aggregate_returns(oos_returns, 'monthly')
 
         sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly], ax=ax,
-                      palette=["red", "red", "lime"],
+                      color="red",
                       marker="d", **kwargs)
-        red_dots = matplotlib.lines.Line2D([],[], color = "red", marker="d",
+        red_dots = matplotlib.lines.Line2D([], [], color="red", marker="d",
                                            label="Out-of-sample data",
                                            linestyle='')
-        lime_dots = matplotlib.lines.Line2D([],[], color = "lime",
-                                            marker="d",
-                                            label="Monthly out-of-sample data",
-                                            linestyle='')
-        ax.legend(handles=[red_dots, lime_dots])
+        ax.legend(handles=[red_dots])
     ax.set_xticklabels(['daily', 'weekly', 'monthly'])
     ax.set_title('Return quantiles')
 
