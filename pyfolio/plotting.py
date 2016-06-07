@@ -1141,11 +1141,21 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
         oos_returns = returns.loc[returns.index >= live_start_date]
         oos_weekly = timeseries.aggregate_returns(oos_returns, 'weekly')
         oos_monthly = timeseries.aggregate_returns(oos_returns, 'monthly')
-        sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly], ax=ax,
-                      color="red", marker="d", **kwargs)
 
+        sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly], ax=ax,
+                      palette=["red", "red", "lime"],
+                      marker="d", **kwargs)
+        red_dots = matplotlib.lines.Line2D([],[], color = "red", marker="d",
+                                           label="Out-of-sample data",
+                                           linestyle='')
+        lime_dots = matplotlib.lines.Line2D([],[], color = "lime",
+                                            marker="d",
+                                            label="Monthly out-of-sample data",
+                                            linestyle='')
+        ax.legend(handles=[red_dots, lime_dots])
     ax.set_xticklabels(['daily', 'weekly', 'monthly'])
     ax.set_title('Return quantiles')
+
     return ax
 
 
