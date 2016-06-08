@@ -1113,17 +1113,25 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
         else returns.loc[returns.index < live_start_date]
     is_weekly = timeseries.aggregate_returns(is_returns, 'weekly')
     is_monthly = timeseries.aggregate_returns(is_returns, 'monthly')
-    sns.boxplot(data=[is_returns, is_weekly, is_monthly], ax=ax, **kwargs)
+    sns.boxplot(data=[is_returns, is_weekly, is_monthly],
+                palette=["#4c72B0", "#55A868", "#CCB974"],
+                ax=ax, **kwargs)
 
     if live_start_date is not None:
         oos_returns = returns.loc[returns.index >= live_start_date]
         oos_weekly = timeseries.aggregate_returns(oos_returns, 'weekly')
         oos_monthly = timeseries.aggregate_returns(oos_returns, 'monthly')
-        sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly], ax=ax,
-                      color="red", marker="d", **kwargs)
 
+        sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly], ax=ax,
+                      color="red",
+                      marker="d", **kwargs)
+        red_dots = matplotlib.lines.Line2D([], [], color="red", marker="d",
+                                           label="Out-of-sample data",
+                                           linestyle='')
+        ax.legend(handles=[red_dots])
     ax.set_xticklabels(['daily', 'weekly', 'monthly'])
     ax.set_title('Return quantiles')
+
     return ax
 
 
