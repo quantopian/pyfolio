@@ -1,11 +1,11 @@
 package:
   name: pyfolio
-  version: "0.5.0"
+  version: "0.5.1"
 
 source:
-  fn: pyfolio-0.5.0.tar.gz
-  url: https://pypi.python.org/packages/e2/58/bbf223dc75903ebb7f8bc4e1d841a873d7f90ba25dd6bd9afa70b78f5d72/pyfolio-0.5.0.tar.gz
-  md5: 211f85b096886f62935fda615d3d6982
+  fn: pyfolio-0.5.1.tar.gz
+  url: https://pypi.python.org/packages/a7/2a/cf5f5d401b39c2266d3de34119443cd684d5fe87721fac8c9cf42e3a6fa6/pyfolio-0.5.1.tar.gz
+  md5: d48bb6e874e811beb802f23b4f1b3ec3
 
 build:
   noarch_python: True
