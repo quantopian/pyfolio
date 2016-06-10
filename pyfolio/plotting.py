@@ -1660,3 +1660,100 @@ def plot_prob_profit_trade(round_trips, ax=None):
            xlim=(lower_plot, upper_plot), ylim=(0, y.max() + 1.))
 
     return ax
+
+
+def plot_cone(aggregate_returns, bounds, ax,
+              cone_stds=(1, 1.5, 2.),
+              color='green',):
+    """
+    Plots the upper and lower bounds of an n standard deviation
+    cone of forecasted cumulative returns.
+
+    Parameters
+    ----------
+    aggregate_returns : pandas.core.frame.DataFrame
+        Cumulative out-of-sample returns.
+    bounds : pandas.core.frame.DataFrame
+        Contains upper and lower cone boundaries. Column names are
+        strings corresponding to the number of standard devations
+        above (positive) or below (negative) the projected mean
+        cumulative returns.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    cone_std : int, float, or list of int/float
+        Number of standard devations to use in the boundaries of
+        the cone. If multiple values are passed, cone bounds will
+        be generated for each value.
+    color : str, optional
+        Any matplotlib color
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+    for std in cone_stds:
+        ax.fill_between(aggregate_returns.index,
+                        bounds[float(std)].iloc[:len(aggregate_returns)],
+                        bounds[float(-std)].iloc[:len(aggregate_returns)],
+                        color=color, alpha=0.5)
+    return ax
+
+
+def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
+                           name=None, ax=None):
+    """
+    Plots the upper and lower bounds of an n standard deviation
+    cone of forecasted cumulative returns. This cone is non-parametric,
+    meaning it does not assume that returns are normally distributed. Redraws
+    a new cone when returns fall outside of last cone drawn
+
+    Parameters
+    ----------
+    is_returns : pandas.core.frame.DataFrame
+        Non-cumulative in-sample returns.
+    oos_returns : pandas.core.frame.DataFrame
+        Non-cumulative out-of-sample returns.
+    name : str, optional
+        Plot title
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+    if ax is None:
+        ax = plt.subplot()
+
+    aggregate_returns = timeseries.cum_returns(oos_returns, starting_value=1.)
+    bounds = timeseries.forecast_cone_bootstrap(is_returns,
+                                                len(oos_returns),
+                                                num_samples=num_samples)
+    bounds.index = oos_returns.index
+    plot_cone(aggregate_returns, bounds, ax)
+
+    bounds_cur = bounds.copy()
+    cone_start = aggregate_returns.index[0]
+
+    aggregate_returns.plot(ax=ax,
+                           lw=3.,
+                           color='k',
+                           label='Cumulative returns = {:.2f}%'.format(
+                            (aggregate_returns.iloc[-1] - 1) * 100))
+    # Draw additional cones if returns fall outside of the previous cone
+    for c in ['orange', 'orangered', 'darkred']:
+        tmp = aggregate_returns.loc[cone_start:]
+        crossing = (tmp < bounds_cur[float(-2.)].iloc[:len(tmp)])
+        if crossing.sum() > 0:
+            cone_start = crossing.loc[crossing].index[0]
+            plot_cone(oos_returns.loc[cone_start:],
+                      (bounds - (1 - aggregate_returns.loc[cone_start])),
+                      ax, color=c)
+            bounds_cur = (bounds - (1 - aggregate_returns.loc[cone_start]))
+    if name is not None:
+        ax.set_title(name)
+    ax.axhline(1, color='k', alpha=0.2)
+    ax.legend()
+    return ax
