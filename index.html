@@ -155,6 +155,8 @@
         
             <li><a href="#installation">Installation</a></li>
         
+            <li><a href="#usage">Usage</a></li>
+        
             <li><a href="#questions">Questions?</a></li>
         
             <li><a href="#contribute">Contribute</a></li>
@@ -187,6 +189,13 @@ performance of a trading algorithm. Here is an example of a tear sheet of a the 
 <img alt="example tear 5" src="https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_5.png" /></p>
 <p>See also <a href="http://nbviewer.ipython.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/overview_slides.ipynb#/">slides of a recent talk about pyfolio.</a></p>
 <h2 id="installation">Installation</h2>
+<h3 id="optional-virtual-environment">(Optional) Virtual Environment</h3>
+<p>For development on pyfolio itself, you might want to use a <a href="http://docs.python-guide.org/en/latest/dev/virtualenvs/">virtual environment</a> to avoid dependency conflicts between <code>pyfolio</code> and other python projects you have. To get set up with a virtual env, run:</p>
+<pre><code class="bash">
+mkvirtualenv pyfolio
+</code></pre>
+
+<p>before running the install commands below.</p>
 <p>To install <code>pyfolio</code> via <code>pip</code> issue the following command:</p>
 <pre><code class="bash">pip install pyfolio
 </code></pre>
@@ -202,10 +211,26 @@ the IPython kernel when you make changes.</p>
  - <a href="https://github.com/mwaskom/seaborn">seaborn</a>
  - <a href="https://github.com/pymc-devs/pymc3">pymc3</a> (optional)
  - <a href="https://github.com/quantopian/zipline">zipline</a> (optional; requires master, <em>not</em> 0.7.0)</p>
+<p>Some of Pyfolio's functionality, such as the <a href="https://github.com/quantopian/pyfolio/blob/master/pyfolio/examples/bayesian.ipynb">Bayesian tearsheet</a>, requires PyMC3 and Theano. To get set up, you can run:</p>
+<pre><code class="bash">pip install theano
+</code></pre>
+
+<pre><code class="bash">pip install git+https://github.com/pymc-devs/pymc3
+</code></pre>
+
 <p>If you are on OSX and using a non-framework build of python you may need to set your backend:</p>
 <pre><code class="bash">echo &quot;backend: TkAgg&quot; &gt; ~/.matplotlib/matplotlibrc
 </code></pre>
 
+<h2 id="usage">Usage</h2>
+<p>A good way to get started is to run the examples in a <a href="http://jupyter.org/">Jupyter notebook</a>.</p>
+<p>To get set up with an example, you can:</p>
+<p>Run a Jupyter notebook server via:</p>
+<pre><code class="bash">jupyter notebook
+</code></pre>
+
+<p>From the notebook list page(usually found at <code>http://localhost:8888/</code>), navigate over to the examples directory, and open any file with a .ipynb extension.</p>
+<p>Execute the code in a notebook cell by clicking on it and hitting Shift+Enter.</p>
 <h2 id="questions">Questions?</h2>
 <p>If you find a bug, feel free to open an issue on our github tracker.</p>
 <p>You can also join our <a href="https://groups.google.com/forum/#!forum/pyfolio">mailing list</a>.</p>
@@ -269,5 +294,5 @@ the IPython kernel when you make changes.</p>
 
 <!--
 MkDocs version : 0.15.3
-Build Date UTC : 2016-05-13 15:57:03.256161
+Build Date UTC : 2016-06-10 08:03:21.974786
 -->
