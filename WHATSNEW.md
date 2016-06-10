@@ -2,6 +2,21 @@
 
 These are new features and improvements of note in each release.
 
+## v0.5.1 (June, 10, 2016)
+
+This is a bugfix release from `0.5.0` with limited new functionality. All users are recommended to upgrade.
+
+### New features
+
+* OOS data is now overlaid on top of box plot [PR306](https://github.com/quantopian/pyfolio/pull/306) by [Ana Ruelas](https://github.com/ahgnaw)
+* New logo [PR298](https://github.com/quantopian/pyfolio/pull/298) by [Taso Petridis](https://github.com/tasopetridis) and [Richard Frank](https://github.com/richafrank)
+* Raw returns plot and cumulative log returns plot [PR294](https://github.com/quantopian/pyfolio/pull/294) by [Thomas Wiecki](https://github.com/twiecki)
+* Net exposure line to the long/short exposure plot [PR301](https://github.com/quantopian/pyfolio/pull/301) by [Ana Ruelas](https://github.com/ahgnaw)
+
+### Bugfixes
+
+* Fix drawdown behavior and pandas exception in tear-sheet creation [PR297](https://github.com/quantopian/pyfolio/pull/297) by [Flavio Duarte](https://github.com/flaviodrt)
+
 ## v0.5.0 (April 21, 2016) -- Olympia
 
 This is a major release from `0.4.0` that includes many new analyses and features. We recommend that all users upgrade to this new version. Also update your dependencies, specifically, `pandas>=0.18.0`, `seaborn>=0.6.0` and `zipline>=0.8.4`.
