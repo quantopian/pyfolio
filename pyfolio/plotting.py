@@ -1745,7 +1745,7 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
             x = returns_tmp.index
             y1 = bounds_tmp[float(std)].iloc[:len(returns_tmp)]
             y2 = bounds_tmp[float(-std)].iloc[:len(returns_tmp)]
-            ax.fill_between(x, y1, y2, color=colors[c], alpha=0.5)
+            axes.fill_between(x, y1, y2, color=colors[c], alpha=0.5)
     # Plot returns line graph
     returns.plot(ax=axes,
                  lw=3.,
