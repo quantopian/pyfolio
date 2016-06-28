@@ -39,6 +39,7 @@ classifiers = ['Development Status :: 4 - Beta',
 
 install_reqs = [
     'funcsigs>=0.4',
+    'ipython>=4.0.0',
     'matplotlib>=1.4.0',
     'mock>=1.1.2',
     'numpy>=1.9.1',
