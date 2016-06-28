@@ -1732,7 +1732,7 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
     cone_start = returns.index[0]
     colors = ["green", "orange", "orangered", "darkred"]
 
-    for c in range(num_strikes+1):
+    for c in range(num_strikes + 1):
         if c > 0:
             tmp = returns.loc[cone_start:]
             crossing = (tmp < bounds_tmp[float(-2.)].iloc[:len(tmp)])
@@ -1745,13 +1745,15 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
             x = returns_tmp.index
             y1 = bounds_tmp[float(std)].iloc[:len(returns_tmp)]
             y2 = bounds_tmp[float(-std)].iloc[:len(returns_tmp)]
-            ax.fill_between(x, y1, y2, color=colors[c], alpha=0.5)
+            axes.fill_between(x, y1, y2, color=colors[c], alpha=0.5)
     # Plot returns line graph
-    returns.plot(ax=axes,
-                 lw=3.,
-                 color='black',
-                 label='Cumulative returns = {:.2f}%'.format(
-                    (returns.iloc[-1] - 1) * 100))
+    returns.plot(
+        ax=axes,
+        lw=3.,
+        color='black',
+        label='Cumulative returns = {:.2f}%'.format(
+            (returns.iloc[-1] - 1) * 100)
+    )
     if name is not None:
         axes.set_title(name)
     axes.axhline(1, color='black', alpha=0.2)
