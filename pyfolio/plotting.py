@@ -39,6 +39,7 @@ from .utils import (APPROX_BDAYS_PER_MONTH,
                     MM_DISPLAY_UNIT)
 
 from functools import wraps
+import qrisk
 
 
 def plotting_context(func):
@@ -1311,8 +1312,7 @@ def plot_slippage_sensitivity(returns, transactions, positions,
     avg_returns_given_slippage = pd.Series()
     for bps in range(1, 100):
         adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
-        avg_returns = timeseries.annual_return(
-            adj_returns)
+        avg_returns = qrisk.annual_return(adj_returns)
         avg_returns_given_slippage.loc[bps] = avg_returns
 
     avg_returns_given_slippage.plot(alpha=1.0, lw=2, ax=ax)
@@ -1340,7 +1340,7 @@ def plot_capacity_sweep(returns, transactions, market_data,
                                                   txn_daily_w_bar,
                                                   start_pv,
                                                   bt_starting_capital)
-        sharpe = timeseries.sharpe_ratio(adj_ret)
+        sharpe = qrisk.sharpe_ratio(adj_ret)
         if sharpe < -1:
             break
         captial_base_sweep.loc[start_pv] = sharpe

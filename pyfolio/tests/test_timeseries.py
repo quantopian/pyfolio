@@ -263,7 +263,7 @@ class TestAggregateReturns(TestCase):
         (simple_rets[:20], 'weekly', [0.3310000000000004, 0.0, 0.0])
     ])
     def test_aggregate_rets(self, returns, convert_to, expected):
-        self.assertEqual(
+        assert_almost_equal(
             timeseries.aggregate_returns(
                 returns,
                 convert_to).values.tolist(),

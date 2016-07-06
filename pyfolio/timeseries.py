@@ -78,22 +78,21 @@ def max_drawdown(returns):
 
 
 def annual_return(returns, period=DAILY):
-    """Determines the annual returns of a strategy.
+    """Determines the mean annual growth rate of returns.
 
     Parameters
     ----------
     returns : pd.Series
         Periodic returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     period : str, optional
-        - defines the periodicity of the 'returns' data for purposes of
-        annualizing. Can be 'monthly', 'weekly', or 'daily'
-        - defaults to 'daily'.
+        Defines the periodicity of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'.
 
     Returns
     -------
     float
-        Annual Return as CAGR (Compounded Annual Growth Rate)
+        Annual Return as CAGR (Compounded Annual Growth Rate).
 
     """
 
@@ -108,11 +107,10 @@ def annual_volatility(returns, period=DAILY):
     ----------
     returns : pd.Series
         Periodic returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     period : str, optional
-        - defines the periodicity of the 'returns' data for purposes of
+        Defines the periodicity of the 'returns' data for purposes of
         annualizing volatility. Can be 'monthly' or 'weekly' or 'daily'.
-        - defaults to 'daily'
 
     Returns
     -------
@@ -131,17 +129,16 @@ def calmar_ratio(returns, period=DAILY):
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     period : str, optional
-        - defines the periodicity of the 'returns' data for purposes of
-        annualizing. Can be 'monthly', 'weekly', or 'daily'
-        - defaults to 'daily'.
-
+        Defines the periodicity of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'.
 
     Returns
     -------
     float
-        Calmar ratio (drawdown ratio).
+        Calmar ratio (drawdown ratio) as float. Returns np.nan if there is no
+        calmar ratio.
 
     Note
     -----
@@ -158,11 +155,13 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     annual_return_threshold : float, optional
-        Threshold over which to consider positive vs negative
-        returns. For the ratio, it will be converted to a daily return
-        and compared to returns.
+        Minimum acceptance return of the investor. Threshold over which to
+        consider positive vs negative returns. It will be converted to a
+        value appropriate for the period of the returns. E.g. An annual minimum
+        acceptable return of 100 will translate to a minimum acceptable
+        return of 0.018.
 
     Returns
     -------
@@ -186,13 +185,12 @@ def sortino_ratio(returns, required_return=0, period=DAILY):
     ----------
     returns : pd.Series or pd.DataFrame
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     required_return: float / series
         minimum acceptable return
     period : str, optional
-        - defines the periodicity of the 'returns' data for purposes of
-        annualizing. Can be 'monthly', 'weekly', or 'daily'
-        - defaults to 'daily'.
+        Defines the periodicity of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'.
 
     Returns
     -------
@@ -215,14 +213,12 @@ def downside_risk(returns, required_return=0, period=DAILY):
     ----------
     returns : pd.Series or pd.DataFrame
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
-
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     required_return: float / series
         minimum acceptable return
     period : str, optional
-        - defines the periodicity of the 'returns' data for purposes of
-        annualizing. Can be 'monthly', 'weekly', or 'daily'
-        - defaults to 'daily'.
+        Defines the periodicity of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'.
 
     Returns
     -------
@@ -234,7 +230,8 @@ def downside_risk(returns, required_return=0, period=DAILY):
 
     """
 
-    return qrisk.downside_risk(returns, required_return=required_return,
+    return qrisk.downside_risk(returns,
+                               required_return=required_return,
                                period=period)
 
 
@@ -246,20 +243,24 @@ def sharpe_ratio(returns, risk_free=0, period=DAILY):
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
+    risk_free : int, float
+        Constant risk-free return throughout the period.
     period : str, optional
-        - defines the periodicity of the 'returns' data for purposes of
-        annualizing. Can be 'monthly', 'weekly', or 'daily'
-        - defaults to 'daily'.
+        Defines the periodicity of the 'returns' data for purposes of
+        annualizing. Can be 'monthly', 'weekly', or 'daily'.
 
     Returns
     -------
     float
         Sharpe ratio.
+    np.nan
+        If insufficient length of returns or if if adjusted returns are 0.
 
     Note
     -----
     See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
+
     """
 
     return qrisk.sharpe_ratio(returns, risk_free=risk_free, period=period)
@@ -273,8 +274,9 @@ def information_ratio(returns, factor_returns):
     ----------
     returns : pd.Series or pd.DataFrame
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     factor_returns: float / series
+        Benchmark return to compare returns against.
 
     Returns
     -------
@@ -297,7 +299,7 @@ def alpha_beta(returns, factor_returns):
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     factor_returns : pd.Series
          Daily noncumulative returns of the factor to which beta is
          computed. Usually a benchmark such as the market.
@@ -316,13 +318,13 @@ def alpha_beta(returns, factor_returns):
 
 
 def alpha(returns, factor_returns):
-    """Calculates annualized alpha.
+    """Calculates alpha.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     factor_returns : pd.Series
          Daily noncumulative returns of the factor to which beta is
          computed. Usually a benchmark such as the market.
@@ -344,7 +346,7 @@ def beta(returns, factor_returns):
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     factor_returns : pd.Series
          Daily noncumulative returns of the factor to which beta is
          computed. Usually a benchmark such as the market.
@@ -354,7 +356,7 @@ def beta(returns, factor_returns):
     -------
     float
         Beta.
-"""
+    """
 
     return qrisk.beta(returns, factor_returns)
 
@@ -368,7 +370,7 @@ def stability_of_timeseries(returns):
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
 
     Returns
     -------
@@ -390,7 +392,7 @@ def tail_ratio(returns):
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+         - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
 
     Returns
     -------
@@ -491,7 +493,8 @@ def cum_returns(returns, starting_value=None):
     where it is possible to sum instead of multiplying.
     """
 
-    return qrisk.cum_returns(returns, starting_value=starting_value)
+    starting = 0 if starting_value is None else starting_value
+    return qrisk.cum_returns(returns, starting_value=starting)
 
 
 def aggregate_returns(returns, convert_to):
@@ -500,9 +503,9 @@ def aggregate_returns(returns, convert_to):
 
     Parameters
     ----------
-    df_daily_rets : pd.Series
+    returns : pd.Series
        Daily returns of the strategy, noncumulative.
-        - See full explanation in tears.create_full_tear_sheet (returns).
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
     convert_to : str
         Can be 'weekly', 'monthly', or 'yearly'.
 
@@ -813,22 +816,18 @@ def get_max_drawdown_underwater(underwater):
 
 def get_max_drawdown(returns):
     """
-    Finds maximum drawdown.
+    Determines the maximum drawdown of a strategy.
 
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
+        - See full explanation in :func:`~pyfolio.timseries.cum_returns`.
 
     Returns
     -------
-    peak : datetime
-        The maximum drawdown's peak.
-    valley : datetime
-        The maximum drawdown's valley.
-    recovery : datetime
-        The maximum drawdown's recovery.
+    float
+        Maximum drawdown.
 
     Note
     -----
