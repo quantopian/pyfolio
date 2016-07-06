@@ -26,7 +26,7 @@ before_install:
 install:
   - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8 scikit-learn seaborn runipy pytables networkx pandas-datareader matplotlib-tests joblib
   - source activate testenv
-  - pip install nose_parameterized contextlib2 logbook==0.10.1
+  - pip install nose_parameterized contextlib2 logbook==0.10.1 qrisk
   #- pip install --no-deps git+https://github.com/quantopian/zipline
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock enum34; fi
   - pip install --no-deps git+https://github.com/Theano/Theano.git@rel-0.8.1
