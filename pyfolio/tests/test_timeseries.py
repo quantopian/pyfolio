@@ -311,12 +311,13 @@ class TestStats(TestCase):
         (simple_month_rets, utils.MONTHLY, 0.006885932704891129)
     ])
     def test_annual_ret(self, returns, period, expected):
-        self.assertEqual(
+        assert_almost_equal(
             timeseries.annual_return(
                 returns,
                 period=period
             ),
-            expected)
+            expected,
+            DECIMAL_PLACES)
 
     @parameterized.expand([
         (simple_rets, utils.DAILY, 0.12271674212427248),
@@ -337,7 +338,7 @@ class TestStats(TestCase):
         )
 
     @parameterized.expand([
-        (simple_rets, 1.2333396776895436),
+        (simple_rets, 1.2321057207245873),
         (np.zeros(10), np.nan),
         ([0.1, 0.2, 0.3], np.nan)
     ])
@@ -355,7 +356,7 @@ class TestStats(TestCase):
             returns, rolling_sharpe_window).values.tolist()), expected)
 
     @parameterized.expand([
-        (simple_rets, 0.10376378866671222)
+        (simple_rets, 0.010766923838470142)
     ])
     def test_stability_of_timeseries(self, returns, expected):
         self.assertAlmostEqual(

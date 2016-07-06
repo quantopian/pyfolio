@@ -24,8 +24,10 @@ import scipy.stats as stats
 
 from . import utils
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
-from .utils import DAILY, WEEKLY, MONTHLY, YEARLY, ANNUALIZATION_FACTORS
+from .utils import DAILY
 from .interesting_periods import PERIODS
+
+import qrisk
 
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
@@ -72,13 +74,7 @@ def max_drawdown(returns):
     See https://en.wikipedia.org/wiki/Drawdown_(economics) for more details.
     """
 
-    if returns.size < 1:
-        return np.nan
-
-    df_cum_rets = cum_returns(returns, starting_value=100)
-    cum_max_return = df_cum_rets.cummax()
-
-    return df_cum_rets.sub(cum_max_return).div(cum_max_return).min()
+    return qrisk.max_drawdown(returns)
 
 
 def annual_return(returns, period=DAILY):
@@ -101,28 +97,7 @@ def annual_return(returns, period=DAILY):
 
     """
 
-    if returns.size < 1:
-        return np.nan
-
-    try:
-        ann_factor = ANNUALIZATION_FACTORS[period]
-    except KeyError:
-        raise ValueError(
-            "period cannot be '{}'. "
-            "Must be '{}', '{}', or '{}'".format(
-                period, DAILY, WEEKLY, MONTHLY
-            )
-        )
-
-    num_years = float(len(returns)) / ann_factor
-    df_cum_rets = cum_returns(returns, starting_value=100)
-    start_value = 100
-    end_value = df_cum_rets.iloc[-1]
-
-    total_return = (end_value - start_value) / start_value
-    annual_return = (1. + total_return) ** (1 / num_years) - 1
-
-    return annual_return
+    return qrisk.annual_return(returns, period=period)
 
 
 def annual_volatility(returns, period=DAILY):
@@ -145,20 +120,7 @@ def annual_volatility(returns, period=DAILY):
         Annual volatility.
     """
 
-    if returns.size < 2:
-        return np.nan
-
-    try:
-        ann_factor = ANNUALIZATION_FACTORS[period]
-    except KeyError:
-        raise ValueError(
-            "period cannot be: '{}'."
-            " Must be '{}', '{}', or '{}'".format(
-                period, DAILY, WEEKLY, MONTHLY
-            )
-        )
-
-    return returns.std() * np.sqrt(ann_factor)
+    return qrisk.annual_volatility(returns, period=period)
 
 
 def calmar_ratio(returns, period=DAILY):
@@ -186,19 +148,7 @@ def calmar_ratio(returns, period=DAILY):
     See https://en.wikipedia.org/wiki/Calmar_ratio for more details.
     """
 
-    temp_max_dd = max_drawdown(returns=returns)
-    if temp_max_dd < 0:
-        temp = annual_return(
-            returns=returns,
-            period=period
-        ) / abs(max_drawdown(returns=returns))
-    else:
-        return np.nan
-
-    if np.isinf(temp):
-        return np.nan
-
-    return temp
+    return qrisk.calmar_ratio(returns, period=period)
 
 
 def omega_ratio(returns, annual_return_threshhold=0.0):
@@ -225,18 +175,7 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
 
     """
 
-    daily_return_thresh = pow(1 + annual_return_threshhold, 1 /
-                              APPROX_BDAYS_PER_YEAR) - 1
-
-    returns_less_thresh = returns - daily_return_thresh
-
-    numer = sum(returns_less_thresh[returns_less_thresh > 0.0])
-    denom = -1.0 * sum(returns_less_thresh[returns_less_thresh < 0.0])
-
-    if denom > 0.0:
-        return numer / denom
-    else:
-        return np.nan
+    return qrisk.omega_ratio(returns, required_return=annual_return_threshhold)
 
 
 def sortino_ratio(returns, required_return=0, period=DAILY):
@@ -264,21 +203,8 @@ def sortino_ratio(returns, required_return=0, period=DAILY):
         Annualized Sortino ratio.
 
     """
-    try:
-        ann_factor = ANNUALIZATION_FACTORS[period]
-    except KeyError:
-        raise ValueError(
-            "period cannot be: '{}'."
-            " Must be '{}', '{}', or '{}'".format(
-                period, DAILY, WEEKLY, MONTHLY
-            )
-        )
 
-    mu = np.nanmean(returns - required_return, axis=0)
-    sortino = mu / downside_risk(returns, required_return)
-    if len(returns.shape) == 2:
-        sortino = pd.Series(sortino, index=returns.columns)
-    return sortino * ann_factor
+    return qrisk.sortino_ratio(returns, required_return=required_return)
 
 
 def downside_risk(returns, required_return=0, period=DAILY):
@@ -307,25 +233,9 @@ def downside_risk(returns, required_return=0, period=DAILY):
         Annualized downside deviation
 
     """
-    try:
-        ann_factor = ANNUALIZATION_FACTORS[period]
-    except KeyError:
-        raise ValueError(
-            "period cannot be: '{}'."
-            " Must be '{}', '{}', or '{}'".format(
-                period, DAILY, WEEKLY, MONTHLY
-            )
-        )
 
-    downside_diff = returns - required_return
-    mask = downside_diff > 0
-    downside_diff[mask] = 0.0
-    squares = np.square(downside_diff)
-    mean_squares = np.nanmean(squares, axis=0)
-    dside_risk = np.sqrt(mean_squares) * np.sqrt(ann_factor)
-    if len(returns.shape) == 2:
-        dside_risk = pd.Series(dside_risk, index=returns.columns)
-    return dside_risk
+    return qrisk.downside_risk(returns, required_return=required_return,
+                               period=period)
 
 
 def sharpe_ratio(returns, risk_free=0, period=DAILY):
@@ -352,14 +262,7 @@ def sharpe_ratio(returns, risk_free=0, period=DAILY):
     See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
-    returns_risk_adj = returns - risk_free
-
-    if (len(returns_risk_adj) < 5) or np.all(returns_risk_adj == 0):
-        return np.nan
-
-    return np.mean(returns_risk_adj) / \
-        np.std(returns_risk_adj) * \
-        np.sqrt(ANNUALIZATION_FACTORS[period])
+    return qrisk.sharpe_ratio(returns, risk_free=risk_free, period=period)
 
 
 def information_ratio(returns, factor_returns):
@@ -383,11 +286,8 @@ def information_ratio(returns, factor_returns):
     See https://en.wikipedia.org/wiki/information_ratio for more details.
 
     """
-    active_return = returns - factor_returns
-    tracking_error = np.std(active_return, ddof=1)
-    if np.isnan(tracking_error):
-        return 0.0
-    return np.mean(active_return) / tracking_error
+
+    return qrisk.information_ratio(returns, factor_returns)
 
 
 def alpha_beta(returns, factor_returns):
@@ -410,13 +310,9 @@ def alpha_beta(returns, factor_returns):
     float
         Beta.
 
-"""
+    """
 
-    ret_index = returns.index
-    beta, alpha = sp.stats.linregress(factor_returns.loc[ret_index].values,
-                                      returns.values)[:2]
-
-    return alpha * APPROX_BDAYS_PER_YEAR, beta
+    return qrisk.alpha_beta(returns, factor_returns=factor_returns)
 
 
 def alpha(returns, factor_returns):
@@ -436,9 +332,9 @@ def alpha(returns, factor_returns):
     -------
     float
         Alpha.
-"""
+    """
 
-    return alpha_beta(returns, factor_returns)[0]
+    return qrisk.alpha(returns, factor_returns=factor_returns)
 
 
 def beta(returns, factor_returns):
@@ -460,7 +356,7 @@ def beta(returns, factor_returns):
         Beta.
 """
 
-    return alpha_beta(returns, factor_returns)[1]
+    return qrisk.beta(returns, factor_returns)
 
 
 def stability_of_timeseries(returns):
@@ -481,11 +377,7 @@ def stability_of_timeseries(returns):
 
     """
 
-    cum_log_returns = np.log1p(returns).cumsum()
-    rhat = stats.linregress(np.arange(len(cum_log_returns)),
-                            cum_log_returns.values)[2]
-
-    return rhat
+    return qrisk.stability_of_timeseries(returns)
 
 
 def tail_ratio(returns):
@@ -507,8 +399,7 @@ def tail_ratio(returns):
 
     """
 
-    return np.abs(np.percentile(returns, 95)) / \
-        np.abs(np.percentile(returns, 5))
+    return qrisk.tail_ratio(returns)
 
 
 def common_sense_ratio(returns):
@@ -600,23 +491,10 @@ def cum_returns(returns, starting_value=None):
     where it is possible to sum instead of multiplying.
     """
 
-    # df_price.pct_change() adds a nan in first position, we can use
-    # that to have cum_returns start at the origin so that
-    # df_cum.iloc[0] == starting_value
-    # Note that we can't add that ourselves as we don't know which dt
-    # to use.
-    if pd.isnull(returns.iloc[0]):
-        returns.iloc[0] = 0.
-
-    df_cum = np.exp(np.log(1 + returns).cumsum())
-
-    if starting_value is None:
-        return df_cum - 1
-    else:
-        return df_cum * starting_value
+    return qrisk.cum_returns(returns, starting_value=starting_value)
 
 
-def aggregate_returns(df_daily_rets, convert_to):
+def aggregate_returns(returns, convert_to):
     """
     Aggregates returns by week, month, or year.
 
@@ -634,23 +512,7 @@ def aggregate_returns(df_daily_rets, convert_to):
         Aggregated returns.
     """
 
-    def cumulate_returns(x):
-        return cum_returns(x)[-1]
-
-    if convert_to == WEEKLY:
-        return df_daily_rets.groupby(
-            [lambda x: x.year,
-             lambda x: x.isocalendar()[1]]).apply(cumulate_returns)
-    elif convert_to == MONTHLY:
-        return df_daily_rets.groupby(
-            [lambda x: x.year, lambda x: x.month]).apply(cumulate_returns)
-    elif convert_to == YEARLY:
-        return df_daily_rets.groupby(
-            [lambda x: x.year]).apply(cumulate_returns)
-    else:
-        ValueError(
-            'convert_to must be {}, {} or {}'.format(WEEKLY, MONTHLY, YEARLY)
-        )
+    return qrisk.aggregate_returns(returns, convert_to=convert_to)
 
 
 def calc_multifactor(returns, factors):
