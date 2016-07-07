@@ -258,12 +258,12 @@ class TestAggregateReturns(TestCase):
             freq='D'))
 
     @parameterized.expand([
-        (simple_rets, 'yearly', [0.3310000000000004, 0.0]),
-        (simple_rets[:100], 'monthly', [0.3310000000000004, 0.0, 0.0, 0.0]),
-        (simple_rets[:20], 'weekly', [0.3310000000000004, 0.0, 0.0])
+        (simple_rets, 'yearly', [0.33099999999999996, 0.0]),
+        (simple_rets[:100], 'monthly', [0.33099999999999996, 0.0, 0.0, 0.0]),
+        (simple_rets[:20], 'weekly', [0.33099999999999996, 0.0, 0.0])
     ])
     def test_aggregate_rets(self, returns, convert_to, expected):
-        assert_almost_equal(
+        self.assertEqual(
             timeseries.aggregate_returns(
                 returns,
                 convert_to).values.tolist(),
@@ -306,18 +306,17 @@ class TestStats(TestCase):
     dt_2 = pd.date_range('2000-1-3', periods=8, freq='D')
 
     @parameterized.expand([
-        (simple_rets, utils.DAILY, 0.15500998835658075),
+        (simple_rets, utils.DAILY, 0.15500998835658053),
         (simple_week_rets, utils.WEEKLY, 0.030183329386562319),
         (simple_month_rets, utils.MONTHLY, 0.006885932704891129)
     ])
     def test_annual_ret(self, returns, period, expected):
-        assert_almost_equal(
+        self.assertEqual(
             timeseries.annual_return(
                 returns,
                 period=period
             ),
-            expected,
-            DECIMAL_PLACES)
+            expected)
 
     @parameterized.expand([
         (simple_rets, utils.DAILY, 0.12271674212427248),
