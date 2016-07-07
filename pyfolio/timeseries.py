@@ -26,8 +26,13 @@ from . import utils
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
 from .utils import DAILY
 from .interesting_periods import PERIODS
+from .deprecate import deprecated
 
 import qrisk
+
+DEPRECATION_WARNING = ("Risk functions in pyfolio.timeseries are deprecated "
+                       "and will be removed in a future release. Please "
+                       "install the qrisk package instead.")
 
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
@@ -54,6 +59,7 @@ def var_cov_var_normal(P, c, mu=0, sigma=1):
     return P - P * (alpha + 1)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def max_drawdown(returns):
     """
     Determines the maximum drawdown of a strategy.
@@ -77,6 +83,7 @@ def max_drawdown(returns):
     return qrisk.max_drawdown(returns)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def annual_return(returns, period=DAILY):
     """Determines the mean annual growth rate of returns.
 
@@ -100,6 +107,7 @@ def annual_return(returns, period=DAILY):
     return qrisk.annual_return(returns, period=period)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def annual_volatility(returns, period=DAILY):
     """
     Determines the annual volatility of a strategy.
@@ -123,6 +131,7 @@ def annual_volatility(returns, period=DAILY):
     return qrisk.annual_volatility(returns, period=period)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def calmar_ratio(returns, period=DAILY):
     """
     Determines the Calmar ratio, or drawdown ratio, of a strategy.
@@ -151,6 +160,7 @@ def calmar_ratio(returns, period=DAILY):
     return qrisk.calmar_ratio(returns, period=period)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def omega_ratio(returns, annual_return_threshhold=0.0):
     """Determines the Omega ratio of a strategy.
 
@@ -187,6 +197,7 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
     return qrisk.omega_ratio(returns, required_return=annual_return_threshhold)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def sortino_ratio(returns, required_return=0, period=DAILY):
     """
     Determines the Sortino ratio of a strategy.
@@ -216,6 +227,7 @@ def sortino_ratio(returns, required_return=0, period=DAILY):
     return qrisk.sortino_ratio(returns, required_return=required_return)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def downside_risk(returns, required_return=0, period=DAILY):
     """
     Determines the downside deviation below a threshold
@@ -247,6 +259,7 @@ def downside_risk(returns, required_return=0, period=DAILY):
                                period=period)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def sharpe_ratio(returns, risk_free=0, period=DAILY):
     """
     Determines the Sharpe ratio of a strategy.
@@ -279,6 +292,7 @@ def sharpe_ratio(returns, risk_free=0, period=DAILY):
     return qrisk.sharpe_ratio(returns, risk_free=risk_free, period=period)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def information_ratio(returns, factor_returns):
     """
     Determines the Information ratio of a strategy.
@@ -305,6 +319,7 @@ def information_ratio(returns, factor_returns):
     return qrisk.information_ratio(returns, factor_returns)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def alpha_beta(returns, factor_returns):
     """Calculates both alpha and beta.
 
@@ -330,8 +345,9 @@ def alpha_beta(returns, factor_returns):
     return qrisk.alpha_beta(returns, factor_returns=factor_returns)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def alpha(returns, factor_returns):
-    """Calculates alpha.
+    """Calculates annualized alpha.
 
     Parameters
     ----------
@@ -352,6 +368,7 @@ def alpha(returns, factor_returns):
     return qrisk.alpha(returns, factor_returns=factor_returns)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def beta(returns, factor_returns):
     """Calculates beta.
 
@@ -374,6 +391,7 @@ def beta(returns, factor_returns):
     return qrisk.beta(returns, factor_returns)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def stability_of_timeseries(returns):
     """Determines R-squared of a linear fit to the cumulative
     log returns. Computes an ordinary least squares linear fit,
@@ -395,6 +413,7 @@ def stability_of_timeseries(returns):
     return qrisk.stability_of_timeseries(returns)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def tail_ratio(returns):
     """Determines the ratio between the right (95%) and left tail (5%).
 
@@ -437,7 +456,7 @@ def common_sense_ratio(returns):
         common sense ratio
 
     """
-    return tail_ratio(returns) * (1 + annual_return(returns))
+    return qrisk.tail_ratio(returns) * (1 + qrisk.annual_return(returns))
 
 
 SIMPLE_STAT_FUNCS = [
@@ -483,6 +502,7 @@ def normalize(returns, starting_value=1):
     return starting_value * (returns / returns.iloc[0])
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def cum_returns(returns, starting_value=0):
     """
     Compute cumulative returns from simple returns.
@@ -509,6 +529,7 @@ def cum_returns(returns, starting_value=0):
     return qrisk.cum_returns(returns, starting_value=starting_value)
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def aggregate_returns(returns, convert_to):
     """
     Aggregates returns by week, month, or year.
@@ -593,7 +614,7 @@ def rolling_beta(returns, factor_returns,
         out = pd.Series(index=returns.index)
         for beg, end in zip(returns.index[0:-rolling_window],
                             returns.index[rolling_window:]):
-            out.loc[end] = alpha_beta(
+            out.loc[end] = qrisk.alpha_beta(
                 returns.loc[beg:end],
                 factor_returns.loc[beg:end])[1]
 

@@ -6,7 +6,6 @@ from numpy.testing import assert_allclose, assert_almost_equal
 
 import numpy as np
 import pandas as pd
-import pandas.util.testing as pdt
 
 from .. import timeseries
 from .. import utils
@@ -181,18 +180,6 @@ class TestDrawdown(TestCase):
             self.assertLessEqual(recovery, peak)
 
     @parameterized.expand([
-        (pd.Series(px_list_1 - 1, index=dt), -0.44000000000000011)
-    ])
-    def test_max_drawdown(self, returns, expected):
-        self.assertEqual(timeseries.max_drawdown(returns), expected)
-
-    @parameterized.expand([
-        (pd.Series(px_list_1 - 1, index=dt), -0.44000000000000011)
-    ])
-    def test_max_drawdown_underwater(self, underwater, expected):
-        self.assertEqual(timeseries.max_drawdown(underwater), expected)
-
-    @parameterized.expand([
         (pd.Series(px_list_1,
                    index=dt),
          1,
@@ -206,20 +193,6 @@ class TestDrawdown(TestCase):
                 returns,
                 top=top),
             expected)
-
-
-class TestCumReturns(TestCase):
-    dt = pd.date_range('2000-1-3', periods=3, freq='D')
-
-    @parameterized.expand([
-        (pd.Series([.1, -.05, .1], index=dt),
-         pd.Series([1.1, 1.1 * .95, 1.1 * .95 * 1.1], index=dt), 1.),
-        (pd.Series([np.nan, -.05, .1], index=dt),
-         pd.Series([1., 1. * .95, 1. * .95 * 1.1], index=dt), 1.),
-    ])
-    def test_expected_result(self, input, expected, starting_value):
-        output = timeseries.cum_returns(input, starting_value=starting_value)
-        pdt.assert_series_equal(output, expected)
 
 
 class TestVariance(TestCase):
@@ -247,27 +220,6 @@ class TestNormalize(TestCase):
     ])
     def test_normalize(self, returns, expected):
         self.assertTrue(timeseries.normalize(returns).equals(expected))
-
-
-class TestAggregateReturns(TestCase):
-    simple_rets = pd.Series(
-        [0.1] * 3 + [0] * 497,
-        pd.date_range(
-            '2000-1-3',
-            periods=500,
-            freq='D'))
-
-    @parameterized.expand([
-        (simple_rets, 'yearly', [0.33099999999999996, 0.0]),
-        (simple_rets[:100], 'monthly', [0.33099999999999996, 0.0, 0.0, 0.0]),
-        (simple_rets[:20], 'weekly', [0.33099999999999996, 0.0, 0.0])
-    ])
-    def test_aggregate_rets(self, returns, convert_to, expected):
-        self.assertEqual(
-            timeseries.aggregate_returns(
-                returns,
-                convert_to).values.tolist(),
-            expected)
 
 
 class TestStats(TestCase):
@@ -306,61 +258,11 @@ class TestStats(TestCase):
     dt_2 = pd.date_range('2000-1-3', periods=8, freq='D')
 
     @parameterized.expand([
-        (simple_rets, utils.DAILY, 0.15500998835658053),
-        (simple_week_rets, utils.WEEKLY, 0.030183329386562319),
-        (simple_month_rets, utils.MONTHLY, 0.006885932704891129)
-    ])
-    def test_annual_ret(self, returns, period, expected):
-        self.assertEqual(
-            timeseries.annual_return(
-                returns,
-                period=period
-            ),
-            expected)
-
-    @parameterized.expand([
-        (simple_rets, utils.DAILY, 0.12271674212427248),
-        (simple_rets, utils.DAILY, 0.12271674212427248),
-        (simple_week_rets, utils.WEEKLY, 0.055744909991675112),
-        (simple_week_rets, utils.WEEKLY, 0.055744909991675112),
-        (simple_month_rets, utils.MONTHLY, 0.026778988562993072),
-        (simple_month_rets, utils.MONTHLY, 0.026778988562993072)
-    ])
-    def test_annual_volatility(self, returns, period, expected):
-        self.assertAlmostEqual(
-            timeseries.annual_volatility(
-                returns,
-                period=period
-            ),
-            expected,
-            DECIMAL_PLACES
-        )
-
-    @parameterized.expand([
-        (simple_rets, 1.2321057207245873),
-        (np.zeros(10), np.nan),
-        ([0.1, 0.2, 0.3], np.nan)
-    ])
-    def test_sharpe(self, returns, expected):
-        assert_almost_equal(
-            timeseries.sharpe_ratio(
-                returns),
-            expected, DECIMAL_PLACES)
-
-    @parameterized.expand([
         (simple_rets[:5], 2, '[nan, inf, inf, 11.224972160321828, inf]')
     ])
     def test_sharpe_2(self, returns, rolling_sharpe_window, expected):
         self.assertEqual(str(timeseries.rolling_sharpe(
             returns, rolling_sharpe_window).values.tolist()), expected)
-
-    @parameterized.expand([
-        (simple_rets, 0.010766923838470142)
-    ])
-    def test_stability_of_timeseries(self, returns, expected):
-        self.assertAlmostEqual(
-            timeseries.stability_of_timeseries(returns),
-            expected, DECIMAL_PLACES)
 
     @parameterized.expand([
         (simple_rets[:5], simple_benchmark[:5], 2, 8.024708101613483e-32)
@@ -372,49 +274,6 @@ class TestStats(TestCase):
                 benchmark_rets,
                 rolling_window=rolling_window).values.tolist()[2],
             expected)
-
-    @parameterized.expand([
-        (pd.Series(px_list_2,
-                   index=dt_2).pct_change().dropna(), -2.3992211554712197)
-    ])
-    def test_calmar(self, returns, expected):
-        self.assertEqual(
-            timeseries.calmar_ratio(
-                returns),
-            expected)
-
-    @parameterized.expand([
-        (pd.Series(px_list,
-                   index=dt), 0.0, 2.0)
-    ])
-    def test_omega(self, returns, annual_return_threshhold, expected):
-        self.assertEqual(
-            timeseries.omega_ratio(
-                returns,
-                annual_return_threshhold=annual_return_threshhold),
-            expected)
-
-    @parameterized.expand([
-        (-simple_rets[:5], -12.29634091915152),
-        (-simple_rets, -1.2296340919151518),
-        (simple_rets, np.inf)
-    ])
-    def test_sortino(self, returns, expected):
-        self.assertAlmostEqual(
-            timeseries.sortino_ratio(returns),
-            expected, DECIMAL_PLACES)
-
-    def test_tail_ratio(self):
-        returns = np.random.randn(10000)
-        self.assertAlmostEqual(
-            timeseries.tail_ratio(returns),
-            1., 1)
-
-    def test_common_sense_ratio(self):
-        returns = pd.Series(np.random.randn(1000) + .1)
-        self.assertAlmostEqual(
-            timeseries.common_sense_ratio(returns),
-            0.024031933021535612, DECIMAL_PLACES)
 
 
 class TestMultifactor(TestCase):

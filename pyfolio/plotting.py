@@ -194,8 +194,7 @@ def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    monthly_ret_table = timeseries.aggregate_returns(returns,
-                                                     'monthly')
+    monthly_ret_table = qrisk.aggregate_returns(returns, 'monthly')
     monthly_ret_table = monthly_ret_table.unstack().round(3)
 
     sns.heatmap(
@@ -243,7 +242,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
     ax.tick_params(axis='x', which='major', labelsize=10)
 
     ann_ret_df = pd.DataFrame(
-        timeseries.aggregate_returns(
+        qrisk.aggregate_returns(
             returns,
             'yearly'))
 
@@ -292,7 +291,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
     ax.tick_params(axis='x', which='major', labelsize=10)
 
-    monthly_ret_table = timeseries.aggregate_returns(returns, 'monthly')
+    monthly_ret_table = qrisk.aggregate_returns(returns, 'monthly')
 
     ax.hist(
         100 * monthly_ret_table,
@@ -405,7 +404,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_cum_rets = timeseries.cum_returns(returns, starting_value=1.0)
+    df_cum_rets = qrisk.cum_returns(returns, starting_value=1.0)
     df_drawdowns = timeseries.gen_drawdown_table(returns, top=top)
 
     df_cum_rets.plot(ax=ax, **kwargs)
@@ -456,7 +455,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     y_axis_formatter = FuncFormatter(utils.percentage)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_cum_rets = timeseries.cum_returns(returns, starting_value=1.0)
+    df_cum_rets = qrisk.cum_returns(returns, starting_value=1.0)
     running_max = np.maximum.accumulate(df_cum_rets)
     underwater = -100 * ((running_max - df_cum_rets) / running_max)
     (underwater).plot(ax=ax, kind='area', color='coral', alpha=0.7, **kwargs)
@@ -691,13 +690,13 @@ def plot_rolling_returns(returns,
         bmark_vol = factor_returns.loc[returns.index].std()
         returns = (returns / returns.std()) * bmark_vol
 
-    cum_rets = timeseries.cum_returns(returns, 1.0)
+    cum_rets = qrisk.cum_returns(returns, 1.0)
 
     y_axis_formatter = FuncFormatter(utils.one_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     if factor_returns is not None:
-        cum_factor_returns = timeseries.cum_returns(
+        cum_factor_returns = qrisk.cum_returns(
             factor_returns[cum_rets.index], 1.0)
         cum_factor_returns.plot(lw=2, color='gray',
                                 label=factor_returns.name, alpha=0.60,
@@ -917,7 +916,7 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     df_long_short.plot(
         kind='line', style=['-g', '-r', '--k'], alpha=1.0,
         ax=ax, **kwargs)
-    df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
+    df_cum_rets = qrisk.cum_returns(returns, starting_value=1)
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
     ax.set_title("Long/Short Exposure")
     ax.set_ylabel('Exposure')
@@ -1003,7 +1002,7 @@ def show_and_plot_top_positions(returns, positions_alloc,
         else:
             ax.legend(loc=legend_loc)
 
-        df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
+        df_cum_rets = qrisk.cum_returns(returns, starting_value=1)
         ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
         ax.set_ylabel('Exposure by stock')
 
@@ -1114,16 +1113,16 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
 
     is_returns = returns if live_start_date is None \
         else returns.loc[returns.index < live_start_date]
-    is_weekly = timeseries.aggregate_returns(is_returns, 'weekly')
-    is_monthly = timeseries.aggregate_returns(is_returns, 'monthly')
+    is_weekly = qrisk.aggregate_returns(is_returns, 'weekly')
+    is_monthly = qrisk.aggregate_returns(is_returns, 'monthly')
     sns.boxplot(data=[is_returns, is_weekly, is_monthly],
                 palette=["#4c72B0", "#55A868", "#CCB974"],
                 ax=ax, **kwargs)
 
     if live_start_date is not None:
         oos_returns = returns.loc[returns.index >= live_start_date]
-        oos_weekly = timeseries.aggregate_returns(oos_returns, 'weekly')
-        oos_monthly = timeseries.aggregate_returns(oos_returns, 'monthly')
+        oos_weekly = qrisk.aggregate_returns(oos_returns, 'weekly')
+        oos_monthly = qrisk.aggregate_returns(oos_returns, 'monthly')
 
         sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly], ax=ax,
                       color="red",
@@ -1149,7 +1148,7 @@ def show_return_range(returns):
          - See full explanation in tears.create_full_tear_sheet.
     """
 
-    df_weekly = timeseries.aggregate_returns(returns, 'weekly')
+    df_weekly = qrisk.aggregate_returns(returns, 'weekly')
 
     two_sigma_daily = returns.mean() - 2 * returns.std()
     two_sigma_weekly = df_weekly.mean() - 2 * df_weekly.std()
@@ -1218,7 +1217,7 @@ def plot_turnover(returns, transactions, positions,
                'Average daily turnover, net'],
               loc=legend_loc)
     ax.set_title('Daily Turnover')
-    df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
+    df_cum_rets = qrisk.cum_returns(returns, starting_value=1)
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
     ax.set_ylim((0, 1))
     ax.set_ylabel('Turnover')
@@ -1266,7 +1265,7 @@ def plot_slippage_sweep(returns, transactions, positions,
     for bps in slippage_params:
         adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
         label = str(bps) + " bps"
-        slippage_sweep[label] = timeseries.cum_returns(adj_returns, 1)
+        slippage_sweep[label] = qrisk.cum_returns(adj_returns, 1)
 
     slippage_sweep.plot(alpha=1.0, lw=0.5, ax=ax)
 
@@ -1422,7 +1421,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     ax.axhline(daily_txn.txn_shares.mean(), color='steelblue',
                linestyle='--', lw=3, alpha=1.0)
     ax.set_title('Daily Trading Volume')
-    df_cum_rets = timeseries.cum_returns(returns, starting_value=1)
+    df_cum_rets = qrisk.cum_returns(returns, starting_value=1)
     ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
     ax.set_ylabel('Amount of shares traded')
     ax.set_xlabel('')
@@ -1516,7 +1515,7 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     """
 
     def cumulate_returns(x):
-        return timeseries.cum_returns(x)[-1]
+        return qrisk.cum_returns(x)[-1]
 
     if ax is None:
         ax = plt.gca()
@@ -1720,7 +1719,7 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
     else:
         axes = ax
 
-    returns = timeseries.cum_returns(oos_returns, starting_value=1.)
+    returns = qrisk.cum_returns(oos_returns, starting_value=1.)
     bounds = timeseries.forecast_cone_bootstrap(is_returns,
                                                 len(oos_returns),
                                                 cone_std=cone_std,
