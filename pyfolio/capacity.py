@@ -2,7 +2,7 @@ from __future__ import division
 import pandas as pd
 import numpy as np
 from . import pos
-import qrisk
+import empyrical
 
 
 def daily_txns_with_bar_data(transactions, market_data):
@@ -233,7 +233,7 @@ def apply_slippage_penalty(returns, txn_daily, simulate_starting_capital,
     # by capital base, it makes the most sense to scale the denominator
     # similarly. In other words, since we aren't applying compounding to
     # simulate_traded_shares, we shouldn't apply compounding to pv.
-    portfolio_value = qrisk.cum_returns(
+    portfolio_value = empyrical.cum_returns(
         returns, starting_value=backtest_starting_capital) * mult
 
     adj_returns = returns - (daily_penalty / portfolio_value)

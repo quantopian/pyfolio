@@ -28,11 +28,11 @@ from .utils import DAILY
 from .interesting_periods import PERIODS
 from .deprecate import deprecated
 
-import qrisk
+import empyrical
 
 DEPRECATION_WARNING = ("Risk functions in pyfolio.timeseries are deprecated "
                        "and will be removed in a future release. Please "
-                       "install the qrisk package instead.")
+                       "install the empyrical package instead.")
 
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
@@ -80,7 +80,7 @@ def max_drawdown(returns):
     See https://en.wikipedia.org/wiki/Drawdown_(economics) for more details.
     """
 
-    return qrisk.max_drawdown(returns)
+    return empyrical.max_drawdown(returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -104,7 +104,7 @@ def annual_return(returns, period=DAILY):
 
     """
 
-    return qrisk.annual_return(returns, period=period)
+    return empyrical.annual_return(returns, period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -128,7 +128,7 @@ def annual_volatility(returns, period=DAILY):
         Annual volatility.
     """
 
-    return qrisk.annual_volatility(returns, period=period)
+    return empyrical.annual_volatility(returns, period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -157,7 +157,7 @@ def calmar_ratio(returns, period=DAILY):
     See https://en.wikipedia.org/wiki/Calmar_ratio for more details.
     """
 
-    return qrisk.calmar_ratio(returns, period=period)
+    return empyrical.calmar_ratio(returns, period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -194,7 +194,8 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
 
     """
 
-    return qrisk.omega_ratio(returns, required_return=annual_return_threshhold)
+    return empyrical.omega_ratio(returns,
+                                 required_return=annual_return_threshhold)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -224,7 +225,7 @@ def sortino_ratio(returns, required_return=0, period=DAILY):
 
     """
 
-    return qrisk.sortino_ratio(returns, required_return=required_return)
+    return empyrical.sortino_ratio(returns, required_return=required_return)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -254,9 +255,9 @@ def downside_risk(returns, required_return=0, period=DAILY):
 
     """
 
-    return qrisk.downside_risk(returns,
-                               required_return=required_return,
-                               period=period)
+    return empyrical.downside_risk(returns,
+                                   required_return=required_return,
+                                   period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -289,7 +290,7 @@ def sharpe_ratio(returns, risk_free=0, period=DAILY):
 
     """
 
-    return qrisk.sharpe_ratio(returns, risk_free=risk_free, period=period)
+    return empyrical.sharpe_ratio(returns, risk_free=risk_free, period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -316,7 +317,7 @@ def information_ratio(returns, factor_returns):
 
     """
 
-    return qrisk.information_ratio(returns, factor_returns)
+    return empyrical.information_ratio(returns, factor_returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -342,7 +343,7 @@ def alpha_beta(returns, factor_returns):
 
     """
 
-    return qrisk.alpha_beta(returns, factor_returns=factor_returns)
+    return empyrical.alpha_beta(returns, factor_returns=factor_returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -365,7 +366,7 @@ def alpha(returns, factor_returns):
         Alpha.
     """
 
-    return qrisk.alpha(returns, factor_returns=factor_returns)
+    return empyrical.alpha(returns, factor_returns=factor_returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -388,7 +389,7 @@ def beta(returns, factor_returns):
         Beta.
     """
 
-    return qrisk.beta(returns, factor_returns)
+    return empyrical.beta(returns, factor_returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -410,7 +411,7 @@ def stability_of_timeseries(returns):
 
     """
 
-    return qrisk.stability_of_timeseries(returns)
+    return empyrical.stability_of_timeseries(returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -433,7 +434,7 @@ def tail_ratio(returns):
 
     """
 
-    return qrisk.tail_ratio(returns)
+    return empyrical.tail_ratio(returns)
 
 
 def common_sense_ratio(returns):
@@ -456,7 +457,8 @@ def common_sense_ratio(returns):
         common sense ratio
 
     """
-    return qrisk.tail_ratio(returns) * (1 + qrisk.annual_return(returns))
+    return empyrical.tail_ratio(returns) * \
+        (1 + empyrical.annual_return(returns))
 
 
 SIMPLE_STAT_FUNCS = [
@@ -526,7 +528,7 @@ def cum_returns(returns, starting_value=0):
     where it is possible to sum instead of multiplying.
     """
 
-    return qrisk.cum_returns(returns, starting_value=starting_value)
+    return empyrical.cum_returns(returns, starting_value=starting_value)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -548,7 +550,7 @@ def aggregate_returns(returns, convert_to):
         Aggregated returns.
     """
 
-    return qrisk.aggregate_returns(returns, convert_to=convert_to)
+    return empyrical.aggregate_returns(returns, convert_to=convert_to)
 
 
 def calc_multifactor(returns, factors):
@@ -614,9 +616,9 @@ def rolling_beta(returns, factor_returns,
         out = pd.Series(index=returns.index)
         for beg, end in zip(returns.index[0:-rolling_window],
                             returns.index[rolling_window:]):
-            out.loc[end] = qrisk.alpha_beta(
+            out.loc[end] = empyrical.beta(
                 returns.loc[beg:end],
-                factor_returns.loc[beg:end])[1]
+                factor_returns.loc[beg:end])
 
         return out
 

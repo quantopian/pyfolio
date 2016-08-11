@@ -30,7 +30,7 @@ except ImportError:
     from pymc3 import T as StudentT
 
 from . import _seaborn as sns
-from qrisk import cum_returns
+from empyrical import cum_returns
 
 
 def model_returns_t_alpha_beta(data, bmark, samples=2000):
