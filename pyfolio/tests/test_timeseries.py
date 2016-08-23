@@ -265,7 +265,7 @@ class TestStats(TestCase):
             returns, rolling_sharpe_window).values.tolist()), expected)
 
     @parameterized.expand([
-        (simple_rets[:5], simple_benchmark[:5], 2, 8.024708101613483e-32)
+        (simple_rets[:5], simple_benchmark, 2, 8.024708101613483e-32)
     ])
     def test_beta(self, returns, benchmark_rets, rolling_window, expected):
         self.assertEqual(

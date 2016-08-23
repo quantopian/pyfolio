@@ -32,7 +32,7 @@ from . import capacity
 from . import plotting
 from . import _seaborn as sns
 from .plotting import plotting_context
-import qrisk
+import empyrical
 
 try:
     from . import bayesian
@@ -253,7 +253,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         if returns.index[0] < benchmark_rets.index[0]:
             returns = returns[returns.index > benchmark_rets.index[0]]
 
-    df_cum_rets = qrisk.cum_returns(returns, starting_value=1)
+    df_cum_rets = empyrical.cum_returns(returns, starting_value=1)
     print("Entire data start date: " + str(df_cum_rets
                                            .index[0].strftime('%Y-%m-%d')))
     print("Entire data end date: " + str(df_cum_rets
@@ -694,9 +694,9 @@ def create_interesting_times_tear_sheet(
 
         # i=0 -> 0, i=1 -> 0, i=2 -> 1 ;; i=0 -> 0, i=1 -> 1, i=2 -> 0
         ax = plt.subplot(gs[int(i / 2.0), i % 2])
-        qrisk.cum_returns(rets_period).plot(
+        empyrical.cum_returns(rets_period).plot(
             ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
-        qrisk.cum_returns(bmark_interesting[name]).plot(
+        empyrical.cum_returns(bmark_interesting[name]).plot(
             ax=ax, color='gray', label='SPY', alpha=0.6)
         ax.legend(['algo',
                    'SPY'],

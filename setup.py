@@ -51,7 +51,7 @@ install_reqs = [
     'seaborn>=0.6.0',
     'pandas-datareader>=0.2',
     'scikit-learn>=0.17',
-    'qrisk>=0.1.3'
+    'empyrical==0.1.9'
 ]
 
 extras_reqs = {
