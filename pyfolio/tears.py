@@ -253,12 +253,8 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         if returns.index[0] < benchmark_rets.index[0]:
             returns = returns[returns.index > benchmark_rets.index[0]]
 
-    df_cum_rets = empyrical.cum_returns(returns, starting_value=1)
-    print("Entire data start date: " + str(df_cum_rets
-                                           .index[0].strftime('%Y-%m-%d')))
-    print("Entire data end date: " + str(df_cum_rets
-                                         .index[-1].strftime('%Y-%m-%d')))
-
+    print("Entire data start date: %s" % returns.index[0].strftime('%Y-%m-%d'))
+    print("Entire data end date: %s" % returns.index[-1].strftime('%Y-%m-%d'))
     print('\n')
 
     plotting.show_perf_stats(returns, benchmark_rets,
