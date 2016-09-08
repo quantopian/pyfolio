@@ -916,8 +916,7 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     df_long_short.plot(
         kind='line', style=['-g', '-r', '--k'], alpha=1.0,
         ax=ax, **kwargs)
-    df_cum_rets = empyrical.cum_returns(returns, starting_value=1)
-    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+    ax.set_xlim((returns.index[0], returns.index[-1]))
     ax.set_title("Long/Short Exposure")
     ax.set_ylabel('Exposure')
     ax.set_xlabel('')
@@ -1002,8 +1001,7 @@ def show_and_plot_top_positions(returns, positions_alloc,
         else:
             ax.legend(loc=legend_loc)
 
-        df_cum_rets = empyrical.cum_returns(returns, starting_value=1)
-        ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+        ax.set_xlim((returns.index[0], returns.index[-1]))
         ax.set_ylabel('Exposure by stock')
 
         if hide_positions:
@@ -1217,8 +1215,7 @@ def plot_turnover(returns, transactions, positions,
                'Average daily turnover, net'],
               loc=legend_loc)
     ax.set_title('Daily Turnover')
-    df_cum_rets = empyrical.cum_returns(returns, starting_value=1)
-    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+    ax.set_xlim((returns.index[0], returns.index[-1]))
     ax.set_ylim((0, 1))
     ax.set_ylabel('Turnover')
     ax.set_xlabel('')
@@ -1421,8 +1418,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     ax.axhline(daily_txn.txn_shares.mean(), color='steelblue',
                linestyle='--', lw=3, alpha=1.0)
     ax.set_title('Daily Trading Volume')
-    df_cum_rets = empyrical.cum_returns(returns, starting_value=1)
-    ax.set_xlim((df_cum_rets.index[0], df_cum_rets.index[-1]))
+    ax.set_xlim((returns.index[0], returns.index[-1]))
     ax.set_ylabel('Amount of shares traded')
     ax.set_xlabel('')
     return ax
