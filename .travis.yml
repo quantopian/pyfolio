@@ -26,12 +26,12 @@ before_install:
 install:
   - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy statsmodels flake8 scikit-learn seaborn runipy pytables networkx pandas-datareader matplotlib-tests joblib
   - source activate testenv
-  - pip install nose_parameterized empyrical>=0.1.9
+  - pip install nose_parameterized
   #- pip install --no-deps git+https://github.com/quantopian/zipline
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock enum34; fi
   - pip install --no-deps git+https://github.com/Theano/Theano.git@rel-0.8.1
   - pip install --no-deps git+https://github.com/pymc-devs/pymc3.git
-  - python setup.py build_ext --inplace
+  - pip install -e .[bayesian]
 
 before_script:
   - "flake8 pyfolio"
