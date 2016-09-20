@@ -1,20 +1,18 @@
-#!/usr/bin/env python
-"""
-simple example script for running notebooks and reporting exceptions.
-Usage: `checkipnb.py foo.ipynb [bar.ipynb [...]]`
-Each cell is submitted to the kernel, and checked for errors.
-"""
-
 import os
 import glob
-from runipy.notebook_runner import NotebookRunner
-from IPython.nbformat.current import read
+from warnings import warn
 
-from pyfolio.utils import pyfolio_root
+from runipy.notebook_runner import NotebookRunner
+from IPython.nbformat import read
+
+import pyfolio
+
+
+pyfolio_root = os.path.dirname(pyfolio.__file__)
 
 
 def test_nbs():
-    path = os.path.join(pyfolio_root(), 'examples', '*.ipynb')
+    path = os.path.join(pyfolio_root, 'examples', '*.ipynb')
     for ipynb in glob.glob(path):
 
         # See if bayesian is useable before we run a test
@@ -22,9 +20,10 @@ def test_nbs():
             try:
                 import pymc3  # NOQA
             except:
+                yield warn, 'skipping test nb %s because missing pymc3' % ipynb
                 continue
 
         with open(ipynb) as f:
             nb = read(f, 'json')
             nb_runner = NotebookRunner(nb)
-            nb_runner.run_notebook(skip_exceptions=False)
+            yield nb_runner.run_notebook
