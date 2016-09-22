@@ -52,6 +52,7 @@ install_reqs = [
     'pandas-datareader>=0.2',
     'scikit-learn>=0.17',
     'empyrical>=0.1.11',
+    'statsmodels>=0.6.1',
 ]
 
 extras_reqs = {
