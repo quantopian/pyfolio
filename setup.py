@@ -53,6 +53,7 @@ install_reqs = [
     'scikit-learn>=0.17',
     'empyrical>=0.1.11',
     'statsmodels>=0.6.1',
+    'jsonschema>=2.5.1',
 ]
 
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
