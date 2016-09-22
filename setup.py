@@ -39,7 +39,7 @@ classifiers = ['Development Status :: 4 - Beta',
 
 install_reqs = [
     'funcsigs>=0.4',
-    'ipython>=4.0.0',
+    'ipython>=3.2.3',
     'matplotlib>=1.4.0',
     'mock>=1.1.2',
     'numpy>=1.9.1',
@@ -52,13 +52,18 @@ install_reqs = [
     'pandas-datareader>=0.2',
     'scikit-learn>=0.17',
     'empyrical>=0.1.11',
+    'statsmodels>=0.6.1',
+    'jsonschema>=2.5.1',
 ]
 
-extras_reqs = {
-    'bayesian': ['pymc3']
-}
-
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
+bayesian_reqs = ['pymc3']
+
+extras_reqs = {
+    'bayesian': bayesian_reqs,
+    'test': test_reqs,
+    'all': test_reqs + bayesian_reqs,
+}
 
 if __name__ == "__main__":
     setup(

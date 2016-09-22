@@ -8,9 +8,9 @@ Each cell is submitted to the kernel, and checked for errors.
 import os
 import glob
 from runipy.notebook_runner import NotebookRunner
-from IPython.nbformat.current import read
 
 from pyfolio.utils import pyfolio_root
+from pyfolio.ipycompat import read as read_notebook
 
 
 def test_nbs():
@@ -25,6 +25,6 @@ def test_nbs():
                 continue
 
         with open(ipynb) as f:
-            nb = read(f, 'json')
+            nb = read_notebook(f, 'json')
             nb_runner = NotebookRunner(nb)
             nb_runner.run_notebook(skip_exceptions=False)
