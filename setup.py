@@ -55,11 +55,14 @@ install_reqs = [
     'statsmodels>=0.6.1',
 ]
 
-extras_reqs = {
-    'bayesian': ['pymc3']
-}
-
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
+bayesian_reqs = ['pymc3']
+
+extras_reqs = {
+    'bayesian': bayesian_reqs,
+    'test': test_reqs,
+    'all': test_reqs + bayesian_reqs,
+}
 
 if __name__ == "__main__":
     setup(
