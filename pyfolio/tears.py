@@ -36,10 +36,12 @@ import empyrical
 
 try:
     from . import bayesian
+    have_bayesian = True
 except ImportError:
     warnings.warn(
         "Could not import bayesian submodule due to missing pymc3 dependency.",
         ImportWarning)
+    have_bayesian = False
 
 
 def timer(msg_body, previous_time):
@@ -831,6 +833,12 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     stoch_vol : boolean, optional
         If True, run and plot the stochastic volatility model
     """
+    if not have_bayesian:
+        raise NotImplementedError(
+            "Bayesian tear sheet requirements not found.\n"
+            "Run 'pip install pyfolio[bayesian]' to install "
+            "bayesian requirements."
+        )
 
     if live_start_date is None:
         raise NotImplementedError(
