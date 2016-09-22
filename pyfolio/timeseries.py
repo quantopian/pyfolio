@@ -1040,24 +1040,9 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
         cumulative returns.
     """
 
-    samples = np.empty((num_samples, num_days))
-    seed = np.random.RandomState(seed=random_seed)
-    for i in range(num_samples):
-        samples[i, :] = is_returns.sample(num_days, replace=True,
-                                          random_state=seed)
-
-    cum_samples = np.cumprod(1 + samples, axis=1) * starting_value
-
-    cum_mean = cum_samples.mean(axis=0)
-    cum_std = cum_samples.std(axis=0)
-
-    if isinstance(cone_std, (float, int)):
-        cone_std = [cone_std]
-
-    cone_bounds = pd.DataFrame(columns=pd.Float64Index([]))
-    for num_std in cone_std:
-        cone_bounds.loc[:, float(num_std)] = cum_mean + cum_std * num_std
-        cone_bounds.loc[:, float(-num_std)] = cum_mean - cum_std * num_std
+    samples = simulate_paths(is_returns, num_days,
+                             starting_value, num_samples, random_seed)
+    cone_bounds = summarize_paths(samples, cone_std)
 
     return cone_bounds
 
@@ -1091,3 +1076,30 @@ def extract_interesting_date_ranges(returns):
             continue
 
     return ranges
+
+
+def simulate_paths(is_returns, num_days,
+                   starting_value=1, num_samples=1000, random_seed=None):
+    samples = np.empty((num_samples, num_days))
+    seed = np.random.RandomState(seed=random_seed)
+    for i in range(num_samples):
+        samples[i, :] = is_returns.sample(num_days, replace=True,
+                                          random_state=seed)
+
+    return samples
+
+
+def summarize_paths(samples, cone_std=(1., 1.5, 2.)):
+    cum_samples = np.cumprod(1 + samples, axis=1) * 1.
+    cum_mean = cum_samples.mean(axis=0)
+    cum_std = cum_samples.std(axis=0)
+
+    if isinstance(cone_std, (float, int)):
+        cone_std = [cone_std]
+
+    cone_bounds = pd.DataFrame(columns=pd.Float64Index([]))
+    for num_std in cone_std:
+        cone_bounds.loc[:, float(num_std)] = cum_mean + cum_std * num_std
+        cone_bounds.loc[:, float(-num_std)] = cum_mean - cum_std * num_std
+
+    return cone_bounds

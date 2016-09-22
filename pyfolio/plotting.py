@@ -1667,7 +1667,6 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
     cone of forecasted cumulative returns. This cone is non-parametric,
     meaning it does not assume that returns are normally distributed. Redraws
     a new cone when returns fall outside of last cone drawn.
-
     Parameters
     ----------
     is_returns : pandas.core.frame.DataFrame
@@ -1692,8 +1691,6 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
         sample method.
     num_strikes : int
         Upper limit for number of cones drawn. Can be anything from 0 to 3.
-
-
     Returns
     -------
     Returns are either an ax or fig option, but not both. If a
@@ -1702,7 +1699,6 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
     notebook. When no ax object is passed in, a matplotlib.figure instance
     is generated and returned. This figure can then be used to save
     the plot as an image without viewing it.
-
     ax : matplotlib.Axes
         The axes that were plotted on.
     fig : matplotlib.figure
@@ -1742,18 +1738,83 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
             y2 = bounds_tmp[float(-std)].iloc[:len(returns_tmp)]
             axes.fill_between(x, y1, y2, color=colors[c], alpha=0.5)
     # Plot returns line graph
-    returns.plot(
-        ax=axes,
-        lw=3.,
-        color='black',
-        label='Cumulative returns = {:.2f}%'.format(
-            (returns.iloc[-1] - 1) * 100)
-    )
+    label = 'Cumulative returns = {:.2f}%'.format((returns.iloc[-1] - 1) * 100)
+    axes.plot(returns.index, returns.values, color='black', lw=3.,
+              label=label)
+
     if name is not None:
         axes.set_title(name)
     axes.axhline(1, color='black', alpha=0.2)
     axes.legend()
 
+    if ax is None:
+        return fig
+    else:
+        return axes
+
+
+
+
+def plot_portfolio_cones(algo_ids, live_all, ret_all, start_dates,
+                         num_samples=1000, ax=None, cone_std=(1., 1.5, 2.),
+                         random_seed=None, num_strikes=3):
+
+    cones = {}
+
+    for name in algo_ids.keys():
+        start_date = start_dates.get(name, None)
+        is_returns = ret_all[name].dropna(
+            ).loc[ret_all[name].dropna().index < start_date]
+        oos_returns = live_all.loc[name,
+                                   live_all.major_axis >= start_date,
+                                   'returns'].dropna()
+        paths = timeseries.simulate_paths(is_returns, len(oos_returns), num_samples=50000)
+        cones[name] = pd.DataFrame(paths.T, index=oos_returns.index)
+
+    if ax is None:
+        fig = figure.Figure(figsize=(10, 8))
+        FigureCanvasAgg(fig)
+        axes = fig.add_subplot(111)
+    else:
+        axes = ax
+    bounds = timeseries.summarize_paths(pd.Panel(cones).mean(axis='items').T)
+    cone_bounds_cur = bounds.copy()
+    start_date = start_dates.get('portfolio', None)
+    oos_returns = live_all.loc['portfolio',
+                               live_all.major_axis >= start_date,
+                               'returns'].dropna()
+    returns = empyrical.cum_returns(oos_returns, starting_value=1.)
+    first_cross = returns.index[0]
+
+    for std in cone_std:
+        axes.fill_between(returns.index,
+                          bounds[float(std)].iloc[:len(returns)],
+                          bounds[float(-std)].iloc[:len(returns)],
+                          color='green', alpha=0.5)
+
+    for color in ['orange', 'orangered', 'darkred']:
+        tmp = returns.loc[first_cross:]
+        lower_cross = (tmp < cone_bounds_cur[float(-2.)].iloc[:len(tmp)])
+        if lower_cross.sum() > 0:
+            # redraw cone
+            first_cross = lower_cross.loc[lower_cross].index[0]
+            cone = oos_returns.loc[first_cross:]
+            cone_bounds = (bounds - (1 - returns.loc[first_cross]))
+            for std in cone_std:
+                axes.fill_between(cone.index,
+                                  cone_bounds[float(std)].iloc[:len(cone)],
+                                  cone_bounds[float(-std)].iloc[:len(cone)],
+                                  color=color, alpha=0.5)
+
+            cone_bounds_cur = (bounds - (1 - returns.loc[first_cross]))
+
+    label = 'Cumulative returns = {:.2f}%'.format((returns.iloc[-1] - 1) * 100)
+    axes.plot(returns.index, returns.values, color='black', lw=3.,
+              label=label)
+
+    axes.set_title('Portfolio')
+    axes.axhline(1, color='k', alpha=0.2)
+    axes.legend()
     if ax is None:
         return fig
     else:
