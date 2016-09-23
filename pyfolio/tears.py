@@ -153,10 +153,6 @@ def create_full_tear_sheet(returns,
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
 
-    # If the strategy's history is longer than the benchmark's, limit strategy
-    if returns.index[0] < benchmark_rets.index[0]:
-        returns = returns[returns.index > benchmark_rets.index[0]]
-
     if (unadjusted_returns is None) and (slippage is not None) and\
        (transactions is not None):
         turnover = txn.get_turnover(positions, transactions,
@@ -262,6 +258,10 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     plotting.show_perf_stats(returns, benchmark_rets,
                              bootstrap=bootstrap,
                              live_start_date=live_start_date)
+
+    # If the strategy's history is longer than the benchmark's, limit strategy
+    if returns.index[0] < benchmark_rets.index[0]:
+        returns = returns[returns.index > benchmark_rets.index[0]]
 
     vertical_sections = 12
 
