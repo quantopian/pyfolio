@@ -29,7 +29,6 @@ install:
   - pip install nose_parameterized
   #- pip install --no-deps git+https://github.com/quantopian/zipline
   - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock enum34; fi
-  - pip install --no-deps git+https://github.com/Theano/Theano.git@rel-0.8.1
   - pip install --no-deps git+https://github.com/pymc-devs/pymc3.git
   - pip install -e .[bayesian]
 
