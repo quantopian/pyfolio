@@ -251,8 +251,8 @@ def model_best(y1, y2, samples=1000):
         pm.Deterministic('difference of stds',
                          group2_std - group1_std)
         pm.Deterministic('effect size', diff_of_means /
-                         pm.sqrt((group1_std**2 +
-                                  group2_std**2) / 2))
+                         pm.math.sqrt((group1_std**2 +
+                                       group2_std**2) / 2))
 
         pm.Deterministic('group1_annual_volatility',
                          returns_group1.distribution.variance**.5 *
@@ -396,7 +396,7 @@ def model_stoch_vol(data, samples=2000):
         sigma = pm.Exponential('sigma', 1. / .02, testval=.1)
         s = GaussianRandomWalk('s', sigma**-2, shape=len(data))
         volatility_process = pm.Deterministic('volatility_process',
-                                              pm.exp(-2 * s))
+                                              pm.math.exp(-2 * s))
         StudentT('r', nu, lam=volatility_process, observed=data)
         start = pm.find_MAP(vars=[s], fmin=sp.optimize.fmin_l_bfgs_b)
 
