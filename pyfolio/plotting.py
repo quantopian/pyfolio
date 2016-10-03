@@ -1659,8 +1659,8 @@ def plot_prob_profit_trade(round_trips, ax=None):
     return ax
 
 
-def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
-               cone_std=(1., 1.5, 2.), random_seed=None, num_strikes=3):
+def _plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
+                cone_std=(1., 1.5, 2.), random_seed=None, num_strikes=3):
     """
     Plots the upper and lower bounds of an n standard deviation
     cone of forecasted cumulative returns. Redraws a new cone when
@@ -1738,12 +1738,12 @@ def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
 
     # Plot returns line graph
     label = 'Cumulative returns = {:.2f}%'.format((returns.iloc[-1] - 1) * 100)
-    axes.plot(returns.index, returns.values, color='k', lw=3.,
+    axes.plot(returns.index, returns.values, color='black', lw=3.,
               label=label)
 
     if name is not None:
         axes.set_title(name)
-    axes.axhline(1, color='k', alpha=0.2)
+    axes.axhline(1, color='black', alpha=0.2)
     axes.legend()
 
     if ax is None:
@@ -1805,7 +1805,7 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
         num_samples=num_samples,
         random_seed=random_seed
     )
-    return plot_cones(
+    return _plot_cones(
         name=name,
         bounds=bounds,
         oos_returns=oos_returns,
@@ -1831,7 +1831,7 @@ def plot_portfolio_cones(live_all, ret_all, start_dates,
         Account names are items, the major axis is
         pandas.tseries.index.DatetimeIndex, and the minor axis contains a
         'returns' column. Each 'returns' column contains non-cumulative
-        in-sample returns.
+        oos-sample returns.
     ret_all : pandas.core.frame.DataFrame
         Account names are keys, for a pandas.core.series.Series containing
         non-cumulative out-of-sample returns.
@@ -1896,7 +1896,7 @@ def plot_portfolio_cones(live_all, ret_all, start_dates,
         samples=pd.Panel(cones).mean(axis='items').T,
         cone_std=cone_std
     )
-    return plot_cones(
+    return _plot_cones(
         name='portfolio',
         bounds=bounds,
         oos_returns=oos_returns,
