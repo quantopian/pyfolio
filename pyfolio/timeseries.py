@@ -462,6 +462,7 @@ def common_sense_ratio(returns):
 
 
 SIMPLE_STAT_FUNCS = [
+    empyrical.cum_returns_final,
     annual_return,
     annual_volatility,
     sharpe_ratio,
