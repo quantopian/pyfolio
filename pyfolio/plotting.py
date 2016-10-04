@@ -1659,8 +1659,8 @@ def plot_prob_profit_trade(round_trips, ax=None):
     return ax
 
 
-def _plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
-                cone_std=(1., 1.5, 2.), random_seed=None, num_strikes=3):
+def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
+               cone_std=(1., 1.5, 2.), random_seed=None, num_strikes=3):
     """
     Plots the upper and lower bounds of an n standard deviation
     cone of forecasted cumulative returns. Redraws a new cone when
@@ -1805,99 +1805,8 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
         num_samples=num_samples,
         random_seed=random_seed
     )
-    return _plot_cones(
+    return plot_cones(
         name=name,
-        bounds=bounds,
-        oos_returns=oos_returns,
-        num_samples=num_samples,
-        ax=ax,
-        cone_std=cone_std,
-        random_seed=random_seed,
-        num_strikes=num_strikes
-    )
-
-
-def plot_portfolio_cones(live_all, ret_all, start_dates,
-                         num_samples=1000, ax=None, cone_std=(1., 1.5, 2.),
-                         random_seed=None, num_strikes=3):
-    """
-    Plots the upper and lower bounds of an n standard deviation
-    cone of forecasted cumulative returns. Redraws a new cone when returns
-    fall outside of last cone drawn.
-
-    Parameters
-    ----------
-    live_all : pandas.core.panel.Panel
-        Account names are items, the major axis is
-        pandas.tseries.index.DatetimeIndex, and the minor axis contains a
-        'returns' column. Each 'returns' column contains non-cumulative
-        oos-sample returns.
-    ret_all : pandas.core.frame.DataFrame
-        Account names are keys, for a pandas.core.series.Series containing
-        non-cumulative out-of-sample returns.
-    start_dates : collections.OrderedDict or dict
-        Start dates for each account.
-    num_samples : int
-        Number of samples to draw from the in-sample daily returns.
-        Each sample will be an array with length num_days.
-        A higher number of samples will generate a more accurate
-        bootstrap cone.
-    ax : matplotlib.Axes, optional
-        Axes upon which to plot.
-    cone_std : list of int/float
-        Number of standard devations to use in the boundaries of
-        the cone. If multiple values are passed, cone bounds will
-        be generated for each value.
-    random_seed : int
-        Seed for the pseudorandom number generator used by the pandas
-        sample method.
-    num_strikes : int
-        Upper limit for number of cones drawn. Can be anything from 0 to 3.
-
-    Returns
-    -------
-    Returns are either an ax or fig option, but not both. If a
-    matplotlib.Axes instance is passed in as ax, then it will be modified
-    and returned. This allows for users to plot interactively in jupyter
-    notebook. When no ax object is passed in, a matplotlib.figure instance
-    is generated and returned. This figure can then be used to save
-    the plot as an image without viewing it.
-
-    ax : matplotlib.Axes
-        The axes that were plotted on.
-    fig : matplotlib.figure
-        The figure instance which contains all the plot elements.
-    """
-    cones = {}
-    for name in ret_all.keys():
-        start_date = start_dates.get(name, None)
-
-        is_returns = ret_all[name].dropna(
-            ).loc[ret_all[name].dropna().index < start_date]
-        oos_returns = live_all.loc[name,
-                                   live_all.major_axis >= start_date,
-                                   'returns'].dropna()
-        paths = timeseries.simulate_paths(
-            is_returns,
-            len(oos_returns),
-            num_samples=50000
-        )
-        cones[name] = pd.DataFrame(
-            paths.T,
-            index=oos_returns.index
-        )
-
-    start_date = start_dates.get('portfolio', None)
-    oos_returns = live_all.loc['portfolio',
-                               live_all.major_axis >= start_date,
-                               'returns'].dropna()
-
-    bounds = timeseries.summarize_paths(
-        samples=pd.Panel(cones).mean(axis='items').T,
-        cone_std=cone_std
-    )
-    return _plot_cones(
-        name='portfolio',
         bounds=bounds,
         oos_returns=oos_returns,
         num_samples=num_samples,

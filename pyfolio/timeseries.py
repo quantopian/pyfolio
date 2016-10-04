@@ -1122,7 +1122,8 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
 
     cone_bounds = summarize_paths(
         samples=samples,
-        cone_std=cone_std)
+        cone_std=cone_std
+    )
 
     return cone_bounds
 
