@@ -76,7 +76,6 @@ class PositionsTestCase(TestCase):
             index=index
         )
         expected.index.name = 'index'
-        expected.columns.name = 'sid'
 
         assert_frame_equal(result, expected)
 
