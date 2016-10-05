@@ -1659,6 +1659,99 @@ def plot_prob_profit_trade(round_trips, ax=None):
     return ax
 
 
+def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
+               cone_std=(1., 1.5, 2.), random_seed=None, num_strikes=3):
+    """
+    Plots the upper and lower bounds of an n standard deviation
+    cone of forecasted cumulative returns. Redraws a new cone when
+    cumulative returns fall outside of last cone drawn.
+
+    Parameters
+    ----------
+    name : str
+        Account name to be used as figure title.
+    bounds : pandas.core.frame.DataFrame
+        Contains upper and lower cone boundaries. Column names are
+        strings corresponding to the number of standard devations
+        above (positive) or below (negative) the projected mean
+        cumulative returns.
+    oos_returns : pandas.core.frame.DataFrame
+        Non-cumulative out-of-sample returns.
+    num_samples : int
+        Number of samples to draw from the in-sample daily returns.
+        Each sample will be an array with length num_days.
+        A higher number of samples will generate a more accurate
+        bootstrap cone.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    cone_std : list of int/float
+        Number of standard devations to use in the boundaries of
+        the cone. If multiple values are passed, cone bounds will
+        be generated for each value.
+    random_seed : int
+        Seed for the pseudorandom number generator used by the pandas
+        sample method.
+    num_strikes : int
+        Upper limit for number of cones drawn. Can be anything from 0 to 3.
+
+    Returns
+    -------
+    Returns are either an ax or fig option, but not both. If a
+    matplotlib.Axes instance is passed in as ax, then it will be modified
+    and returned. This allows for users to plot interactively in jupyter
+    notebook. When no ax object is passed in, a matplotlib.figure instance
+    is generated and returned. This figure can then be used to save
+    the plot as an image without viewing it.
+
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    fig : matplotlib.figure
+        The figure instance which contains all the plot elements.
+    """
+    if ax is None:
+        fig = figure.Figure(figsize=(10, 8))
+        FigureCanvasAgg(fig)
+        axes = fig.add_subplot(111)
+    else:
+        axes = ax
+
+    returns = empyrical.cum_returns(oos_returns, starting_value=1.)
+    bounds_tmp = bounds.copy()
+    returns_tmp = returns.copy()
+    cone_start = returns.index[0]
+    colors = ["green", "orange", "orangered", "darkred"]
+
+    for c in range(num_strikes + 1):
+        if c > 0:
+            tmp = returns.loc[cone_start:]
+            crossing = (tmp < bounds_tmp[float(-2.)].iloc[:len(tmp)])
+            if crossing.sum() <= 0:
+                break
+            cone_start = crossing.loc[crossing].index[0]
+            returns_tmp = returns.loc[cone_start:]
+            bounds_tmp = (bounds - (1 - returns.loc[cone_start]))
+        for std in cone_std:
+            x = returns_tmp.index
+            y1 = bounds_tmp[float(std)].iloc[:len(returns_tmp)]
+            y2 = bounds_tmp[float(-std)].iloc[:len(returns_tmp)]
+            axes.fill_between(x, y1, y2, color=colors[c], alpha=0.5)
+
+    # Plot returns line graph
+    label = 'Cumulative returns = {:.2f}%'.format((returns.iloc[-1] - 1) * 100)
+    axes.plot(returns.index, returns.values, color='black', lw=3.,
+              label=label)
+
+    if name is not None:
+        axes.set_title(name)
+    axes.axhline(1, color='black', alpha=0.2)
+    axes.legend()
+
+    if ax is None:
+        return fig
+    else:
+        return axes
+
+
 def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
                            name=None, ax=None, cone_std=(1., 1.5, 2.),
                            random_seed=None, num_strikes=0):
@@ -1667,7 +1760,6 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
     cone of forecasted cumulative returns. This cone is non-parametric,
     meaning it does not assume that returns are normally distributed. Redraws
     a new cone when returns fall outside of last cone drawn.
-
     Parameters
     ----------
     is_returns : pandas.core.frame.DataFrame
@@ -1693,7 +1785,6 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
     num_strikes : int
         Upper limit for number of cones drawn. Can be anything from 0 to 3.
 
-
     Returns
     -------
     Returns are either an ax or fig option, but not both. If a
@@ -1702,59 +1793,25 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
     notebook. When no ax object is passed in, a matplotlib.figure instance
     is generated and returned. This figure can then be used to save
     the plot as an image without viewing it.
-
     ax : matplotlib.Axes
         The axes that were plotted on.
     fig : matplotlib.figure
         The figure instance which contains all the plot elements.
     """
-    if ax is None:
-        fig = figure.Figure(figsize=(10, 8))
-        FigureCanvasAgg(fig)
-        axes = fig.add_subplot(111)
-    else:
-        axes = ax
-
-    returns = empyrical.cum_returns(oos_returns, starting_value=1.)
-    bounds = timeseries.forecast_cone_bootstrap(is_returns,
-                                                len(oos_returns),
-                                                cone_std=cone_std,
-                                                num_samples=num_samples,
-                                                random_seed=random_seed)
-    bounds.index = oos_returns.index
-    bounds_tmp = bounds.copy()
-    returns_tmp = returns.copy()
-    cone_start = returns.index[0]
-    colors = ["green", "orange", "orangered", "darkred"]
-
-    for c in range(num_strikes + 1):
-        if c > 0:
-            tmp = returns.loc[cone_start:]
-            crossing = (tmp < bounds_tmp[float(-2.)].iloc[:len(tmp)])
-            if crossing.sum() <= 0:
-                break
-            cone_start = crossing.loc[crossing].index[0]
-            returns_tmp = oos_returns.loc[cone_start:]
-            bounds_tmp = (bounds - (1 - returns.loc[cone_start]))
-        for std in cone_std:
-            x = returns_tmp.index
-            y1 = bounds_tmp[float(std)].iloc[:len(returns_tmp)]
-            y2 = bounds_tmp[float(-std)].iloc[:len(returns_tmp)]
-            axes.fill_between(x, y1, y2, color=colors[c], alpha=0.5)
-    # Plot returns line graph
-    returns.plot(
-        ax=axes,
-        lw=3.,
-        color='black',
-        label='Cumulative returns = {:.2f}%'.format(
-            (returns.iloc[-1] - 1) * 100)
+    bounds = timeseries.forecast_cone_bootstrap(
+        is_returns=is_returns,
+        num_days=len(oos_returns),
+        cone_std=cone_std,
+        num_samples=num_samples,
+        random_seed=random_seed
     )
-    if name is not None:
-        axes.set_title(name)
-    axes.axhline(1, color='black', alpha=0.2)
-    axes.legend()
-
-    if ax is None:
-        return fig
-    else:
-        return axes
+    return plot_cones(
+        name=name,
+        bounds=bounds,
+        oos_returns=oos_returns,
+        num_samples=num_samples,
+        ax=ax,
+        cone_std=cone_std,
+        random_seed=random_seed,
+        num_strikes=num_strikes
+    )
