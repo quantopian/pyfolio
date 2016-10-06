@@ -1724,6 +1724,8 @@ def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
     for c in range(num_strikes + 1):
         if c > 0:
             tmp = returns.loc[cone_start:]
+            bounds_tmp = bounds_tmp.iloc[0:len(tmp)]
+            bounds_tmp = bounds_tmp.set_index(tmp.index)
             crossing = (tmp < bounds_tmp[float(-2.)].iloc[:len(tmp)])
             if crossing.sum() <= 0:
                 break
@@ -1805,9 +1807,10 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
         num_samples=num_samples,
         random_seed=random_seed
     )
+
     return plot_cones(
         name=name,
-        bounds=bounds,
+        bounds=bounds.set_index(oos_returns.index),
         oos_returns=oos_returns,
         num_samples=num_samples,
         ax=ax,
