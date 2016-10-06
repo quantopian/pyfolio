@@ -724,7 +724,7 @@ def plot_rolling_returns(returns,
             is_returns = returns.loc[returns.index < live_start_date]
             cone_bounds = cone_function(
                 is_returns,
-                len(oos_cum_returns),
+                oos_cum_returns,
                 cone_std=cone_std,
                 starting_value=is_cum_returns[-1])
 
@@ -1724,6 +1724,8 @@ def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
     for c in range(num_strikes + 1):
         if c > 0:
             tmp = returns.loc[cone_start:]
+            bounds_tmp = bounds_tmp.iloc[0:len(tmp)]
+            bounds_tmp = bounds_tmp.set_index(tmp.index)
             crossing = (tmp < bounds_tmp[float(-2.)].iloc[:len(tmp)])
             if crossing.sum() <= 0:
                 break
@@ -1800,7 +1802,7 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
     """
     bounds = timeseries.forecast_cone_bootstrap(
         is_returns=is_returns,
-        num_days=len(oos_returns),
+        oos_returns=oos_returns,
         cone_std=cone_std,
         num_samples=num_samples,
         random_seed=random_seed

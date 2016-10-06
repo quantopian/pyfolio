@@ -1071,7 +1071,7 @@ def summarize_paths(samples, cone_std=(1., 1.5, 2.)):
     return cone_bounds
 
 
-def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
+def forecast_cone_bootstrap(is_returns, oos_returns, cone_std=(1., 1.5, 2.),
                             starting_value=1, num_samples=1000,
                             random_seed=None):
     """
@@ -1086,8 +1086,9 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
     is_returns : pd.Series
         In-sample daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    num_days : int
-        Number of days to project the probability cone forward.
+    oos_returns : pd.Series
+        Out-of-sample daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
     cone_std : int, float, or list of int/float
         Number of standard devations to use in the boundaries of
         the cone. If multiple values are passed, cone bounds will
@@ -1114,7 +1115,7 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
 
     samples = simulate_paths(
         is_returns=is_returns,
-        num_days=num_days,
+        num_days=len(oos_returns),
         starting_value=starting_value,
         num_samples=num_samples,
         random_seed=random_seed
@@ -1125,7 +1126,7 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
         cone_std=cone_std
     )
 
-    return cone_bounds
+    return cone_bounds.set_index(oos_returns.index)
 
 
 def extract_interesting_date_ranges(returns):
