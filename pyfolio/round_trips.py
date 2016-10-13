@@ -20,7 +20,7 @@ from collections import deque, OrderedDict
 import pandas as pd
 import numpy as np
 
-from .utils import print_table, APPROX_BDAYS_PER_MONTH
+from .utils import print_table
 
 PNL_STATS = OrderedDict(
     [('Total profit', lambda x: x.sum()),
@@ -59,15 +59,15 @@ RETURN_STATS = OrderedDict(
 DURATION_STATS = OrderedDict(
     [('Avg duration', lambda x: x.mean()),
      ('Median duration', lambda x: x.median()),
-     # FIXME: Instead of x.max() - x.min() this should be
-     # rts.close_dt.max() - rts.open_dt.min() which is not
-     # available here. As it would require a new approach here
-     # that passes in multiple fields we disable these measures
-     # for now.
-     #('Avg # round_trips per day', lambda x: float(len(x)) /
-     # (x.max() - x.min()).days),
-     #('Avg # round_trips per month', lambda x: float(len(x)) /
-     # (((x.max() - x.min()).days) / APPROX_BDAYS_PER_MONTH)),
+     #  FIXME: Instead of x.max() - x.min() this should be
+     #  rts.close_dt.max() - rts.open_dt.min() which is not
+     #  available here. As it would require a new approach here
+     #  that passes in multiple fields we disable these measures
+     #  for now.
+     #  ('Avg # round_trips per day', lambda x: float(len(x)) /
+     #   (x.max() - x.min()).days),
+     #  ('Avg # round_trips per month', lambda x: float(len(x)) /
+     #   (((x.max() - x.min()).days) / APPROX_BDAYS_PER_MONTH)),
      ])
 
 
