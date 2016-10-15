@@ -1,9 +1,9 @@
 package:
   name: pyfolio
-  version: "0.5.1"
+  version: "0.6.0"
 
 source:
-  fn: pyfolio-0.5.1.tar.gz
+  fn: pyfolio-0.6.0.tar.gz
   url: https://pypi.python.org/packages/a7/2a/cf5f5d401b39c2266d3de34119443cd684d5fe87721fac8c9cf42e3a6fa6/pyfolio-0.5.1.tar.gz
   md5: d48bb6e874e811beb802f23b4f1b3ec3
 

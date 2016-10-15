@@ -2,6 +2,21 @@
 
 These are new features and improvements of note in each release.
 
+## v0.6.0 (Oct, 17, 2016)
+
+This is a major new release from `0.5.1`. All users are recommended to upgrade.
+
+### New features
+
+* Computation of performance and risk measures has been split off into [`empyrical`](https://github.com/quantopian/empyrical).
+* New multistrike cone which redraws the cone when its crossed [PR310](https://github.com/quantopian/pyfolio/pull/310).
+
+### Bugfixes
+
+* Can use most recent PyMC3 now.
+* Depends on seaborn 0.7.0 or later now [PR331](https://github.com/quantopian/pyfolio/pull/331).
+* Disable buggy computation of round trips per day and per month [PR339](https://github.com/quantopian/pyfolio/pull/339).
+
 ## v0.5.1 (June, 10, 2016)
 
 This is a bugfix release from `0.5.0` with limited new functionality. All users are recommended to upgrade.
