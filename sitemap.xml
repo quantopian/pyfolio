@@ -4,7 +4,7 @@
     
     <url>
      <loc>None/</loc>
-     <lastmod>2016-06-10</lastmod>
+     <lastmod>2016-10-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -12,7 +12,7 @@
     
     <url>
      <loc>None/whatsnew/</loc>
-     <lastmod>2016-06-10</lastmod>
+     <lastmod>2016-10-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
     
@@ -21,37 +21,37 @@
         
     <url>
      <loc>None/notebooks/single_stock_example/</loc>
-     <lastmod>2016-06-10</lastmod>
+     <lastmod>2016-10-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/notebooks/zipline_algo_example/</loc>
-     <lastmod>2016-06-10</lastmod>
+     <lastmod>2016-10-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/notebooks/bayesian/</loc>
-     <lastmod>2016-06-10</lastmod>
+     <lastmod>2016-10-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/notebooks/sector_mapping_example/</loc>
-     <lastmod>2016-06-10</lastmod>
+     <lastmod>2016-10-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/notebooks/round_trip_example/</loc>
-     <lastmod>2016-06-10</lastmod>
+     <lastmod>2016-10-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         
     <url>
      <loc>None/notebooks/slippage_example/</loc>
-     <lastmod>2016-06-10</lastmod>
+     <lastmod>2016-10-17</lastmod>
      <changefreq>daily</changefreq>
     </url>
         

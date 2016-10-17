@@ -153,6 +153,8 @@
     
         <li class="main active"><a href="#whats-new">What's New</a></li>
         
+            <li><a href="#v060-oct-17-2016">v0.6.0 (Oct, 17, 2016)</a></li>
+        
             <li><a href="#v051-june-10-2016">v0.5.1 (June, 10, 2016)</a></li>
         
             <li><a href="#v050-april-21-2016-olympia">v0.5.0 (April 21, 2016) -- Olympia</a></li>
@@ -172,22 +174,35 @@
 
 <h1 id="whats-new">What's New</h1>
 <p>These are new features and improvements of note in each release.</p>
+<h2 id="v060-oct-17-2016">v0.6.0 (Oct, 17, 2016)</h2>
+<p>This is a major new release from <code>0.5.1</code>. All users are recommended to upgrade.</p>
+<h3 id="new-features">New features</h3>
+<ul>
+<li>Computation of performance and risk measures has been split off into <a href="https://github.com/quantopian/empyrical"><code>empyrical</code></a>. This allows <a href="https://zipline.io"><code>Zipline</code></a> and <code>pyfolio</code> to use the same code to calculate its risk statistics. By <a href="https://github.com/ahgnaw">Ana Ruelas</a> and <a href="https://github.com/abhijeetkalyan">Abhi Kalyan</a>. </li>
+<li>New multistrike cone which redraws the cone when it crossed its initial bounds <a href="https://github.com/quantopian/pyfolio/pull/310">PR310</a>. By <a href="https://github.com/ahgnaw">Ana Ruelas</a> and <a href="https://github.com/abhijeetkalyan">Abhi Kalyan</a>.</li>
+</ul>
+<h3 id="bugfixes">Bugfixes</h3>
+<ul>
+<li>Can use most recent PyMC3 now.</li>
+<li>Depends on seaborn 0.7.0 or later now <a href="https://github.com/quantopian/pyfolio/pull/331">PR331</a>.</li>
+<li>Disable buggy computation of round trips per day and per month <a href="https://github.com/quantopian/pyfolio/pull/339">PR339</a>.</li>
+</ul>
 <h2 id="v051-june-10-2016">v0.5.1 (June, 10, 2016)</h2>
 <p>This is a bugfix release from <code>0.5.0</code> with limited new functionality. All users are recommended to upgrade.</p>
-<h3 id="new-features">New features</h3>
+<h3 id="new-features_1">New features</h3>
 <ul>
 <li>OOS data is now overlaid on top of box plot <a href="https://github.com/quantopian/pyfolio/pull/306">PR306</a> by <a href="https://github.com/ahgnaw">Ana Ruelas</a></li>
 <li>New logo <a href="https://github.com/quantopian/pyfolio/pull/298">PR298</a> by <a href="https://github.com/tasopetridis">Taso Petridis</a> and <a href="https://github.com/richafrank">Richard Frank</a></li>
 <li>Raw returns plot and cumulative log returns plot <a href="https://github.com/quantopian/pyfolio/pull/294">PR294</a> by <a href="https://github.com/twiecki">Thomas Wiecki</a></li>
 <li>Net exposure line to the long/short exposure plot <a href="https://github.com/quantopian/pyfolio/pull/301">PR301</a> by <a href="https://github.com/ahgnaw">Ana Ruelas</a></li>
 </ul>
-<h3 id="bugfixes">Bugfixes</h3>
+<h3 id="bugfixes_1">Bugfixes</h3>
 <ul>
 <li>Fix drawdown behavior and pandas exception in tear-sheet creation <a href="https://github.com/quantopian/pyfolio/pull/297">PR297</a> by <a href="https://github.com/flaviodrt">Flavio Duarte</a></li>
 </ul>
 <h2 id="v050-april-21-2016-olympia">v0.5.0 (April 21, 2016) -- Olympia</h2>
 <p>This is a major release from <code>0.4.0</code> that includes many new analyses and features. We recommend that all users upgrade to this new version. Also update your dependencies, specifically, <code>pandas&gt;=0.18.0</code>, <code>seaborn&gt;=0.6.0</code> and <code>zipline&gt;=0.8.4</code>.</p>
-<h3 id="new-features_1">New features</h3>
+<h3 id="new-features_2">New features</h3>
 <ul>
 <li>New capacity tear-sheet to assess how much capital can be traded on a strategy <a href="https://github.com/quantopian/pyfolio/pull/284">PR284</a>. <a href="https://github.com/a-campbell">Andrew Campbell</a>.</li>
 <li>Bootstrap analysis to assess uncertainty in performance metrics <a href="https://github.com/quantopian/pyfolio/pull/261">PR261</a>. <a href="https://github.com/twiecki">Thomas Wiecki</a></li>
@@ -203,7 +218,7 @@
 </ul>
 <h2 id="v040-dec-10-2015">v0.4.0 (Dec 10, 2015)</h2>
 <p>This is a major release from 0.3.1 that includes new features and quite a few bug fixes. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_2">New features</h3>
+<h3 id="new-features_3">New features</h3>
 <ul>
 <li>Round-trip analysis <a href="https://github.com/quantopian/pyfolio/pull/210">PR210</a> Andrew, Thomas</li>
 <li>Improved cone to forecast returns that uses a bootstrap instead of linear forecasting <a href="https://github.com/quantopian/pyfolio/pull/233">PR233</a> Andrew, Thomas</li>
@@ -220,7 +235,7 @@
 </ul>
 <h2 id="v031-nov-12-2015">v0.3.1 (Nov 12, 2015)</h2>
 <p>This is a minor release from 0.3 that includes mostly bugfixes but also some new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_3">New features</h3>
+<h3 id="new-features_4">New features</h3>
 <ul>
 <li>Add Information Ratio <a href="https://github.com/quantopian/pyfolio/pull/194">PR194</a> by @MridulS</li>
 <li>Bayesian tear-sheet now accepts 'Fama-French' option to do Bayesian multivariate regression against Fama-French risk factors <a href="https://github.com/quantopian/pyfolio/pull/200">PR200</a> by Shane Bussman</li>
@@ -249,7 +264,7 @@
 </ul>
 <h2 id="v03-oct-23-2015">v0.3 (Oct 23, 2015)</h2>
 <p>This is a major release from 0.2 that includes many exciting new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_4">New features</h3>
+<h3 id="new-features_5">New features</h3>
 <ul>
 <li>Sector exposures: sum positions by sector given a dictionary or series of symbol to sector mappings <a href="https://github.com/quantopian/pyfolio/pull/166">PR166</a></li>
 <li>Ability to make cones with multiple shades stdev regions <a href="https://github.com/quantopian/pyfolio/pull/168">PR168</a></li>
@@ -263,7 +278,7 @@
 </ul>
 <h2 id="v02-oct-16-2015">v0.2 (Oct 16, 2015)</h2>
 <p>This is a major release from 0.1 that includes mainly bugfixes and refactorings but also some new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_5">New features</h3>
+<h3 id="new-features_6">New features</h3>
 <ul>
 <li>Volatility matched cumulative returns plot <a href="https://github.com/quantopian/pyfolio/pull/126">PR126</a>.</li>
 <li>Allow for different periodicity (annualization factors) in the annual_() methods <a href="https://github.com/quantopian/pyfolio/pull/164">PR164</a>.</li>
