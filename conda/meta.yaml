@@ -4,8 +4,8 @@ package:
 
 source:
   fn: pyfolio-0.6.0.tar.gz
-  url: https://pypi.python.org/packages/a7/2a/cf5f5d401b39c2266d3de34119443cd684d5fe87721fac8c9cf42e3a6fa6/pyfolio-0.5.1.tar.gz
-  md5: d48bb6e874e811beb802f23b4f1b3ec3
+  url: https://pypi.python.org/packages/74/b6/bd9064f071ab71312256dc0dcf792440f2e41a66f6736bd2aa90ba965fb6/pyfolio-0.6.0.tar.gz#md5=f3f02df1c1b77209eb33c64e34f00031
+  md5: f3f02df1c1b77209eb33c64e34f00031
 
 build:
   noarch_python: True
@@ -31,6 +31,7 @@ requirements:
     - statsmodels >=0.5.0
     - pandas-datareader >=0.2
     - ipython
+    - empyrical >=0.2.1
 
 test:
   # Python imports
