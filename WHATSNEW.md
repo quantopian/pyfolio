@@ -8,8 +8,8 @@ This is a major new release from `0.5.1`. All users are recommended to upgrade.
 
 ### New features
 
-* Computation of performance and risk measures has been split off into [`empyrical`](https://github.com/quantopian/empyrical).
-* New multistrike cone which redraws the cone when its crossed [PR310](https://github.com/quantopian/pyfolio/pull/310).
+* Computation of performance and risk measures has been split off into [`empyrical`](https://github.com/quantopian/empyrical). This allows [`Zipline`](https://zipline.io) and `pyfolio` to use the same code to calculate its risk statistics. By [Ana Ruelas](https://github.com/ahgnaw) and [Abhi Kalyan](https://github.com/abhijeetkalyan). 
+* New multistrike cone which redraws the cone when it crossed its initial bounds [PR310](https://github.com/quantopian/pyfolio/pull/310). By [Ana Ruelas](https://github.com/ahgnaw) and [Abhi Kalyan](https://github.com/abhijeetkalyan).
 
 ### Bugfixes
 
