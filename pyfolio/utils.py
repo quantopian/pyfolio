@@ -84,7 +84,7 @@ def one_dec_places(x, pos):
     return '%.1f' % x
 
 
-def two_dec_places(x):
+def two_dec_places(x, pos):
     """
     Adds 1/100th decimal to plot ticks.
     """
