@@ -163,7 +163,7 @@ def plot_rolling_fama_french(
               loc=legend_loc)
     ax.set_ylim((-2.0, 2.0))
 
-    y_axis_formatter = FuncFormatter(utils.one_dec_places)
+    y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
     ax.axhline(0.0, color='black')
     ax.set_xlabel('')
@@ -401,7 +401,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    y_axis_formatter = FuncFormatter(utils.one_dec_places)
+    y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     df_cum_rets = empyrical.cum_returns(returns, starting_value=1.0)
@@ -692,7 +692,7 @@ def plot_rolling_returns(returns,
 
     cum_rets = empyrical.cum_returns(returns, 1.0)
 
-    y_axis_formatter = FuncFormatter(utils.one_dec_places)
+    y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     if factor_returns is not None:
@@ -772,7 +772,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     if ax is None:
         ax = plt.gca()
 
-    y_axis_formatter = FuncFormatter(utils.one_dec_places)
+    y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     ax.set_title("Rolling Portfolio Beta to " + str(factor_returns.name))
@@ -822,7 +822,7 @@ def plot_rolling_sharpe(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
     if ax is None:
         ax = plt.gca()
 
-    y_axis_formatter = FuncFormatter(utils.one_dec_places)
+    y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     rolling_sharpe_ts = timeseries.rolling_sharpe(
@@ -1196,7 +1196,7 @@ def plot_turnover(returns, transactions, positions,
     if ax is None:
         ax = plt.gca()
 
-    y_axis_formatter = FuncFormatter(utils.one_dec_places)
+    y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     df_turnover = txn.get_turnover(positions, transactions)
