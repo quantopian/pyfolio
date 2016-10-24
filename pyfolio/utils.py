@@ -24,7 +24,6 @@ from IPython.display import display
 import pandas as pd
 from pandas.tseries.offsets import BDay
 from pandas_datareader import data as web
-import numpy as np
 
 from . import pos
 from . import txn
@@ -84,12 +83,14 @@ def one_dec_places(x, pos):
 
     return '%.1f' % x
 
+
 def two_dec_places(x):
     """
     Adds 1/100th decimal to plot ticks.
     """
 
     return '%.2f' % x
+
 
 def percentage(x, pos):
     """
