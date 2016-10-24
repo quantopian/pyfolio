@@ -84,6 +84,12 @@ def one_dec_places(x, pos):
 
     return '%.1f' % x
 
+def two_dec_places(x):
+    """
+    Adds 1/100th decimal to plot ticks.
+    """
+
+    return '%.2f' % x
 
 def percentage(x, pos):
     """
@@ -91,14 +97,6 @@ def percentage(x, pos):
     """
 
     return '%.0f%%' % x
-
-
-def round_two_dec_places(x):
-    """
-    Rounds a number to 1/100th decimal.
-    """
-
-    return np.round(x, 2)
 
 
 def get_utc_timestamp(dt):
