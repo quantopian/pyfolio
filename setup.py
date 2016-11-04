@@ -50,8 +50,7 @@ install_reqs = [
     'scipy>=0.14.0',
     'seaborn>=0.7.1',
     'pandas-datareader>=0.2',
-    'empyrical>=0.2.1',
-    'jsonschema>=2.5.1',
+    'empyrical>=0.2.1'
 ]
 
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
