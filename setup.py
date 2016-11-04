@@ -42,7 +42,6 @@ install_reqs = [
     'matplotlib>=1.4.0',
     'numpy>=1.9.1',
     'pandas>=0.18.0',
-    'pyparsing>=2.0.3',
     'python-dateutil>=2.4.2',
     'pytz>=2014.10',
     'scipy>=0.14.0',
