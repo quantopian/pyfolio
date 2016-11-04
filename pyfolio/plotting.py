@@ -497,8 +497,8 @@ def plot_perf_stats(returns, factor_returns, ax=None):
     return ax
 
 
-def show_perf_stats(returns, factor_returns, live_start_date=None,
-                    bootstrap=False):
+def show_perf_stats(returns, factor_returns, gross_lev=None,
+                    live_start_date=None, bootstrap=False):
     """Prints some performance metrics of the strategy.
 
     - Shows amount of time the strategy has been run in backtest and
@@ -534,14 +534,18 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
         live_start_date = utils.get_utc_timestamp(live_start_date)
         returns_backtest = returns[returns.index < live_start_date]
         returns_live = returns[returns.index > live_start_date]
+        gross_lev_backtest = gross_lev[gross_lev.index < live_start_date]
+        gross_lev_live = gross_lev[gross_lev.index > live_start_date]
 
         perf_stats_live = perf_func(
             returns_live,
-            factor_returns=factor_returns)
+            factor_returns=factor_returns,
+            gross_lev=gross_lev_live)
 
         perf_stats_all = perf_func(
             returns,
-            factor_returns=factor_returns)
+            factor_returns=factor_returns,
+            gross_lev=gross_lev)
 
         print('Out-of-Sample Months: ' +
               str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
@@ -553,7 +557,8 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
 
     perf_stats = perf_func(
         returns_backtest,
-        factor_returns=factor_returns)
+        factor_returns=factor_returns,
+        gross_lev=gross_lev_backtest)
 
     if live_start_date is not None:
         perf_stats = pd.concat(OrderedDict([

@@ -474,7 +474,7 @@ SIMPLE_STAT_FUNCS = [
     stats.skew,
     stats.kurtosis,
     tail_ratio,
-    common_sense_ratio,
+    common_sense_ratio
 ]
 
 FACTOR_STAT_FUNCS = [
@@ -630,7 +630,7 @@ def rolling_fama_french(returns, factor_returns=None,
                         rolling_window=rolling_window)
 
 
-def perf_stats(returns, factor_returns=None):
+def perf_stats(returns, factor_returns=None, gross_lev=None):
     """Calculates various performance metrics of a strategy, for use in
     plotting.show_perf_stats.
 
@@ -652,9 +652,11 @@ def perf_stats(returns, factor_returns=None):
     """
 
     stats = pd.Series()
-
     for stat_func in SIMPLE_STAT_FUNCS:
         stats[stat_func.__name__] = stat_func(returns)
+
+    if gross_lev is not None:
+        stats['mean_gross_leverage'] = gross_lev.mean()
 
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:

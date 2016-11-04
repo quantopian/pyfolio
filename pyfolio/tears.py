@@ -163,6 +163,7 @@ def create_full_tear_sheet(returns,
     create_returns_tear_sheet(
         returns,
         live_start_date=live_start_date,
+        gross_lev=gross_lev,
         cone_std=cone_std,
         benchmark_rets=benchmark_rets,
         bootstrap=bootstrap,
@@ -204,6 +205,7 @@ def create_full_tear_sheet(returns,
 
 @plotting_context
 def create_returns_tear_sheet(returns, live_start_date=None,
+                              gross_lev=None,
                               cone_std=(1.0, 1.5, 2.0),
                               benchmark_rets=None,
                               bootstrap=False,
@@ -256,6 +258,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     print('\n')
 
     plotting.show_perf_stats(returns, benchmark_rets,
+                             gross_lev=gross_lev,
                              bootstrap=bootstrap,
                              live_start_date=live_start_date)
 
