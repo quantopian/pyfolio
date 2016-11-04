@@ -17,7 +17,6 @@ requirements:
 
   run:
     - python
-    - funcsigs >=0.4
     - matplotlib >=1.4.0
     - mock >=1.1.2
     - numpy >=1.9.1
