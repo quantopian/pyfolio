@@ -20,6 +20,7 @@ from os import makedirs, environ
 from os.path import expanduser, join, getmtime, isdir
 import warnings
 
+import numpy as np
 from IPython.display import display
 import pandas as pd
 from pandas.tseries.offsets import BDay
