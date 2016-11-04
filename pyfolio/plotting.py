@@ -555,6 +555,7 @@ def show_perf_stats(returns, factor_returns, gross_lev=None,
               str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
     else:
         returns_backtest = returns
+        gross_lev_backtest = gross_lev
 
     print('Backtest Months: ' +
           str(int(len(returns_backtest) / APPROX_BDAYS_PER_MONTH)))
