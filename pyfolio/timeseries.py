@@ -554,34 +554,6 @@ def aggregate_returns(returns, convert_to):
     return empyrical.aggregate_returns(returns, convert_to=convert_to)
 
 
-def calc_multifactor(returns, factors):
-    """Computes multiple ordinary least squares linear fits, and returns
-    fit parameters.
-
-    Parameters
-    ----------
-    returns : pd.Series
-        Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
-    factors : pd.Series
-        Secondary sets to fit.
-
-    Returns
-    -------
-    pd.DataFrame
-        Fit parameters.
-
-    """
-
-    import statsmodels.api as sm
-    factors = factors.loc[returns.index]
-    factors = sm.add_constant(factors)
-    factors = factors.dropna(axis=0)
-    results = sm.OLS(returns[factors.index], factors).fit()
-
-    return results.params
-
-
 def rolling_beta(returns, factor_returns,
                  rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """Determines the rolling beta of a strategy.
