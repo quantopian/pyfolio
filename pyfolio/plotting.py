@@ -26,8 +26,6 @@ import matplotlib.lines as mlines
 from matplotlib import figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-from sklearn import preprocessing
-
 from . import utils
 from . import timeseries
 from . import pos
@@ -1425,8 +1423,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
 
 
 def plot_daily_returns_similarity(returns_backtest, returns_live,
-                                  title='', scale_kws=None, ax=None,
-                                  **kwargs):
+                                  title='', ax=None, **kwargs):
     """Plots overlapping distributions of in-sample (backtest) returns
     and out-of-sample (live trading) returns.
 
@@ -1438,8 +1435,6 @@ def plot_daily_returns_similarity(returns_backtest, returns_live,
         Daily returns of the strategy's live trading, noncumulative.
     title : str, optional
         The title to use for the plot.
-    scale_kws : dict, optional
-        Additional arguments passed to preprocessing.scale.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -1454,13 +1449,11 @@ def plot_daily_returns_similarity(returns_backtest, returns_live,
 
     if ax is None:
         ax = plt.gca()
-    if scale_kws is None:
-        scale_kws = {}
 
-    sns.kdeplot(preprocessing.scale(returns_backtest, **scale_kws),
+    sns.kdeplot(utils.standardize_data(returns_backtest),
                 bw='scott', shade=True, label='backtest',
                 color='forestgreen', ax=ax, **kwargs)
-    sns.kdeplot(preprocessing.scale(returns_live, **scale_kws),
+    sns.kdeplot(utils.standardize_data(returns_live),
                 bw='scott', shade=True, label='out-of-sample',
                 color='red', ax=ax, **kwargs)
     ax.set_title(title)

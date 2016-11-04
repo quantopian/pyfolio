@@ -50,7 +50,6 @@ install_reqs = [
     'scipy>=0.14.0',
     'seaborn>=0.7.1',
     'pandas-datareader>=0.2',
-    'scikit-learn>=0.17',
     'empyrical>=0.2.1',
     'jsonschema>=2.5.1',
 ]
