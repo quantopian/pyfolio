@@ -534,8 +534,12 @@ def show_perf_stats(returns, factor_returns, gross_lev=None,
         live_start_date = utils.get_utc_timestamp(live_start_date)
         returns_backtest = returns[returns.index < live_start_date]
         returns_live = returns[returns.index > live_start_date]
-        gross_lev_backtest = gross_lev[gross_lev.index < live_start_date]
-        gross_lev_live = gross_lev[gross_lev.index > live_start_date]
+
+        gross_lev_backtest = None
+        gross_lev_live = None
+        if gross_lev is not None:
+            gross_lev_backtest = gross_lev[gross_lev.index < live_start_date]
+            gross_lev_live = gross_lev[gross_lev.index > live_start_date]
 
         perf_stats_live = perf_func(
             returns_live,
