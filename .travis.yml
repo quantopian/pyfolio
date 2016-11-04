@@ -28,7 +28,6 @@ install:
   - source activate testenv
   - pip install nose_parameterized
   #- pip install --no-deps git+https://github.com/quantopian/zipline
-  - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes mock enum34; fi
   - pip install -e .[bayesian]
 
 before_script:
