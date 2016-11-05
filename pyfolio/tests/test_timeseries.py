@@ -276,33 +276,6 @@ class TestStats(TestCase):
             expected)
 
 
-class TestMultifactor(TestCase):
-    simple_rets = pd.Series(
-        [0.1] * 3 + [0] * 497,
-        pd.date_range(
-            '2000-1-1',
-            periods=500,
-            freq='D'))
-    simple_benchmark_rets = pd.DataFrame(
-        pd.Series(
-            [0.03] * 4 + [0] * 496,
-            pd.date_range(
-                '2000-1-1',
-                periods=500,
-                freq='D')),
-        columns=['bm'])
-
-    @parameterized.expand([
-        (simple_rets[:4], simple_benchmark_rets[:4], [2.5000000000000004])
-    ])
-    def test_calc_multifactor(self, returns, factors, expected):
-        self.assertEqual(
-            timeseries.calc_multifactor(
-                returns,
-                factors).values.tolist(),
-            expected)
-
-
 class TestCone(TestCase):
     def test_bootstrap_cone_against_linear_cone_normal_returns(self):
         random_seed = 100

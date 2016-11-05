@@ -26,8 +26,6 @@ import matplotlib.lines as mlines
 from matplotlib import figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-from sklearn import preprocessing
-
 from . import utils
 from . import timeseries
 from . import pos
@@ -499,8 +497,8 @@ def plot_perf_stats(returns, factor_returns, ax=None):
     return ax
 
 
-def show_perf_stats(returns, factor_returns, live_start_date=None,
-                    bootstrap=False):
+def show_perf_stats(returns, factor_returns, gross_lev=None,
+                    live_start_date=None, bootstrap=False):
     """Prints some performance metrics of the strategy.
 
     - Shows amount of time the strategy has been run in backtest and
@@ -537,25 +535,35 @@ def show_perf_stats(returns, factor_returns, live_start_date=None,
         returns_backtest = returns[returns.index < live_start_date]
         returns_live = returns[returns.index > live_start_date]
 
+        gross_lev_backtest = None
+        gross_lev_live = None
+        if gross_lev is not None:
+            gross_lev_backtest = gross_lev[gross_lev.index < live_start_date]
+            gross_lev_live = gross_lev[gross_lev.index > live_start_date]
+
         perf_stats_live = perf_func(
             returns_live,
-            factor_returns=factor_returns)
+            factor_returns=factor_returns,
+            gross_lev=gross_lev_live)
 
         perf_stats_all = perf_func(
             returns,
-            factor_returns=factor_returns)
+            factor_returns=factor_returns,
+            gross_lev=gross_lev)
 
         print('Out-of-Sample Months: ' +
               str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
     else:
         returns_backtest = returns
+        gross_lev_backtest = gross_lev
 
     print('Backtest Months: ' +
           str(int(len(returns_backtest) / APPROX_BDAYS_PER_MONTH)))
 
     perf_stats = perf_func(
         returns_backtest,
-        factor_returns=factor_returns)
+        factor_returns=factor_returns,
+        gross_lev=gross_lev_backtest)
 
     if live_start_date is not None:
         perf_stats = pd.concat(OrderedDict([
@@ -1425,8 +1433,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
 
 
 def plot_daily_returns_similarity(returns_backtest, returns_live,
-                                  title='', scale_kws=None, ax=None,
-                                  **kwargs):
+                                  title='', ax=None, **kwargs):
     """Plots overlapping distributions of in-sample (backtest) returns
     and out-of-sample (live trading) returns.
 
@@ -1438,8 +1445,6 @@ def plot_daily_returns_similarity(returns_backtest, returns_live,
         Daily returns of the strategy's live trading, noncumulative.
     title : str, optional
         The title to use for the plot.
-    scale_kws : dict, optional
-        Additional arguments passed to preprocessing.scale.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -1454,13 +1459,11 @@ def plot_daily_returns_similarity(returns_backtest, returns_live,
 
     if ax is None:
         ax = plt.gca()
-    if scale_kws is None:
-        scale_kws = {}
 
-    sns.kdeplot(preprocessing.scale(returns_backtest, **scale_kws),
+    sns.kdeplot(utils.standardize_data(returns_backtest),
                 bw='scott', shade=True, label='backtest',
                 color='forestgreen', ax=ax, **kwargs)
-    sns.kdeplot(preprocessing.scale(returns_live, **scale_kws),
+    sns.kdeplot(utils.standardize_data(returns_live),
                 bw='scott', shade=True, label='out-of-sample',
                 color='red', ax=ax, **kwargs)
     ax.set_title(title)

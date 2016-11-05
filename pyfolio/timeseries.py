@@ -474,7 +474,7 @@ SIMPLE_STAT_FUNCS = [
     stats.skew,
     stats.kurtosis,
     tail_ratio,
-    common_sense_ratio,
+    common_sense_ratio
 ]
 
 FACTOR_STAT_FUNCS = [
@@ -554,34 +554,6 @@ def aggregate_returns(returns, convert_to):
     return empyrical.aggregate_returns(returns, convert_to=convert_to)
 
 
-def calc_multifactor(returns, factors):
-    """Computes multiple ordinary least squares linear fits, and returns
-    fit parameters.
-
-    Parameters
-    ----------
-    returns : pd.Series
-        Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
-    factors : pd.Series
-        Secondary sets to fit.
-
-    Returns
-    -------
-    pd.DataFrame
-        Fit parameters.
-
-    """
-
-    import statsmodels.api as sm
-    factors = factors.loc[returns.index]
-    factors = sm.add_constant(factors)
-    factors = factors.dropna(axis=0)
-    results = sm.OLS(returns[factors.index], factors).fit()
-
-    return results.params
-
-
 def rolling_beta(returns, factor_returns,
                  rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """Determines the rolling beta of a strategy.
@@ -658,7 +630,7 @@ def rolling_fama_french(returns, factor_returns=None,
                         rolling_window=rolling_window)
 
 
-def perf_stats(returns, factor_returns=None):
+def perf_stats(returns, factor_returns=None, gross_lev=None):
     """Calculates various performance metrics of a strategy, for use in
     plotting.show_perf_stats.
 
@@ -671,6 +643,8 @@ def perf_stats(returns, factor_returns=None):
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
         If None, do not compute alpha, beta, and information ratio.
+    gross_lev : pd.Series (optional)
+        Daily gross leverage of the strategy.
 
     Returns
     -------
@@ -680,9 +654,11 @@ def perf_stats(returns, factor_returns=None):
     """
 
     stats = pd.Series()
-
     for stat_func in SIMPLE_STAT_FUNCS:
         stats[stat_func.__name__] = stat_func(returns)
+
+    if gross_lev is not None:
+        stats['mean_gross_leverage'] = gross_lev.mean()
 
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
@@ -692,7 +668,8 @@ def perf_stats(returns, factor_returns=None):
     return stats
 
 
-def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True):
+def perf_stats_bootstrap(returns, factor_returns=None, gross_lev=None,
+                         return_stats=True):
     """Calculates various bootstrapped performance metrics of a strategy.
 
     Parameters
@@ -725,6 +702,10 @@ def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True):
         stat_name = stat_func.__name__
         bootstrap_values[stat_name] = calc_bootstrap(stat_func,
                                                      returns)
+
+    if gross_lev is not None:
+        bootstrap_values['mean_gross_leverage'] = calc_bootstrap(np.mean,
+                                                                 gross_lev)
 
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:

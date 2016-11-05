@@ -38,22 +38,15 @@ classifiers = ['Development Status :: 4 - Beta',
                'Operating System :: OS Independent']
 
 install_reqs = [
-    'funcsigs>=0.4',
     'ipython>=3.2.3',
     'matplotlib>=1.4.0',
-    'mock>=1.1.2',
     'numpy>=1.9.1',
     'pandas>=0.18.0',
-    'pyparsing>=2.0.3',
-    'python-dateutil>=2.4.2',
     'pytz>=2014.10',
     'scipy>=0.14.0',
     'seaborn>=0.7.1',
     'pandas-datareader>=0.2',
-    'scikit-learn>=0.17',
-    'empyrical>=0.2.1',
-    'statsmodels>=0.6.1',
-    'jsonschema>=2.5.1',
+    'empyrical>=0.2.1'
 ]
 
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']

@@ -20,6 +20,7 @@ from os import makedirs, environ
 from os.path import expanduser, join, getmtime, isdir
 import warnings
 
+import numpy as np
 from IPython.display import display
 import pandas as pd
 from pandas.tseries.offsets import BDay
@@ -475,7 +476,8 @@ def get_symbol_rets(symbol, start=None, end=None):
 
 
 def print_table(table, name=None, fmt=None):
-    """Pretty print a pandas DataFrame.
+    """
+    Pretty print a pandas DataFrame.
 
     Uses HTML output if running inside Jupyter Notebook, otherwise
     formatted text output.
@@ -506,3 +508,20 @@ def print_table(table, name=None, fmt=None):
 
     if fmt is not None:
         pd.set_option('display.float_format', prev_option)
+
+
+def standardize_data(x):
+    """
+    Standardize an array with mean and standard deviation.
+
+    Parameters
+    ----------
+    x : np.array
+        Array to standardize.
+
+    Returns
+    -------
+    np.array
+        Standardized array.
+    """
+    return (x - np.mean(x)) / np.std(x)
