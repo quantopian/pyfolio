@@ -643,6 +643,8 @@ def perf_stats(returns, factor_returns=None, gross_lev=None):
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
         If None, do not compute alpha, beta, and information ratio.
+    gross_lev : pd.Series (optional)
+        Daily gross leverage of the strategy.
 
     Returns
     -------
@@ -666,7 +668,8 @@ def perf_stats(returns, factor_returns=None, gross_lev=None):
     return stats
 
 
-def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True):
+def perf_stats_bootstrap(returns, factor_returns=None, gross_lev=None,
+                         return_stats=True):
     """Calculates various bootstrapped performance metrics of a strategy.
 
     Parameters
@@ -699,6 +702,10 @@ def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True):
         stat_name = stat_func.__name__
         bootstrap_values[stat_name] = calc_bootstrap(stat_func,
                                                      returns)
+
+    if gross_lev is not None:
+        bootstrap_values['mean_gross_leverage'] = calc_bootstrap(np.mean,
+                                                                 gross_lev)
 
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
