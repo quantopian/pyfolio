@@ -1574,7 +1574,8 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    monthly_rets = returns.resample('M').cumulate_returns().to_period()
+    monthly_rets = returns.resample('M').apply(lambda x: cumulate_returns(x))
+    monthly_rets = monthly_rets.to_period()
 
     sns.barplot(x=monthly_rets.index,
                 y=monthly_rets.values,
