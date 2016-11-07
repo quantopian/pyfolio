@@ -146,12 +146,12 @@ def plot_rolling_fama_french(
         ax = plt.gca()
 
     ax.set_title(
-        "Rolling Fama-French Single Factor Betas (%.0f-month)" % (
+        "Rolling Fama-French single factor betas (%.0f-month)" % (
             rolling_window / APPROX_BDAYS_PER_MONTH
         )
     )
 
-    ax.set_ylabel('beta')
+    ax.set_ylabel('Beta')
 
     rolling_beta = timeseries.rolling_fama_french(
         returns,
@@ -214,7 +214,7 @@ def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
         ax=ax, **kwargs)
     ax.set_ylabel('Year')
     ax.set_xlabel('Month')
-    ax.set_title("Monthly Returns (%)")
+    ax.set_title("Monthly returns (%)")
     return ax
 
 
@@ -263,7 +263,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
 
     ax.set_ylabel('Year')
     ax.set_xlabel('Returns')
-    ax.set_title("Annual Returns")
+    ax.set_title("Annual returns")
     ax.legend(['mean'])
     return ax
 
@@ -315,7 +315,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
     ax.legend(['mean'])
     ax.set_ylabel('Number of months')
     ax.set_xlabel('Returns')
-    ax.set_title("Distribution of Monthly Returns")
+    ax.set_title("Distribution of monthly returns")
     return ax
 
 
@@ -375,7 +375,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
                'Average daily holdings, by month',
                'Average daily holdings, net'],
               loc=legend_loc)
-    ax.set_title('Holdings per Day')
+    ax.set_title('Holdings per day')
     ax.set_ylabel('Amount of holdings per day')
     ax.set_xlabel('')
     return ax
@@ -426,7 +426,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
                         alpha=.4,
                         color=colors[i])
 
-    ax.set_title('Top %i Drawdown Periods' % top)
+    ax.set_title('Top %i drawdown periods' % top)
     ax.set_ylabel('Cumulative returns')
     ax.legend(['Portfolio'], loc='upper left')
     ax.set_xlabel('')
@@ -465,7 +465,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     underwater = -100 * ((running_max - df_cum_rets) / running_max)
     (underwater).plot(ax=ax, kind='area', color='coral', alpha=0.7, **kwargs)
     ax.set_ylabel('Drawdown')
-    ax.set_title('Underwater Plot')
+    ax.set_title('Underwater plot')
     ax.set_xlabel('')
     return ax
 
@@ -617,7 +617,8 @@ def plot_returns(returns,
     if ax is None:
         ax = plt.gca()
 
-    ax.set(xlabel='', ylabel='Returns')
+    ax.set_label('')
+    ax.set_ylabel('Returns')
 
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
@@ -695,8 +696,9 @@ def plot_rolling_returns(returns,
     if ax is None:
         ax = plt.gca()
 
-    ax.set(xlabel='', ylabel='Cumulative returns',
-           yscale='log' if logy else 'linear')
+    ax.set_xlabel('')
+    ax.set_ylabel('Cumulative returns')
+    ax.set_yscale('log' if logy else 'linear')
 
     if volatility_match and factor_returns is None:
         raise ValueError('volatility_match requires passing of'
@@ -790,7 +792,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    ax.set_title("Rolling Portfolio Beta to " + str(factor_returns.name))
+    ax.set_title("Rolling portfolio beta to " + str(factor_returns.name))
     ax.set_ylabel('Beta')
     rb_1 = timeseries.rolling_beta(
         returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6)
@@ -896,8 +898,8 @@ def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
     ax.axhline(gross_lev.mean(), color='g', linestyle='--', lw=3,
                alpha=1.0)
 
-    ax.set_title('Gross Leverage')
-    ax.set_ylabel('Gross Leverage')
+    ax.set_title('Gross leverage')
+    ax.set_ylabel('Gross leverage')
     ax.set_xlabel('')
     return ax
 
@@ -933,7 +935,7 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
         kind='line', style=['-g', '-r', '--k'], alpha=1.0,
         ax=ax, **kwargs)
     ax.set_xlim((returns.index[0], returns.index[-1]))
-    ax.set_title("Long/Short Exposure")
+    ax.set_title("Long and short exposure")
     ax.set_ylabel('Exposure')
     ax.set_xlabel('')
     return ax
@@ -1002,7 +1004,7 @@ def show_and_plot_top_positions(returns, positions_alloc,
             ax = plt.gca()
 
         positions_alloc[df_top_abs.index].plot(
-            title='Portfolio Allocation Over Time, Only Top 10 Holdings',
+            title='Portfolio allocation over time, only top 10 holdings',
             alpha=0.4, ax=ax, **kwargs)
 
         # Place legend below plot, shrink plot by 20%
@@ -1054,7 +1056,7 @@ def plot_max_median_position_concentration(positions, ax=None, **kwargs):
 
     ax.legend(loc='center left')
     ax.set_ylabel('Exposure')
-    ax.set_title('Long/Short Max and Median Position Concentration')
+    ax.set_title('Long/Short max and median position concentration')
 
     return ax
 
@@ -1084,7 +1086,7 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
     if ax is None:
         ax = plt.gcf()
 
-    sector_alloc.plot(title='Sector Allocation Over Time',
+    sector_alloc.plot(title='Sector allocation over time',
                       alpha=0.4, ax=ax, **kwargs)
 
     box = ax.get_position()
@@ -1149,7 +1151,7 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
                                            label="Out-of-sample data",
                                            linestyle='')
         ax.legend(handles=[red_dots])
-    ax.set_xticklabels(['daily', 'weekly', 'monthly'])
+    ax.set_xticklabels(['Daily', 'Weekly', 'Monthly'])
     ax.set_title('Return quantiles')
 
     return ax
@@ -1220,7 +1222,7 @@ def plot_turnover(returns, transactions, positions,
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     df_turnover = txn.get_turnover(positions, transactions)
-    df_turnover_by_month = df_turnover.resample("M")
+    df_turnover_by_month = df_turnover.resample("M").mean()
     df_turnover.plot(color='steelblue', alpha=1.0, lw=0.5, ax=ax, **kwargs)
     df_turnover_by_month.plot(
         color='orangered',
@@ -1234,7 +1236,7 @@ def plot_turnover(returns, transactions, positions,
                'Average daily turnover, by month',
                'Average daily turnover, net'],
               loc=legend_loc)
-    ax.set_title('Daily Turnover')
+    ax.set_title('Daily turnover')
     ax.set_xlim((returns.index[0], returns.index[-1]))
     ax.set_ylim((0, 1))
     ax.set_ylabel('Turnover')
@@ -1287,7 +1289,7 @@ def plot_slippage_sweep(returns, transactions, positions,
 
     slippage_sweep.plot(alpha=1.0, lw=0.5, ax=ax)
 
-    ax.set_title('Cumulative Returns Given Additional Per-Dollar Slippage')
+    ax.set_title('Cumulative returns given additional per-dollar slippage')
     ax.set_ylabel('')
 
     ax.legend(loc='center left')
@@ -1335,10 +1337,10 @@ def plot_slippage_sensitivity(returns, transactions, positions,
 
     avg_returns_given_slippage.plot(alpha=1.0, lw=2, ax=ax)
 
-    ax.set(title='Average Annual Returns Given Additional Per-Dollar Slippage',
-           xticks=np.arange(0, 100, 10),
-           ylabel='Average Annual Return',
-           xlabel='Per-Dollar Slippage (bps)')
+    ax.set_title('Average annual returns given additional per-dollar slippage')
+    ax.set_xticks(np.arange(0, 100, 10))
+    ax.set_ylabel('Average annual return')
+    ax.set_xlabel('Per-dollar slippage (bps)')
 
     return ax
 
@@ -1368,9 +1370,9 @@ def plot_capacity_sweep(returns, transactions, market_data,
         ax = plt.gca()
 
     captial_base_sweep.plot(ax=ax)
-    ax.set(xlabel='Capital Base ($mm)',
-           ylabel='Sharpe Ratio',
-           title='Capital Base Performance Sweep')
+    ax.set_xlabel('Capital base ($mm)')
+    ax.set_ylabel('Sharpe ratio')
+    ax.set_title('Capital base performance sweep')
 
     return ax
 
@@ -1403,8 +1405,8 @@ def plot_daily_turnover_hist(transactions, positions,
         ax = plt.gca()
     turnover = txn.get_turnover(positions, transactions, period=None)
     sns.distplot(turnover, ax=ax, **kwargs)
-    ax.set_title('Distribution of Daily Turnover Rates')
-    ax.set_xlabel('Turnover Rate')
+    ax.set_title('Distribution of daily turnover rates')
+    ax.set_xlabel('Turnover rate')
     return ax
 
 
@@ -1439,7 +1441,7 @@ def plot_daily_volume(returns, transactions, ax=None, **kwargs):
     daily_txn.txn_shares.plot(alpha=1.0, lw=0.5, ax=ax, **kwargs)
     ax.axhline(daily_txn.txn_shares.mean(), color='steelblue',
                linestyle='--', lw=3, alpha=1.0)
-    ax.set_title('Daily Trading Volume')
+    ax.set_title('Daily trading volume')
     ax.set_xlim((returns.index[0], returns.index[-1]))
     ax.set_ylabel('Amount of shares traded')
     ax.set_xlabel('')
@@ -1494,14 +1496,14 @@ def plot_txn_time_hist(transactions, bin_minutes=5, tz='America/New_York',
     ax.set_xlim(570, 960)
     ax.set_xticks(txn_time.index[::int(30/bin_minutes)])
     ax.set_xticklabels(txn_time.time_str[::int(30/bin_minutes)])
-    ax.set_title('Transaction Time Distribution')
+    ax.set_title('Transaction time distribution')
     ax.set_ylabel('Proportion')
     ax.set_xlabel('')
     return ax
 
 
 def plot_daily_returns_similarity(returns_backtest, returns_live,
-                                  title='', ax=None, **kwargs):
+                                  ax=None, **kwargs):
     """
     Plots overlapping distributions of in-sample (backtest) returns
     and out-of-sample (live trading) returns.
@@ -1534,7 +1536,6 @@ def plot_daily_returns_similarity(returns_backtest, returns_live,
     sns.kdeplot(utils.standardize_data(returns_live),
                 bw='scott', shade=True, label='out-of-sample',
                 color='red', ax=ax, **kwargs)
-    ax.set_title(title)
 
     return ax
 
@@ -1558,7 +1559,7 @@ def show_worst_drawdown_periods(returns, top=5):
     drawdown_df = timeseries.gen_drawdown_table(returns, top=top)
     utils.print_table(drawdown_df.sort_values('net drawdown in %',
                                               ascending=False),
-                      name='Worst Drawdown Periods', fmt='{0:.2f}')
+                      name='Worst drawdown periods', fmt='{0:.2f}')
 
 
 def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
@@ -1726,8 +1727,10 @@ def plot_prob_profit_trade(round_trips, ax=None):
     ax.axvline(lower_perc, color='0.5')
     ax.axvline(upper_perc, color='0.5')
 
-    ax.set(xlabel='Probability making a profitable decision', ylabel='Belief',
-           xlim=(lower_plot, upper_plot), ylim=(0, y.max() + 1.))
+    ax.set_xlabel('Probability of making a profitable decision')
+    ax.set_ylabel('Belief')
+    ax.set_xlim(lower_plot, upper_plot)
+    ax.set_ylim((0, y.max() + 1.))
 
     return ax
 

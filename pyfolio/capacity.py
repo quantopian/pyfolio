@@ -27,6 +27,7 @@ def daily_txns_with_bar_data(transactions, market_data):
         price and volume columns for close price and daily volume for
         the corresponding ticker, respectively.
     """
+
     transactions.index.name = 'date'
     txn_daily = pd.DataFrame(transactions.assign(
         amount=abs(transactions.amount)).groupby(
@@ -43,7 +44,8 @@ def days_to_liquidate_positions(positions, market_data,
                                 max_bar_consumption=0.2,
                                 capital_base=1e6,
                                 mean_volume_window=5):
-    """Compute the number of days that would have been required
+    """
+    Compute the number of days that would have been required
     to fully liquidate each position on each day based on the
     trailing n day mean daily bar volume and a limit on the proportion
     of a daily bar that we are allowed to consume.
@@ -77,7 +79,6 @@ def days_to_liquidate_positions(positions, market_data,
     days_to_liquidate : pd.DataFrame
         Number of days required to fully liquidate daily positions.
         Datetime index, symbols as columns.
-
     """
 
     DV = market_data['volume'] * market_data['price']
@@ -128,7 +129,6 @@ def get_max_days_to_liquidate_by_ticker(positions, market_data,
         Max Number of days required to fully liquidate each traded name.
         Index of symbols. Columns for days_to_liquidate and the corresponding
         date and position_alloc on that day.
-
     """
 
     dtlp = days_to_liquidate_positions(positions, market_data,
@@ -171,8 +171,8 @@ def get_low_liquidity_transactions(transactions, market_data,
         the passed positions DataFrame (same dates and symbols).
     last_n_days : integer
         Compute for only the last n days of the passed backtest data.
-
     """
+
     txn_daily_w_bar = daily_txns_with_bar_data(transactions, market_data)
     txn_daily_w_bar.index.name = 'date'
     txn_daily_w_bar = txn_daily_w_bar.reset_index()
@@ -218,6 +218,7 @@ def apply_slippage_penalty(returns, txn_daily, simulate_starting_capital,
     adj_returns : pd.Series
         Slippage penalty adjusted daily returns.
     """
+
     mult = simulate_starting_capital / backtest_starting_capital
     simulate_traded_shares = abs(mult * txn_daily.amount)
     simulate_traded_dollars = txn_daily.price * simulate_traded_shares
@@ -226,7 +227,7 @@ def apply_slippage_penalty(returns, txn_daily, simulate_starting_capital,
     penalties = simulate_pct_volume_used**2 \
         * impact * simulate_traded_dollars
 
-    daily_penalty = penalties.resample('D', how='sum')
+    daily_penalty = penalties.resample('D').sum()
     daily_penalty = daily_penalty.reindex(returns.index).fillna(0)
 
     # Since we are scaling the numerator of the penalties linearly

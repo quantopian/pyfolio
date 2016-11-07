@@ -313,7 +313,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         cone_std=cone_std,
         ax=ax_rolling_returns)
     ax_rolling_returns.set_title(
-        'Cumulative Returns')
+        'Cumulative returns')
 
     plotting.plot_rolling_returns(
         returns,
@@ -324,7 +324,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         legend_loc=None,
         ax=ax_rolling_returns_vol_match)
     ax_rolling_returns_vol_match.set_title(
-        'Cumulative returns volatility matched to benchmark.')
+        'Cumulative returns volatility matched to benchmark')
 
     plotting.plot_rolling_returns(
         returns,
@@ -334,7 +334,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         cone_std=cone_std,
         ax=ax_rolling_returns_log)
     ax_rolling_returns_log.set_title(
-        'Cumulative Returns on logarithmic scale')
+        'Cumulative returns on logarithmic scale')
 
     plotting.plot_returns(
         returns,
