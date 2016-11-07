@@ -31,7 +31,7 @@ def map_transaction(txn):
     dict
         Mapped transaction.
     """
-    # sid can either be just a single value or a SID descriptor
+
     if isinstance(txn['sid'], dict):
         sid = txn['sid']['sid']
         symbol = txn['sid']['symbol']
@@ -81,7 +81,8 @@ def make_transaction_frame(transactions):
 
 
 def get_txn_vol(transactions):
-    """Extract daily transaction data from set of transaction objects.
+    """
+    Extract daily transaction data from set of transaction objects.
 
     Parameters
     ----------
@@ -96,6 +97,7 @@ def get_txn_vol(transactions):
         Daily transaction volume and number of shares.
          - See full explanation in tears.create_full_tear_sheet.
     """
+
     txn_norm = transactions.copy()
     txn_norm.index = txn_norm.index.normalize()
     amounts = txn_norm.amount.abs()
@@ -109,7 +111,8 @@ def get_txn_vol(transactions):
 
 
 def adjust_returns_for_slippage(returns, turnover, slippage_bps):
-    """Apply a slippage penalty for every dollar traded.
+    """
+    Apply a slippage penalty for every dollar traded.
 
     Parameters
     ----------
@@ -127,6 +130,7 @@ def adjust_returns_for_slippage(returns, turnover, slippage_bps):
     pd.Series
         Time series of daily returns, adjusted for slippage.
     """
+
     slippage = 0.0001 * slippage_bps
     # Only include returns in the period where the algo traded.
     trim_returns = returns.loc[turnover.index]
@@ -162,6 +166,7 @@ def get_turnover(positions, transactions, period=None, average=True):
     turnover_rate : pd.Series
         timeseries of portfolio turnover rates.
     """
+
     txn_vol = get_txn_vol(transactions)
     traded_value = txn_vol.txn_volume
     portfolio_value = positions.sum(axis=1)

@@ -70,6 +70,7 @@ def ensure_directory(path):
     """
     Ensure that a directory named "path" exists.
     """
+
     try:
         makedirs(path)
     except OSError as exc:
@@ -103,7 +104,7 @@ def percentage(x, pos):
 
 def get_utc_timestamp(dt):
     """
-    returns the Timestamp/DatetimeIndex
+    Returns the Timestamp/DatetimeIndex
     with either localized or converted to UTC.
 
     Parameters
@@ -116,6 +117,7 @@ def get_utc_timestamp(dt):
     same type as input
         date(s) converted to UTC
     """
+
     dt = pd.to_datetime(dt)
     try:
         dt = dt.tz_localize('UTC')
@@ -132,7 +134,8 @@ def _1_bday_ago():
 
 
 def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
-    """Get returns from a cached file if the cache is recent enough,
+    """
+    Get returns from a cached file if the cache is recent enough,
     otherwise, try to retrieve via a provided update function and
     update the cache file.
 
@@ -152,6 +155,7 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
     pandas.DataFrame
         DataFrame containing returns
     """
+
     update_cache = False
 
     try:
@@ -193,7 +197,8 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
 
 
 def get_symbol_from_yahoo(symbol, start=None, end=None):
-    """Wrapper for pandas.io.data.get_data_yahoo().
+    """
+    Wrapper for pandas.io.data.get_data_yahoo().
     Retrieves prices for symbol from yahoo and computes returns
     based on adjusted closing prices.
 
@@ -211,6 +216,7 @@ def get_symbol_from_yahoo(symbol, start=None, end=None):
     pandas.DataFrame
         Returns of symbol in requested period.
     """
+
     px = web.get_data_yahoo(symbol, start=start, end=end)
     rets = px[['Adj Close']].pct_change().dropna()
     rets.index = rets.index.tz_localize("UTC")
@@ -240,6 +246,7 @@ def default_returns_func(symbol, start=None, end=None):
         Daily returns for the symbol.
          - See full explanation in tears.create_full_tear_sheet (returns).
     """
+
     if start is None:
         start = '1/1/1970'
     if end is None:
@@ -264,7 +271,8 @@ def default_returns_func(symbol, start=None, end=None):
 
 
 def vectorize(func):
-    """Decorator so that functions can be written to work on Series but
+    """
+    Decorator so that functions can be written to work on Series but
     may still be called with DataFrames.
     """
 
@@ -278,13 +286,15 @@ def vectorize(func):
 
 
 def get_fama_french():
-    """Retrieve Fama-French factors via pandas-datareader
+    """
+    Retrieve Fama-French factors via pandas-datareader
 
     Returns
     -------
     pandas.DataFrame
         Percent change of Fama-French factors
     """
+
     start = '1/1/1970'
     research_factors = web.DataReader('F-F_Research_Data_Factors_daily',
                                       'famafrench', start=start)[0]
@@ -299,7 +309,7 @@ def get_fama_french():
 
 def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     """
-    Loads risk factors Mkt-Rf, SMB, HML, Rf, and UMD.
+    Load risk factors Mkt-Rf, SMB, HML, Rf, and UMD.
 
     Data is stored in HDF5 file. If the data is more than 2
     days old, redownload from Dartmouth.
@@ -309,6 +319,7 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     five_factors : pd.DataFrame
         Risk factors timeseries.
     """
+
     if start is None:
         start = '1/1/1970'
     if end is None:
@@ -328,7 +339,8 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
 
 
 def get_treasury_yield(start=None, end=None, period='3MO'):
-    """Load treasury yields from FRED.
+    """
+    Load treasury yields from FRED.
 
     Parameters
     ----------
@@ -346,6 +358,7 @@ def get_treasury_yield(start=None, end=None, period='3MO'):
     pd.Series
         Annual treasury yield for every day.
     """
+
     if start is None:
         start = '1/1/1970'
     if end is None:
@@ -360,7 +373,8 @@ def get_treasury_yield(start=None, end=None, period='3MO'):
 
 
 def extract_rets_pos_txn_from_zipline(backtest):
-    """Extract returns, positions, transactions and leverage from the
+    """
+    Extract returns, positions, transactions and leverage from the
     backtest data structure returned by zipline.TradingAlgorithm.run().
 
     The returned data structures are in a format compatible with the
@@ -395,7 +409,6 @@ def extract_rets_pos_txn_from_zipline(backtest):
     >>>     pyfolio.utils.extract_rets_pos_txn_from_zipline(backtest)
     >>> pyfolio.tears.create_full_tear_sheet(returns,
     >>>     positions, transactions, gross_lev=gross_lev)
-
     """
 
     backtest.index = backtest.index.normalize()
@@ -445,6 +458,7 @@ def register_return_func(func):
     -------
     None
     """
+
     SETTINGS['returns_func'] = func
 
 
@@ -470,6 +484,7 @@ def get_symbol_rets(symbol, start=None, end=None):
     pandas.Series
         Returned by the current 'returns_func'
     """
+
     return SETTINGS['returns_func'](symbol,
                                     start=start,
                                     end=end)
@@ -492,8 +507,8 @@ def print_table(table, name=None, fmt=None):
         Formatter to use for displaying table elements.
         E.g. '{0:.2f}%' for displaying 100 as '100.00%'.
         Restores original setting after displaying.
-
     """
+
     if isinstance(table, pd.Series):
         table = pd.DataFrame(table)
 
@@ -524,4 +539,5 @@ def standardize_data(x):
     np.array
         Standardized array.
     """
+
     return (x - np.mean(x)) / np.std(x)

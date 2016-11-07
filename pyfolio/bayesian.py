@@ -34,7 +34,8 @@ from empyrical import cum_returns
 
 
 def model_returns_t_alpha_beta(data, bmark, samples=2000):
-    """Run Bayesian alpha-beta-model with T distributed returns.
+    """
+    Run Bayesian alpha-beta-model with T distributed returns.
 
     This model estimates intercept (alpha) and slope (beta) of two
     return sets. Usually, these will be algorithm returns and
@@ -64,6 +65,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
     """
+
     if data.shape[0] != bmark.shape[0]:
         data = pd.Series(data, index=bmark.index)
 
@@ -106,7 +108,8 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
 
 
 def model_returns_normal(data, samples=500):
-    """Run Bayesian model assuming returns are normally distributed.
+    """
+    Run Bayesian model assuming returns are normally distributed.
 
     Parameters
     ----------
@@ -122,8 +125,8 @@ def model_returns_normal(data, samples=500):
     trace : pymc3.sampling.BaseTrace object
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
-
     """
+
     with pm.Model() as model:
         mu = pm.Normal('mean returns', mu=0, sd=.01, testval=data.mean())
         sigma = pm.HalfCauchy('volatility', beta=1, testval=data.std())
@@ -145,7 +148,8 @@ def model_returns_normal(data, samples=500):
 
 
 def model_returns_t(data, samples=500):
-    """Run Bayesian model assuming returns are Student-T distributed.
+    """
+    Run Bayesian model assuming returns are Student-T distributed.
 
     Compared with the normal model, this model assumes returns are
     T-distributed and thus have a 3rd parameter (nu) that controls the
@@ -165,7 +169,6 @@ def model_returns_t(data, samples=500):
     trace : pymc3.sampling.BaseTrace object
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
-
     """
 
     with pm.Model() as model:
@@ -189,7 +192,8 @@ def model_returns_t(data, samples=500):
 
 
 def model_best(y1, y2, samples=1000):
-    """Bayesian Estimation Supersedes the T-Test
+    """
+    Bayesian Estimation Supersedes the T-Test
 
     This model runs a Bayesian hypothesis comparing if y1 and y2 come
     from the same distribution. Returns are assumed to be T-distributed.
@@ -276,7 +280,8 @@ def model_best(y1, y2, samples=1000):
 
 def plot_best(trace=None, data_train=None, data_test=None,
               samples=1000, burn=200, axs=None):
-    """Plot BEST significance analysis.
+    """
+    Plot BEST significance analysis.
 
     Parameters
     ----------
@@ -305,6 +310,7 @@ def plot_best(trace=None, data_train=None, data_test=None,
     --------
     model_best : Estimation of BEST model.
     """
+
     if trace is None:
         if (data_train is not None) or (data_test is not None):
             raise ValueError('Either pass trace or data_train and data_test')
@@ -364,7 +370,8 @@ def plot_best(trace=None, data_train=None, data_test=None,
 
 
 def model_stoch_vol(data, samples=2000):
-    """Run stochastic volatility model.
+    """
+    Run stochastic volatility model.
 
     This model estimates the volatility of a returns series over time.
     Returns are assumed to be T-distributed. lambda (width of
@@ -389,6 +396,7 @@ def model_stoch_vol(data, samples=2000):
     --------
     plot_stoch_vol : plotting of tochastic volatility model
     """
+
     from pymc3.distributions.timeseries import GaussianRandomWalk
 
     with pm.Model() as model:
@@ -412,7 +420,8 @@ def model_stoch_vol(data, samples=2000):
 
 
 def plot_stoch_vol(data, trace=None, ax=None):
-    """Generate plot for stochastic volatility model.
+    """
+    Generate plot for stochastic volatility model.
 
     Parameters
     ----------
@@ -432,6 +441,7 @@ def plot_stoch_vol(data, trace=None, ax=None):
     --------
     model_stoch_vol : run stochastic volatility model
     """
+
     if trace is None:
         trace = model_stoch_vol(data)
 
@@ -447,7 +457,8 @@ def plot_stoch_vol(data, trace=None, ax=None):
 
 
 def compute_bayes_cone(preds, starting_value=1.):
-    """Compute 5, 25, 75 and 95 percentiles of cumulative returns, used
+    """
+    Compute 5, 25, 75 and 95 percentiles of cumulative returns, used
     for the Bayesian cone.
 
     Parameters
@@ -463,7 +474,6 @@ def compute_bayes_cone(preds, starting_value=1.):
     dict of percentiles over time
         Dictionary mapping percentiles (5, 25, 75, 95) to a
         timeseries.
-
     """
 
     def scoreatpercentile(cum_preds, p):
@@ -477,7 +487,8 @@ def compute_bayes_cone(preds, starting_value=1.):
 
 
 def compute_consistency_score(returns_test, preds):
-    """Compute Bayesian consistency score.
+    """
+    Compute Bayesian consistency score.
 
     Parameters
     ----------
@@ -493,6 +504,7 @@ def compute_consistency_score(returns_test, preds):
         Bayesian cone spanned by preds) to 0 (returns_test completely
         outside of Bayesian cone.)
     """
+
     returns_test_cum = cum_returns(returns_test, starting_value=1.)
     cum_preds = np.cumprod(preds + 1, 1)
 
@@ -542,7 +554,8 @@ def _plot_bayes_cone(returns_train, returns_test,
 
 def run_model(model, returns_train, returns_test=None,
               bmark=None, samples=500, ppc=False):
-    """Run one of the Bayesian models.
+    """
+    Run one of the Bayesian models.
 
     Parameters
     ----------
@@ -574,8 +587,7 @@ def run_model(model, returns_train, returns_test=None,
 
     ppc : numpy.array (if ppc==True)
        PPC of shape samples x len(returns_test).
-
-"""
+    """
 
     if model == 'alpha_beta':
         model, trace = model_returns_t_alpha_beta(returns_train,
@@ -601,7 +613,8 @@ def run_model(model, returns_train, returns_test=None,
 
 def plot_bayes_cone(returns_train, returns_test, ppc,
                     plot_train_len=50, ax=None):
-    """Generate cumulative returns plot with Bayesian cone.
+    """
+    Generate cumulative returns plot with Bayesian cone.
 
     Parameters
     ----------
@@ -627,8 +640,7 @@ def plot_bayes_cone(returns_train, returns_test, ppc,
     trace : pymc3.sampling.BaseTrace
         A PyMC3 trace object that contains samples for each parameter
         of the posterior.
-
-"""
+    """
 
     score = compute_consistency_score(returns_test,
                                       ppc)

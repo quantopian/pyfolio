@@ -506,6 +506,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
+
     vertical_sections = 6 if unadjusted_returns is not None else 4
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
@@ -665,6 +666,7 @@ def create_interesting_times_tear_sheet(
     set_context : boolean, optional
         If True, set default plotting style context.
     """
+
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
 
     if len(rets_interesting) == 0:
@@ -839,6 +841,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     stoch_vol : boolean, optional
         If True, run and plot the stochastic volatility model
     """
+
     if not have_bayesian:
         raise NotImplementedError(
             "Bayesian tear sheet requirements not found.\n"
