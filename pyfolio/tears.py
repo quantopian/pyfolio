@@ -506,13 +506,14 @@ def create_txn_tear_sheet(returns, positions, transactions,
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
-    vertical_sections = 5 if unadjusted_returns is not None else 3
+    vertical_sections = 6 if unadjusted_returns is not None else 4
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
     ax_turnover = plt.subplot(gs[0, :])
     ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
     ax_turnover_hist = plt.subplot(gs[2, :])
+    ax_txn_timings = plt.subplot(gs[3, :])
 
     plotting.plot_turnover(
         returns,
@@ -528,14 +529,16 @@ def create_txn_tear_sheet(returns, positions, transactions,
     except ValueError:
         warnings.warn('Unable to generate turnover plot.', UserWarning)
 
+    plotting.plot_txn_time_hist(transactions, ax=ax_txn_timings)
+
     if unadjusted_returns is not None:
-        ax_slippage_sweep = plt.subplot(gs[3, :])
+        ax_slippage_sweep = plt.subplot(gs[4, :])
         plotting.plot_slippage_sweep(unadjusted_returns,
                                      transactions,
                                      positions,
                                      ax=ax_slippage_sweep
                                      )
-        ax_slippage_sensitivity = plt.subplot(gs[4, :])
+        ax_slippage_sensitivity = plt.subplot(gs[5, :])
         plotting.plot_slippage_sensitivity(unadjusted_returns,
                                            transactions,
                                            positions,

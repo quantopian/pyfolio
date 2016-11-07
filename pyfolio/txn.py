@@ -96,9 +96,10 @@ def get_txn_vol(transactions):
         Daily transaction volume and number of shares.
          - See full explanation in tears.create_full_tear_sheet.
     """
-    transactions.index = transactions.index.normalize()
-    amounts = transactions.amount.abs()
-    prices = transactions.price
+    txn_norm = transactions.copy()
+    txn_norm.index = txn_norm.index.normalize()
+    amounts = txn_norm.amount.abs()
+    prices = txn_norm.price
     values = amounts * prices
     daily_amounts = amounts.groupby(amounts.index).sum()
     daily_values = values.groupby(values.index).sum()
