@@ -1618,7 +1618,7 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     return ax
 
 
-def plot_round_trip_life_times(round_trips, ax=None):
+def plot_round_trip_lifetimes(round_trips, top=10, ax=None):
     """
     Plots timespans and directions of round trip trades.
 
@@ -1639,16 +1639,21 @@ def plot_round_trip_life_times(round_trips, ax=None):
     if ax is None:
         ax = plt.subplot()
 
-    symbols = round_trips.symbol.unique()
+    durations = round_trips.groupby('symbol').duration.apply(np.sum)
+    top_symbols = durations.sort_values(ascending=False).index[:10]
+    top_round_trips = round_trips.copy()[round_trips.symbol.isin(top_symbols)]
+
+    symbols = top_round_trips.symbol.unique()
     symbol_idx = pd.Series(np.arange(len(symbols)), index=symbols)
 
-    for symbol, sym_round_trips in round_trips.groupby('symbol'):
+    for symbol, sym_round_trips in top_round_trips.groupby('symbol'):
         for _, row in sym_round_trips.iterrows():
             c = 'b' if row.long else 'r'
             y_ix = symbol_idx[symbol]
             ax.plot([row['open_dt'], row['close_dt']],
                     [y_ix, y_ix], color=c)
 
+    ax.set_xticks(range(10))
     ax.set_yticklabels(symbols)
 
     red_line = mlines.Line2D([], [], color='r', label='Short')

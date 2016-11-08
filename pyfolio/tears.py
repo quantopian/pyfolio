@@ -616,7 +616,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
     ax_pnl_per_round_trip_dollars = plt.subplot(gs[2, 0])
     ax_pnl_per_round_trip_pct = plt.subplot(gs[2, 1])
 
-    plotting.plot_round_trip_life_times(trades, ax=ax_trade_lifetimes)
+    plotting.plot_round_trip_lifetimes(trades, ax=ax_trade_lifetimes)
 
     plotting.plot_prob_profit_trade(trades, ax=ax_prob_profit_trade)
 
