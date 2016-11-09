@@ -1489,11 +1489,12 @@ def plot_txn_time_hist(transactions, bin_minutes=5, tz='America/New_York',
     txn_time.index = (txn_time.index/bin_minutes).astype(int) * bin_minutes
     txn_time = txn_time.groupby(level=0).sum()
 
-    txn_time['time_str'] = txn_time.index.map(lambda x: \
+    txn_time['time_str'] = txn_time.index.map(lambda x:
                                               str(datetime.time(int(x/60),
-                                                                x%60))[:-3])
-    txn_time.trade_value = txn_time.trade_value.fillna(0) \
-                           / txn_time.trade_value.sum()
+                                                                x % 60))[:-3])
+
+    trade_value_sum = txn_time.trade_value.sum()
+    txn_time.trade_value = txn_time.trade_value.fillna(0) / trade_value_sum
 
     ax.bar(txn_time.index, txn_time.trade_value, width=bin_minutes, **kwargs)
 
