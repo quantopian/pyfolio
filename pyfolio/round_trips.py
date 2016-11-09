@@ -257,13 +257,13 @@ def extract_round_trips(transactions,
         pv = pd.DataFrame(portfolio_value,
                           columns=['portfolio_value'])\
             .assign(date=portfolio_value.index)
+
         roundtrips['date'] = roundtrips.close_dt.apply(lambda x:
                                                        x.replace(hour=0,
                                                                  minute=0,
                                                                  second=0))
-
-        tmp = roundtrips.assign(date=roundtrips.close_dt)\
-                        .join(pv, on='date', lsuffix='_')
+        
+        tmp = roundtrips.join(pv, on='date', lsuffix='_')
 
         roundtrips['returns'] = tmp.pnl / tmp.portfolio_value
         roundtrips = roundtrips.drop('date', axis='columns')
