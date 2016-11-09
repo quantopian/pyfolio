@@ -42,6 +42,7 @@ from .utils import (APPROX_BDAYS_PER_MONTH,
 from functools import wraps
 import empyrical
 
+
 def plotting_context(func):
     """
     Decorator to set plotting context during function call.
@@ -1488,11 +1489,14 @@ def plot_txn_time_hist(transactions, bin_minutes=5, tz='America/New_York',
     txn_time.index = (txn_time.index/bin_minutes).astype(int) * bin_minutes
     txn_time = txn_time.groupby(level=0).sum()
 
-    txn_time['time_str'] = txn_time.index.map(lambda x: str(datetime.time(int(x/60), x%60))[:-3])
-    txn_time.trade_value = txn_time.trade_value.fillna(0) / txn_time.trade_value.sum()
+    txn_time['time_str'] = txn_time.index.map(lambda x: \
+                                              str(datetime.time(int(x/60),
+                                                                x%60))[:-3])
+    txn_time.trade_value = txn_time.trade_value.fillna(0) \
+                           / txn_time.trade_value.sum()
 
     ax.bar(txn_time.index, txn_time.trade_value, width=bin_minutes, **kwargs)
-    
+
     ax.set_xlim(570, 960)
     ax.set_xticks(txn_time.index[::int(30/bin_minutes)])
     ax.set_xticklabels(txn_time.time_str[::int(30/bin_minutes)])
@@ -1618,7 +1622,7 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     return ax
 
 
-def plot_round_trip_lifetimes(round_trips, disp_amount=12, linewidth=24, ax=None):
+def plot_round_trip_lifetimes(round_trips, disp_amount=12, lsize=24, ax=None):
     """
     Plots timespans and directions of round trip trades.
 
@@ -1651,15 +1655,16 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=12, linewidth=24, ax=None
             c = 'b' if row.long else 'r'
             y_ix = symbol_idx[symbol] + 0.05
             ax.plot([row['open_dt'], row['close_dt']],
-                    [y_ix, y_ix], color=c, linewidth=linewidth, solid_capstyle='butt')
+                    [y_ix, y_ix], color=c,
+                    linewidth=lsize, solid_capstyle='butt')
 
     ax.set_yticks(range(disp_amount))
     ax.set_yticklabels(symbols)
 
     ax.set_ylim((-0.5, min(len(symbols), disp_amount) - 0.5))
-    red_box = patches.Rectangle([0, 0], 1, 1, color='r', label='Short')
-    blue_box = patches.Rectangle([0, 0], 1, 1, color='b', label='Long')
-    leg = ax.legend(handles=[red_box, blue_box], frameon=True, loc='lower left')
+    blue = patches.Rectangle([0, 0], 1, 1, color='b', label='Long')
+    red = patches.Rectangle([0, 0], 1, 1, color='r', label='Short')
+    leg = ax.legend(handles=[blue, red], frameon=True, loc='lower left')
     leg.get_frame().set_edgecolor('black')
     ax.grid(False)
 

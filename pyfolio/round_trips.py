@@ -262,7 +262,7 @@ def extract_round_trips(transactions,
                                                        x.replace(hour=0,
                                                                  minute=0,
                                                                  second=0))
-        
+
         tmp = roundtrips.join(pv, on='date', lsuffix='_')
 
         roundtrips['returns'] = tmp.pnl / tmp.portfolio_value
