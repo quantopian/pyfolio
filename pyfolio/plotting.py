@@ -1656,7 +1656,7 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=12, linewidth=24, ax=None
     ax.set_yticks(range(disp_amount))
     ax.set_yticklabels(symbols)
 
-    ax.set_ylim((-0.5, disp_amount-0.5))
+    ax.set_ylim((-0.5, min(len(symbols), disp_amount) - 0.5))
     red_box = patches.Rectangle([0, 0], 1, 1, color='r', label='Short')
     blue_box = patches.Rectangle([0, 0], 1, 1, color='b', label='Long')
     leg = ax.legend(handles=[red_box, blue_box], frameon=True, loc='lower left')
