@@ -33,6 +33,7 @@ def get_percent_alloc(values):
     allocations : pd.DataFrame
         Positions and their allocations.
     """
+
     return values.divide(
         values.sum(axis='columns'),
         axis='rows'
@@ -114,6 +115,7 @@ def get_max_median_position_concentration(positions):
         Columns are max long, max short, median long, and median short
         position concentrations. Rows are timeperiods.
     """
+
     expos = get_percent_alloc(positions)
     expos = expos.drop('cash', axis=1)
 
@@ -130,7 +132,8 @@ def get_max_median_position_concentration(positions):
 
 
 def extract_pos(positions, cash):
-    """Extract position values from backtest object as returned by
+    """
+    Extract position values from backtest object as returned by
     get_backtest() on the Quantopian research platform.
 
     Parameters
@@ -148,6 +151,7 @@ def extract_pos(positions, cash):
         Daily net position values.
          - See full explanation in tears.create_full_tear_sheet.
     """
+
     positions = positions.copy()
     positions['values'] = positions.amount * positions.last_sale_price
     cash.name = 'cash'
@@ -190,6 +194,7 @@ def get_sector_exposures(positions, symbol_sector_map):
             2004-01-12    -4132.240       142.630             3989.6100
             2004-01-13    -199.640        -100.980            100.0000
     """
+
     cash = positions['cash']
     positions = positions.drop('cash', axis=1)
 

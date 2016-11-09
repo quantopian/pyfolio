@@ -313,7 +313,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         cone_std=cone_std,
         ax=ax_rolling_returns)
     ax_rolling_returns.set_title(
-        'Cumulative Returns')
+        'Cumulative returns')
 
     plotting.plot_rolling_returns(
         returns,
@@ -324,7 +324,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         legend_loc=None,
         ax=ax_rolling_returns_vol_match)
     ax_rolling_returns_vol_match.set_title(
-        'Cumulative returns volatility matched to benchmark.')
+        'Cumulative returns volatility matched to benchmark')
 
     plotting.plot_rolling_returns(
         returns,
@@ -334,7 +334,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
         cone_std=cone_std,
         ax=ax_rolling_returns_log)
     ax_rolling_returns_log.set_title(
-        'Cumulative Returns on logarithmic scale')
+        'Cumulative returns on logarithmic scale')
 
     plotting.plot_returns(
         returns,
@@ -506,13 +506,15 @@ def create_txn_tear_sheet(returns, positions, transactions,
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
-    vertical_sections = 5 if unadjusted_returns is not None else 3
+
+    vertical_sections = 6 if unadjusted_returns is not None else 4
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
     ax_turnover = plt.subplot(gs[0, :])
     ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
     ax_turnover_hist = plt.subplot(gs[2, :])
+    ax_txn_timings = plt.subplot(gs[3, :])
 
     plotting.plot_turnover(
         returns,
@@ -528,14 +530,16 @@ def create_txn_tear_sheet(returns, positions, transactions,
     except ValueError:
         warnings.warn('Unable to generate turnover plot.', UserWarning)
 
+    plotting.plot_txn_time_hist(transactions, ax=ax_txn_timings)
+
     if unadjusted_returns is not None:
-        ax_slippage_sweep = plt.subplot(gs[3, :])
+        ax_slippage_sweep = plt.subplot(gs[4, :])
         plotting.plot_slippage_sweep(unadjusted_returns,
                                      transactions,
                                      positions,
                                      ax=ax_slippage_sweep
                                      )
-        ax_slippage_sensitivity = plt.subplot(gs[4, :])
+        ax_slippage_sensitivity = plt.subplot(gs[5, :])
         plotting.plot_slippage_sensitivity(unadjusted_returns,
                                            transactions,
                                            positions,
@@ -612,7 +616,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
     ax_pnl_per_round_trip_dollars = plt.subplot(gs[2, 0])
     ax_pnl_per_round_trip_pct = plt.subplot(gs[2, 1])
 
-    plotting.plot_round_trip_life_times(trades, ax=ax_trade_lifetimes)
+    plotting.plot_round_trip_lifetimes(trades, ax=ax_trade_lifetimes)
 
     plotting.plot_prob_profit_trade(trades, ax=ax_prob_profit_trade)
 
@@ -662,6 +666,7 @@ def create_interesting_times_tear_sheet(
     set_context : boolean, optional
         If True, set default plotting style context.
     """
+
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
 
     if len(rets_interesting) == 0:
@@ -836,6 +841,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     stoch_vol : boolean, optional
         If True, run and plot the stochastic volatility model
     """
+
     if not have_bayesian:
         raise NotImplementedError(
             "Bayesian tear sheet requirements not found.\n"
