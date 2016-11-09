@@ -25,7 +25,7 @@ import pytz
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
-import matplotlib.lines as mlines
+import matplotlib.patches as patches
 from matplotlib import figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
@@ -1618,7 +1618,7 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     return ax
 
 
-def plot_round_trip_lifetimes(round_trips, top=10, ax=None):
+def plot_round_trip_lifetimes(round_trips, disp_amount=12, linewidth=24, ax=None):
     """
     Plots timespans and directions of round trip trades.
 
@@ -1640,7 +1640,7 @@ def plot_round_trip_lifetimes(round_trips, top=10, ax=None):
         ax = plt.subplot()
 
     durations = round_trips.groupby('symbol').duration.apply(np.sum)
-    top_symbols = durations.sort_values(ascending=False).index[:10]
+    top_symbols = durations.sort_values(ascending=False).index[:disp_amount]
     top_round_trips = round_trips.copy()[round_trips.symbol.isin(top_symbols)]
 
     symbols = top_round_trips.symbol.unique()
@@ -1649,16 +1649,19 @@ def plot_round_trip_lifetimes(round_trips, top=10, ax=None):
     for symbol, sym_round_trips in top_round_trips.groupby('symbol'):
         for _, row in sym_round_trips.iterrows():
             c = 'b' if row.long else 'r'
-            y_ix = symbol_idx[symbol]
+            y_ix = symbol_idx[symbol] + 0.05
             ax.plot([row['open_dt'], row['close_dt']],
-                    [y_ix, y_ix], color=c)
+                    [y_ix, y_ix], color=c, linewidth=linewidth, solid_capstyle='butt')
 
-    ax.set_xticks(range(10))
+    ax.set_yticks(range(disp_amount))
     ax.set_yticklabels(symbols)
 
-    red_line = mlines.Line2D([], [], color='r', label='Short')
-    blue_line = mlines.Line2D([], [], color='b', label='Long')
-    ax.legend(handles=[red_line, blue_line], loc=0)
+    ax.set_ylim((-0.5, disp_amount-0.5))
+    red_box = patches.Rectangle([0, 0], 1, 1, color='r', label='Short')
+    blue_box = patches.Rectangle([0, 0], 1, 1, color='b', label='Long')
+    leg = ax.legend(handles=[red_box, blue_box], frameon=True, loc='lower left')
+    leg.get_frame().set_edgecolor('black')
+    ax.grid(False)
 
     return ax
 
