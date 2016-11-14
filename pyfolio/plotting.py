@@ -426,7 +426,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
                         lim[1],
                         alpha=.4,
                         color=colors[i])
-
+    ax.set_ylim(lim)
     ax.set_title('Top %i drawdown periods' % top)
     ax.set_ylabel('Cumulative returns')
     ax.legend(['Portfolio'], loc='upper left')
@@ -747,11 +747,10 @@ def plot_rolling_returns(returns,
                 starting_value=is_cum_returns[-1])
 
             cone_bounds = cone_bounds.set_index(oos_cum_returns.index)
-
             for std in cone_std:
                 ax.fill_between(cone_bounds.index,
-                                cone_bounds[float(std)],
-                                cone_bounds[float(-std)],
+                                cone_bounds[float(std)] + oos_cum_returns[0] - 1,
+                                cone_bounds[float(-std)] + oos_cum_returns[0] - 1,
                                 color='steelblue', alpha=0.5)
 
     if legend_loc is not None:
