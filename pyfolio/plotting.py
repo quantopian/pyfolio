@@ -748,9 +748,10 @@ def plot_rolling_returns(returns,
 
             cone_bounds = cone_bounds.set_index(oos_cum_returns.index)
             for std in cone_std:
+                cone_delta = oos_cum_returns[0] - 1
                 ax.fill_between(cone_bounds.index,
-                                cone_bounds[float(std)] + oos_cum_returns[0] - 1,
-                                cone_bounds[float(-std)] + oos_cum_returns[0] - 1,
+                                cone_bounds[float(std)] + cone_delta,
+                                cone_bounds[float(-std)] + cone_delta,
                                 color='steelblue', alpha=0.5)
 
     if legend_loc is not None:
