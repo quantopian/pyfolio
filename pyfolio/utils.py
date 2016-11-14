@@ -165,7 +165,7 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
             raise
         update_cache = True
     else:
-        if pd.Timestamp(mtime, unit='s') < _1_bday_ago():
+        if pd.Timestamp(mtime, unit='s') < latest_dt:
             update_cache = True
         else:
             returns = pd.read_csv(filepath, index_col=0, parse_dates=True)
