@@ -158,6 +158,9 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
 
     update_cache = False
 
+    if not latest_dt.tzinfo:
+        latest_dt = pytz.utc.localize(latest_dt)
+    
     try:
         mtime = getmtime(filepath)
     except OSError as e:
