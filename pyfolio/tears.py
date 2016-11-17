@@ -130,7 +130,7 @@ def create_full_tear_sheet(returns,
         If True, causes the generation of a round trip tear sheet.
     estimate_intraday: boolean, optional
         Instead of using the end-of-day positions, use the point in the day
-        where we have the most $ invested. This will adjust positions and 
+        where we have the most $ invested. This will adjust positions and
         to better approximate and represent how an intraday strategy behaves.
         By default, an attempt will be made to detect intraday strategies.
         Specifying this value will prevent detection.
@@ -156,18 +156,18 @@ def create_full_tear_sheet(returns,
                                     period=None, average=False)
         unadjusted_returns = returns.copy()
         returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
-            
+
     if positions is not None and transactions is not None:
         if (estimate_intraday is None and
             utils.detect_intraday(positions, transactions)):
-            warnings.warn('Detected intraday strategy. Set ' +
-                          'estimate_intraday=False to disable', UserWarning)
-            estimate_intraday = True
-        if estimate_intraday == True:
+                warnings.warn('Detected intraday strategy. Set ' +
+                              'estimate_intraday=False to disable', UserWarning)
+                estimate_intraday = True
+        if estimate_intraday is True:
             positions = utils.estimate_intraday(returns, positions,
                                                 transactions)
 
-    elif estimate_intraday == True:
+    elif estimate_intraday is True:
         raise ValueError('Positions and transactions needed' +
                          'to estimate intraday')
 
@@ -446,14 +446,14 @@ def create_position_tear_sheet(returns, positions,
     if transactions is not None:
         if (estimate_intraday is None and
             utils.detect_intraday(positions, transactions)):
-            warnings.warn('Detected intraday strategy. Set ' +
-                          'estimate_intraday=False to disable', UserWarning)
-            estimate_intraday = True
-        if estimate_intraday == True:
+                warnings.warn('Detected intraday strategy. Set ' +
+                              'estimate_intraday=False to disable', UserWarning)
+                estimate_intraday = True
+        if estimate_intraday is True:
             positions = utils.estimate_intraday(returns, positions,
                                                 transactions)
 
-    elif estimate_intraday == True:
+    elif estimate_intraday is True:
         raise ValueError('Transactions needed to estimate intraday')
 
     if hide_positions:
@@ -539,10 +539,10 @@ def create_txn_tear_sheet(returns, positions, transactions,
 
     if (estimate_intraday is None and
         utils.detect_intraday(positions, transactions)):
-        warnings.warn('Detected intraday strategy. Set ' +
-                      'estimate_intraday=False to disable', UserWarning)
-        estimate_intraday = True
-    if estimate_intraday == True:
+            warnings.warn('Detected intraday strategy. Set ' +
+                          'estimate_intraday=False to disable', UserWarning)
+            estimate_intraday = True
+    if estimate_intraday is True:
         positions = utils.estimate_intraday(returns, positions,
                                             transactions)
 
@@ -626,10 +626,10 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
     if (estimate_intraday is None and
         utils.detect_intraday(positions, transactions)):
-        warnings.warn('Detected intraday strategy. Set ' +
-                      'estimate_intraday=False to disable', UserWarning)
-        estimate_intraday = True
-    if estimate_intraday == True:
+            warnings.warn('Detected intraday strategy. Set ' +
+                          'estimate_intraday=False to disable', UserWarning)
+            estimate_intraday = True
+    if estimate_intraday is True:
         positions = utils.estimate_intraday(returns, positions,
                                             transactions)
 
@@ -769,7 +769,7 @@ def create_interesting_times_tear_sheet(
 
 @plotting_context
 def create_capacity_tear_sheet(returns, positions, transactions,
-                               market_data, 
+                               market_data,
                                liquidation_daily_vol_limit=0.2,
                                trade_daily_vol_limit=0.05,
                                last_n_days=utils.APPROX_BDAYS_PER_MONTH * 6,
@@ -815,10 +815,10 @@ def create_capacity_tear_sheet(returns, positions, transactions,
 
     if (estimate_intraday is None and
         utils.detect_intraday(positions, transactions)):
-        warnings.warn('Detected intraday strategy. Set ' +
-                      'estimate_intraday=False to disable', UserWarning)
-        estimate_intraday = True
-    if estimate_intraday == True:
+            warnings.warn('Detected intraday strategy. Set ' +
+                          'estimate_intraday=False to disable', UserWarning)
+            estimate_intraday = True
+    if estimate_intraday is True:
         positions = utils.estimate_intraday(returns, positions,
                                             transactions)
 

@@ -597,7 +597,8 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
 
     # Cumulate transactions into positions
     cumulative_positions = transactions.reset_index().pivot_table(
-        index='date', values='amount', columns='symbol').replace(np.nan, 0).cumsum()
+        index='date', values='amount',
+        columns='symbol').replace(np.nan, 0).cumsum()
 
     # Get EOD prices with computed EOD positions
     eod_positions = cumulative_positions.resample('1D').last().dropna()
@@ -641,8 +642,9 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
     # Compute absolute position, and select max each day
     dollar_amounts['abs_position'] = dollar_amounts.drop(
         'cash', axis=1).abs().sum(axis=1)
-    pos_corrected = dollar_amounts[dollar_amounts['abs_position'] == dollar_amounts.groupby(
-        pd.TimeGrouper('24H'))['abs_position'].transform(max)]
+    condition = dollar_amounts['abs_position'] == dollar_amounts.groupby(
+        pd.TimeGrouper('24H'))['abs_position'].transform(max)
+    pos_corrected = dollar_amounts[condition]
 
     # Format
     pos_corrected = pos_corrected.drop(
