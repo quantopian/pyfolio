@@ -159,7 +159,7 @@ def create_full_tear_sheet(returns,
 
     if positions is not None and transactions is not None:
         if (estimate_intraday is None and
-        utils.detect_intraday(positions, transactions)):
+                utils.detect_intraday(positions, transactions)):
             warnings.warn('Detected intraday strategy. Set ' +
                           'estimate_intraday=False to disable', UserWarning)
             estimate_intraday = True
@@ -445,7 +445,7 @@ def create_position_tear_sheet(returns, positions,
 
     if transactions is not None:
         if (estimate_intraday is None and
-        utils.detect_intraday(positions, transactions)):
+                utils.detect_intraday(positions, transactions)):
             warnings.warn('Detected intraday strategy. Set ' +
                           'estimate_intraday=False to disable', UserWarning)
             estimate_intraday = True
@@ -538,7 +538,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
     """
 
     if (estimate_intraday is None and
-    utils.detect_intraday(positions, transactions)):
+            utils.detect_intraday(positions, transactions)):
         warnings.warn('Detected intraday strategy. Set ' +
                       'estimate_intraday=False to disable', UserWarning)
         estimate_intraday = True
@@ -625,7 +625,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
     """
 
     if (estimate_intraday is None and
-    utils.detect_intraday(positions, transactions)):
+            utils.detect_intraday(positions, transactions)):
         warnings.warn('Detected intraday strategy. Set ' +
                       'estimate_intraday=False to disable', UserWarning)
         estimate_intraday = True
@@ -814,7 +814,7 @@ def create_capacity_tear_sheet(returns, positions, transactions,
     """
 
     if (estimate_intraday is None and
-    utils.detect_intraday(positions, transactions)):
+            utils.detect_intraday(positions, transactions)):
         warnings.warn('Detected intraday strategy. Set ' +
                       'estimate_intraday=False to disable', UserWarning)
         estimate_intraday = True
