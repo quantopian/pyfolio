@@ -39,11 +39,6 @@ class PositionsTestCase(TestCase):
             __location__ + '/test_data/test_returns.csv.gz'),
         index_col=0, parse_dates=True)
     test_returns = to_series(to_utc(test_returns))
-    test_gross_lev = read_csv(
-        gzip.open(
-            __location__ + '/test_data/test_gross_lev.csv.gz'),
-        index_col=0, parse_dates=True)
-    test_gross_lev = to_series(to_utc(test_gross_lev))
     test_txn = to_utc(read_csv(
         gzip.open(
             __location__ + '/test_data/test_txn.csv.gz'),
@@ -66,7 +61,6 @@ class PositionsTestCase(TestCase):
         create_full_tear_sheet(self.test_returns,
                                positions=self.test_pos,
                                transactions=self.test_txn,
-                               gross_lev=self.test_gross_lev,
                                **kwargs
                                )
 
@@ -91,7 +85,6 @@ class PositionsTestCase(TestCase):
     def test_create_position_tear_sheet_breakdown(self, kwargs):
         create_position_tear_sheet(self.test_returns,
                                    self.test_pos,
-                                   gross_lev=self.test_gross_lev,
                                    **kwargs
                                    )
 
