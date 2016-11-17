@@ -541,3 +541,118 @@ def standardize_data(x):
     """
 
     return (x - np.mean(x)) / np.std(x)
+
+
+def detect_intraday(positions, transactions, threshold=0.25):
+    """
+    Attempt to detect an intraday strategy. Get the number of
+    positions held at the end of the day, and divide that by the
+    number of unique stocks transacted every day. If the average quotient
+    is below a threshold, then an intraday strategy is detected.
+
+    Parameters
+    ----------
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
+         - See full explanation in create_full_tear_sheet.
+
+    Returns
+    -------
+    returns : boolean
+        True if an intraday strategy is detected.
+    """
+
+    daily_txn = transactions.copy()
+    daily_txn.index = daily_txn.index.date
+    txn_count = daily_txn.groupby(level=0).symbol.nunique().sum()
+    daily_pos = positions.drop('cash', axis=1).replace(0, np.nan)
+    return daily_pos.count(axis=1).sum() / txn_count < threshold
+
+
+def estimate_intraday(returns, positions, transactions, EOD_hour=23):
+    """
+    Intraday strategies will often not hold positions at the day end.
+    This attempts to find the point in the day that best represents
+    the activity of the strategy on that day, and effectively resamples
+    the end-of-day positions with the positions at this point of day.
+    The point of day is found by detecting when our exposure in the market
+    is at its maximum point. Note that this is an estimate.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
+         - See full explanation in create_full_tear_sheet.
+
+    Returns
+    -------
+    returns : pd.DataFrame
+        Daily net position values, resampled for intraday behavior.
+    """
+
+    # Cumulate transactions into positions
+    cumulative_positions = transactions.reset_index().pivot_table(
+        index='date', values='amount', columns='symbol').replace(np.nan, 0).cumsum()
+
+    # Get EOD prices with computed EOD positions
+    eod_positions = cumulative_positions.resample('1D').last().dropna()
+    eod_positions.index = eod_positions.index + pd.Timedelta(hours=EOD_hour)
+    eod_dollar_amounts = positions.drop('cash', axis=1)
+    eod_dollar_amounts.index = eod_dollar_amounts.index + \
+        pd.Timedelta(hours=EOD_hour)
+    eod_prices = (eod_dollar_amounts / eod_positions)
+
+    # Construct intraday prices
+    intraday_prices = transactions.reset_index().pivot_table(
+        index='date', values='price', columns='symbol')
+
+    # Join prices
+    all_prices = pd.concat([intraday_prices, eod_prices]).sort_index()
+
+    # Join positions
+    all_positions = pd.concat(
+        [cumulative_positions, eod_positions.replace(0, np.nan)]).sort_index()
+
+    # Multiply positions and prices to get $ amounts
+    dollar_amounts = (all_positions * all_prices.ffill())
+
+    # Find EOD capital base
+    eod_capital = positions.sum(axis=1)
+    eod_capital.index = eod_capital.index + pd.Timedelta(hours=EOD_hour)
+
+    # Join to dollar amounts, forward fill and add starting capital
+    dollar_amounts['portfolio_value'] = eod_capital
+    dollar_amounts['portfolio_value'] = dollar_amounts[
+        'portfolio_value'].ffill()
+    starting_cap = eod_capital[0] / (1 + returns[0])
+    dollar_amounts['portfolio_value'] = dollar_amounts[
+        'portfolio_value'].replace(np.nan, starting_cap)
+
+    # Compute cash
+    dollar_amounts['cash'] = dollar_amounts['portfolio_value'] - \
+        dollar_amounts.drop('portfolio_value', axis=1).sum(axis=1)
+    dollar_amounts = dollar_amounts.drop('portfolio_value', axis=1)
+
+    # Compute absolute position, and select max each day
+    dollar_amounts['abs_position'] = dollar_amounts.drop(
+        'cash', axis=1).abs().sum(axis=1)
+    pos_corrected = dollar_amounts[dollar_amounts['abs_position'] == dollar_amounts.groupby(
+        pd.TimeGrouper('24H'))['abs_position'].transform(max)]
+
+    # Format
+    pos_corrected = pos_corrected.drop(
+        'abs_position', axis=1).replace(np.nan, 0)
+    pos_corrected.index.name = 'period_close'
+    pos_corrected.columns.name = 'sid'
+    pos_corrected.index = pos_corrected.index.normalize()
+
+    return pos_corrected
