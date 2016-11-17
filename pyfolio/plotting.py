@@ -506,7 +506,7 @@ def plot_perf_stats(returns, factor_returns, ax=None):
     return ax
 
 
-def show_perf_stats(returns, factor_returns, gross_lev=None,
+def show_perf_stats(returns, factor_returns, positions=None,
                     live_start_date=None, bootstrap=False):
     """
     Prints some performance metrics of the strategy.
@@ -522,12 +522,15 @@ def show_perf_stats(returns, factor_returns, gross_lev=None,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    live_start_date : datetime, optional
-        The point in time when the strategy began live trading, after
-        its backtest period.
     factor_returns : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in create_full_tear_sheet.
+    live_start_date : datetime, optional
+        The point in time when the strategy began live trading, after
+        its backtest period.
     bootstrap : boolean (optional)
         Whether to perform bootstrap analysis for the performance
         metrics.
@@ -544,27 +547,27 @@ def show_perf_stats(returns, factor_returns, gross_lev=None,
         returns_backtest = returns[returns.index < live_start_date]
         returns_live = returns[returns.index > live_start_date]
 
-        gross_lev_backtest = None
-        gross_lev_live = None
-        if gross_lev is not None:
-            gross_lev_backtest = gross_lev[gross_lev.index < live_start_date]
-            gross_lev_live = gross_lev[gross_lev.index > live_start_date]
+        positions_backtest = None
+        positions_live = None
+        if positions is not None:
+            positions_backtest = positions[positions.index < live_start_date]
+            positions_live = positions[positions.index > live_start_date]
 
         perf_stats_live = perf_func(
             returns_live,
             factor_returns=factor_returns,
-            gross_lev=gross_lev_live)
+            positions=positions_live)
 
         perf_stats_all = perf_func(
             returns,
             factor_returns=factor_returns,
-            gross_lev=gross_lev)
+            positions=positions)
 
         print('Out-of-Sample Months: ' +
               str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
     else:
         returns_backtest = returns
-        gross_lev_backtest = gross_lev
+        positions_backtest = positions
 
     print('Backtest Months: ' +
           str(int(len(returns_backtest) / APPROX_BDAYS_PER_MONTH)))
@@ -572,7 +575,7 @@ def show_perf_stats(returns, factor_returns, gross_lev=None,
     perf_stats = perf_func(
         returns_backtest,
         factor_returns=factor_returns,
-        gross_lev=gross_lev_backtest)
+        positions=positions_backtest)
 
     if live_start_date is not None:
         perf_stats = pd.concat(OrderedDict([
@@ -864,7 +867,7 @@ def plot_rolling_sharpe(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
     return ax
 
 
-def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
+def plot_gross_leverage(returns, positions, ax=None, **kwargs):
     """
     Plots gross leverage versus date.
 
@@ -876,9 +879,9 @@ def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    gross_lev : pd.Series, optional
-        The leverage of a strategy.
-         - See full explanation in tears.create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in create_full_tear_sheet.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -892,12 +895,10 @@ def plot_gross_leverage(returns, gross_lev, ax=None, **kwargs):
 
     if ax is None:
         ax = plt.gca()
+    gl = timeseries.gross_lev(positions)
+    gl.plot(alpha=0.8, lw=0.5, color='g', legend=False, ax=ax, **kwargs)
 
-    gross_lev.plot(alpha=0.8, lw=0.5, color='g', legend=False, ax=ax,
-                   **kwargs)
-
-    ax.axhline(gross_lev.mean(), color='g', linestyle='--', lw=3,
-               alpha=1.0)
+    ax.axhline(gl.mean(), color='g', linestyle='--', lw=3, alpha=1.0)
 
     ax.set_title('Gross leverage')
     ax.set_ylabel('Gross leverage')

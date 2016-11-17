@@ -397,25 +397,21 @@ def extract_rets_pos_txn_from_zipline(backtest):
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
-    gross_lev : pd.Series, optional
-        The leverage of a strategy.
-         - See full explanation in tears.create_full_tear_sheet.
 
 
     Example (on the Quantopian research platform)
     ---------------------------------------------
     >>> backtest = my_algo.run()
-    >>> returns, positions, transactions, gross_lev =
+    >>> returns, positions, transactions =
     >>>     pyfolio.utils.extract_rets_pos_txn_from_zipline(backtest)
     >>> pyfolio.tears.create_full_tear_sheet(returns,
-    >>>     positions, transactions, gross_lev=gross_lev)
+    >>>     positions, transactions)
     """
 
     backtest.index = backtest.index.normalize()
     if backtest.index.tzinfo is None:
         backtest.index = backtest.index.tz_localize('UTC')
     returns = backtest.returns
-    gross_lev = backtest.gross_leverage
     raw_positions = []
     for dt, pos_row in backtest.positions.iteritems():
         df = pd.DataFrame(pos_row)
@@ -429,7 +425,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
     if transactions.index.tzinfo is None:
         transactions.index = transactions.index.tz_localize('utc')
 
-    return returns, positions, transactions, gross_lev
+    return returns, positions, transactions
 
 
 # Settings dict to store functions/values that may

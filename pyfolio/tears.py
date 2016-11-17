@@ -58,7 +58,6 @@ def create_full_tear_sheet(returns,
                            transactions=None,
                            market_data=None,
                            benchmark_rets=None,
-                           gross_lev=None,
                            slippage=None,
                            live_start_date=None,
                            sector_mappings=None,
@@ -113,15 +112,6 @@ def create_full_tear_sheet(returns,
         Panel with items axis of 'price' and 'volume' DataFrames.
         The major and minor axes should match those of the
         the passed positions DataFrame (same dates and symbols).
-    gross_lev : pd.Series, optional
-        The leverage of a strategy.
-         - Time series of the sum of long and short exposure per share
-            divided by net asset value.
-         - Example:
-            2009-12-04    0.999932
-            2009-12-07    0.999783
-            2009-12-08    0.999880
-            2009-12-09    1.000283
     slippage : int/float, optional
         Basis points of slippage to apply to returns before generating
         tearsheet stats and plots.
@@ -183,8 +173,8 @@ def create_full_tear_sheet(returns,
 
     create_returns_tear_sheet(
         returns,
+        positions=positions,
         live_start_date=live_start_date,
-        gross_lev=gross_lev,
         cone_std=cone_std,
         benchmark_rets=benchmark_rets,
         bootstrap=bootstrap,
@@ -196,7 +186,6 @@ def create_full_tear_sheet(returns,
 
     if positions is not None:
         create_position_tear_sheet(returns, positions,
-                                   gross_lev=gross_lev,
                                    hide_positions=hide_positions,
                                    set_context=set_context,
                                    sector_mappings=sector_mappings,
@@ -229,8 +218,8 @@ def create_full_tear_sheet(returns,
 
 
 @plotting_context
-def create_returns_tear_sheet(returns, live_start_date=None,
-                              gross_lev=None,
+def create_returns_tear_sheet(returns, positions=None,
+                              live_start_date=None,
                               cone_std=(1.0, 1.5, 2.0),
                               benchmark_rets=None,
                               bootstrap=False,
@@ -250,6 +239,9 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
+    positions : pd.DataFrame, optional
+        Daily net position values.
          - See full explanation in create_full_tear_sheet.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
@@ -283,7 +275,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     print('\n')
 
     plotting.show_perf_stats(returns, benchmark_rets,
-                             gross_lev=gross_lev,
+                             positions=positions,
                              bootstrap=bootstrap,
                              live_start_date=live_start_date)
 
@@ -413,7 +405,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
 
 @plotting_context
-def create_position_tear_sheet(returns, positions, gross_lev=None,
+def create_position_tear_sheet(returns, positions,
                                show_and_plot_top_pos=2, hide_positions=False,
                                return_fig=False, sector_mappings=None,
                                transactions=None, estimate_intraday=None):
@@ -431,9 +423,6 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
          - See full explanation in create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
-         - See full explanation in create_full_tear_sheet.
-    gross_lev : pd.Series, optional
-        The leverage of a strategy.
          - See full explanation in create_full_tear_sheet.
     show_and_plot_top_pos : int, optional
         By default, this is 2, and both prints and plots the
@@ -477,6 +466,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
     ax_top_positions = plt.subplot(gs[1, :], sharex=ax_exposures)
     ax_max_median_pos = plt.subplot(gs[2, :], sharex=ax_exposures)
     ax_holdings = plt.subplot(gs[3, :], sharex=ax_exposures)
+    ax_gross_leverage = plt.subplot(gs[4, :], sharex=ax_exposures)
 
     positions_alloc = pos.get_percent_alloc(positions)
 
@@ -494,13 +484,8 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
-    last_pos = 4
-    if gross_lev is not None:
-        ax_gross_leverage = plt.subplot(gs[last_pos, :],
-                                        sharex=ax_exposures)
-        plotting.plot_gross_leverage(returns, gross_lev,
-                                     ax=ax_gross_leverage)
-        last_pos += 1
+    plotting.plot_gross_leverage(returns, positions,
+                                 ax=ax_gross_leverage)
 
     if sector_mappings is not None:
         sector_exposures = pos.get_sector_exposures(positions,
@@ -508,8 +493,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         if len(sector_exposures.columns) > 1:
             sector_alloc = pos.get_percent_alloc(sector_exposures)
             sector_alloc = sector_alloc.drop('cash', axis='columns')
-            ax_sector_alloc = plt.subplot(gs[last_pos, :],
-                                          sharex=ax_exposures)
+            ax_sector_alloc = plt.subplot(gs[5, :], sharex=ax_exposures)
             plotting.plot_sector_allocations(returns, sector_alloc,
                                              ax=ax_sector_alloc)
 
