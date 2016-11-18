@@ -646,7 +646,7 @@ def gross_lev(positions):
         Gross leverage.
     """
     exposure = positions.drop('cash', axis=1).abs().sum(axis=1)
-    return exposure/positions.sum(axis=1)
+    return exposure / positions.sum(axis=1)
 
 
 def perf_stats(returns, factor_returns=None, positions=None):
