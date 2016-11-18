@@ -358,8 +358,6 @@ class TestGrossLev(TestCase):
     test_gross_lev = to_series(to_utc(test_gross_lev))
 
     def test_gross_lev_calculation(self):
-        print timeseries.gross_lev(self.test_pos).index[0]
-        print self.test_gross_lev.index[0]
         self.assertAlmostEqual(
             timeseries.gross_lev(self.test_pos)['2004-02-01':].mean(),
             self.test_gross_lev['2004-02-01':].mean())
