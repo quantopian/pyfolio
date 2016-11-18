@@ -595,62 +595,35 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
         Daily net position values, resampled for intraday behavior.
     """
 
-    # Cumulate transactions into positions
-    cumulative_positions = transactions.reset_index().pivot_table(
-        index='date', values='amount',
-        columns='symbol').replace(np.nan, 0).cumsum()
+    # Construct DataFrame of transaction amounts
+    txn_val = transactions.copy()
+    txn_val['value'] = txn_val.amount * txn_val.price
+    txn_val = txn_val.reset_index().pivot_table(
+        index='date', values='value',
+        columns='symbol').replace(np.nan, 0)
 
-    # Get EOD prices with computed EOD positions
-    eod_positions = cumulative_positions.resample('1D').last().dropna()
-    eod_positions.index = eod_positions.index + pd.Timedelta(hours=EOD_hour)
-    eod_dollar_amounts = positions.drop('cash', axis=1)
-    eod_dollar_amounts.index = eod_dollar_amounts.index + \
-        pd.Timedelta(hours=EOD_hour)
-    eod_prices = (eod_dollar_amounts / eod_positions)
+    # Cumulate transactions amounts each day
+    txn_val['date'] = txn_val.index.date
+    txn_val = txn_val.groupby('date').cumsum()
 
-    # Construct intraday prices
-    intraday_prices = transactions.reset_index().pivot_table(
-        index='date', values='price', columns='symbol')
+    # Calculate exposure, then take peak of exposure every day
+    txn_val['exposure'] = txn_val.abs().sum(axis=1)
+    condition = (txn_val['exposure'] == txn_val.groupby(
+            pd.TimeGrouper('24H'))['exposure'].transform(max))
+    txn_val = txn_val[condition].drop('exposure', axis=1)
 
-    # Join prices
-    all_prices = pd.concat([intraday_prices, eod_prices]).sort_index()
+    # Compute cash delta
+    txn_val['cash'] = -txn_val.sum(axis=1)
 
-    # Join positions
-    all_positions = pd.concat(
-        [cumulative_positions, eod_positions.replace(0, np.nan)]).sort_index()
+    # Shift EOD positions to positions at start of next trading day
+    positions_shifted = positions.copy().shift(1).fillna(0)
+    starting_capital = positions.iloc[0].sum() / (1 + returns[0])
+    positions_shifted.cash[0] = starting_capital
 
-    # Multiply positions and prices to get $ amounts
-    dollar_amounts = (all_positions * all_prices.ffill())
+    # Format and add start positions to intraday position changes
+    txn_val.index = txn_val.index.normalize()
+    corrected_positions = positions_shifted.add(txn_val, fill_value=0)
+    corrected_positions.index.name = 'period_close'
+    corrected_positions.columns.name = 'sid'
 
-    # Find EOD capital base
-    eod_capital = positions.sum(axis=1)
-    eod_capital.index = eod_capital.index + pd.Timedelta(hours=EOD_hour)
-
-    # Join to dollar amounts, forward fill and add starting capital
-    dollar_amounts['portfolio_value'] = eod_capital
-    dollar_amounts['portfolio_value'] = dollar_amounts[
-        'portfolio_value'].ffill()
-    starting_cap = eod_capital[0] / (1 + returns[0])
-    dollar_amounts['portfolio_value'] = dollar_amounts[
-        'portfolio_value'].replace(np.nan, starting_cap)
-
-    # Compute cash
-    dollar_amounts['cash'] = dollar_amounts['portfolio_value'] - \
-        dollar_amounts.drop('portfolio_value', axis=1).sum(axis=1)
-    dollar_amounts = dollar_amounts.drop('portfolio_value', axis=1)
-
-    # Compute absolute position, and select max each day
-    dollar_amounts['abs_position'] = dollar_amounts.drop(
-        'cash', axis=1).abs().sum(axis=1)
-    condition = dollar_amounts['abs_position'] == dollar_amounts.groupby(
-        pd.TimeGrouper('24H'))['abs_position'].transform(max)
-    pos_corrected = dollar_amounts[condition]
-
-    # Format
-    pos_corrected = pos_corrected.drop(
-        'abs_position', axis=1).replace(np.nan, 0)
-    pos_corrected.index.name = 'period_close'
-    pos_corrected.columns.name = 'sid'
-    pos_corrected.index = pos_corrected.index.normalize()
-
-    return pos_corrected
+    return corrected_positions
