@@ -603,7 +603,7 @@ def check_intraday(estimate, returns, positions, transactions):
                 return positions
         else:
             return positions
-        
+
     elif estimate:
         if positions is not None and transactions is not None:
             return estimate_intraday(returns, positions, transactions)
@@ -611,6 +611,7 @@ def check_intraday(estimate, returns, positions, transactions):
             raise ValueError('Positions and txns needed to estimate intraday')
     else:
         return positions
+
 
 def estimate_intraday(returns, positions, transactions, EOD_hour=23):
     """
