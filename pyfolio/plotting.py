@@ -354,7 +354,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
         ax = plt.gca()
 
     positions = positions.copy().drop('cash', axis='columns')
-    df_holdings = positions.apply(lambda x: np.sum(x != 0), axis='columns')
+    df_holdings = positions.replace(0, np.nan).count(axis=1)
     df_holdings_by_month = df_holdings.resample('1M').mean()
     df_holdings.plot(color='steelblue', alpha=0.6, lw=0.5, ax=ax, **kwargs)
     df_holdings_by_month.plot(
