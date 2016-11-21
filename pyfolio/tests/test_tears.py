@@ -8,6 +8,7 @@ import gzip
 
 from pandas import read_csv
 
+from pyfolio.utils import (to_utc, to_series)
 from pyfolio.tears import (create_full_tear_sheet,
                            create_returns_tear_sheet,
                            create_position_tear_sheet,
@@ -15,19 +16,6 @@ from pyfolio.tears import (create_full_tear_sheet,
                            create_round_trip_tear_sheet,
                            create_interesting_times_tear_sheet,
                            create_bayesian_tear_sheet)
-
-
-def to_utc(df):
-    try:
-        df.index = df.index.tz_localize('UTC')
-    except TypeError:
-        df.index = df.index.tz_convert('UTC')
-
-    return df
-
-
-def to_series(df):
-    return df[df.columns[0]]
 
 
 class PositionsTestCase(TestCase):
