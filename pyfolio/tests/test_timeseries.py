@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from .. import timeseries
-from pyfolio.utils import (get_symbols_rets,
+from pyfolio.utils import (get_symbol_rets,
                            to_utc,
                            to_series)
 import gzip
