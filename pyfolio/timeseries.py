@@ -679,7 +679,7 @@ def perf_stats(returns, factor_returns=None, positions=None):
         stats[stat_func.__name__] = stat_func(returns)
 
     if positions is not None:
-        stats['mean_gross_leverage'] = gross_lev(positions).mean()
+        stats['gross_leverage'] = gross_lev(positions).mean()
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
             stats[stat_func.__name__] = stat_func(returns,
@@ -728,7 +728,7 @@ def perf_stats_bootstrap(returns, factor_returns=None, positions=None,
 
     if positions is not None:
         gl = gross_lev(positions)
-        bootstrap_values['mean_gross_leverage'] = calc_bootstrap(np.mean,
+        bootstrap_values['gross_leverage'] = calc_bootstrap(np.mean,
                                                                  gl)
 
     if factor_returns is not None:
