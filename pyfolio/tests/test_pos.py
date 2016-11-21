@@ -1,14 +1,18 @@
 from unittest import TestCase
 from nose_parameterized import parameterized
 from collections import OrderedDict
+import os
+import gzip
 
 from pandas import (
     Series,
     DataFrame,
     date_range,
-    Timestamp
+    Timestamp,
+    read_csv
 )
-from pandas.util.testing import (assert_frame_equal)
+from pandas.util.testing import (assert_frame_equal,
+                                 assert_equal)
 
 from numpy import (
     arange,
@@ -18,6 +22,8 @@ from numpy import (
 
 import warnings
 
+from pyfolio.utils import (to_utc, to_series, check_intraday,
+                          detect_intraday, estimate_intraday)
 from pyfolio.pos import (get_percent_alloc,
                          extract_pos,
                          get_sector_exposures,
@@ -76,6 +82,7 @@ class PositionsTestCase(TestCase):
             index=index
         )
         expected.index.name = 'index'
+        expected.columns.name = 'sid'
 
         assert_frame_equal(result, expected)
 
@@ -137,3 +144,45 @@ class PositionsTestCase(TestCase):
     def test_max_median_exposure(self, positions, expected):
         alloc_summary = get_max_median_position_concentration(positions)
         assert_frame_equal(expected, alloc_summary)
+
+    __location__ = os.path.realpath(
+        os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+    test_returns = read_csv(
+        gzip.open(
+            __location__ + '/test_data/test_returns.csv.gz'),
+        index_col=0, parse_dates=True)
+    test_returns = to_series(to_utc(test_returns))
+    test_txn = to_utc(read_csv(
+        gzip.open(
+            __location__ + '/test_data/test_txn.csv.gz'),
+        index_col=0, parse_dates=True))
+    test_pos = to_utc(read_csv(
+        gzip.open(__location__ + '/test_data/test_pos.csv.gz'),
+        index_col=0, parse_dates=True))
+
+    @parameterized.expand([
+        (test_pos, test_txn, False),
+        (test_pos.resample('1W').last(), test_txn, True)
+    ])
+    def test_detect_intraday(self, positions, transactions, expected):
+        detected = detect_intraday(positions, transactions, threshold=0.25)
+        assert_equal(detected, expected)
+
+    @parameterized.expand([
+        ('infer', test_returns, test_pos, test_txn, test_pos),
+        (False, test_returns, test_pos, test_txn, test_pos)
+    ])
+    def test_check_intraday(self, estimate, returns,
+                            positions, transactions, expected):
+        detected = check_intraday(estimate, returns, positions, transactions)
+        assert_frame_equal(detected, expected)
+
+    @parameterized.expand([
+        (test_returns, test_pos, test_txn, (1506, 8)),
+        (test_returns, test_pos.resample('1W').last(), test_txn, (1819, 8))
+    ])
+    def test_estimate_intraday(self, returns, positions,
+                               transactions, expected):
+        intraday_pos = estimate_intraday(returns, positions, transactions)
+        assert_equal(intraday_pos.shape, expected)
