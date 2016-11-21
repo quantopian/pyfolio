@@ -642,6 +642,7 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
 
     # Construct DataFrame of transaction amounts
     txn_val = transactions.copy()
+    txn_val.index.names = ['date']
     txn_val['value'] = txn_val.amount * txn_val.price
     txn_val = txn_val.reset_index().pivot_table(
         index='date', values='value',
