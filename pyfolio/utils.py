@@ -570,7 +570,7 @@ def detect_intraday(positions, transactions, threshold=0.25):
 
 def check_intraday(estimate, returns, positions, transactions):
     """
-    Logic for checking if a strategy is intraday and processing it
+    Logic for checking if a strategy is intraday and processing it.
 
     Parameters
     ----------
@@ -592,6 +592,7 @@ def check_intraday(estimate, returns, positions, transactions):
     positions : pd.DataFrame, optional
         Daily net position values, adjusted for intraday movement.
     """
+
     if estimate is 'infer':
         if positions is not None and transactions is not None:
             if detect_intraday(positions, transactions):
@@ -619,8 +620,8 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
     This attempts to find the point in the day that best represents
     the activity of the strategy on that day, and effectively resamples
     the end-of-day positions with the positions at this point of day.
-    The point of day is found by detecting when our exposure in the market
-    is at its maximum point. Note that this is an estimate.
+    The point of day is found by detecting when our exposure in the
+    market is at its maximum point. Note that this is an estimate.
 
     Parameters
     ----------
@@ -648,7 +649,7 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
         index='date', values='value',
         columns='symbol').replace(np.nan, 0)
 
-    # Cumulate transactions amounts each day
+    # Cumulate transaction amounts each day
     txn_val['date'] = txn_val.index.date
     txn_val = txn_val.groupby('date').cumsum()
 
@@ -673,3 +674,24 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
     corrected_positions.columns.name = 'sid'
 
     return corrected_positions
+
+
+def to_utc(df):
+    """
+    For use in tests; applied UTC timestamp to DataFrame.
+    """
+
+    try:
+        df.index = df.index.tz_localize('UTC')
+    except TypeError:
+        df.index = df.index.tz_convert('UTC')
+
+    return df
+
+
+def to_series(df):
+    """
+    For use in tests; converts DataFrame's first column to Series.
+    """
+
+    return df[df.columns[0]]
