@@ -9,9 +9,11 @@ import numpy as np
 import pandas as pd
 
 from .. import timeseries
-from .. import utils
-from test_tears import to_utc, to_series
+from pyfolio.utils import (get_symbols_rets,
+                           to_utc,
+                           to_series)
 import gzip
+
 
 DECIMAL_PLACES = 8
 
@@ -169,9 +171,9 @@ class TestDrawdown(TestCase):
         # Add test to show that drawdowns don't overlap
         # Bug #145 observed for FB stock on the period 2014-10-24 - 2015-03-19
         # Reproduced on SPY data (cached) but need a large number of drawdowns
-        spy_rets = utils.get_symbol_rets('SPY',
-                                         start='1997-01-01',
-                                         end='2004-12-31')
+        spy_rets = get_symbol_rets('SPY',
+                                   start='1997-01-01',
+                                   end='2004-12-31')
         spy_drawdowns = timeseries.gen_drawdown_table(
             spy_rets,
             top=20).sort_values(by='peak date')
