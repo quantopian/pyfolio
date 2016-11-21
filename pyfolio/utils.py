@@ -563,7 +563,6 @@ def detect_intraday(positions, transactions, threshold=0.25):
 
     daily_txn = transactions.copy()
     daily_txn.index = daily_txn.index.date
-    daily_txn = daily_txn.rename(columns={'sid': 'symbol'})
     txn_count = daily_txn.groupby(level=0).symbol.nunique().sum()
     daily_pos = positions.drop('cash', axis=1).replace(0, np.nan)
     return daily_pos.count(axis=1).sum() / txn_count < threshold
@@ -646,7 +645,6 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
     txn_val = transactions.copy()
     txn_val.index.names = ['date']
     txn_val['value'] = txn_val.amount * txn_val.price
-    txn_val = txn_val.rename(columns={'sid': 'symbol'})
     txn_val = txn_val.reset_index().pivot_table(
         index='date', values='value',
         columns='symbol').replace(np.nan, 0)
