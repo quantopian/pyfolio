@@ -567,8 +567,8 @@ def create_txn_tear_sheet(returns, positions, transactions,
 
 @plotting_context
 def create_round_trip_tear_sheet(returns, positions, transactions,
-                                 sector_mappings=None, estimate_intraday='infer',
-                                 return_fig=False):
+                                 sector_mappings=None,
+                                 estimate_intraday='infer', return_fig=False):
     """
     Generate a number of figures and plots describing the duration,
     frequency, and profitability of trade "round trips."
