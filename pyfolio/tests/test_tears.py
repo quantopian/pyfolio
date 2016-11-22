@@ -8,6 +8,7 @@ import gzip
 
 from pandas import read_csv
 
+from pyfolio.utils import (to_utc, to_series)
 from pyfolio.tears import (create_full_tear_sheet,
                            create_returns_tear_sheet,
                            create_position_tear_sheet,
@@ -15,19 +16,6 @@ from pyfolio.tears import (create_full_tear_sheet,
                            create_round_trip_tear_sheet,
                            create_interesting_times_tear_sheet,
                            create_bayesian_tear_sheet)
-
-
-def to_utc(df):
-    try:
-        df.index = df.index.tz_localize('UTC')
-    except TypeError:
-        df.index = df.index.tz_convert('UTC')
-
-    return df
-
-
-def to_series(df):
-    return df[df.columns[0]]
 
 
 class PositionsTestCase(TestCase):
@@ -39,11 +27,6 @@ class PositionsTestCase(TestCase):
             __location__ + '/test_data/test_returns.csv.gz'),
         index_col=0, parse_dates=True)
     test_returns = to_series(to_utc(test_returns))
-    test_gross_lev = read_csv(
-        gzip.open(
-            __location__ + '/test_data/test_gross_lev.csv.gz'),
-        index_col=0, parse_dates=True)
-    test_gross_lev = to_series(to_utc(test_gross_lev))
     test_txn = to_utc(read_csv(
         gzip.open(
             __location__ + '/test_data/test_txn.csv.gz'),
@@ -66,7 +49,6 @@ class PositionsTestCase(TestCase):
         create_full_tear_sheet(self.test_returns,
                                positions=self.test_pos,
                                transactions=self.test_txn,
-                               gross_lev=self.test_gross_lev,
                                **kwargs
                                )
 
@@ -91,7 +73,6 @@ class PositionsTestCase(TestCase):
     def test_create_position_tear_sheet_breakdown(self, kwargs):
         create_position_tear_sheet(self.test_returns,
                                    self.test_pos,
-                                   gross_lev=self.test_gross_lev,
                                    **kwargs
                                    )
 

@@ -397,25 +397,21 @@ def extract_rets_pos_txn_from_zipline(backtest):
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
-    gross_lev : pd.Series, optional
-        The leverage of a strategy.
-         - See full explanation in tears.create_full_tear_sheet.
 
 
     Example (on the Quantopian research platform)
     ---------------------------------------------
     >>> backtest = my_algo.run()
-    >>> returns, positions, transactions, gross_lev =
+    >>> returns, positions, transactions =
     >>>     pyfolio.utils.extract_rets_pos_txn_from_zipline(backtest)
     >>> pyfolio.tears.create_full_tear_sheet(returns,
-    >>>     positions, transactions, gross_lev=gross_lev)
+    >>>     positions, transactions)
     """
 
     backtest.index = backtest.index.normalize()
     if backtest.index.tzinfo is None:
         backtest.index = backtest.index.tz_localize('UTC')
     returns = backtest.returns
-    gross_lev = backtest.gross_leverage
     raw_positions = []
     for dt, pos_row in backtest.positions.iteritems():
         df = pd.DataFrame(pos_row)
@@ -429,7 +425,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
     if transactions.index.tzinfo is None:
         transactions.index = transactions.index.tz_localize('utc')
 
-    return returns, positions, transactions, gross_lev
+    return returns, positions, transactions
 
 
 # Settings dict to store functions/values that may
@@ -541,3 +537,161 @@ def standardize_data(x):
     """
 
     return (x - np.mean(x)) / np.std(x)
+
+
+def detect_intraday(positions, transactions, threshold=0.25):
+    """
+    Attempt to detect an intraday strategy. Get the number of
+    positions held at the end of the day, and divide that by the
+    number of unique stocks transacted every day. If the average quotient
+    is below a threshold, then an intraday strategy is detected.
+
+    Parameters
+    ----------
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
+         - See full explanation in create_full_tear_sheet.
+
+    Returns
+    -------
+    returns : boolean
+        True if an intraday strategy is detected.
+    """
+
+    daily_txn = transactions.copy()
+    daily_txn.index = daily_txn.index.date
+    txn_count = daily_txn.groupby(level=0).symbol.nunique().sum()
+    daily_pos = positions.drop('cash', axis=1).replace(0, np.nan)
+    return daily_pos.count(axis=1).sum() / txn_count < threshold
+
+
+def check_intraday(estimate, returns, positions, transactions):
+    """
+    Logic for checking if a strategy is intraday and processing it.
+
+    Parameters
+    ----------
+    estimate: boolean or str, optional
+        Approximate returns for intraday strategies.
+        See description in tears.create_full_tear_sheet.
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
+         - See full explanation in create_full_tear_sheet.
+
+    Returns
+    -------
+    positions : pd.DataFrame, optional
+        Daily net position values, adjusted for intraday movement.
+    """
+
+    if estimate is 'infer':
+        if positions is not None and transactions is not None:
+            if detect_intraday(positions, transactions):
+                warnings.warn('Detected intraday strategy; inferring positi' +
+                              'ons from transactions. Set estimate_intraday' +
+                              '=False to disable.')
+                return estimate_intraday(returns, positions, transactions)
+            else:
+                return positions
+        else:
+            return positions
+
+    elif estimate:
+        if positions is not None and transactions is not None:
+            return estimate_intraday(returns, positions, transactions)
+        else:
+            raise ValueError('Positions and txns needed to estimate intraday')
+    else:
+        return positions
+
+
+def estimate_intraday(returns, positions, transactions, EOD_hour=23):
+    """
+    Intraday strategies will often not hold positions at the day end.
+    This attempts to find the point in the day that best represents
+    the activity of the strategy on that day, and effectively resamples
+    the end-of-day positions with the positions at this point of day.
+    The point of day is found by detecting when our exposure in the
+    market is at its maximum point. Note that this is an estimate.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
+         - See full explanation in create_full_tear_sheet.
+
+    Returns
+    -------
+    returns : pd.DataFrame
+        Daily net position values, resampled for intraday behavior.
+    """
+
+    # Construct DataFrame of transaction amounts
+    txn_val = transactions.copy()
+    txn_val.index.names = ['date']
+    txn_val['value'] = txn_val.amount * txn_val.price
+    txn_val = txn_val.reset_index().pivot_table(
+        index='date', values='value',
+        columns='symbol').replace(np.nan, 0)
+
+    # Cumulate transaction amounts each day
+    txn_val['date'] = txn_val.index.date
+    txn_val = txn_val.groupby('date').cumsum()
+
+    # Calculate exposure, then take peak of exposure every day
+    txn_val['exposure'] = txn_val.abs().sum(axis=1)
+    condition = (txn_val['exposure'] == txn_val.groupby(
+            pd.TimeGrouper('24H'))['exposure'].transform(max))
+    txn_val = txn_val[condition].drop('exposure', axis=1)
+
+    # Compute cash delta
+    txn_val['cash'] = -txn_val.sum(axis=1)
+
+    # Shift EOD positions to positions at start of next trading day
+    positions_shifted = positions.copy().shift(1).fillna(0)
+    starting_capital = positions.iloc[0].sum() / (1 + returns[0])
+    positions_shifted.cash[0] = starting_capital
+
+    # Format and add start positions to intraday position changes
+    txn_val.index = txn_val.index.normalize()
+    corrected_positions = positions_shifted.add(txn_val, fill_value=0)
+    corrected_positions.index.name = 'period_close'
+    corrected_positions.columns.name = 'sid'
+
+    return corrected_positions
+
+
+def to_utc(df):
+    """
+    For use in tests; applied UTC timestamp to DataFrame.
+    """
+
+    try:
+        df.index = df.index.tz_localize('UTC')
+    except TypeError:
+        df.index = df.index.tz_convert('UTC')
+
+    return df
+
+
+def to_series(df):
+    """
+    For use in tests; converts DataFrame's first column to Series.
+    """
+
+    return df[df.columns[0]]

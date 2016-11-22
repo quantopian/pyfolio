@@ -1,14 +1,20 @@
 from __future__ import division
 
+import os
 from unittest import TestCase
 from nose_parameterized import parameterized
 from numpy.testing import assert_allclose, assert_almost_equal
+from pandas.util.testing import assert_series_equal
 
 import numpy as np
 import pandas as pd
 
 from .. import timeseries
-from .. import utils
+from pyfolio.utils import (get_symbol_rets,
+                           to_utc,
+                           to_series)
+import gzip
+
 
 DECIMAL_PLACES = 8
 
@@ -166,9 +172,9 @@ class TestDrawdown(TestCase):
         # Add test to show that drawdowns don't overlap
         # Bug #145 observed for FB stock on the period 2014-10-24 - 2015-03-19
         # Reproduced on SPY data (cached) but need a large number of drawdowns
-        spy_rets = utils.get_symbol_rets('SPY',
-                                         start='1997-01-01',
-                                         end='2004-12-31')
+        spy_rets = get_symbol_rets('SPY',
+                                   start='1997-01-01',
+                                   end='2004-12-31')
         spy_drawdowns = timeseries.gen_drawdown_table(
             spy_rets,
             top=20).sort_values(by='peak date')
@@ -339,3 +345,22 @@ class TestBootstrap(TestCase):
             3,
             'SD of bootstrap does not match theoretical SD of'
             'sampling distribution')
+
+
+class TestGrossLev(TestCase):
+    __location__ = os.path.realpath(
+        os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+    test_pos = to_utc(pd.read_csv(
+        gzip.open(__location__ + '/test_data/test_pos.csv.gz'),
+        index_col=0, parse_dates=True))
+    test_gross_lev = pd.read_csv(
+        gzip.open(
+            __location__ + '/test_data/test_gross_lev.csv.gz'),
+        index_col=0, parse_dates=True)
+    test_gross_lev = to_series(to_utc(test_gross_lev))
+
+    def test_gross_lev_calculation(self):
+        assert_series_equal(
+            timeseries.gross_lev(self.test_pos)['2004-02-01':],
+            self.test_gross_lev['2004-02-01':], check_names=False)

@@ -462,8 +462,8 @@ def common_sense_ratio(returns):
 
 
 SIMPLE_STAT_FUNCS = [
-    empyrical.cum_returns_final,
     annual_return,
+    empyrical.cum_returns_final,
     annual_volatility,
     sharpe_ratio,
     calmar_ratio,
@@ -630,8 +630,28 @@ def rolling_fama_french(returns, factor_returns=None,
                         rolling_window=rolling_window)
 
 
-def perf_stats(returns, factor_returns=None, gross_lev=None):
-    """Calculates various performance metrics of a strategy, for use in
+def gross_lev(positions):
+    """
+    Calculates the gross leverage of a strategy.
+
+    Parameters
+    ----------
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+
+    Returns
+    -------
+    pd.Series
+        Gross leverage.
+    """
+    exposure = positions.drop('cash', axis=1).abs().sum(axis=1)
+    return exposure / positions.sum(axis=1)
+
+
+def perf_stats(returns, factor_returns=None, positions=None):
+    """
+    Calculates various performance metrics of a strategy, for use in
     plotting.show_perf_stats.
 
     Parameters
@@ -643,8 +663,9 @@ def perf_stats(returns, factor_returns=None, gross_lev=None):
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
         If None, do not compute alpha, beta, and information ratio.
-    gross_lev : pd.Series (optional)
-        Daily gross leverage of the strategy.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
 
     Returns
     -------
@@ -657,9 +678,8 @@ def perf_stats(returns, factor_returns=None, gross_lev=None):
     for stat_func in SIMPLE_STAT_FUNCS:
         stats[stat_func.__name__] = stat_func(returns)
 
-    if gross_lev is not None:
-        stats['mean_gross_leverage'] = gross_lev.mean()
-
+    if positions is not None:
+        stats['gross_leverage'] = gross_lev(positions).mean()
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
             stats[stat_func.__name__] = stat_func(returns,
@@ -668,7 +688,7 @@ def perf_stats(returns, factor_returns=None, gross_lev=None):
     return stats
 
 
-def perf_stats_bootstrap(returns, factor_returns=None, gross_lev=None,
+def perf_stats_bootstrap(returns, factor_returns=None, positions=None,
                          return_stats=True):
     """Calculates various bootstrapped performance metrics of a strategy.
 
@@ -681,6 +701,9 @@ def perf_stats_bootstrap(returns, factor_returns=None, gross_lev=None,
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
         If None, do not compute alpha, beta, and information ratio.
+    positions : pd.DataFrame
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
     return_stats : boolean (optional)
         If True, returns a DataFrame of mean, median, 5 and 95 percentiles
         for each perf metric.
@@ -703,9 +726,9 @@ def perf_stats_bootstrap(returns, factor_returns=None, gross_lev=None,
         bootstrap_values[stat_name] = calc_bootstrap(stat_func,
                                                      returns)
 
-    if gross_lev is not None:
-        bootstrap_values['mean_gross_leverage'] = calc_bootstrap(np.mean,
-                                                                 gross_lev)
+    if positions is not None:
+        gl = gross_lev(positions)
+        bootstrap_values['gross_leverage'] = calc_bootstrap(np.mean, gl)
 
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:

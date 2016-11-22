@@ -58,12 +58,12 @@ def create_full_tear_sheet(returns,
                            transactions=None,
                            market_data=None,
                            benchmark_rets=None,
-                           gross_lev=None,
                            slippage=None,
                            live_start_date=None,
                            sector_mappings=None,
                            bayesian=False,
                            round_trips=False,
+                           estimate_intraday='infer',
                            hide_positions=False,
                            cone_std=(1.0, 1.5, 2.0),
                            bootstrap=False,
@@ -112,15 +112,6 @@ def create_full_tear_sheet(returns,
         Panel with items axis of 'price' and 'volume' DataFrames.
         The major and minor axes should match those of the
         the passed positions DataFrame (same dates and symbols).
-    gross_lev : pd.Series, optional
-        The leverage of a strategy.
-         - Time series of the sum of long and short exposure per share
-            divided by net asset value.
-         - Example:
-            2009-12-04    0.999932
-            2009-12-07    0.999783
-            2009-12-08    0.999880
-            2009-12-09    1.000283
     slippage : int/float, optional
         Basis points of slippage to apply to returns before generating
         tearsheet stats and plots.
@@ -137,6 +128,12 @@ def create_full_tear_sheet(returns,
         If True, causes the generation of a Bayesian tear sheet.
     round_trips: boolean, optional
         If True, causes the generation of a round trip tear sheet.
+    estimate_intraday: boolean or str, optional
+        Instead of using the end-of-day positions, use the point in the day
+        where we have the most $ invested. This will adjust positions to
+        better approximate and represent how an intraday strategy behaves.
+        By default, this is 'infer', and an attempt will be made to detect
+        an intraday strategy. Specifying this value will prevent detection.
     cone_std : float, or tuple, optional
         If float, The standard deviation to use for the cone plots.
         If tuple, Tuple of standard deviation values to use for the cone plots
@@ -160,10 +157,13 @@ def create_full_tear_sheet(returns,
         unadjusted_returns = returns.copy()
         returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
 
+    positions = utils.check_intraday(estimate_intraday, returns,
+                                     positions, transactions)
+
     create_returns_tear_sheet(
         returns,
+        positions=positions,
         live_start_date=live_start_date,
-        gross_lev=gross_lev,
         cone_std=cone_std,
         benchmark_rets=benchmark_rets,
         bootstrap=bootstrap,
@@ -175,26 +175,29 @@ def create_full_tear_sheet(returns,
 
     if positions is not None:
         create_position_tear_sheet(returns, positions,
-                                   gross_lev=gross_lev,
                                    hide_positions=hide_positions,
                                    set_context=set_context,
-                                   sector_mappings=sector_mappings)
+                                   sector_mappings=sector_mappings,
+                                   estimate_intraday=False)
 
         if transactions is not None:
             create_txn_tear_sheet(returns, positions, transactions,
                                   unadjusted_returns=unadjusted_returns,
+                                  estimate_intraday=False,
                                   set_context=set_context)
             if round_trips:
                 create_round_trip_tear_sheet(
                     returns=returns,
                     positions=positions,
                     transactions=transactions,
-                    sector_mappings=sector_mappings)
+                    sector_mappings=sector_mappings,
+                    estimate_intraday=False)
 
             if market_data is not None:
                 create_capacity_tear_sheet(returns, positions, transactions,
                                            market_data, daily_vol_limit=0.2,
-                                           last_n_days=125)
+                                           last_n_days=125,
+                                           estimate_intraday=False)
 
     if bayesian:
         create_bayesian_tear_sheet(returns,
@@ -204,8 +207,8 @@ def create_full_tear_sheet(returns,
 
 
 @plotting_context
-def create_returns_tear_sheet(returns, live_start_date=None,
-                              gross_lev=None,
+def create_returns_tear_sheet(returns, positions=None,
+                              live_start_date=None,
                               cone_std=(1.0, 1.5, 2.0),
                               benchmark_rets=None,
                               bootstrap=False,
@@ -225,6 +228,9 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
+         - See full explanation in create_full_tear_sheet.
+    positions : pd.DataFrame, optional
+        Daily net position values.
          - See full explanation in create_full_tear_sheet.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
@@ -258,7 +264,7 @@ def create_returns_tear_sheet(returns, live_start_date=None,
     print('\n')
 
     plotting.show_perf_stats(returns, benchmark_rets,
-                             gross_lev=gross_lev,
+                             positions=positions,
                              bootstrap=bootstrap,
                              live_start_date=live_start_date)
 
@@ -388,9 +394,10 @@ def create_returns_tear_sheet(returns, live_start_date=None,
 
 
 @plotting_context
-def create_position_tear_sheet(returns, positions, gross_lev=None,
+def create_position_tear_sheet(returns, positions,
                                show_and_plot_top_pos=2, hide_positions=False,
-                               return_fig=False, sector_mappings=None):
+                               return_fig=False, sector_mappings=None,
+                               transactions=None, estimate_intraday='infer'):
     """
     Generate a number of plots for analyzing a
     strategy's positions and holdings.
@@ -406,9 +413,6 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
     positions : pd.DataFrame
         Daily net position values.
          - See full explanation in create_full_tear_sheet.
-    gross_lev : pd.Series, optional
-        The leverage of a strategy.
-         - See full explanation in create_full_tear_sheet.
     show_and_plot_top_pos : int, optional
         By default, this is 2, and both prints and plots the
         top 10 positions.
@@ -423,7 +427,13 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
     sector_mappings : dict or pd.Series, optional
         Security identifier to sector mapping.
         Security ids as keys, sectors as values.
+    estimate_intraday: boolean or str, optional
+        Approximate returns for intraday strategies.
+        See description in create_full_tear_sheet.
     """
+
+    positions = utils.check_intraday(estimate_intraday, returns,
+                                     positions, transactions)
 
     if hide_positions:
         show_and_plot_top_pos = 0
@@ -435,6 +445,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
     ax_top_positions = plt.subplot(gs[1, :], sharex=ax_exposures)
     ax_max_median_pos = plt.subplot(gs[2, :], sharex=ax_exposures)
     ax_holdings = plt.subplot(gs[3, :], sharex=ax_exposures)
+    ax_gross_leverage = plt.subplot(gs[4, :], sharex=ax_exposures)
 
     positions_alloc = pos.get_percent_alloc(positions)
 
@@ -452,13 +463,8 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
-    last_pos = 4
-    if gross_lev is not None:
-        ax_gross_leverage = plt.subplot(gs[last_pos, :],
-                                        sharex=ax_exposures)
-        plotting.plot_gross_leverage(returns, gross_lev,
-                                     ax=ax_gross_leverage)
-        last_pos += 1
+    plotting.plot_gross_leverage(returns, positions,
+                                 ax=ax_gross_leverage)
 
     if sector_mappings is not None:
         sector_exposures = pos.get_sector_exposures(positions,
@@ -466,8 +472,7 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
         if len(sector_exposures.columns) > 1:
             sector_alloc = pos.get_percent_alloc(sector_exposures)
             sector_alloc = sector_alloc.drop('cash', axis='columns')
-            ax_sector_alloc = plt.subplot(gs[last_pos, :],
-                                          sharex=ax_exposures)
+            ax_sector_alloc = plt.subplot(gs[5, :], sharex=ax_exposures)
             plotting.plot_sector_allocations(returns, sector_alloc,
                                              ax=ax_sector_alloc)
 
@@ -481,7 +486,8 @@ def create_position_tear_sheet(returns, positions, gross_lev=None,
 
 @plotting_context
 def create_txn_tear_sheet(returns, positions, transactions,
-                          unadjusted_returns=None, return_fig=False):
+                          unadjusted_returns=None, estimate_intraday='infer',
+                          return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's transactions.
 
@@ -503,9 +509,15 @@ def create_txn_tear_sheet(returns, positions, transactions,
         Will plot additional swippage sweep analysis.
          - See pyfolio.plotting.plot_swippage_sleep and
            pyfolio.plotting.plot_slippage_sensitivity
+    estimate_intraday: boolean or str, optional
+        Approximate returns for intraday strategies.
+        See description in create_full_tear_sheet.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
+
+    positions = utils.check_intraday(estimate_intraday, returns,
+                                     positions, transactions)
 
     vertical_sections = 6 if unadjusted_returns is not None else 4
 
@@ -556,7 +568,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
 @plotting_context
 def create_round_trip_tear_sheet(returns, positions, transactions,
                                  sector_mappings=None,
-                                 return_fig=False):
+                                 estimate_intraday='infer', return_fig=False):
     """
     Generate a number of figures and plots describing the duration,
     frequency, and profitability of trade "round trips."
@@ -578,9 +590,15 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
     sector_mappings : dict or pd.Series, optional
         Security identifier to sector mapping.
         Security ids as keys, sectors as values.
+    estimate_intraday: boolean or str, optional
+        Approximate returns for intraday strategies.
+        See description in create_full_tear_sheet.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
+
+    positions = utils.check_intraday(estimate_intraday, returns,
+                                     positions, transactions)
 
     transactions_closed = round_trips.add_closing_transactions(positions,
                                                                transactions)
@@ -722,7 +740,8 @@ def create_capacity_tear_sheet(returns, positions, transactions,
                                liquidation_daily_vol_limit=0.2,
                                trade_daily_vol_limit=0.05,
                                last_n_days=utils.APPROX_BDAYS_PER_MONTH * 6,
-                               days_to_liquidate_limit=1):
+                               days_to_liquidate_limit=1,
+                               estimate_intraday='infer'):
     """
     Generates a report detailing portfolio size constraints set by
     least liquid tickers. Plots a "capacity sweep," a curve describing
@@ -756,7 +775,13 @@ def create_capacity_tear_sheet(returns, positions, transactions,
         the last N days of the backtest
     days_to_liquidate_limit : integer
         Display all tickers with greater max days to liquidation.
+    estimate_intraday: boolean or str, optional
+        Approximate returns for intraday strategies.
+        See description in create_full_tear_sheet.
     """
+
+    positions = utils.check_intraday(estimate_intraday, returns,
+                                     positions, transactions)
 
     print("Max days to liquidation is computed for each traded name "
           "assuming a 20% limit on daily bar consumption \n"
