@@ -486,7 +486,7 @@ def create_position_tear_sheet(returns, positions,
 
 @plotting_context
 def create_txn_tear_sheet(returns, positions, transactions,
-                          unadjusted_returns=None, estimate_intraday='str',
+                          unadjusted_returns=None, estimate_intraday='infer',
                           return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's transactions.
@@ -567,7 +567,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
 
 @plotting_context
 def create_round_trip_tear_sheet(returns, positions, transactions,
-                                 sector_mappings=None, estimate_intraday='str',
+                                 sector_mappings=None, estimate_intraday='infer',
                                  return_fig=False):
     """
     Generate a number of figures and plots describing the duration,
