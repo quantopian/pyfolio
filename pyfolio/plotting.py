@@ -354,27 +354,30 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
         ax = plt.gca()
 
     positions = positions.copy().drop('cash', axis='columns')
-    df_holdings = positions.fillna(0).count(axis=1)
-    df_holdings_by_month = df_holdings.resample('1M').mean()
-    df_holdings.plot(color='steelblue', alpha=0.6, lw=0.5, ax=ax, **kwargs)
-    df_holdings_by_month.plot(
-        color='orangered',
-        alpha=0.5,
-        lw=2,
-        ax=ax,
-        **kwargs)
+    positions = positions.replace(0, np.nan)
+    df_longs = positions[positions > 0].count(axis=1)
+    df_shorts = positions[positions < 0].count(axis=1) * -1
+    df_longs.plot(color='darkgreen', alpha=0.6, lw=1.0, ax=ax, **kwargs)
+    df_shorts.plot(color='darkred', alpha=0.6, lw=1.0, ax=ax, **kwargs)
     ax.axhline(
-        df_holdings.values.mean(),
+        df_longs.mean(),
         color='steelblue',
         ls='--',
-        lw=3,
+        lw=2.0,
+        alpha=1.0)
+    ax.axhline(
+        df_shorts.mean(),
+        color='brown',
+        ls='--',
+        lw=2.0,
         alpha=1.0)
 
     ax.set_xlim((returns.index[0], returns.index[-1]))
 
-    ax.legend(['Daily holdings',
-               'Average daily holdings, by month',
-               'Average daily holdings, net'],
+    ax.legend(['Daily long positions',
+               'Average daily long positions',
+               'Daily short positions',
+               'Average daily short positions'],
               loc=legend_loc)
     ax.set_title('Holdings per day')
     ax.set_ylabel('Amount of holdings per day')
@@ -804,7 +807,6 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     rb_2 = timeseries.rolling_beta(
         returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 12)
     rb_2.plot(color='grey', lw=3, alpha=0.4, ax=ax, **kwargs)
-    ax.set_ylim((-2.5, 2.5))
     ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)
     ax.axhline(0.0, color='black', linestyle='-', lw=2)
 
