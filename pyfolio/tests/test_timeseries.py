@@ -4,6 +4,7 @@ import os
 from unittest import TestCase
 from nose_parameterized import parameterized
 from numpy.testing import assert_allclose, assert_almost_equal
+from pandas.util.testing import assert_series_equal
 
 import numpy as np
 import pandas as pd
@@ -360,6 +361,6 @@ class TestGrossLev(TestCase):
     test_gross_lev = to_series(to_utc(test_gross_lev))
 
     def test_gross_lev_calculation(self):
-        self.assertAlmostEqual(
-            timeseries.gross_lev(self.test_pos)['2004-02-01':].mean(),
-            self.test_gross_lev['2004-02-01':].mean())
+        assert_series_equal(
+            timeseries.gross_lev(self.test_pos)['2004-02-01':],
+            self.test_gross_lev['2004-02-01':], check_names=False)
