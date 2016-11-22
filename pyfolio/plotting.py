@@ -375,8 +375,8 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     ax.set_xlim((returns.index[0], returns.index[-1]))
 
     ax.legend(['Daily long positions',
-               'Average daily long positions',
                'Daily short positions',
+               'Average daily long positions',
                'Average daily short positions'],
               loc=legend_loc)
     ax.set_title('Holdings per day')
