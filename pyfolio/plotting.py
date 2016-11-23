@@ -936,18 +936,18 @@ def plot_exposures(returns, positions, ax=None, **kwargs):
 
     pos_no_cash = positions.copy().drop('cash', axis=1)
     l_exp = pos_no_cash[pos_no_cash > 0].sum(axis=1) / positions.sum(axis=1)
-    s_exp = -pos_no_cash[pos_no_cash < 0].sum(axis=1) / positions.sum(axis=1)
-    net_exp = pos_no_cash.abs().sum(axis=1) / positions.sum(axis=1)
+    s_exp = pos_no_cash[pos_no_cash < 0].sum(axis=1) / positions.sum(axis=1)
+    net_exp = pos_no_cash.sum(axis=1) / positions.sum(axis=1)
 
     ax.fill_between(l_exp.index,
                     0,
                     l_exp.values,
                     label='Long', color='green')
-    ax.fill_between(l_exp.index,
-                    l_exp.values,
-                    net_exp.values,
+    ax.fill_between(s_exp.index,
+                    0,
+                    s_exp.values,
                     label='Short', color='red')
-    ax.plot(l_exp.index, net_exp.values,
+    ax.plot(net_exp.index, net_exp.values,
             label='Net', color='black', linestyle='dotted')
 
     ax.set_xlim((returns.index[0], returns.index[-1]))
