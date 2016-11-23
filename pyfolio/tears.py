@@ -449,7 +449,7 @@ def create_position_tear_sheet(returns, positions,
 
     positions_alloc = pos.get_percent_alloc(positions)
 
-    plotting.plot_exposures(returns, positions_alloc, ax=ax_exposures)
+    plotting.plot_exposures(returns, positions, ax=ax_exposures)
 
     plotting.show_and_plot_top_positions(
         returns,

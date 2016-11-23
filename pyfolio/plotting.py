@@ -353,7 +353,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    positions = positions.copy().drop('cash', axis='columns')
+    positions = positions.drop('cash', axis='columns')
     positions = positions.replace(0, np.nan)
     df_longs = positions[positions > 0].count(axis=1)
     df_shorts = positions[positions < 0].count(axis=1) * -1
@@ -908,7 +908,7 @@ def plot_gross_leverage(returns, positions, ax=None, **kwargs):
     return ax
 
 
-def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
+def plot_exposures(returns, positions, ax=None, **kwargs):
     """
     Plots a cake chart of the long and short exposure.
 
@@ -934,13 +934,26 @@ def plot_exposures(returns, positions_alloc, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    df_long_short = pos.get_long_short_pos(positions_alloc)
-    df_long_short.plot(
-        kind='line', style=['-g', '-r', '--k'], alpha=1.0,
-        ax=ax, **kwargs)
+    pos_no_cash = positions.drop('cash', axis=1)
+    l_exp = pos_no_cash[pos_no_cash > 0].sum(axis=1) / positions.sum(axis=1)
+    s_exp = pos_no_cash[pos_no_cash < 0].sum(axis=1) / positions.sum(axis=1)
+    net_exp = pos_no_cash.sum(axis=1) / positions.sum(axis=1)
+
+    ax.fill_between(l_exp.index,
+                    0,
+                    l_exp.values,
+                    label='Long', color='green')
+    ax.fill_between(s_exp.index,
+                    0,
+                    s_exp.values,
+                    label='Short', color='red')
+    ax.plot(net_exp.index, net_exp.values,
+            label='Net', color='black', linestyle='dotted')
+
     ax.set_xlim((returns.index[0], returns.index[-1]))
-    ax.set_title("Long and short exposure")
+    ax.set_title("Exposure")
     ax.set_ylabel('Exposure')
+    ax.legend(loc='lower left', frameon=True)
     ax.set_xlabel('')
     return ax
 
@@ -1648,7 +1661,7 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
         ax = plt.subplot()
 
     sample = round_trips.symbol.sample(n=disp_amount, random_state=1)
-    sample_round_trips = round_trips.copy()[round_trips.symbol.isin(sample)]
+    sample_round_trips = round_trips[round_trips.symbol.isin(sample)]
 
     symbol_idx = pd.Series(np.arange(len(sample)), index=sample)
 
