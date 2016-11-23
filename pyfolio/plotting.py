@@ -353,7 +353,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    positions = positions.copy().drop('cash', axis='columns')
+    positions = positions.drop('cash', axis='columns')
     positions = positions.replace(0, np.nan)
     df_longs = positions[positions > 0].count(axis=1)
     df_shorts = positions[positions < 0].count(axis=1) * -1
@@ -934,7 +934,7 @@ def plot_exposures(returns, positions, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    pos_no_cash = positions.copy().drop('cash', axis=1)
+    pos_no_cash = positions.drop('cash', axis=1)
     l_exp = pos_no_cash[pos_no_cash > 0].sum(axis=1) / positions.sum(axis=1)
     s_exp = pos_no_cash[pos_no_cash < 0].sum(axis=1) / positions.sum(axis=1)
     net_exp = pos_no_cash.sum(axis=1) / positions.sum(axis=1)
@@ -1661,7 +1661,7 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
         ax = plt.subplot()
 
     sample = round_trips.symbol.sample(n=disp_amount, random_state=1)
-    sample_round_trips = round_trips.copy()[round_trips.symbol.isin(sample)]
+    sample_round_trips = round_trips[round_trips.symbol.isin(sample)]
 
     symbol_idx = pd.Series(np.arange(len(sample)), index=sample)
 
