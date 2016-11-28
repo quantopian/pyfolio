@@ -166,7 +166,6 @@ def plot_rolling_fama_french(
                'High-Growth (HML)',
                'Momentum (UMD)'],
               loc=legend_loc)
-    ax.set_ylim((-2.0, 2.0))
 
     y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
@@ -861,7 +860,6 @@ def plot_rolling_sharpe(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
         lw=3)
     ax.axhline(0.0, color='black', linestyle='-', lw=3)
 
-    ax.set_ylim((-3.0, 6.0))
     ax.set_ylabel('Sharpe ratio')
     ax.set_xlabel('')
     ax.legend(['Sharpe', 'Average'],
