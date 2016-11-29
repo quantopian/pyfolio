@@ -171,7 +171,7 @@ def plot_rolling_fama_french(
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
     ax.axhline(0.0, color='black')
     ax.set_xlabel('')
-
+    ax.set_ylim((-1.0, 1.0))
     return ax
 
 
@@ -813,6 +813,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     ax.legend(['6-mo',
                '12-mo'],
               loc=legend_loc)
+    ax.set_ylim((-1.0, 1.0))
     return ax
 
 
