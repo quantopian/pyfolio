@@ -1659,7 +1659,7 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
     if ax is None:
         ax = plt.subplot()
 
-    sample = round_trips.symbol.sample(n=disp_amount, random_state=1)
+    sample = round_trips.symbol.unique().sample(n=disp_amount, random_state=1)
     sample_round_trips = round_trips[round_trips.symbol.isin(sample)]
 
     symbol_idx = pd.Series(np.arange(len(sample)), index=sample)
