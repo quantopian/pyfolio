@@ -377,7 +377,8 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     return ax
 
 
-def plot_long_short_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
+def plot_long_short_holdings(returns, positions,
+                             legend_loc='best', ax=None, **kwargs):
     """
     Plots total amount of stocks with an active position, breaking out
     short and long. Short positions will be shown below zero, while
@@ -1715,7 +1716,10 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
     if ax is None:
         ax = plt.subplot()
 
-    sample = round_trips.symbol.unique().sample(n=disp_amount, random_state=1)
+    symbols_sample = round_trips.symbol.unique()
+    np.random.seed(1)
+    sample = np.random.choice(round_trips.symbol.unique(), replace=False,
+                              size=min(disp_amount, len(symbols_sample)))
     sample_round_trips = round_trips[round_trips.symbol.isin(sample)]
 
     symbol_idx = pd.Series(np.arange(len(sample)), index=sample)
