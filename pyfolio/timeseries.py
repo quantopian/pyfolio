@@ -36,7 +36,8 @@ DEPRECATION_WARNING = ("Risk functions in pyfolio.timeseries are deprecated "
 
 
 def var_cov_var_normal(P, c, mu=0, sigma=1):
-    """Variance-covariance calculation of daily Value-at-Risk in a
+    """
+    Variance-covariance calculation of daily Value-at-Risk in a
     portfolio.
 
     Parameters
@@ -52,7 +53,6 @@ def var_cov_var_normal(P, c, mu=0, sigma=1):
     -------
     float
         Variance-covariance.
-
     """
 
     alpha = sp.stats.norm.ppf(1 - c, mu, sigma)
@@ -85,7 +85,8 @@ def max_drawdown(returns):
 
 @deprecated(msg=DEPRECATION_WARNING)
 def annual_return(returns, period=DAILY):
-    """Determines the mean annual growth rate of returns.
+    """
+    Determines the mean annual growth rate of returns.
 
     Parameters
     ----------
@@ -101,7 +102,6 @@ def annual_return(returns, period=DAILY):
     -------
     float
         Annual Return as CAGR (Compounded Annual Growth Rate).
-
     """
 
     return empyrical.annual_return(returns, period=period)
@@ -162,7 +162,8 @@ def calmar_ratio(returns, period=DAILY):
 
 @deprecated(msg=DEPRECATION_WARNING)
 def omega_ratio(returns, annual_return_threshhold=0.0):
-    """Determines the Omega ratio of a strategy.
+    """
+    Determines the Omega ratio of a strategy.
 
     Parameters
     ----------
@@ -191,7 +192,6 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
     Note
     -----
     See https://en.wikipedia.org/wiki/Omega_ratio for more details.
-
     """
 
     return empyrical.omega_ratio(returns,
@@ -222,7 +222,6 @@ def sortino_ratio(returns, required_return=0, period=DAILY):
     DataFrame ==> np.array
 
         Annualized Sortino ratio.
-
     """
 
     return empyrical.sortino_ratio(returns, required_return=required_return)
@@ -252,7 +251,6 @@ def downside_risk(returns, required_return=0, period=DAILY):
     DataFrame ==> np.array
 
         Annualized downside deviation
-
     """
 
     return empyrical.downside_risk(returns,
@@ -287,7 +285,6 @@ def sharpe_ratio(returns, risk_free=0, period=DAILY):
     Note
     -----
     See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
-
     """
 
     return empyrical.sharpe_ratio(returns, risk_free=risk_free, period=period)
@@ -314,7 +311,6 @@ def information_ratio(returns, factor_returns):
     Note
     -----
     See https://en.wikipedia.org/wiki/information_ratio for more details.
-
     """
 
     return empyrical.information_ratio(returns, factor_returns)
@@ -322,7 +318,8 @@ def information_ratio(returns, factor_returns):
 
 @deprecated(msg=DEPRECATION_WARNING)
 def alpha_beta(returns, factor_returns):
-    """Calculates both alpha and beta.
+    """
+    Calculates both alpha and beta.
 
     Parameters
     ----------
@@ -340,7 +337,6 @@ def alpha_beta(returns, factor_returns):
         Alpha.
     float
         Beta.
-
     """
 
     return empyrical.alpha_beta(returns, factor_returns=factor_returns)
@@ -348,7 +344,8 @@ def alpha_beta(returns, factor_returns):
 
 @deprecated(msg=DEPRECATION_WARNING)
 def alpha(returns, factor_returns):
-    """Calculates annualized alpha.
+    """
+    Calculates annualized alpha.
 
     Parameters
     ----------
@@ -371,7 +368,8 @@ def alpha(returns, factor_returns):
 
 @deprecated(msg=DEPRECATION_WARNING)
 def beta(returns, factor_returns):
-    """Calculates beta.
+    """
+    Calculates beta.
 
     Parameters
     ----------
@@ -394,7 +392,8 @@ def beta(returns, factor_returns):
 
 @deprecated(msg=DEPRECATION_WARNING)
 def stability_of_timeseries(returns):
-    """Determines R-squared of a linear fit to the cumulative
+    """
+    Determines R-squared of a linear fit to the cumulative
     log returns. Computes an ordinary least squares linear fit,
     and returns R-squared.
 
@@ -408,7 +407,6 @@ def stability_of_timeseries(returns):
     -------
     float
         R-squared.
-
     """
 
     return empyrical.stability_of_timeseries(returns)
@@ -416,7 +414,8 @@ def stability_of_timeseries(returns):
 
 @deprecated(msg=DEPRECATION_WARNING)
 def tail_ratio(returns):
-    """Determines the ratio between the right (95%) and left tail (5%).
+    """
+    Determines the ratio between the right (95%) and left tail (5%).
 
     For example, a ratio of 0.25 means that losses are four times
     as bad as profits.
@@ -431,14 +430,14 @@ def tail_ratio(returns):
     -------
     float
         tail ratio
-
     """
 
     return empyrical.tail_ratio(returns)
 
 
 def common_sense_ratio(returns):
-    """Common sense ratio is the multiplication of the tail ratio and the
+    """
+    Common sense ratio is the multiplication of the tail ratio and the
     Gain-to-Pain-Ratio -- sum(profits) / sum(losses).
 
     See http://bit.ly/1ORzGBk for more information on motivation of
@@ -455,8 +454,8 @@ def common_sense_ratio(returns):
     -------
     float
         common sense ratio
-
     """
+
     return empyrical.tail_ratio(returns) * \
         (1 + empyrical.annual_return(returns))
 
@@ -556,7 +555,8 @@ def aggregate_returns(returns, convert_to):
 
 def rolling_beta(returns, factor_returns,
                  rolling_window=APPROX_BDAYS_PER_MONTH * 6):
-    """Determines the rolling beta of a strategy.
+    """
+    Determines the rolling beta of a strategy.
 
     Parameters
     ----------
@@ -579,8 +579,8 @@ def rolling_beta(returns, factor_returns,
     Note
     -----
     See https://en.wikipedia.org/wiki/Beta_(finance) for more details.
-
     """
+
     if factor_returns.ndim > 1:
         # Apply column-wise
         return factor_returns.apply(partial(rolling_beta, returns),
@@ -598,7 +598,8 @@ def rolling_beta(returns, factor_returns,
 
 def rolling_fama_french(returns, factor_returns=None,
                         rolling_window=APPROX_BDAYS_PER_MONTH * 6):
-    """Computes rolling Fama-French single factor betas.
+    """
+    Computes rolling Fama-French single factor betas.
 
     Specifically, returns SMB, HML, and UMD.
 
@@ -620,6 +621,7 @@ def rolling_fama_french(returns, factor_returns=None,
         DataFrame containing rolling beta coefficients for SMB, HML
         and UMD
     """
+
     if factor_returns is None:
         factor_returns = utils.load_portfolio_risk_factors(
             start=returns.index[0], end=returns.index[-1])
@@ -645,6 +647,7 @@ def gross_lev(positions):
     pd.Series
         Gross leverage.
     """
+
     exposure = positions.drop('cash', axis=1).abs().sum(axis=1)
     return exposure / positions.sum(axis=1)
 
@@ -671,7 +674,6 @@ def perf_stats(returns, factor_returns=None, positions=None):
     -------
     pd.Series
         Performance metrics.
-
     """
 
     stats = pd.Series()
@@ -719,6 +721,7 @@ def perf_stats_bootstrap(returns, factor_returns=None, positions=None,
         if return_stats is False:
         - Bootstrap samples for each performance metric.
     """
+
     bootstrap_values = OrderedDict()
 
     for stat_func in SIMPLE_STAT_FUNCS:
@@ -806,8 +809,8 @@ def calc_distribution_stats(x):
     pandas.Series
         Series containing mean, median, std, as well as 5, 25, 75 and
         95 percentiles of passed in values.
-
     """
+
     return pd.Series({'mean': np.mean(x),
                       'median': np.median(x),
                       'std': np.std(x),
@@ -821,7 +824,8 @@ def calc_distribution_stats(x):
 
 
 def get_max_drawdown_underwater(underwater):
-    """Determines peak, valley, and recovery dates given an 'underwater'
+    """
+    Determines peak, valley, and recovery dates given an 'underwater'
     DataFrame.
 
     An underwater DataFrame is a DataFrame that has precomputed
@@ -840,7 +844,6 @@ def get_max_drawdown_underwater(underwater):
         The maximum drawdown's valley.
     recovery : datetime
         The maximum drawdown's recovery.
-
     """
 
     valley = np.argmin(underwater)  # end of the period
@@ -1027,10 +1030,9 @@ def simulate_paths(is_returns, num_days,
 
     Returns
     -------
-
     samples : numpy.ndarray
-
     """
+
     samples = np.empty((num_samples, num_days))
     seed = np.random.RandomState(seed=random_seed)
     for i in range(num_samples):
@@ -1040,7 +1042,7 @@ def simulate_paths(is_returns, num_days,
     return samples
 
 
-def summarize_paths(samples, cone_std=(1., 1.5, 2.)):
+def summarize_paths(samples, cone_std=(1., 1.5, 2.), starting_value=1.):
     """
     Gnerate the upper and lower bounds of an n standard deviation
     cone of forecasted cumulative returns.
@@ -1056,11 +1058,12 @@ def summarize_paths(samples, cone_std=(1., 1.5, 2.)):
 
     Returns
     -------
-
     samples : pandas.core.frame.DataFrame
-
     """
-    cum_samples = np.cumprod(1 + samples, axis=1) * 1.
+
+    cum_samples = empyrical.cum_returns(samples.T,
+                                        starting_value=starting_value).T
+
     cum_mean = cum_samples.mean(axis=0)
     cum_std = cum_samples.std(axis=0)
 
@@ -1126,14 +1129,16 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
 
     cone_bounds = summarize_paths(
         samples=samples,
-        cone_std=cone_std
+        cone_std=cone_std,
+        starting_value=starting_value
     )
 
     return cone_bounds
 
 
 def extract_interesting_date_ranges(returns):
-    """Extracts returns based on interesting events. See
+    """
+    Extracts returns based on interesting events. See
     gen_date_range_interesting.
 
     Parameters
@@ -1146,8 +1151,8 @@ def extract_interesting_date_ranges(returns):
     -------
     ranges : OrderedDict
         Date ranges, with returns, of all valid events.
-
     """
+
     returns_dupe = returns.copy()
     returns_dupe.index = returns_dupe.index.map(pd.Timestamp)
     ranges = OrderedDict()
