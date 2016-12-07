@@ -12,19 +12,12 @@ financial portfolios developed by
 
 At the core of pyfolio is a so-called tear sheet that consists of
 various individual plots that provide a comprehensive image of the
-performance of a trading algorithm. Here's an example tear sheet, which comes from the Zipline algorithm sample notebook:
+performance of a trading algorithm. Here's an example tear sheet analyzing returns, which comes from the Zipline algorithm sample notebook:
 
 ![example tear 0](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_0.png "Example tear sheet created from a Zipline algo")
 ![example tear 1](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_1.png "Example tear sheet created from a Zipline algo")
-![example tear 2](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_2.png)
-![example tear 3](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_3.png)
-![example tear 4](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_4.png)
-![example tear 6](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_6.png)
-![example tear 7](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_7.png)
-![example tear 5](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_5.png)
 
-
-See also [slides of a recent talk about pyfolio.](http://nbviewer.ipython.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/overview_slides.ipynb#/)
+See also [slides of a talk about pyfolio.](http://nbviewer.ipython.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/overview_slides.ipynb#/)
 
 ## Installation
 
