@@ -322,10 +322,68 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
 def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     """
     Plots total amount of stocks with an active position, either short
-    or long.
+    or long. Displays daily total, daily average per month, and
+    all-time daily average.
 
-    Displays daily total, daily average per month, and all-time daily
-    average.
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    positions : pd.DataFrame, optional
+        Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to plotting function.
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
+    if ax is None:
+        ax = plt.gca()
+
+    positions = positions.copy().drop('cash', axis='columns')
+    df_holdings = positions.apply(lambda x: np.sum(x != 0), axis='columns')
+    df_holdings_by_month = df_holdings.resample('1M').mean()
+    df_holdings.plot(color='steelblue', alpha=0.6, lw=0.5, ax=ax, **kwargs)
+    df_holdings_by_month.plot(
+        color='orangered',
+        alpha=0.5,
+        lw=2,
+        ax=ax,
+        **kwargs)
+    ax.axhline(
+        df_holdings.values.mean(),
+        color='steelblue',
+        ls='--',
+        lw=3,
+        alpha=1.0)
+
+    ax.set_xlim((returns.index[0], returns.index[-1]))
+
+    ax.legend(['Daily holdings',
+               'Average daily holdings, by month',
+               'Average daily holdings, net'],
+              loc=legend_loc)
+    ax.set_title('Total holdings per pay')
+    ax.set_ylabel('Holdings')
+    ax.set_xlabel('')
+    return ax
+
+
+def plot_long_short_holdings(returns, positions,
+                             legend_loc='best', ax=None, **kwargs):
+    """
+    Plots total amount of stocks with an active position, breaking out
+    short and long. Short positions will be shown below zero, while
+    long positions will be shown above zero. Displays daily total and
+    all-time daily average.
 
     Parameters
     ----------
@@ -378,8 +436,8 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
                'Average daily long positions',
                'Average daily short positions'],
               loc=legend_loc)
-    ax.set_title('Holdings per day')
-    ax.set_ylabel('Amount of holdings per day')
+    ax.set_title('Long and short holdings per day')
+    ax.set_ylabel('Holdings')
     ax.set_xlabel('')
     return ax
 
@@ -753,10 +811,9 @@ def plot_rolling_returns(returns,
 
             cone_bounds = cone_bounds.set_index(oos_cum_returns.index)
             for std in cone_std:
-                cone_delta = oos_cum_returns[0] - 1
                 ax.fill_between(cone_bounds.index,
-                                cone_bounds[float(std)] + cone_delta,
-                                cone_bounds[float(-std)] + cone_delta,
+                                cone_bounds[float(std)],
+                                cone_bounds[float(-std)],
                                 color='steelblue', alpha=0.5)
 
     if legend_loc is not None:
@@ -1659,7 +1716,10 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
     if ax is None:
         ax = plt.subplot()
 
-    sample = round_trips.symbol.unique().sample(n=disp_amount, random_state=1)
+    symbols_sample = round_trips.symbol.unique()
+    np.random.seed(1)
+    sample = np.random.choice(round_trips.symbol.unique(), replace=False,
+                              size=min(disp_amount, len(symbols_sample)))
     sample_round_trips = round_trips[round_trips.symbol.isin(sample)]
 
     symbol_idx = pd.Series(np.arange(len(sample)), index=sample)

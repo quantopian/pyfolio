@@ -437,7 +437,7 @@ def create_position_tear_sheet(returns, positions,
 
     if hide_positions:
         show_and_plot_top_pos = 0
-    vertical_sections = 6 if sector_mappings is not None else 5
+    vertical_sections = 7 if sector_mappings is not None else 6
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
@@ -445,7 +445,8 @@ def create_position_tear_sheet(returns, positions,
     ax_top_positions = plt.subplot(gs[1, :], sharex=ax_exposures)
     ax_max_median_pos = plt.subplot(gs[2, :], sharex=ax_exposures)
     ax_holdings = plt.subplot(gs[3, :], sharex=ax_exposures)
-    ax_gross_leverage = plt.subplot(gs[4, :], sharex=ax_exposures)
+    ax_long_short_holdings = plt.subplot(gs[4, :], sharex=ax_exposures)
+    ax_gross_leverage = plt.subplot(gs[5, :], sharex=ax_exposures)
 
     positions_alloc = pos.get_percent_alloc(positions)
 
@@ -463,6 +464,9 @@ def create_position_tear_sheet(returns, positions,
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
+    plotting.plot_long_short_holdings(returns, positions_alloc,
+                                      ax=ax_long_short_holdings)
+
     plotting.plot_gross_leverage(returns, positions,
                                  ax=ax_gross_leverage)
 
@@ -472,7 +476,7 @@ def create_position_tear_sheet(returns, positions,
         if len(sector_exposures.columns) > 1:
             sector_alloc = pos.get_percent_alloc(sector_exposures)
             sector_alloc = sector_alloc.drop('cash', axis='columns')
-            ax_sector_alloc = plt.subplot(gs[5, :], sharex=ax_exposures)
+            ax_sector_alloc = plt.subplot(gs[6, :], sharex=ax_exposures)
             plotting.plot_sector_allocations(returns, sector_alloc,
                                              ax=ax_sector_alloc)
 
