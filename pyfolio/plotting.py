@@ -1048,6 +1048,8 @@ def show_and_plot_top_positions(returns, positions_alloc,
         The axes that were plotted on.
 
     """
+    positions_alloc = positions_alloc.copy()
+    positions_alloc.columns = positions_alloc.columns.map(utils.format_asset)
 
     df_top_long, df_top_short, df_top_abs = pos.get_top_long_short_abs(
         positions_alloc)
@@ -1733,7 +1735,7 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
                     linewidth=lsize, solid_capstyle='butt')
 
     ax.set_yticks(range(disp_amount))
-    ax.set_yticklabels(sample)
+    ax.set_yticklabels([utils.format_asset(s) for s in sample])
 
     ax.set_ylim((-0.5, min(len(sample), disp_amount) - 0.5))
     blue = patches.Rectangle([0, 0], 1, 1, color='b', label='Long')
@@ -1765,10 +1767,10 @@ def show_profit_attribution(round_trips):
     """
 
     total_pnl = round_trips['pnl'].sum()
-    pct_profit_attribution = round_trips.groupby(
-        'symbol')['pnl'].sum() / total_pnl
+    pnl_attribution = round_trips.groupby('symbol')['pnl'].sum() / total_pnl
 
-    utils.print_table(pct_profit_attribution.sort_values(
+    pnl_attribution.index = pnl_attribution.index.map(utils.format_asset)
+    utils.print_table(pnl_attribution.sort_values(
         inplace=False,
         ascending=False),
         name='Profitability (PnL / PnL total) per name',
