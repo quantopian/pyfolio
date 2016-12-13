@@ -135,10 +135,9 @@ def _1_bday_ago():
 
 def format_asset(asset):
     """
-    If zipline asset objects are used, we want to print it out prettily
-    within the tear sheet. We wrap the whole call in a try, except
-    so we are also compatible with older versions of zipline. This function
-    should only be applied directly before displaying.
+    If zipline asset objects are used, we want to print them out prettily
+    within the tear sheet. This function should only be applied directly
+    before displaying.
     """
 
     try:
