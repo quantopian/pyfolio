@@ -142,12 +142,13 @@ def format_asset(asset):
     """
 
     try:
-        import zipline.assets._assets as zipline_assets
-        if isinstance(asset, (zipline_assets.Equity, zipline_assets.Future)):
-            return asset.symbol
-        else:
-            return asset
+        import zipline.assets
     except:
+        return asset
+
+    if isinstance(asset, zipline.assets.Asset):
+        return asset.symbol
+    else:
         return asset
 
 
