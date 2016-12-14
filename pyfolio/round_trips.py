@@ -20,7 +20,7 @@ from collections import deque, OrderedDict
 import pandas as pd
 import numpy as np
 
-from .utils import print_table
+from .utils import print_table, format_asset
 
 PNL_STATS = OrderedDict(
     [('Total profit', lambda x: x.sum()),
@@ -404,5 +404,6 @@ def print_round_trip_stats(round_trips, hide_pos=False):
                 name='Return stats')
 
     if not hide_pos:
+        stats['symbols'].columns = stats['symbols'].columns.map(format_asset)
         print_table(stats['symbols'] * 100,
                     fmt='{:.2f}%', name='Symbol stats')

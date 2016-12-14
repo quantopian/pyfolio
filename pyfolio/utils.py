@@ -133,6 +133,24 @@ def _1_bday_ago():
     return pd.Timestamp.now().normalize() - _1_bday
 
 
+def format_asset(asset):
+    """
+    If zipline asset objects are used, we want to print them out prettily
+    within the tear sheet. This function should only be applied directly
+    before displaying.
+    """
+
+    try:
+        import zipline.assets
+    except:
+        return asset
+
+    if isinstance(asset, zipline.assets.Asset):
+        return asset.symbol
+    else:
+        return asset
+
+
 def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
     """
     Get returns from a cached file if the cache is recent enough,
