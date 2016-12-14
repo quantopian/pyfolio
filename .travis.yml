@@ -28,6 +28,7 @@ install:
   - source activate testenv
   - pip install nose_parameterized
   #- pip install --no-deps git+https://github.com/quantopian/zipline
+  - pip install -e .
   - pip install git+git://github.com/pymc-devs/pymc3.git
 
 before_script:
