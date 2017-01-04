@@ -82,7 +82,8 @@ def days_to_liquidate_positions(positions, market_data,
     """
 
     DV = market_data['volume'] * market_data['price']
-    roll_mean_dv = pd.rolling_mean(DV, mean_volume_window).shift()
+    roll_mean_dv = DV.rolling(window=mean_volume_window,
+                              center=False).mean().shift()
     roll_mean_dv = roll_mean_dv.replace(0, np.nan)
 
     positions_alloc = pos.get_percent_alloc(positions)
@@ -148,7 +149,7 @@ def get_max_days_to_liquidate_by_ticker(positions, market_data,
     liq_desc.index.levels[0].name = 'symbol'
     liq_desc.index.levels[1].name = 'date'
 
-    worst_liq = liq_desc.reset_index().sort(
+    worst_liq = liq_desc.reset_index().sort_values(
         'days_to_liquidate', ascending=False).groupby('symbol').first()
 
     return worst_liq
@@ -184,7 +185,7 @@ def get_low_liquidity_transactions(transactions, market_data,
     bar_consumption = txn_daily_w_bar.assign(
         max_pct_bar_consumed=(
             txn_daily_w_bar.amount/txn_daily_w_bar.volume)*100
-    ).sort('max_pct_bar_consumed', ascending=False)
+    ).sort_values('max_pct_bar_consumed', ascending=False)
     max_bar_consumption = bar_consumption.groupby('symbol').first()
 
     return max_bar_consumption[['date', 'max_pct_bar_consumed']]

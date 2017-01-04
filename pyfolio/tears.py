@@ -798,6 +798,8 @@ def create_capacity_tear_sheet(returns, positions, transactions,
         max_bar_consumption=liquidation_daily_vol_limit,
         capital_base=1e6,
         mean_volume_window=5)
+    max_days_by_ticker.index = (
+        max_days_by_ticker.index.map(utils.format_asset))
 
     print("Whole backtest:")
     utils.print_table(
@@ -810,12 +812,16 @@ def create_capacity_tear_sheet(returns, positions, transactions,
         capital_base=1e6,
         mean_volume_window=5,
         last_n_days=last_n_days)
+    max_days_by_ticker_lnd.index = (
+        max_days_by_ticker_lnd.index.map(utils.format_asset))
 
     print("Last {} trading days:".format(last_n_days))
     utils.print_table(
         max_days_by_ticker_lnd[max_days_by_ticker_lnd.days_to_liquidate > 1])
 
     llt = capacity.get_low_liquidity_transactions(transactions, market_data)
+    llt.index = llt.index.map(utils.format_asset)
+
     print('Tickers with daily transactions consuming >{}% of daily bar \n'
           'all backtest:'.format(trade_daily_vol_limit * 100))
     utils.print_table(
