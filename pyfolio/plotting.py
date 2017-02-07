@@ -1768,13 +1768,14 @@ def show_profit_attribution(round_trips):
 
     total_pnl = round_trips['pnl'].sum()
     pnl_attribution = round_trips.groupby('symbol')['pnl'].sum() / total_pnl
+    pnl_attribution.name = ''
 
     pnl_attribution.index = pnl_attribution.index.map(utils.format_asset)
     utils.print_table(pnl_attribution.sort_values(
         inplace=False,
         ascending=False),
         name='Profitability (PnL / PnL total) per name',
-        fmt='{0:.2f}%')
+        fmt='{:.2%}')
 
 
 def plot_prob_profit_trade(round_trips, ax=None):

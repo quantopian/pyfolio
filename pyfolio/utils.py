@@ -575,7 +575,7 @@ def detect_intraday(positions, transactions, threshold=0.25):
 
     Returns
     -------
-    returns : boolean
+    boolean
         True if an intraday strategy is detected.
     """
 
@@ -607,7 +607,7 @@ def check_intraday(estimate, returns, positions, transactions):
 
     Returns
     -------
-    positions : pd.DataFrame, optional
+    pd.DataFrame
         Daily net position values, adjusted for intraday movement.
     """
 
@@ -655,7 +655,7 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
 
     Returns
     -------
-    returns : pd.DataFrame
+    pd.DataFrame
         Daily net position values, resampled for intraday behavior.
     """
 
