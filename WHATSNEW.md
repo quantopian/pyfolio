@@ -2,7 +2,27 @@
 
 These are new features and improvements of note in each release.
 
-## v0.6.0 (Oct, 17, 2016)
+## v0.7.0 (Jan 28th, 2017)
+
+This is a major release from `0.6.0`, and all users are recommended to upgrade.
+
+### New features
+
+ - Adds a transaction timing plot, which gives insight into the strategies' trade times.
+ - Adds a plot showing the number of longs and shorts held over time.
+ - New round trips plot selects a sample of held positions (16 by default) and shows their round trips. This replaces the old round trip plot, which became unreadable for strategies that traded many positions.
+ - Adds basic capability for analyzing intraday strategies. If a strategy makes a large amount of transactions relative to its end-of-day positions, then pyfolio will attempt to reconstruct the intraday positions, take the point of peak exposure to the market during each day, and plot that data with the positions tear sheet. By default pyfolio will automatically detect this, but the behavior can be changed by passing either `estimate_intraday=True` or `estimate_intraday=False` to the tear sheet functions ([see here](https://github.com/quantopian/pyfolio/blob/master/pyfolio/tears.py#L131)).
+ - Now formats [zipline](https://github.com/quantopian/zipline) assets, displaying their ticker symbol.
+ - Gross leverage is no longer required to be passed, and will now be calculated from the passed positions DataFrame.
+
+### Bugfixes
+
+ - Cone plotting location is now correct.
+ - Adjust scaling of beta and Fama-French plots.
+ - Removed multiple dependencies, some of which were previously unused.
+ - Various text fixes.
+
+## v0.6.0 (Oct 17, 2016)
 
 This is a major new release from `0.5.1`. All users are recommended to upgrade.
 
@@ -17,7 +37,7 @@ This is a major new release from `0.5.1`. All users are recommended to upgrade.
 * Depends on seaborn 0.7.0 or later now [PR331](https://github.com/quantopian/pyfolio/pull/331).
 * Disable buggy computation of round trips per day and per month [PR339](https://github.com/quantopian/pyfolio/pull/339).
 
-## v0.5.1 (June, 10, 2016)
+## v0.5.1 (June 10, 2016)
 
 This is a bugfix release from `0.5.0` with limited new functionality. All users are recommended to upgrade.
 
