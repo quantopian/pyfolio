@@ -169,7 +169,7 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
         file_dt = pd.Timestamp(mtime, unit='s')
 
         if latest_dt.tzinfo:
-            file_dt = file_dt.astimezone(latest_dt.tzinfo)
+            file_dt = file_dt.tz_localize('utc')
 
         if file_dt < latest_dt:
             update_cache = True
