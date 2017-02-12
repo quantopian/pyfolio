@@ -25,7 +25,6 @@ from IPython.display import display
 import pandas as pd
 from pandas.tseries.offsets import BDay
 from pandas_datareader import data as web
-import pytz
 
 from . import pos
 from . import txn
@@ -159,9 +158,6 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
 
     update_cache = False
 
-    if not latest_dt.tzinfo:
-        latest_dt = pytz.utc.localize(latest_dt)
-
     try:
         mtime = getmtime(filepath)
     except OSError as e:
@@ -169,7 +165,13 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
             raise
         update_cache = True
     else:
-        if pd.Timestamp(mtime, unit='s') < latest_dt:
+
+        file_dt = pd.Timestamp(mtime, unit='s')
+
+        if latest_dt.tzinfo:
+            file_dt = file_dt.astimezone(latest_dt.tzinfo)
+
+        if file_dt < latest_dt:
             update_cache = True
         else:
             returns = pd.read_csv(filepath, index_col=0, parse_dates=True)
