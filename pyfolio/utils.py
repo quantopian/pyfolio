@@ -617,7 +617,7 @@ def check_intraday(estimate, returns, positions, transactions):
         Daily net position values, adjusted for intraday movement.
     """
 
-    if estimate is 'infer':
+    if estimate == 'infer':
         if positions is not None and transactions is not None:
             if detect_intraday(positions, transactions):
                 warnings.warn('Detected intraday strategy; inferring positi' +
