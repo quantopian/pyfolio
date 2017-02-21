@@ -12,93 +12,76 @@ financial portfolios developed by
 
 At the core of pyfolio is a so-called tear sheet that consists of
 various individual plots that provide a comprehensive image of the
-performance of a trading algorithm. Here's an example tear sheet analyzing returns, which comes from the Zipline algorithm sample notebook:
+performance of a trading algorithm. Here's an example tear sheet analyzing a
+strategy's returns:
 
 ![example tear 0](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_0.png "Example tear sheet created from a Zipline algo")
 ![example tear 1](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_1.png "Example tear sheet created from a Zipline algo")
 
-See also [slides of a talk about pyfolio.](http://nbviewer.ipython.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/overview_slides.ipynb#/)
+Also see [slides of a talk about pyfolio](http://nbviewer.ipython.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/overview_slides.ipynb#/).
 
 ## Installation
 
-### (Optional) Virtual Environment
-
-For development on pyfolio itself, you might want to use a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) to avoid dependency conflicts between `pyfolio` and other python projects you have. To get set up with a virtual env, run:
-```bash
-
-mkvirtualenv pyfolio
-```
-before running the install commands below.
-
-To install `pyfolio` via `pip` issue the following command:
+To install pyfolio, run:
 
 ```bash
 pip install pyfolio
 ```
 
-For development, clone the git repo and run `python setup.py develop`
-and edit the library files directly. Make sure to reload or restart
-the IPython kernel when you make changes.
+#### Development
 
-`pyfolio` has the following dependencies:
- - numpy
- - scipy
- - pandas
- - matplotlib
- - [seaborn](https://github.com/mwaskom/seaborn)
- - [pymc3](https://github.com/pymc-devs/pymc3) (optional)
- - [zipline](https://github.com/quantopian/zipline) (optional; requires master, *not* 0.7.0)
+For development, you may want to use a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) to avoid dependency conflicts between pyfolio and other Python projects you have. To get set up with a virtual env, run:
+```bash
+mkvirtualenv pyfolio
+```
 
-Some of Pyfolio's functionality, such as the [Bayesian tearsheet](https://github.com/quantopian/pyfolio/blob/master/pyfolio/examples/bayesian.ipynb), requires PyMC3 and Theano. To get set up, you can run:
+Next, clone this git repository and run `python setup.py develop`
+and edit the library files directly.
+
+#### Bayesian tear sheet
+
+Generating a [Bayesian tearsheet](https://github.com/quantopian/pyfolio/blob/master/pyfolio/examples/bayesian.ipynb) requires PyMC3 and Theano. You can install these packages with the following commands:
 
 ```bash
 pip install theano
 ```
 
 ```bash
-pip install git+https://github.com/pymc-devs/pymc3
+pip install pymc3
 ```
 
-If you are on OSX and using a non-framework build of python you may need to set your backend:
+#### Matplotlib on OSX
+
+If you are on OSX and using a non-framework build of Python, you may need to set your backend:
 ``` bash
 echo "backend: TkAgg" > ~/.matplotlib/matplotlibrc
 ```
 
 ## Usage
 
-A good way to get started is to run the examples in a [Jupyter notebook](http://jupyter.org/).
-
-To get set up with an example, you can:
-
-Run a Jupyter notebook server via:
+A good way to get started is to run the pyfolio examples in
+a [Jupyter notebook](http://jupyter.org/). To do this, you first want to
+start a Jupyter notebook server:
 
 ```bash
 jupyter notebook
 ```
 
-From the notebook list page(usually found at `http://localhost:8888/`), navigate over to the examples directory, and open any file with a .ipynb extension.
+From the notebook list page, navigate to the pyfolio examples directory
+and open a notebook. Execute the code in a notebook cell by clicking on it
+and hitting Shift+Enter.
 
-Execute the code in a notebook cell by clicking on it and hitting Shift+Enter.
 
 ## Questions?
 
-If you find a bug, feel free to open an issue on our github tracker.
+If you find a bug, feel free to open an issue in this repository.
 
-You can also join our [mailing list](https://groups.google.com/forum/#!forum/pyfolio).
+You can also join our [mailing list](https://groups.google.com/forum/#!forum/pyfolio) or
+our [Gitter channel](https://gitter.im/quantopian/pyfolio).
 
-## Contribute
 
-If you want to contribute, a great place to start would be the [help-wanted issues](https://github.com/quantopian/pyfolio/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
+## Contributing
 
-## Credits
+If you'd like to contribute, a great place to look is the [issues marked with help-wanted](https://github.com/quantopian/pyfolio/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
 
-* Gus Gordon (gus@quantopian.com)
-* Justin Lent (justin@quantopian.com)
-* Sepideh Sadeghi (sp.sadeghi@gmail.com)
-* Thomas Wiecki (thomas@quantopian.com)
-* Jessica Stauth (jstauth@quantopian.com)
-* Karen Rubin (karen@quantopian.com)
-* David Edwards (dedwards@quantopian.com)
-* Andrew Campbell (andrew@quantopian.com)
-
-For a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.
+For a list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.
