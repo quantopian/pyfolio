@@ -52,7 +52,7 @@ pip install pymc3
 
 #### Matplotlib on OSX
 
-If you are on OSX and using a non-framework build of Python you may need to set your backend:
+If you are on OSX and using a non-framework build of Python, you may need to set your backend:
 ``` bash
 echo "backend: TkAgg" > ~/.matplotlib/matplotlibrc
 ```
