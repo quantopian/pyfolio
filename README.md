@@ -12,7 +12,7 @@ financial portfolios developed by
 
 At the core of pyfolio is a so-called tear sheet that consists of
 various individual plots that provide a comprehensive image of the
-performance of a trading algorithm. Here's an example tear sheet analyzing returns, which comes from the Zipline algorithm sample notebook:
+performance of a trading algorithm. Here's an example tear sheet analyzing returns:
 
 ![example tear 0](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_0.png "Example tear sheet created from a Zipline algo")
 ![example tear 1](https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_1.png "Example tear sheet created from a Zipline algo")
@@ -27,16 +27,15 @@ To install pyfolio, run:
 pip install pyfolio
 ```
 
-#### For development
+#### Development
 
-For developing pyfolio, you may want to use a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) to avoid dependency conflicts between pyfolio and other python projects you have. To get set up with a virtual env, run:
+For development, you may want to use a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) to avoid dependency conflicts between pyfolio and other Python projects you have. To get set up with a virtual env, run:
 ```bash
 mkvirtualenv pyfolio
 ```
 
 Next, clone this git repository and run `python setup.py develop`
 and edit the library files directly.
-
 
 #### Bayesian tear sheet
 
@@ -52,23 +51,23 @@ pip install pymc3
 
 #### Matplotlib on OSX
 
-If you are on OSX and using a non-framework build of python you may need to set your backend:
+If you are on OSX and using a non-framework build of Python you may need to set your backend:
 ``` bash
 echo "backend: TkAgg" > ~/.matplotlib/matplotlibrc
 ```
 
 ## Usage
 
-A good way to get started is to run the examples in a [Jupyter notebook](http://jupyter.org/).
-
-To start with an example, you can run a Jupyter notebook server:
+A good way to get started is to run the pyfolio examples in
+a [Jupyter notebook](http://jupyter.org/). To do this, you first want to
+start a Jupyter notebook server:
 
 ```bash
 jupyter notebook
 ```
 
-From the notebook list page, navigate to the pyfolio examples directory,
-and open a notebook. Execute the code in a notebook cell byclicking on it
+From the notebook list page, navigate to the pyfolio examples directory
+and open a notebook. Execute the code in a notebook cell by clicking on it
 and hitting Shift+Enter.
 
 
