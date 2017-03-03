@@ -371,7 +371,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
                'Average daily holdings, by month',
                'Average daily holdings, net'],
               loc=legend_loc)
-    ax.set_title('Total holdings per pay')
+    ax.set_title('Total holdings per day')
     ax.set_ylabel('Holdings')
     ax.set_xlabel('')
     return ax
