@@ -100,9 +100,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
                  mu=mu_reg,
                  sd=sigma,
                  observed=data)
-        start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
-        step = pm.NUTS(scaling=start)
-        trace = pm.sample(samples, step, start=start)
+        trace = pm.sample(samples)
 
     return model, trace
 
@@ -141,9 +139,8 @@ def model_returns_normal(data, samples=500):
             returns.distribution.variance**.5 *
             np.sqrt(252))
 
-        start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
-        step = pm.NUTS(scaling=start)
-        trace = pm.sample(samples, step, start=start)
+        trace = pm.sample(samples)
+
     return model, trace
 
 
@@ -185,9 +182,7 @@ def model_returns_t(data, samples=500):
                          returns.distribution.variance**.5 *
                          np.sqrt(252))
 
-        start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
-        step = pm.NUTS(scaling=start)
-        trace = pm.sample(samples, step, start=start)
+        trace = pm.sample(samples)
     return model, trace
 
 
@@ -272,9 +267,7 @@ def model_best(y1, y2, samples=1000):
                          returns_group2.distribution.variance**.5 *
                          np.sqrt(252))
 
-        step = pm.NUTS()
-
-        trace = pm.sample(samples, step)
+        trace = pm.sample(samples)
     return model, trace
 
 
@@ -298,7 +291,7 @@ def plot_best(trace=None, data_train=None, data_test=None,
     samples : int, optional
         Posterior samples to draw.
     burn : int
-        Posterior sampels to discard as burn-in.
+        Posterior samples to discard as burn-in.
     axs : array of matplotlib.axes objects, optional
         Plot into passed axes objects. Needs 6 axes.
 
@@ -406,15 +399,7 @@ def model_stoch_vol(data, samples=2000):
         volatility_process = pm.Deterministic('volatility_process',
                                               pm.math.exp(-2 * s))
         StudentT('r', nu, lam=volatility_process, observed=data)
-        start = pm.find_MAP(vars=[s], fmin=sp.optimize.fmin_l_bfgs_b)
-
-        step = pm.NUTS(scaling=start)
-        trace = pm.sample(100, step, progressbar=False)
-
-        # Start next run at the last sampled position.
-        step = pm.NUTS(scaling=trace[-1], gamma=.25)
-        trace = pm.sample(samples, step, start=trace[-1],
-                          progressbar=False)
+        trace = pm.sample(samples)
 
     return model, trace
 

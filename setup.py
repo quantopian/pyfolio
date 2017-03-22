@@ -51,7 +51,7 @@ install_reqs = [
 ]
 
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
-bayesian_reqs = ['pymc3']
+bayesian_reqs = ['pymc3>=3.0']
 
 extras_reqs = {
     'bayesian': bayesian_reqs,
