@@ -6,9 +6,6 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-  - "3.6-dev"
-  - "3.7-dev"
-  - "nightly"
 
 before_install:
   # We do this conditionally because it saves us some downloading if the
