@@ -33,7 +33,7 @@ class TestDrawdown(TestCase):
     def test_get_max_drawdown_begins_first_day(self, px):
         rets = px.pct_change()
         drawdowns = timeseries.gen_drawdown_table(rets, top=1)
-        self.assertEqual(drawdowns.loc[0, 'net drawdown in %'], 25)
+        self.assertEqual(drawdowns.loc[0, 'Net drawdown in %'], 25)
 
     drawdown_list = np.array(
         [100, 110, 120, 150, 180, 200, 100, 120,
