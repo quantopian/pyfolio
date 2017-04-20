@@ -746,7 +746,7 @@ def perf_stats(returns, factor_returns=None, positions=None,
         for stat_func in FACTOR_STAT_FUNCS:
             res = stat_func(returns, factor_returns)
             stats[STAT_FUNC_NAMES[stat_func.__name__]] = res
-    
+
     for stat, value in stats.iteritems():
         if stat in STAT_FUNCS_PCT:
             stats[stat] = str(np.round(value * 100, 1)) + '%'

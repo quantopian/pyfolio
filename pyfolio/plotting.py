@@ -371,7 +371,7 @@ def plot_holdings(returns, positions, legend_loc='lower left',
     ax.legend(['Holdings',
                'Average holdings, by month',
                'Average holdings, total'],
-              loc=legend_loc, frameon=True, prop={'size':12})
+              loc=legend_loc, frameon=True, prop={'size': 12})
     ax.set_title('Total holdings')
     ax.set_ylabel('Holdings')
     ax.set_xlabel('')
@@ -438,7 +438,7 @@ def plot_long_short_holdings(returns, positions,
                (df_shorts.max(), df_shorts.min()),
                'Average long holdings',
                'Average short holdings'],
-              loc=legend_loc, frameon=True, prop={'size':12})
+              loc=legend_loc, frameon=True, prop={'size': 12})
     ax.set_title('Long and short holdings')
     ax.set_ylabel('Holdings')
     ax.set_xlabel('')
