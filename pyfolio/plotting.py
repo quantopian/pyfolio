@@ -562,7 +562,7 @@ def plot_perf_stats(returns, factor_returns, ax=None):
     bootstrap_values = timeseries.perf_stats_bootstrap(returns,
                                                        factor_returns,
                                                        return_stats=False)
-    bootstrap_values = bootstrap_values.drop('kurtosis', axis='columns')
+    bootstrap_values = bootstrap_values.drop('Kurtosis', axis='columns')
 
     sns.boxplot(data=bootstrap_values, orient='h', ax=ax)
 

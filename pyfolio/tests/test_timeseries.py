@@ -68,22 +68,22 @@ class TestDrawdown(TestCase):
 
         drawdowns = timeseries.gen_drawdown_table(rets, top=2)
 
-        self.assertEqual(np.round(drawdowns.loc[0, 'net drawdown in %']),
+        self.assertEqual(np.round(drawdowns.loc[0, 'Net drawdown in %']),
                          first_net_drawdown)
-        self.assertEqual(drawdowns.loc[0, 'peak date'],
+        self.assertEqual(drawdowns.loc[0, 'Peak date'],
                          first_expected_peak)
-        self.assertEqual(drawdowns.loc[0, 'valley date'],
+        self.assertEqual(drawdowns.loc[0, 'Valley date'],
                          first_expected_valley)
-        self.assertEqual(drawdowns.loc[0, 'recovery date'],
+        self.assertEqual(drawdowns.loc[0, 'Recovery date'],
                          first_expected_recovery)
 
-        self.assertEqual(np.round(drawdowns.loc[1, 'net drawdown in %']),
+        self.assertEqual(np.round(drawdowns.loc[1, 'Net drawdown in %']),
                          second_net_drawdown)
-        self.assertEqual(drawdowns.loc[1, 'peak date'],
+        self.assertEqual(drawdowns.loc[1, 'Peak date'],
                          second_expected_peak)
-        self.assertEqual(drawdowns.loc[1, 'valley date'],
+        self.assertEqual(drawdowns.loc[1, 'Valley date'],
                          second_expected_valley)
-        self.assertTrue(pd.isnull(drawdowns.loc[1, 'recovery date']))
+        self.assertTrue(pd.isnull(drawdowns.loc[1, 'Recovery date']))
 
     px_list_1 = np.array(
         [100, 120, 100, 80, 70, 110, 180, 150]) / 100.  # Simple
@@ -148,25 +148,25 @@ class TestDrawdown(TestCase):
             pd.isnull(
                 drawdowns.loc[
                     0,
-                    'peak date'])) if expected_peak is None \
-            else self.assertEqual(drawdowns.loc[0, 'peak date'],
+                    'Peak date'])) if expected_peak is None \
+            else self.assertEqual(drawdowns.loc[0, 'Peak date'],
                                   expected_peak)
         self.assertTrue(
             pd.isnull(
-                drawdowns.loc[0, 'valley date'])) \
+                drawdowns.loc[0, 'Valley date'])) \
             if expected_valley is None else self.assertEqual(
-                drawdowns.loc[0, 'valley date'],
+                drawdowns.loc[0, 'Valley date'],
                 expected_valley)
         self.assertTrue(
             pd.isnull(
-                drawdowns.loc[0, 'recovery date'])) \
+                drawdowns.loc[0, 'Recovery date'])) \
             if expected_recovery is None else self.assertEqual(
-                drawdowns.loc[0, 'recovery date'],
+                drawdowns.loc[0, 'Recovery date'],
                 expected_recovery)
         self.assertTrue(
-            pd.isnull(drawdowns.loc[0, 'duration'])) \
+            pd.isnull(drawdowns.loc[0, 'Duration'])) \
             if expected_duration is None else self.assertEqual(
-                drawdowns.loc[0, 'duration'], expected_duration)
+                drawdowns.loc[0, 'Duration'], expected_duration)
 
     def test_drawdown_overlaps(self):
         # Add test to show that drawdowns don't overlap
@@ -177,11 +177,11 @@ class TestDrawdown(TestCase):
                                    end='2004-12-31')
         spy_drawdowns = timeseries.gen_drawdown_table(
             spy_rets,
-            top=20).sort_values(by='peak date')
+            top=20).sort_values(by='Peak date')
         # Compare the recovery date of each drawdown with the peak of the next
         # Last pair might contain a NaT if drawdown didn't finish, so ignore it
-        pairs = list(zip(spy_drawdowns['recovery date'],
-                         spy_drawdowns['peak date'].shift(-1)))[:-1]
+        pairs = list(zip(spy_drawdowns['Recovery date'],
+                         spy_drawdowns['Peak date'].shift(-1)))[:-1]
         for recovery, peak in pairs:
             self.assertLessEqual(recovery, peak)
 
