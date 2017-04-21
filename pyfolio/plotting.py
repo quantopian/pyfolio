@@ -569,6 +569,15 @@ def plot_perf_stats(returns, factor_returns, ax=None):
     return ax
 
 
+STAT_FUNCS_PCT = [
+    'Annual return',
+    'Cumulative returns',
+    'Annual volatility',
+    'Max drawdown',
+    'Daily value at risk',
+    'Daily turnover'
+]
+
 def show_perf_stats(returns, factor_returns, positions=None,
                     transactions=None, live_start_date=None,
                     bootstrap=False):
@@ -657,6 +666,11 @@ def show_perf_stats(returns, factor_returns, positions=None,
         print('Backtest months: ' +
               str(int(len(returns) / APPROX_BDAYS_PER_MONTH)))
         perf_stats = pd.DataFrame(perf_stats_all, columns=['Backtest'])
+
+    for column in perf_stats.columns:
+        for stat, value in perf_stats[column].iteritems():
+            if stat in STAT_FUNCS_PCT:
+                perf_stats.loc[stat, column] = str(np.round(value * 100, 1)) + '%'
 
     utils.print_table(perf_stats, fmt='{0:.2f}')
 
