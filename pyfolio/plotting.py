@@ -680,7 +680,7 @@ def show_perf_stats(returns, factor_returns, positions=None,
     for column in perf_stats.columns:
         for stat, value in perf_stats[column].iteritems():
             if stat in STAT_FUNCS_PCT:
-                perf_stats.loc[stat, column] = str(np.round(value *100,
+                perf_stats.loc[stat, column] = str(np.round(value * 100,
                                                             1)) + '%'
 
     utils.print_table(perf_stats, fmt='{0:.2f}')
