@@ -696,6 +696,7 @@ STAT_FUNC_NAMES = {
     'beta': 'Beta',
 }
 
+
 def perf_stats(returns, factor_returns=None, positions=None,
                transactions=None):
     """
