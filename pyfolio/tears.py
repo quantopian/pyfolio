@@ -445,7 +445,7 @@ def create_position_tear_sheet(returns, positions,
     ax_top_positions = plt.subplot(gs[1, :], sharex=ax_exposures)
     ax_max_median_pos = plt.subplot(gs[2, :], sharex=ax_exposures)
     ax_holdings = plt.subplot(gs[3, :], sharex=ax_exposures)
-    ax_long_short_holdings = plt.subplot(gs[4, :], sharex=ax_exposures)
+    ax_long_short_holdings = plt.subplot(gs[4, :])
     ax_gross_leverage = plt.subplot(gs[5, :], sharex=ax_exposures)
 
     positions_alloc = pos.get_percent_alloc(positions)
