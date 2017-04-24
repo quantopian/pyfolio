@@ -414,17 +414,23 @@ def plot_long_short_holdings(returns, positions,
     positions = positions.replace(0, np.nan)
     df_longs = positions[positions > 0].count(axis=1)
     df_shorts = positions[positions < 0].count(axis=1)
-
-    lf = ax.fill_between(df_longs.index, 0, df_longs.values, color='#28B121', alpha=0.25,
-                        lw=2.0, edgecolor=matplotlib.colors.colorConverter.to_rgba('#28B121', alpha=.7))
-    sf = ax.fill_between(df_shorts.index, 0, df_shorts.values, color='#D9292E', alpha=0.25,
-                         lw=2.0, edgecolor=matplotlib.colors.colorConverter.to_rgba('#D9292E', alpha=.7))
+    l_color = matplotlib.colors.colorConverter.to_rgba('#28B121', alpha=.7)
+    s_color = matplotlib.colors.colorConverter.to_rgba('#D9292E', alpha=.7)
+    lf = ax.fill_between(df_longs.index, 0, df_longs.values,
+                         color='#28B121', alpha=0.25, lw=2.0,
+                         edgecolor=l_color)
+    sf = ax.fill_between(df_shorts.index, 0, df_shorts.values,
+                         color='#D9292E', alpha=0.25, lw=2.0,
+                         edgecolor=s_color)
 
     bf = patches.Rectangle([0, 0], 1, 1, color='#B08C65')
     leg = ax.legend([lf, sf, bf],
-              ['Long (max: %s, min: %s)' % (df_longs.max(), df_longs.min()),
-               'Short (max: %s, min: %s)' % (df_shorts.max(), df_shorts.min()),
-               'Overlap'], loc=legend_loc, frameon=True, framealpha=0.8, prop={'size': 12})
+                    ['Long (max: %s, min: %s)' % (df_longs.max(),
+                                                  df_longs.min()),
+                     'Short (max: %s, min: %s)' % (df_shorts.max(),
+                                                   df_shorts.min()),
+                     'Overlap'], loc=legend_loc, frameon=True,
+                    framealpha=0.8, prop={'size': 12})
     leg.get_frame().set_edgecolor('black')
 
     ax.set_title('Long and short holdings')
