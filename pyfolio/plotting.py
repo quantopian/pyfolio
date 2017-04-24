@@ -369,8 +369,8 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     leg = ax.legend(['Daily holdings',
                      'Average daily holdings, by month',
                      'Average daily holdings, overall'],
-                     loc=legend_loc,frameon=True,
-                     framealpha=0.8, prop={'size': 12})
+                    loc=legend_loc, frameon=True,
+                    framealpha=0.8, prop={'size': 12})
     leg.get_frame().set_edgecolor('black')
 
     ax.set_title('Total holdings')
