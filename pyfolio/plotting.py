@@ -319,13 +319,11 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
     return ax
 
 
-def plot_holdings(returns, positions, legend_loc='best',
-                  ax=None, **kwargs):
+def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     """
     Plots total amount of stocks with an active position, either short
     or long. Displays daily total, daily average per month, and
     all-time daily average.
-
     Parameters
     ----------
     returns : pd.Series
@@ -349,32 +347,33 @@ def plot_holdings(returns, positions, legend_loc='best',
     if ax is None:
         ax = plt.gca()
 
-    positions = positions.drop('cash', axis='columns')
-    positions = positions.replace(0, np.nan)
-    df_longs = positions[positions > 0].count(axis=1)
-    df_shorts = positions[positions < 0].count(axis=1)
-    df_holdings = positions.count(axis=1)
+    positions = positions.copy().drop('cash', axis='columns')
+    df_holdings = positions.replace(0, np.nan).count(axis=1)
     df_holdings_by_month = df_holdings.resample('1M').mean()
+    df_holdings.plot(color='steelblue', alpha=0.6, lw=0.5, ax=ax, **kwargs)
+    df_holdings_by_month.plot(
+        color='orangered',
+        alpha=0.5,
+        lw=2,
+        ax=ax,
+        **kwargs)
+    ax.axhline(
+        df_holdings.values.mean(),
+        color='steelblue',
+        ls='--',
+        lw=3,
+        alpha=1.0)
 
-    ax.fill_between(df_holdings.index,
-                    0,
-                    df_longs.values,
-                    label='Long holdings', color='#7cea9d')
-    ax.fill_between(df_holdings.index,
-                    df_longs.values,
-                    df_longs.values + df_shorts.values,
-                    label='Short holdings', color='#db7e6b')
+    ax.set_xlim((returns.index[0], returns.index[-1]))
 
-    ax.plot(df_holdings_by_month.index, df_holdings_by_month,
-            color='black', linestyle='dashed', lw=2,
-            label='Average holdings, by month', **kwargs)
-
-    ax.grid(False)
-    leg = ax.legend(loc=legend_loc, frameon=True,
-                    framealpha=0.7, prop={'size': 12})
+    leg = ax.legend(['Daily holdings',
+                     'Average daily holdings, by month',
+                     'Average daily holdings, overall'],
+                     loc=legend_loc,frameon=True,
+                     framealpha=0.8, prop={'size': 12})
     leg.get_frame().set_edgecolor('black')
 
-    ax.set_title('Total, long, and short holdings')
+    ax.set_title('Total holdings')
     ax.set_ylabel('Holdings')
     ax.set_xlabel('')
     return ax
@@ -384,9 +383,7 @@ def plot_long_short_holdings(returns, positions,
                              legend_loc='best', ax=None, **kwargs):
     """
     Plots total amount of stocks with an active position, breaking out
-    short and long. Short positions will be shown below zero, while
-    long positions will be shown above zero. Displays daily total and
-    all-time daily average.
+    short and long into transparent filled regions.
 
     Parameters
     ----------
@@ -417,40 +414,22 @@ def plot_long_short_holdings(returns, positions,
     positions = positions.replace(0, np.nan)
     df_longs = positions[positions > 0].count(axis=1)
     df_shorts = positions[positions < 0].count(axis=1)
-    num_bins = max(df_longs.max(), df_shorts.max()) + 1
-    hist_long, _ = np.histogram(df_longs,
-                                bins=np.arange(num_bins + 1))
-    hist_short, _ = np.histogram(df_shorts,
-                                 bins=np.arange(num_bins + 1))
 
-    width = 0.5
-    ind = np.arange(num_bins)
-    if df_longs.mean() == df_shorts.mean():
-        s_style = 'dashed'
-    else:
-        s_style = 'solid'
-    ax.bar(ind - width / 2, hist_long, width,
-           align='center', color='#7cea9d')
-    ax.bar(ind + width - width / 2, hist_short, width,
-           align='center', color='#db7e6b')
-    ax.axvline(x=df_longs.mean(), lw=3, color='darkgreen', alpha=0.8)
-    ax.axvline(x=df_shorts.mean(), lw=3, linestyle=s_style,
-               color='darkred', alpha=0.8)
-    leg = ax.legend(['Long holdings (max: %s, min: %s)' %
-                     (df_longs.max(), df_longs.min()),
-                     'Short holdings (max: %s, min: %s)' %
-                     (df_shorts.max(), df_shorts.min()),
-                     'Average long holdings (%s)' % int(df_longs.mean()),
-                     'Average short holdings (%s)' % int(df_shorts.mean())],
-                    loc=legend_loc, frameon=True,
-                    framealpha=0.7, prop={'size': 12})
+    lf = ax.fill_between(df_longs.index, 0, df_longs.values, color='#28B121', alpha=0.25,
+                        lw=2.0, edgecolor=matplotlib.colors.colorConverter.to_rgba('#28B121', alpha=.7))
+    sf = ax.fill_between(df_shorts.index, 0, df_shorts.values, color='#D9292E', alpha=0.25,
+                         lw=2.0, edgecolor=matplotlib.colors.colorConverter.to_rgba('#D9292E', alpha=.7))
+
+    bf = patches.Rectangle([0, 0], 1, 1, color='#B08C65')
+    leg = ax.legend([lf, sf, bf],
+              ['Long (max: %s, min: %s)' % (df_longs.max(), df_longs.min()),
+               'Short (max: %s, min: %s)' % (df_shorts.max(), df_shorts.min()),
+               'Overlap'], loc=legend_loc, frameon=True, framealpha=0.8, prop={'size': 12})
     leg.get_frame().set_edgecolor('black')
 
-    ax.set_xlim(-width, num_bins - width)
-    ax.grid(False)
-    ax.set_title('Distribution of long and short holdings')
-    ax.set_ylabel('Day count')
-    ax.set_xlabel('Holdings')
+    ax.set_title('Long and short holdings')
+    ax.set_ylabel('Holdings')
+    ax.set_xlabel('')
     return ax
 
 
