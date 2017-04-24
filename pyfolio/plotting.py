@@ -634,7 +634,7 @@ def show_perf_stats(returns, factor_returns, positions=None,
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
         returns_is = returns[returns.index < live_start_date]
-        returns_oos = returns[returns.index > live_start_date]
+        returns_oos = returns[returns.index >= live_start_date]
 
         positions_is = None
         positions_oos = None
@@ -643,7 +643,7 @@ def show_perf_stats(returns, factor_returns, positions=None,
 
         if positions is not None:
             positions_is = positions[positions.index < live_start_date]
-            positions_oos = positions[positions.index > live_start_date]
+            positions_oos = positions[positions.index >= live_start_date]
             if transactions is not None:
                 transactions_is = transactions[(transactions.index <
                                                 live_start_date)]
