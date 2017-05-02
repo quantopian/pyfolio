@@ -380,7 +380,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
 
 
 def plot_long_short_holdings(returns, positions,
-                             legend_loc='best', ax=None, **kwargs):
+                             legend_loc='upper left', ax=None, **kwargs):
     """
     Plots total amount of stocks with an active position, breaking out
     short and long into transparent filled regions.
@@ -433,6 +433,7 @@ def plot_long_short_holdings(returns, positions,
                     framealpha=0.8, prop={'size': 12})
     leg.get_frame().set_edgecolor('black')
 
+    ax.set_xlim((returns.index[0], returns.index[-1]))
     ax.set_title('Long and short holdings')
     ax.set_ylabel('Holdings')
     ax.set_xlabel('')
