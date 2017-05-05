@@ -827,7 +827,7 @@ def plot_rolling_returns(returns,
             is_returns = returns.loc[returns.index < live_start_date]
             cone_bounds = cone_function(
                 is_returns,
-                len(oos_cum_returns),
+                oos_cum_returns,
                 cone_std=cone_std,
                 starting_value=is_cum_returns[-1])
 
@@ -1970,7 +1970,7 @@ def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
 
     bounds = timeseries.forecast_cone_bootstrap(
         is_returns=is_returns,
-        num_days=len(oos_returns),
+        oos_returns=oos_returns,
         cone_std=cone_std,
         num_samples=num_samples,
         random_seed=random_seed
