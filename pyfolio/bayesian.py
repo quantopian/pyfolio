@@ -74,7 +74,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
     if bmark.ndim == 1:
         bmark = pd.DataFrame(bmark)
 
-    bmark = bmark.loc[data_no_missing.index]
+    bmark = bmark.loc[data_no_missing.index].ffill().bfill()
     n_bmark = bmark.shape[1]
 
     with pm.Model() as model:
@@ -93,7 +93,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alphabeta_init[-1])
         beta_reg = pm.Normal('beta', mu=0, sd=1,
                              testval=alphabeta_init[:-1], shape=n_bmark)
-        bmark_theano = tt.as_tensor_variable(bmark.values.T)
+        bmark_theano = tt.as_tensor_variable(X.ilc[:,:-1].values.T)
         mu_reg = alpha_reg + tt.dot(beta_reg, bmark_theano)
         StudentT('returns',
                  nu=nu + 2,
