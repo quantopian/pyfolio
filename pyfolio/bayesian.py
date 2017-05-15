@@ -85,7 +85,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         nu = pm.Exponential('nu_minus_two', 1. / 10., testval=.3)
 
         # alpha and beta
-        X = bmark.loc[data_no_missing.index]
+        X = bmark.loc[data_no_missing.index].ffill().bfill()
         X.loc[:, 'ones'] = 1.
         y = data_no_missing
         alphabeta_init = np.linalg.lstsq(X, y)[0]
