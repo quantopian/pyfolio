@@ -247,6 +247,7 @@ def get_symbol_from_yahoo(symbol, start=None, end=None):
     rets.columns = [symbol]
     return rets
 
+
 def get_symbol_from_google(symbol, start=None, end=None):
     """
     Wrapper for web.get_data_google()
@@ -273,6 +274,7 @@ def get_symbol_from_google(symbol, start=None, end=None):
     rets.index = rets.index.tz_localize("UTC")
     rets.columns = [symbol]
     return rets
+
 
 def default_returns_func(symbol, start=None, end=None):
     """
