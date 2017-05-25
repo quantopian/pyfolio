@@ -440,6 +440,14 @@ def create_simple_returns_tear_sheet(returns,
                                        benchmark_rets=None,
                                        return_fig=False):
 
+    """
+    Simpler version of create_returns_tear_sheet, for use in
+    create_simple_tear_sheet.
+
+    - Plots: table of performance stats, rolling returns (with cone),
+        rolling beta, rolling sharpe, underwater plot.
+    """
+
     if benchmark_rets is None:
         benchmark_rets = pf.utils.get_symbol_rets('SPY')
 
@@ -613,6 +621,13 @@ def create_simple_position_tear_sheet(returns,
                                transactions=None,
                                estimate_intraday='infer'):
 
+    """
+    Simpler version of create_position_tear_sheet, for use in
+    create_simple_tear_sheet.
+
+    - Plots: exposures, top positions, holdings, gross leverage.
+    """
+
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
 
@@ -734,6 +749,47 @@ def create_txn_tear_sheet(returns, positions, transactions,
                                            positions,
                                            ax=ax_slippage_sensitivity
                                            )
+    for ax in fig.axes:
+        plt.setp(ax.get_xticklabels(), visible=True)
+
+    plt.show()
+    if return_fig:
+        return fig
+
+
+@plotting_context
+def create_simple_txn_tear_sheet(returns,
+                          positions,
+                          transactions,
+                          unadjusted_returns=None,
+                          estimate_intraday='infer',
+                          return_fig=False):
+
+    """
+    Simpler version of create_position_tear_sheet, for use in
+    create_simple_tear_sheet.
+
+    - Plots: turnover, daily volume.
+    """
+    
+    positions = utils.check_intraday(estimate_intraday, returns,
+                                     positions, transactions)
+
+    vertical_sections = 4 if unadjusted_returns is not None else 2
+
+    fig = plt.figure(figsize=(14, vertical_sections * 6))
+    gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
+    ax_turnover = plt.subplot(gs[0, :])
+    ax_daily_volume = plt.subplot(gs[1, :], sharex=ax_turnover)
+
+    plotting.plot_turnover(
+        returns,
+        transactions,
+        positions,
+        ax=ax_turnover)
+
+    plotting.plot_daily_volume(returns, transactions, ax=ax_daily_volume)
+
     for ax in fig.axes:
         plt.setp(ax.get_xticklabels(), visible=True)
 
