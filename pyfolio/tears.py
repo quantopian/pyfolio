@@ -210,6 +210,46 @@ def create_full_tear_sheet(returns,
                                    set_context=set_context)
 
 
+def create_simple_tear_sheet(returns,
+                               positions=None,
+                               transactions=None,
+                               slippage=None,
+                               unadjusted_returns=None):
+
+    benchmark_rets = utils.get_symbol_rets('SPY')
+
+    if (unadjusted_returns is None) and (slippage is not None) and \
+       (transactions is not None):
+        turnover = txn.get_turnover(positions, transactions,
+                                    period=None, average=False)
+        unadjusted_returns = returns.copy()
+        returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
+
+    positions = utils.check_intraday(False, returns,
+                                     positions, transactions)
+
+    create_simple_returns_tear_sheet(returns,
+                                        positions=positions,
+                                        transactions=transactions,
+                                        benchmark_rets=benchmark_rets)
+
+    if positions is not None:
+        create_simple_position_tear_sheet(returns,
+                                        positions,
+                                        hide_positions=True,
+                                        set_context=True,
+                                        sector_mappings=None,
+                                        estimate_intraday=False)
+
+        if transactions is not None:
+            create_simple_txn_tear_sheet(returns,
+                                      positions,
+                                      transactions,
+                                      unadjusted_returns=unadjusted_returns,
+                                      estimate_intraday=False,
+                                      set_context=True)
+
+
 @plotting_context
 def create_returns_tear_sheet(returns, positions=None,
                               transactions=None,
@@ -394,6 +434,81 @@ def create_returns_tear_sheet(returns, positions=None,
 
 
 @plotting_context
+def create_simple_returns_tear_sheet(returns,
+                                       positions=None,
+                                       transactions=None,
+                                       benchmark_rets=None,
+                                       return_fig=False):
+
+    if benchmark_rets is None:
+        benchmark_rets = pf.utils.get_symbol_rets('SPY')
+
+    returns = returns[returns.index > benchmark_rets.index[0]]
+
+    print("Entire data start date: %s" % returns.index[0].strftime('%Y-%m-%d'))
+    print("Entire data end date: %s" % returns.index[-1].strftime('%Y-%m-%d'))
+
+    plotting.show_perf_stats(returns,
+                                benchmark_rets,
+                                positions=positions,
+                                transactions=transactions)
+
+    #plotting.show_worst_drawdown_periods(returns)
+
+    # If the strategy's history is longer than the benchmark's, limit strategy
+    if returns.index[0] < benchmark_rets.index[0]:
+        returns = returns[returns.index > benchmark_rets.index[0]]
+
+    vertical_sections = 6
+
+    fig = plt.figure(figsize=(14, vertical_sections * 6))
+    gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
+
+    ax_rolling_returns = plt.subplot(gs[:2, :])
+    i = 2
+    ax_returns = plt.subplot(gs[i, :],
+                             sharex=ax_rolling_returns)
+    i += 1
+    ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+    i += 1
+    ax_rolling_sharpe = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+    i += 1
+    ax_underwater = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+    i += 1
+
+    plotting.plot_rolling_returns(
+        returns,
+        factor_returns=benchmark_rets,
+        ax=ax_rolling_returns
+    )
+    ax_rolling_returns.set_title(
+        'Cumulative returns')
+
+    plotting.plot_returns(
+        returns,
+        ax=ax_returns,
+    )
+    ax_returns.set_title(
+        'Returns')
+
+    plotting.plot_rolling_beta(
+        returns, benchmark_rets, ax=ax_rolling_beta)
+
+    plotting.plot_rolling_sharpe(
+        returns, ax=ax_rolling_sharpe)
+
+    plotting.plot_drawdown_underwater(
+        returns=returns, ax=ax_underwater)
+
+    for ax in fig.axes:
+        plt.setp(ax.get_xticklabels(), visible=True)
+
+    plt.show()
+    if return_fig:
+        return fig
+
+
+@plotting_context
 def create_position_tear_sheet(returns, positions,
                                show_and_plot_top_pos=2, hide_positions=False,
                                return_fig=False, sector_mappings=None,
@@ -466,6 +581,64 @@ def create_position_tear_sheet(returns, positions,
 
     plotting.plot_long_short_holdings(returns, positions_alloc,
                                       ax=ax_long_short_holdings)
+
+    plotting.plot_gross_leverage(returns, positions,
+                                 ax=ax_gross_leverage)
+
+    if sector_mappings is not None:
+        sector_exposures = pos.get_sector_exposures(positions,
+                                                    sector_mappings)
+        if len(sector_exposures.columns) > 1:
+            sector_alloc = pos.get_percent_alloc(sector_exposures)
+            sector_alloc = sector_alloc.drop('cash', axis='columns')
+            ax_sector_alloc = plt.subplot(gs[6, :], sharex=ax_exposures)
+            plotting.plot_sector_allocations(returns, sector_alloc,
+                                             ax=ax_sector_alloc)
+
+    for ax in fig.axes:
+        plt.setp(ax.get_xticklabels(), visible=True)
+
+    plt.show()
+    if return_fig:
+        return fig
+
+
+@plotting_context
+def create_simple_position_tear_sheet(returns,
+                               positions,
+                               show_and_plot_top_pos=2,
+                               hide_positions=False,
+                               return_fig=False,
+                               sector_mappings=None,
+                               transactions=None,
+                               estimate_intraday='infer'):
+
+    positions = utils.check_intraday(estimate_intraday, returns,
+                                     positions, transactions)
+
+    if hide_positions:
+        show_and_plot_top_pos = 0
+    vertical_sections = 7 if sector_mappings is not None else 4
+
+    fig = plt.figure(figsize=(14, vertical_sections * 6))
+    gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
+    ax_exposures = plt.subplot(gs[0, :])
+    ax_top_positions = plt.subplot(gs[1, :], sharex=ax_exposures)
+    ax_holdings = plt.subplot(gs[2, :], sharex=ax_exposures)
+    ax_gross_leverage = plt.subplot(gs[3, :], sharex=ax_exposures)
+
+    positions_alloc = pos.get_percent_alloc(positions)
+
+    plotting.plot_exposures(returns, positions, ax=ax_exposures)
+
+    plotting.show_and_plot_top_positions(
+        returns,
+        positions_alloc,
+        show_and_plot=show_and_plot_top_pos,
+        hide_positions=hide_positions,
+        ax=ax_top_positions)
+
+    plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
     plotting.plot_gross_leverage(returns, positions,
                                  ax=ax_gross_leverage)
