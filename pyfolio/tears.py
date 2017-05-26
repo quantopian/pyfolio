@@ -323,8 +323,7 @@ def create_simple_tear_sheet(returns,
                                   factor_returns=benchmark_rets,
                                   live_start_date=live_start_date,
                                   cone_std=(1.0, 1.5, 2.0),
-                                  ax=ax_rolling_returns
-                                  )
+                                  ax=ax_rolling_returns)
     ax_rolling_returns.set_title('Cumulative returns')
 
     plotting.plot_rolling_beta(returns, benchmark_rets, ax=ax_rolling_beta)
@@ -360,8 +359,7 @@ def create_simple_tear_sheet(returns,
                                           ax=ax_long_short_holdings)
 
         if transactions is not None:
-            vertical_sections = 2
-
+            # Plot simple transactions tear sheet
             ax_turnover = plt.subplot(gs[i, :])
             i += 1
             ax_txn_timings = plt.subplot(gs[i, :])
@@ -374,10 +372,10 @@ def create_simple_tear_sheet(returns,
 
             plotting.plot_txn_time_hist(transactions, ax=ax_txn_timings)
 
-            for ax in fig.axes:
-                plt.setp(ax.get_xticklabels(), visible=True)
+    for ax in fig.axes:
+        plt.setp(ax.get_xticklabels(), visible=True)
 
-            plt.show()
+    plt.show()
 
 
 @plotting_context
