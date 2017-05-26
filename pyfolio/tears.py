@@ -215,6 +215,19 @@ def create_simple_tear_sheet(returns,
                              transactions=None,
                              slippage=None,
                              unadjusted_returns=None):
+    """
+    Simpler version of create_full_tear_sheet.
+    Parameters are the same as in create_full_tear_sheet, but:
+
+    - Will not take live_start_date
+    - Always use SPY as benchmark
+    - Will not take sector_mappings
+    - Never performs bootstrap analysis
+    - Always uses default plotting style context
+    - Never attempts to infer intraday strategy
+    - Always hides positions on position tearsheet
+    - Always uses cone_std = (1.0, 1.5, 2.0)
+    """
 
     benchmark_rets = utils.get_symbol_rets('SPY')
 
@@ -235,20 +248,13 @@ def create_simple_tear_sheet(returns,
 
     if positions is not None:
         create_simple_position_tear_sheet(returns,
-                                          positions,
-                                          hide_positions=True,
-                                          set_context=True,
-                                          sector_mappings=None,
-                                          estimate_intraday=False)
+                                          positions)
 
         if transactions is not None:
             create_simple_txn_tear_sheet(returns,
                                          positions,
                                          transactions,
-                                         unadjusted_returns=unadjusted_returns,
-                                         estimate_intraday=False,
-                                         set_context=True)
-
+                                         unadjusted_returns=unadjusted_returns)
 
 @plotting_context
 def create_returns_tear_sheet(returns, positions=None,
@@ -612,12 +618,8 @@ def create_position_tear_sheet(returns, positions,
 @plotting_context
 def create_simple_position_tear_sheet(returns,
                                       positions,
-                                      show_and_plot_top_pos=2,
-                                      hide_positions=False,
                                       return_fig=False,
-                                      sector_mappings=None,
-                                      transactions=None,
-                                      estimate_intraday='infer'):
+                                      transactions=None):
 
     """
     Simpler version of create_position_tear_sheet, for use in
@@ -626,12 +628,10 @@ def create_simple_position_tear_sheet(returns,
     - Plots: exposures, top positions, holdings, gross leverage.
     """
 
-    positions = utils.check_intraday(estimate_intraday, returns,
+    positions = utils.check_intraday(False, returns,
                                      positions, transactions)
 
-    if hide_positions:
-        show_and_plot_top_pos = 0
-    vertical_sections = 7 if sector_mappings is not None else 4
+    vertical_sections = 4
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
@@ -647,24 +647,14 @@ def create_simple_position_tear_sheet(returns,
     plotting.show_and_plot_top_positions(
         returns,
         positions_alloc,
-        show_and_plot=show_and_plot_top_pos,
-        hide_positions=hide_positions,
+        show_and_plot=0,
+        hide_positions=True,
         ax=ax_top_positions)
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
     plotting.plot_gross_leverage(returns, positions,
                                  ax=ax_gross_leverage)
-
-    if sector_mappings is not None:
-        sector_exposures = pos.get_sector_exposures(positions,
-                                                    sector_mappings)
-        if len(sector_exposures.columns) > 1:
-            sector_alloc = pos.get_percent_alloc(sector_exposures)
-            sector_alloc = sector_alloc.drop('cash', axis='columns')
-            ax_sector_alloc = plt.subplot(gs[6, :], sharex=ax_exposures)
-            plotting.plot_sector_allocations(returns, sector_alloc,
-                                             ax=ax_sector_alloc)
 
     for ax in fig.axes:
         plt.setp(ax.get_xticklabels(), visible=True)
@@ -760,7 +750,6 @@ def create_simple_txn_tear_sheet(returns,
                                  positions,
                                  transactions,
                                  unadjusted_returns=None,
-                                 estimate_intraday='infer',
                                  return_fig=False):
 
     """
@@ -770,7 +759,7 @@ def create_simple_txn_tear_sheet(returns,
     - Plots: turnover, daily volume.
     """
 
-    positions = utils.check_intraday(estimate_intraday, returns,
+    positions = utils.check_intraday(False, returns,
                                      positions, transactions)
 
     vertical_sections = 4 if unadjusted_returns is not None else 2
@@ -794,7 +783,6 @@ def create_simple_txn_tear_sheet(returns,
     plt.show()
     if return_fig:
         return fig
-
 
 @plotting_context
 def create_round_trip_tear_sheet(returns, positions, transactions,
