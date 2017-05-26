@@ -10,9 +10,13 @@ from pandas import read_csv
 
 from pyfolio.utils import (to_utc, to_series)
 from pyfolio.tears import (create_full_tear_sheet,
+                           create_simple_tear_sheet,
                            create_returns_tear_sheet,
+                           create_simple_returns_tear_sheet,
                            create_position_tear_sheet,
+                           create_simple_position_tear_sheet,
                            create_txn_tear_sheet,
+                           create_simple_txn_tear_sheet,
                            create_round_trip_tear_sheet,
                            create_interesting_times_tear_sheet,
                            create_bayesian_tear_sheet)
@@ -53,6 +57,17 @@ class PositionsTestCase(TestCase):
                                )
 
     @parameterized.expand([({},),
+                           ({'slippage': 1},),
+                           ])
+    @cleanup
+    def test_create_simple_tear_sheet_breakdown(self, kwargs):
+        create_simple_tear_sheet(self.test_returns,
+                                 positions=self.test_pos,
+                                 transactions=self.test_txn,
+                                 **kwargs
+                                 )
+
+    @parameterized.expand([({},),
                            ({'live_start_date':
                              test_returns.index[-20]},),
                            ({'cone_std': 1},),
@@ -63,6 +78,12 @@ class PositionsTestCase(TestCase):
         create_returns_tear_sheet(self.test_returns,
                                   **kwargs
                                   )
+
+    @cleanup
+    def test_create_simple_returns_tear_sheet_breakdown(self, kwargs):
+        create_simple_returns_tear_sheet(self.test_returns,
+                                         **kwargs
+                                         )
 
     @parameterized.expand([({},),
                            ({'hide_positions': True},),
@@ -76,6 +97,13 @@ class PositionsTestCase(TestCase):
                                    **kwargs
                                    )
 
+    @cleanup
+    def test_create_simple_position_tear_sheet_breakdown(self, kwargs):
+        create_simple_position_tear_sheet(self.test_returns,
+                                          self.test_pos,
+                                          **kwargs
+                                          )
+
     @parameterized.expand([({},),
                            ({'unadjusted_returns': test_returns},),
                            ])
@@ -86,6 +114,17 @@ class PositionsTestCase(TestCase):
                               self.test_txn,
                               **kwargs
                               )
+
+    @parameterized.expand([({},),
+                           ({'unadjusted_returns': test_returns},),
+                           ])
+    @cleanup
+    def test_create_simple_txn_tear_sheet_breakdown(self, kwargs):
+        create_simple_txn_tear_sheet(self.test_returns,
+                                     self.test_pos,
+                                     self.test_txn,
+                                     **kwargs
+                                     )
 
     @parameterized.expand([({},),
                            ({'sector_mappings': {}},),
