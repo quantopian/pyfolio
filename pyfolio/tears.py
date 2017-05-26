@@ -210,15 +210,72 @@ def create_full_tear_sheet(returns,
                                    set_context=set_context)
 
 
-# INTEGRATED VERSION
-
 def create_simple_tear_sheet(returns,
                              positions=None,
                              transactions=None,
+                             benchmark_rets=None,
                              slippage=None,
                              live_start_date=None):
+    """
+    Simpler version of create_full_tear_sheet; generates summary performance
+    statistics and important plots as a single image.
 
-    benchmark_rets = utils.get_symbol_rets('SPY')
+    - Plots: cumulative returns, rolling beta, rolling Sharpe, underwater,
+        exposure, top 10 holdings, total holdings, long/short holdings,
+        daily turnover, transaction time distribution.
+    - Never accept market_data input (market_data = None)
+    - Never accept sector_mappings input (sector_mappings = None)
+    - Never attempt to infer intraday strategy (estimate_intraday = False)
+    - Never perform bootstrap analysis (bootstrap = False)
+    - Never hide posistions on top 10 holdings plot (hide_positions = False)
+    - Always use default cone_std (cone_std = (1.0, 1.5, 2.0))
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - Time series with decimal returns.
+         - Example:
+            2015-07-16    -0.012143
+            2015-07-17    0.045350
+            2015-07-20    0.030957
+            2015-07-21    0.004902
+    positions : pd.DataFrame, optional
+        Daily net position values.
+         - Time series of dollar amount invested in each position and cash.
+         - Days where stocks are not held can be represented by 0 or NaN.
+         - Non-working capital is labelled 'cash'
+         - Example:
+            index         'AAPL'         'MSFT'          cash
+            2004-01-09    13939.3800     -14012.9930     711.5585
+            2004-01-12    14492.6300     -14624.8700     27.1821
+            2004-01-13    -13853.2800    13653.6400      -43.6375
+    transactions : pd.DataFrame, optional
+        Executed trade volumes and fill prices.
+        - One row per trade.
+        - Trades on different names that occur at the
+          same time will have identical indicies.
+        - Example:
+            index                  amount   price    symbol
+            2004-01-09 12:18:01    483      324.12   'AAPL'
+            2004-01-09 12:18:01    122      83.10    'MSFT'
+            2004-01-13 14:12:23    -75      340.43   'AAPL'
+    benchmark_rets : pd.Series, optional
+        Daily returns of the benchmark, noncumulative. Defaults to SPY.
+    slippage : int/float, optional
+        Basis points of slippage to apply to returns before generating
+        tearsheet stats and plots.
+        If a value is provided, slippage parameter sweep
+        plots will be generated from the unadjusted returns.
+        Transactions and positions must also be passed.
+        - See txn.adjust_returns_for_slippage for more details.
+    live_start_date : datetime, optional
+        The point in time when the strategy began live trading,
+        after its backtest period. This datetime should be normalized.
+    """
+
+    if benchmark_rets is None:
+        benchmark_rets = utils.get_symbol_rets('SPY')
 
     if (slippage is not None) and (transactions is not None):
         turnover = txn.get_turnover(positions, transactions,
