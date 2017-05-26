@@ -256,6 +256,7 @@ def create_simple_tear_sheet(returns,
                                          transactions,
                                          unadjusted_returns=unadjusted_returns)
 
+
 @plotting_context
 def create_returns_tear_sheet(returns, positions=None,
                               transactions=None,
@@ -783,6 +784,7 @@ def create_simple_txn_tear_sheet(returns,
     plt.show()
     if return_fig:
         return fig
+
 
 @plotting_context
 def create_round_trip_tear_sheet(returns, positions, transactions,
