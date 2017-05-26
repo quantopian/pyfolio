@@ -210,6 +210,8 @@ def create_full_tear_sheet(returns,
                                    set_context=set_context)
 
 
+# INTEGRATED VERSION
+
 def create_simple_tear_sheet(returns,
                              positions=None,
                              transactions=None,
@@ -224,9 +226,9 @@ def create_simple_tear_sheet(returns,
         returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
 
     if (positions is not None) and (transactions is not None):
-        vertical_sections = 10
+        vertical_sections = 11
     elif positions is not None:
-        vertical_sections = 8
+        vertical_sections = 9
     else:
         vertical_sections = 5
 
@@ -278,6 +280,8 @@ def create_simple_tear_sheet(returns,
         # Plot simple positions tear sheet
         ax_exposures = plt.subplot(gs[i, :])
         i += 1
+        ax_top_positions = plt.subplot(gs[i, :], sharex=ax_exposures)
+        i += 1
         ax_holdings = plt.subplot(gs[i, :], sharex=ax_exposures)
         i += 1
         ax_long_short_holdings = plt.subplot(gs[i, :])
@@ -286,6 +290,12 @@ def create_simple_tear_sheet(returns,
         positions_alloc = pos.get_percent_alloc(positions)
 
         plotting.plot_exposures(returns, positions, ax=ax_exposures)
+
+        plotting.show_and_plot_top_positions(returns,
+                                             positions_alloc,
+                                             show_and_plot=0,
+                                             hide_positions=False,
+                                             ax=ax_top_positions)
 
         plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
