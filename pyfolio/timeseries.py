@@ -25,6 +25,7 @@ import scipy.stats as stats
 from . import utils
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
 from .utils import DAILY
+from .txn import get_turnover
 from .interesting_periods import PERIODS
 from .deprecate import deprecated
 
@@ -460,29 +461,6 @@ def common_sense_ratio(returns):
         (1 + empyrical.annual_return(returns))
 
 
-SIMPLE_STAT_FUNCS = [
-    annual_return,
-    empyrical.cum_returns_final,
-    annual_volatility,
-    sharpe_ratio,
-    calmar_ratio,
-    stability_of_timeseries,
-    max_drawdown,
-    omega_ratio,
-    sortino_ratio,
-    stats.skew,
-    stats.kurtosis,
-    tail_ratio,
-    common_sense_ratio
-]
-
-FACTOR_STAT_FUNCS = [
-    information_ratio,
-    alpha,
-    beta,
-]
-
-
 def normalize(returns, starting_value=1):
     """
     Normalizes a returns timeseries based on the first value.
@@ -652,7 +630,75 @@ def gross_lev(positions):
     return exposure / positions.sum(axis=1)
 
 
-def perf_stats(returns, factor_returns=None, positions=None):
+def value_at_risk(returns, period=None, sigma=2.0):
+    """
+    Get value at risk (VaR).
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    period : str, optional
+        Period over which to calculate VaR. Set to 'weekly',
+        'monthly', or 'yearly', otherwise defaults to period of
+        returns (typically daily).
+    sigma : float, optional
+        Standard deviations of VaR, default 2.
+    """
+    if period is not None:
+        returns_agg = empyrical.aggregate_returns(returns, period)
+    else:
+        returns_agg = returns.copy()
+
+    value_at_risk = returns_agg.mean() - sigma * returns_agg.std()
+    return value_at_risk
+
+
+SIMPLE_STAT_FUNCS = [
+    annual_return,
+    empyrical.cum_returns_final,
+    annual_volatility,
+    sharpe_ratio,
+    calmar_ratio,
+    stability_of_timeseries,
+    max_drawdown,
+    omega_ratio,
+    sortino_ratio,
+    stats.skew,
+    stats.kurtosis,
+    tail_ratio,
+    common_sense_ratio,
+    value_at_risk
+]
+
+FACTOR_STAT_FUNCS = [
+    alpha,
+    beta,
+]
+
+STAT_FUNC_NAMES = {
+    'annual_return': 'Annual return',
+    'cum_returns_final': 'Cumulative returns',
+    'annual_volatility': 'Annual volatility',
+    'sharpe_ratio': 'Sharpe ratio',
+    'calmar_ratio': 'Calmar ratio',
+    'stability_of_timeseries': 'Stability',
+    'max_drawdown': 'Max drawdown',
+    'omega_ratio': 'Omega ratio',
+    'sortino_ratio': 'Sortino ratio',
+    'skew': 'Skew',
+    'kurtosis': 'Kurtosis',
+    'tail_ratio': 'Tail ratio',
+    'common_sense_ratio': 'Common sense ratio',
+    'value_at_risk': 'Daily value at risk',
+    'alpha': 'Alpha',
+    'beta': 'Beta',
+}
+
+
+def perf_stats(returns, factor_returns=None, positions=None,
+               transactions=None):
     """
     Calculates various performance metrics of a strategy, for use in
     plotting.show_perf_stats.
@@ -669,6 +715,9 @@ def perf_stats(returns, factor_returns=None, positions=None):
     positions : pd.DataFrame
         Daily net position values.
          - See full explanation in tears.create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
+        - See full explanation in tears.create_full_tear_sheet
 
     Returns
     -------
@@ -678,20 +727,23 @@ def perf_stats(returns, factor_returns=None, positions=None):
 
     stats = pd.Series()
     for stat_func in SIMPLE_STAT_FUNCS:
-        stats[stat_func.__name__] = stat_func(returns)
+        stats[STAT_FUNC_NAMES[stat_func.__name__]] = stat_func(returns)
 
     if positions is not None:
-        stats['gross_leverage'] = gross_lev(positions).mean()
+        stats['Gross leverage'] = gross_lev(positions).mean()
+        if transactions is not None:
+            stats['Daily turnover'] = get_turnover(positions, transactions,
+                                                   period='1D').mean()
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
-            stats[stat_func.__name__] = stat_func(returns,
-                                                  factor_returns)
+            res = stat_func(returns, factor_returns)
+            stats[STAT_FUNC_NAMES[stat_func.__name__]] = res
 
     return stats
 
 
-def perf_stats_bootstrap(returns, factor_returns=None, positions=None,
-                         return_stats=True):
+def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True,
+                         **kwargs):
     """Calculates various bootstrapped performance metrics of a strategy.
 
     Parameters
@@ -703,9 +755,6 @@ def perf_stats_bootstrap(returns, factor_returns=None, positions=None,
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
         If None, do not compute alpha, beta, and information ratio.
-    positions : pd.DataFrame
-        Daily net position values.
-         - See full explanation in tears.create_full_tear_sheet.
     return_stats : boolean (optional)
         If True, returns a DataFrame of mean, median, 5 and 95 percentiles
         for each perf metric.
@@ -725,17 +774,13 @@ def perf_stats_bootstrap(returns, factor_returns=None, positions=None,
     bootstrap_values = OrderedDict()
 
     for stat_func in SIMPLE_STAT_FUNCS:
-        stat_name = stat_func.__name__
+        stat_name = STAT_FUNC_NAMES[stat_func.__name__]
         bootstrap_values[stat_name] = calc_bootstrap(stat_func,
                                                      returns)
 
-    if positions is not None:
-        gl = gross_lev(positions)
-        bootstrap_values['gross_leverage'] = calc_bootstrap(np.mean, gl)
-
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
-            stat_name = stat_func.__name__
+            stat_name = STAT_FUNC_NAMES[stat_func.__name__]
             bootstrap_values[stat_name] = calc_bootstrap(
                 stat_func,
                 returns,
@@ -946,35 +991,35 @@ def gen_drawdown_table(returns, top=10):
     df_cum = cum_returns(returns, 1.0)
     drawdown_periods = get_top_drawdowns(returns, top=top)
     df_drawdowns = pd.DataFrame(index=list(range(top)),
-                                columns=['net drawdown in %',
-                                         'peak date',
-                                         'valley date',
-                                         'recovery date',
-                                         'duration'])
+                                columns=['Net drawdown in %',
+                                         'Peak date',
+                                         'Valley date',
+                                         'Recovery date',
+                                         'Duration'])
 
     for i, (peak, valley, recovery) in enumerate(drawdown_periods):
         if pd.isnull(recovery):
-            df_drawdowns.loc[i, 'duration'] = np.nan
+            df_drawdowns.loc[i, 'Duration'] = np.nan
         else:
-            df_drawdowns.loc[i, 'duration'] = len(pd.date_range(peak,
+            df_drawdowns.loc[i, 'Duration'] = len(pd.date_range(peak,
                                                                 recovery,
                                                                 freq='B'))
-        df_drawdowns.loc[i, 'peak date'] = (peak.to_pydatetime()
+        df_drawdowns.loc[i, 'Peak date'] = (peak.to_pydatetime()
                                             .strftime('%Y-%m-%d'))
-        df_drawdowns.loc[i, 'valley date'] = (valley.to_pydatetime()
+        df_drawdowns.loc[i, 'Valley date'] = (valley.to_pydatetime()
                                               .strftime('%Y-%m-%d'))
         if isinstance(recovery, float):
-            df_drawdowns.loc[i, 'recovery date'] = recovery
+            df_drawdowns.loc[i, 'Recovery date'] = recovery
         else:
-            df_drawdowns.loc[i, 'recovery date'] = (recovery.to_pydatetime()
+            df_drawdowns.loc[i, 'Recovery date'] = (recovery.to_pydatetime()
                                                     .strftime('%Y-%m-%d'))
-        df_drawdowns.loc[i, 'net drawdown in %'] = (
+        df_drawdowns.loc[i, 'Net drawdown in %'] = (
             (df_cum.loc[peak] - df_cum.loc[valley]) / df_cum.loc[peak]) * 100
 
-    df_drawdowns['peak date'] = pd.to_datetime(df_drawdowns['peak date'])
-    df_drawdowns['valley date'] = pd.to_datetime(df_drawdowns['valley date'])
-    df_drawdowns['recovery date'] = pd.to_datetime(
-        df_drawdowns['recovery date'])
+    df_drawdowns['Peak date'] = pd.to_datetime(df_drawdowns['Peak date'])
+    df_drawdowns['Valley date'] = pd.to_datetime(df_drawdowns['Valley date'])
+    df_drawdowns['Recovery date'] = pd.to_datetime(
+        df_drawdowns['Recovery date'])
 
     return df_drawdowns
 

@@ -324,7 +324,6 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     Plots total amount of stocks with an active position, either short
     or long. Displays daily total, daily average per month, and
     all-time daily average.
-
     Parameters
     ----------
     returns : pd.Series
@@ -367,23 +366,24 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
 
     ax.set_xlim((returns.index[0], returns.index[-1]))
 
-    ax.legend(['Daily holdings',
-               'Average daily holdings, by month',
-               'Average daily holdings, net'],
-              loc=legend_loc)
-    ax.set_title('Total holdings per day')
+    leg = ax.legend(['Daily holdings',
+                     'Average daily holdings, by month',
+                     'Average daily holdings, overall'],
+                    loc=legend_loc, frameon=True,
+                    framealpha=0.8, prop={'size': 12})
+    leg.get_frame().set_edgecolor('black')
+
+    ax.set_title('Total holdings')
     ax.set_ylabel('Holdings')
     ax.set_xlabel('')
     return ax
 
 
 def plot_long_short_holdings(returns, positions,
-                             legend_loc='best', ax=None, **kwargs):
+                             legend_loc='upper left', ax=None, **kwargs):
     """
     Plots total amount of stocks with an active position, breaking out
-    short and long. Short positions will be shown below zero, while
-    long positions will be shown above zero. Displays daily total and
-    all-time daily average.
+    short and long into transparent filled regions.
 
     Parameters
     ----------
@@ -413,30 +413,28 @@ def plot_long_short_holdings(returns, positions,
     positions = positions.drop('cash', axis='columns')
     positions = positions.replace(0, np.nan)
     df_longs = positions[positions > 0].count(axis=1)
-    df_shorts = positions[positions < 0].count(axis=1) * -1
-    df_longs.plot(color='darkgreen', alpha=0.6, lw=1.0, ax=ax, **kwargs)
-    df_shorts.plot(color='darkred', alpha=0.6, lw=1.0, ax=ax, **kwargs)
-    ax.axhline(
-        df_longs.mean(),
-        color='steelblue',
-        ls='--',
-        lw=2.0,
-        alpha=1.0)
-    ax.axhline(
-        df_shorts.mean(),
-        color='brown',
-        ls='--',
-        lw=2.0,
-        alpha=1.0)
+    df_shorts = positions[positions < 0].count(axis=1)
+    l_color = matplotlib.colors.colorConverter.to_rgba('#28B121', alpha=.7)
+    s_color = matplotlib.colors.colorConverter.to_rgba('#D9292E', alpha=.7)
+    lf = ax.fill_between(df_longs.index, 0, df_longs.values,
+                         color='#28B121', alpha=0.25, lw=2.0,
+                         edgecolor=l_color)
+    sf = ax.fill_between(df_shorts.index, 0, df_shorts.values,
+                         color='#D9292E', alpha=0.25, lw=2.0,
+                         edgecolor=s_color)
+
+    bf = patches.Rectangle([0, 0], 1, 1, color='#B08C65')
+    leg = ax.legend([lf, sf, bf],
+                    ['Long (max: %s, min: %s)' % (df_longs.max(),
+                                                  df_longs.min()),
+                     'Short (max: %s, min: %s)' % (df_shorts.max(),
+                                                   df_shorts.min()),
+                     'Overlap'], loc=legend_loc, frameon=True,
+                    framealpha=0.8, prop={'size': 12})
+    leg.get_frame().set_edgecolor('black')
 
     ax.set_xlim((returns.index[0], returns.index[-1]))
-
-    ax.legend(['Daily long positions',
-               'Daily short positions',
-               'Average daily long positions',
-               'Average daily short positions'],
-              loc=legend_loc)
-    ax.set_title('Long and short holdings per day')
+    ax.set_title('Long and short holdings')
     ax.set_ylabel('Holdings')
     ax.set_xlabel('')
     return ax
@@ -478,7 +476,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     lim = ax.get_ylim()
     colors = sns.cubehelix_palette(len(df_drawdowns))[::-1]
     for i, (peak, recovery) in df_drawdowns[
-            ['peak date', 'recovery date']].iterrows():
+            ['Peak date', 'Recovery date']].iterrows():
         if pd.isnull(recovery):
             recovery = returns.index[-1]
         ax.fill_between((peak, recovery),
@@ -559,15 +557,26 @@ def plot_perf_stats(returns, factor_returns, ax=None):
     bootstrap_values = timeseries.perf_stats_bootstrap(returns,
                                                        factor_returns,
                                                        return_stats=False)
-    bootstrap_values = bootstrap_values.drop('kurtosis', axis='columns')
+    bootstrap_values = bootstrap_values.drop('Kurtosis', axis='columns')
 
     sns.boxplot(data=bootstrap_values, orient='h', ax=ax)
 
     return ax
 
 
+STAT_FUNCS_PCT = [
+    'Annual return',
+    'Cumulative returns',
+    'Annual volatility',
+    'Max drawdown',
+    'Daily value at risk',
+    'Daily turnover'
+]
+
+
 def show_perf_stats(returns, factor_returns, positions=None,
-                    live_start_date=None, bootstrap=False):
+                    transactions=None, live_start_date=None,
+                    bootstrap=False):
     """
     Prints some performance metrics of the strategy.
 
@@ -602,52 +611,65 @@ def show_perf_stats(returns, factor_returns, positions=None,
     else:
         perf_func = timeseries.perf_stats
 
+    perf_stats_all = perf_func(
+        returns,
+        factor_returns=factor_returns,
+        positions=positions,
+        transactions=transactions)
+
     if live_start_date is not None:
         live_start_date = utils.get_utc_timestamp(live_start_date)
-        returns_backtest = returns[returns.index < live_start_date]
-        returns_live = returns[returns.index > live_start_date]
+        returns_is = returns[returns.index < live_start_date]
+        returns_oos = returns[returns.index >= live_start_date]
 
-        positions_backtest = None
-        positions_live = None
+        positions_is = None
+        positions_oos = None
+        transactions_is = None
+        transactions_oos = None
+
         if positions is not None:
-            positions_backtest = positions[positions.index < live_start_date]
-            positions_live = positions[positions.index > live_start_date]
+            positions_is = positions[positions.index < live_start_date]
+            positions_oos = positions[positions.index >= live_start_date]
+            if transactions is not None:
+                transactions_is = transactions[(transactions.index <
+                                                live_start_date)]
+                transactions_oos = transactions[(transactions.index >
+                                                 live_start_date)]
 
-        perf_stats_live = perf_func(
-            returns_live,
+        perf_stats_is = perf_func(
+            returns_is,
             factor_returns=factor_returns,
-            positions=positions_live)
+            positions=positions_is,
+            transactions=transactions_is)
 
-        perf_stats_all = perf_func(
-            returns,
+        perf_stats_oos = perf_func(
+            returns_oos,
             factor_returns=factor_returns,
-            positions=positions)
+            positions=positions_oos,
+            transactions=transactions_oos)
 
-        print('Out-of-Sample Months: ' +
-              str(int(len(returns_live) / APPROX_BDAYS_PER_MONTH)))
-    else:
-        returns_backtest = returns
-        positions_backtest = positions
+        print('In-sample months: ' +
+              str(int(len(returns_is) / APPROX_BDAYS_PER_MONTH)))
+        print('Out-of-sample months: ' +
+              str(int(len(returns_oos) / APPROX_BDAYS_PER_MONTH)))
 
-    print('Backtest Months: ' +
-          str(int(len(returns_backtest) / APPROX_BDAYS_PER_MONTH)))
-
-    perf_stats = perf_func(
-        returns_backtest,
-        factor_returns=factor_returns,
-        positions=positions_backtest)
-
-    if live_start_date is not None:
         perf_stats = pd.concat(OrderedDict([
-            ('Backtest', perf_stats),
-            ('Out of sample', perf_stats_live),
-            ('All history', perf_stats_all),
+            ('In-sample', perf_stats_is),
+            ('Out-of-sample', perf_stats_oos),
+            ('All', perf_stats_all),
         ]), axis=1)
     else:
-        perf_stats = pd.DataFrame(perf_stats, columns=['Backtest'])
+        print('Backtest months: ' +
+              str(int(len(returns) / APPROX_BDAYS_PER_MONTH)))
+        perf_stats = pd.DataFrame(perf_stats_all, columns=['Backtest'])
 
-    utils.print_table(perf_stats, name='Performance statistics',
-                      fmt='{0:.2f}')
+    for column in perf_stats.columns:
+        for stat, value in perf_stats[column].iteritems():
+            if stat in STAT_FUNCS_PCT:
+                perf_stats.loc[stat, column] = str(np.round(value * 100,
+                                                            1)) + '%'
+
+    utils.print_table(perf_stats, fmt='{0:.2f}')
 
 
 def plot_returns(returns,
@@ -1175,6 +1197,7 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
 
     ax.set_xlim((sector_alloc.index[0], sector_alloc.index[-1]))
     ax.set_ylabel('Exposure by sector')
+    ax.set_xlabel('')
 
     return ax
 
@@ -1230,29 +1253,6 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
     ax.set_title('Return quantiles')
 
     return ax
-
-
-def show_return_range(returns):
-    """
-    Print monthly return and weekly return standard deviations.
-
-    Parameters
-    ----------
-    returns : pd.Series
-        Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
-    """
-
-    df_weekly = empyrical.aggregate_returns(returns, 'weekly')
-
-    two_sigma_daily = returns.mean() - 2 * returns.std()
-    two_sigma_weekly = df_weekly.mean() - 2 * df_weekly.std()
-
-    var_sigma = pd.Series([two_sigma_daily, two_sigma_weekly],
-                          index=['2-sigma returns daily',
-                                 '2-sigma returns weekly'])
-
-    print(var_sigma.round(3).values)
 
 
 def plot_turnover(returns, transactions, positions,
@@ -1636,7 +1636,7 @@ def show_worst_drawdown_periods(returns, top=5):
     """
 
     drawdown_df = timeseries.gen_drawdown_table(returns, top=top)
-    utils.print_table(drawdown_df.sort_values('net drawdown in %',
+    utils.print_table(drawdown_df.sort_values('Net drawdown in %',
                                               ascending=False),
                       name='Worst drawdown periods', fmt='{0:.2f}')
 

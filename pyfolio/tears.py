@@ -128,6 +128,9 @@ def create_full_tear_sheet(returns,
         If True, causes the generation of a Bayesian tear sheet.
     round_trips: boolean, optional
         If True, causes the generation of a round trip tear sheet.
+    sector_mappings : dict or pd.Series, optional
+        Security identifier to sector mapping.
+        Security ids as keys, sectors as values.
     estimate_intraday: boolean or str, optional
         Instead of using the end-of-day positions, use the point in the day
         where we have the most $ invested. This will adjust positions to
@@ -163,6 +166,7 @@ def create_full_tear_sheet(returns,
     create_returns_tear_sheet(
         returns,
         positions=positions,
+        transactions=transactions,
         live_start_date=live_start_date,
         cone_std=cone_std,
         benchmark_rets=benchmark_rets,
@@ -208,6 +212,7 @@ def create_full_tear_sheet(returns,
 
 @plotting_context
 def create_returns_tear_sheet(returns, positions=None,
+                              transactions=None,
                               live_start_date=None,
                               cone_std=(1.0, 1.5, 2.0),
                               benchmark_rets=None,
@@ -254,19 +259,19 @@ def create_returns_tear_sheet(returns, positions=None,
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
-        # If the strategy's history is longer than the benchmark's, limit
-        # strategy
-        if returns.index[0] < benchmark_rets.index[0]:
-            returns = returns[returns.index > benchmark_rets.index[0]]
+
+    returns = returns[returns.index > benchmark_rets.index[0]]
 
     print("Entire data start date: %s" % returns.index[0].strftime('%Y-%m-%d'))
     print("Entire data end date: %s" % returns.index[-1].strftime('%Y-%m-%d'))
-    print('\n')
 
     plotting.show_perf_stats(returns, benchmark_rets,
                              positions=positions,
+                             transactions=transactions,
                              bootstrap=bootstrap,
                              live_start_date=live_start_date)
+
+    plotting.show_worst_drawdown_periods(returns)
 
     # If the strategy's history is longer than the benchmark's, limit strategy
     if returns.index[0] < benchmark_rets.index[0]:
@@ -366,11 +371,6 @@ def create_returns_tear_sheet(returns, positions=None,
     plotting.plot_drawdown_underwater(
         returns=returns, ax=ax_underwater)
 
-    plotting.show_worst_drawdown_periods(returns)
-
-    print('\n')
-    plotting.show_return_range(returns)
-
     plotting.plot_monthly_returns_heatmap(returns, ax=ax_monthly_heatmap)
     plotting.plot_annual_returns(returns, ax=ax_annual_returns)
     plotting.plot_monthly_returns_dist(returns, ax=ax_monthly_dist)
@@ -445,7 +445,7 @@ def create_position_tear_sheet(returns, positions,
     ax_top_positions = plt.subplot(gs[1, :], sharex=ax_exposures)
     ax_max_median_pos = plt.subplot(gs[2, :], sharex=ax_exposures)
     ax_holdings = plt.subplot(gs[3, :], sharex=ax_exposures)
-    ax_long_short_holdings = plt.subplot(gs[4, :], sharex=ax_exposures)
+    ax_long_short_holdings = plt.subplot(gs[4, :])
     ax_gross_leverage = plt.subplot(gs[5, :], sharex=ax_exposures)
 
     positions_alloc = pos.get_percent_alloc(positions)
@@ -629,7 +629,6 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
     fig = plt.figure(figsize=(14, 3 * 6))
 
-    fig = plt.figure(figsize=(14, 3 * 6))
     gs = gridspec.GridSpec(3, 2, wspace=0.5, hspace=0.5)
 
     ax_trade_lifetimes = plt.subplot(gs[0, :])

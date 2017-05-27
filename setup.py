@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 from setuptools import setup
 
 import versioneer
@@ -38,8 +39,13 @@ classifiers = ['Development Status :: 4 - Beta',
                'Topic :: Scientific/Engineering :: Mathematics',
                'Operating System :: OS Independent']
 
+if (sys.version_info.major, sys.version_info.minor) >= (3, 3):
+    support_ipython_6 = True
+else:
+    support_ipython_6 = False
+
 install_reqs = [
-    'ipython>=3.2.3',
+    'ipython>=3.2.3' if support_ipython_6 else 'ipython>=3.2.3, <6',
     'matplotlib>=1.4.0',
     'numpy>=1.9.1',
     'pandas>=0.19.0',
