@@ -277,7 +277,7 @@ def create_returns_tear_sheet(returns, positions=None,
     if returns.index[0] < benchmark_rets.index[0]:
         returns = returns[returns.index > benchmark_rets.index[0]]
 
-    vertical_sections = 12
+    vertical_sections = 13
 
     if live_start_date is not None:
         vertical_sections += 1
@@ -301,6 +301,8 @@ def create_returns_tear_sheet(returns, positions=None,
                              sharex=ax_rolling_returns)
     i += 1
     ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+    i += 1
+    ax_rolling_volatility = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
     ax_rolling_sharpe = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
@@ -357,6 +359,9 @@ def create_returns_tear_sheet(returns, positions=None,
 
     plotting.plot_rolling_beta(
         returns, benchmark_rets, ax=ax_rolling_beta)
+
+    plotting.plot_rolling_volatility(
+        returns, ax=ax_rolling_volatility)
 
     plotting.plot_rolling_sharpe(
         returns, ax=ax_rolling_sharpe)
