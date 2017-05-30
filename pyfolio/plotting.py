@@ -897,7 +897,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
 
 
 def plot_rolling_volatility(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
-                        legend_loc='best', ax=None, **kwargs):
+                            legend_loc='best', ax=None, **kwargs):
     """
     Plots the rolling volatility versus date.
 
@@ -930,7 +930,7 @@ def plot_rolling_volatility(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
     rolling_vol_ts = timeseries.rolling_volatility(
         returns, rolling_window)
     rolling_vol_ts.plot(alpha=.7, lw=3, color='orangered', ax=ax,
-                           **kwargs)
+                        **kwargs)
 
     ax.set_title('Rolling Volatility (6-month)')
     ax.axhline(
