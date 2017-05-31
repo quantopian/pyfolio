@@ -361,7 +361,7 @@ def create_returns_tear_sheet(returns, positions=None,
         returns, benchmark_rets, ax=ax_rolling_beta)
 
     plotting.plot_rolling_volatility(
-        returns, ax=ax_rolling_volatility)
+        returns, benchmark_rets, ax=ax_rolling_volatility)
 
     plotting.plot_rolling_sharpe(
         returns, ax=ax_rolling_sharpe)

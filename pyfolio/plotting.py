@@ -896,7 +896,8 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     return ax
 
 
-def plot_rolling_volatility(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
+def plot_rolling_volatility(returns, factor_returns=pd.DataFrame(),
+                            rolling_window=APPROX_BDAYS_PER_MONTH * 6,
                             legend_loc='best', ax=None, **kwargs):
     """
     Plots the rolling volatility versus date.
@@ -906,6 +907,8 @@ def plot_rolling_volatility(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
+    factor_returns : pd.Series, optional
+        Daily noncumulative returns of the benchmark.
     rolling_window : int, optional
         The days window over which to compute the volatility.
     legend_loc : matplotlib.loc, optional
@@ -931,19 +934,29 @@ def plot_rolling_volatility(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
         returns, rolling_window)
     rolling_vol_ts.plot(alpha=.7, lw=3, color='orangered', ax=ax,
                         **kwargs)
+    if not factor_returns.empty:
+        rolling_vol_ts_factor = timeseries.rolling_volatility(
+            factor_returns, rolling_window)
+        rolling_vol_ts_factor.plot(alpha=.7, lw=3, color='grey', ax=ax,
+                                   **kwargs)
 
     ax.set_title('Rolling Volatility (6-month)')
     ax.axhline(
         rolling_vol_ts.mean(),
-        color='steelblue',
+        color='orangered',
         linestyle='--',
         lw=3)
-    ax.axhline(0.0, color='black', linestyle='-', lw=3)
+
+    ax.axhline(0.0, color='black', linestyle='-', lw=2)
 
     ax.set_ylabel('Volatility')
     ax.set_xlabel('')
-    ax.legend(['Volatility', 'Average'],
-              loc=legend_loc)
+    if factor_returns.empty:
+        ax.legend(['Volatility', "Average Volatility"],
+                  loc=legend_loc)
+    else:
+        ax.legend(['Volatility', 'Benchmark Volatility', "Average Volatility"],
+                  loc=legend_loc)
     return ax
 
 
