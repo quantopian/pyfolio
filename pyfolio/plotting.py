@@ -952,10 +952,10 @@ def plot_rolling_volatility(returns, factor_returns=None,
     ax.set_ylabel('Volatility')
     ax.set_xlabel('')
     if factor_returns.empty:
-        ax.legend(['Volatility', "Average Volatility"],
+        ax.legend(['Volatility', 'Average Volatility'],
                   loc=legend_loc)
     else:
-        ax.legend(['Volatility', 'Benchmark Volatility', "Average Volatility"],
+        ax.legend(['Volatility', 'Benchmark Volatility', 'Average Volatility'],
                   loc=legend_loc)
     return ax
 
