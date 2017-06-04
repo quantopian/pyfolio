@@ -896,7 +896,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     return ax
 
 
-def plot_rolling_volatility(returns, factor_returns=pd.DataFrame(),
+def plot_rolling_volatility(returns, factor_returns=None,
                             rolling_window=APPROX_BDAYS_PER_MONTH * 6,
                             legend_loc='best', ax=None, **kwargs):
     """
@@ -934,7 +934,7 @@ def plot_rolling_volatility(returns, factor_returns=pd.DataFrame(),
         returns, rolling_window)
     rolling_vol_ts.plot(alpha=.7, lw=3, color='orangered', ax=ax,
                         **kwargs)
-    if not factor_returns.empty:
+    if factor_returns is not None:
         rolling_vol_ts_factor = timeseries.rolling_volatility(
             factor_returns, rolling_window)
         rolling_vol_ts_factor.plot(alpha=.7, lw=3, color='grey', ax=ax,
