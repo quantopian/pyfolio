@@ -69,6 +69,13 @@ def create_full_tear_sheet(returns,
                            cone_std=(1.0, 1.5, 2.0),
                            bootstrap=False,
                            unadjusted_returns=None,
+                           risk=False,
+                           style_factor_panel=None,
+                           sectors=None,
+                           caps=None,
+                           shares_held=None,
+                           volumes=None,
+                           percentile=None,
                            set_context=True):
     """
     Generate a number of tear sheets that are useful
@@ -203,6 +210,10 @@ def create_full_tear_sheet(returns,
                                            market_data, daily_vol_limit=0.2,
                                            last_n_days=125,
                                            estimate_intraday=False)
+
+        if style_factor_panel is not None:
+            create_risk_tear_sheet(positions, style_factor_panel, sectors,
+                                   caps, shares_held, volumes, percentile)
 
     if bayesian:
         create_bayesian_tear_sheet(returns,
