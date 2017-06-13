@@ -77,7 +77,7 @@ def plot_style_factor_exposures(tot_sfe, factor_name, ax=None):
     avg = tot_sfe.mean()
     ax.axhline(avg, linestyle='-.', label='Mean = {:.3}'.format(avg))
     ax.axhline(0, color='k', linestyle='-')
-    ax.set_title('{} Weighted Exposure'.format(factor_name), fontsize='medium')
+    ax.set_title('{} Weighted Exposure'.format(factor_name))
     ax.set_ylabel('{} Weighted Exposure'.format(factor_name))
     ax.legend()
 
@@ -152,10 +152,10 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures, ax=None):
     ax.stackplot(long_exposures[0].index, short_exposures,
                  colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set_title('Sector Exposures: Long and Short', fontsize='large')
+    ax.set_title('Sector Exposures: Long and Short')
     ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Long/Short Exposure in Sectors')
-    ax.legend(loc=2, fontsize='medium')
+    ax.legend()
 
     return ax
 
@@ -181,10 +181,10 @@ def plot_sector_exposures_gross(gross_exposures, ax=None):
     ax.stackplot(gross_exposures[0].index, gross_exposures,
                  labels=sector_names, colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set_title('Sector Exposures: Gross', fontsize='large')
+    ax.set_title('Sector Exposures: Gross')
     ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Gross Exposure in Sectors')
-    ax.legend(loc=2, fontsize='medium')
+    ax.legend()
 
     return ax
 
@@ -256,10 +256,10 @@ def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
     ax.stackplot(long_exposures[0].index, short_exposures,
                  colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set_title('Market Cap Exposures: Long and Short', fontsize='large')
+    ax.set_title('Market Cap Exposures: Long and Short')
     ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Long/Short Exposure in Market Cap Buckets')
-    ax.legend(loc=2, fontsize='medium')
+    ax.legend()
 
     return ax
 
@@ -282,10 +282,10 @@ def plot_cap_exposures_gross(gross_exposures, ax=None):
     ax.stackplot(gross_exposures[0].index, gross_exposures,
                  labels=CAP_NAMES, colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set_title('Market Cap Exposures: Gross', fontsize='large')
+    ax.set_title('Market Cap Exposures: Gross')
     ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Gross Exposure in Market Cap Buckets')
-    ax.legend(loc=2, fontsize='medium')
+    ax.legend()
 
     return ax
 
@@ -313,7 +313,7 @@ def compute_volume_exposures(shares_held, volumes, percentile):
     shares_held = shares_held.replace(0, np.nan)
 
     shares_longed = shares_held[shares_held > 0]
-    shares_shorted = shares_held[shares_held > 0]
+    shares_shorted = -1 * shares_held[shares_held < 0]
     shares_grossed = shares_held.abs()
 
     longed_frac = shares_longed.divide(volumes)
@@ -350,11 +350,11 @@ def plot_volume_exposures_longshort(longed_threshold, shorted_threshold,
     ax.plot(shorted_threshold.index, shorted_threshold, label='short')
     ax.axhline(0, color='k')
     ax.set_title('{}th Percentile of Proportion of Volume: Longs and Shorts'
-                 .format(100*percentile), fontsize='large')
+                 .format(100*percentile))
     ax.set_xlabel('Date')
     ax.set_ylabel('{}th Percentile of Proportion of Volume (%)'
                   .format(100*percentile))
-    ax.legend(fontsize='medium')
+    ax.legend()
 
     return ax
 
@@ -380,10 +380,10 @@ def plot_volume_exposures_gross(grossed_threshold, percentile, ax=None):
     ax.plot(grossed_threshold.index, grossed_threshold, label='gross')
     ax.axhline(0, color='k')
     ax.set_title('{}th Percentile of Proportion of Volume: Gross'
-                 .format(100*percentile), fontsize='large')
+                 .format(100*percentile))
     ax.set_xlabel('Date')
     ax.set_ylabel('{}th Percentile of Proportion of Volume (%)'
                   .format(100*percentile))
-    ax.legend(fontsize='medium')
+    ax.legend()
 
     return ax
