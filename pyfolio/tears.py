@@ -1358,18 +1358,19 @@ def create_risk_tear_sheet(positions,
             = risk.compute_cap_exposures(positions, caps)
         risk.plot_cap_exposures_longshort(long_exposures, short_exposures,
                                           ax_cap_longshort)
-        risk.plot_sector_exposures_gross(gross_exposures, ax_cap_gross)
+        risk.plot_cap_exposures_gross(gross_exposures, ax_cap_gross)
 
     if volumes is not None:
         i += 1
         ax_vol_longshort = plt.subplot(gs[i:i+2, :], sharex=style_axes[0])
         i += 2
         ax_vol_gross = plt.subplot(gs[i, :], sharex=style_axes[0])
-        long_exposures, short_exposures, gross_exposures \
+        longed_threshold, shorted_threshold, grossed_threshold \
             = risk.compute_volume_exposures(positions, volumes, percentile)
-        risk.plot_volume_exposures_longshort(long_exposures, short_exposures,
-                                             percentile, ax_vol_longshort)
-        risk.plot_volume_exposures_gross(gross_exposures, percentile,
+        risk.plot_volume_exposures_longshort(longed_threshold,
+                                             shorted_threshold, percentile,
+                                             ax_vol_longshort)
+        risk.plot_volume_exposures_gross(grossed_threshold, percentile,
                                          ax_vol_gross)
 
     plt.show()
