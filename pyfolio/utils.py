@@ -24,7 +24,11 @@ import numpy as np
 from IPython.display import display
 import pandas as pd
 from pandas.tseries.offsets import BDay
-from pandas_datareader import data as web
+
+try:
+    from pandas_datareader import data as web
+except ImportError as e:
+    from pandas.io import data as web
 
 from . import pos
 from . import txn
