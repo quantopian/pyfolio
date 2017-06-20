@@ -1317,9 +1317,9 @@ def create_risk_tear_sheet(positions,
 
     vertical_sections = len(style_factor_panel.items)
     if sectors is not None:
-        vertical_sections += 3
+        vertical_sections += 4
     if caps is not None:
-        vertical_sections += 3
+        vertical_sections += 4
     if (shares_held is not None) & (volumes is not None) \
                                  & (percentile is not None):
         vertical_sections += 3
@@ -1343,22 +1343,28 @@ def create_risk_tear_sheet(positions,
         ax_sector_longshort = plt.subplot(gs[i:i+2, :], sharex=style_axes[0])
         i += 2
         ax_sector_gross = plt.subplot(gs[i, :], sharex=style_axes[0])
-        long_exposures, short_exposures, gross_exposures \
+        i += 1
+        ax_sector_net = plt.subplot(gs[i, :], sharex=style_axes[0])
+        long_exposures, short_exposures, gross_exposures, net_exposures \
             = risk.compute_sector_exposures(positions, sectors)
         risk.plot_sector_exposures_longshort(long_exposures, short_exposures,
                                              ax_sector_longshort)
         risk.plot_sector_exposures_gross(gross_exposures, ax_sector_gross)
+        risk.plot_sector_exposures_net(net_exposures, ax_sector_net)
 
     if caps is not None:
         i += 1
         ax_cap_longshort = plt.subplot(gs[i:i+2, :], sharex=style_axes[0])
         i += 2
         ax_cap_gross = plt.subplot(gs[i, :], sharex=style_axes[0])
-        long_exposures, short_exposures, gross_exposures \
+        i += 1
+        ax_cap_net = plt.subplot(gs[i, :], sharex=style_axes[0])
+        long_exposures, short_exposures, gross_exposures, net_exposures \
             = risk.compute_cap_exposures(positions, caps)
         risk.plot_cap_exposures_longshort(long_exposures, short_exposures,
                                           ax_cap_longshort)
         risk.plot_cap_exposures_gross(gross_exposures, ax_cap_gross)
+        risk.plot_cap_exposures_net(net_exposures, ax_cap_net)
 
     if volumes is not None:
         i += 1

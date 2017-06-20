@@ -14,21 +14,21 @@
 # limitations under the License.
 import numpy as np
 import matplotlib.pyplot as plt
+from collections import OrderedDict
 
-SECTORS = \
-    {
-        101: '101 Basic Materials',
-        102: '102 Consumer Cyclical',
-        103: '103 Financial Services',
-        104: '104 Real Estate',
-        205: '205 Consumer Defensive',
-        206: '206 Healthcare',
-        207: '207 Utilities',
-        308: '308 Communication Services',
-        309: '309 Energy',
-        310: '310 Industrials',
-        311: '311 Technology'
-    }
+SECTORS = OrderedDict((
+    (101, '101 Basic Materials'),
+    (102, '102 Consumer Cyclical'),
+    (103, '103 Financial Services'),
+    (104, '104 Real Estate'),
+    (205, '205 Consumer Defensive'),
+    (206, '206 Healthcare'),
+    (207, '207 Utilities'),
+    (308, '308 Communication Services'),
+    (309, '309 Energy'),
+    (310, '310 Industrials'),
+    (311, '311 Technology')
+))
 
 CAP_CUTOFFS = [50000000, 300000000, 2000000000, 10000000000, 200000000000]
 CAP_NAMES = ['Micro', 'Small', 'Mid', 'Large', 'Mega']
@@ -92,7 +92,7 @@ def plot_style_factor_exposures(tot_sfe, factor_name, ax=None):
     ax.axhline(avg, linestyle='-.', label='Mean = {:.3}'.format(avg))
     ax.axhline(0, color='k', linestyle='-')
     ax.set_title('{} Weighted Exposure'.format(factor_name))
-    ax.set_ylabel('{} Weighted Exposure'.format(factor_name))
+    ax.set_ylabel('{} \n Weighted Exposure'.format(factor_name))
     ax.legend()
 
     return ax
@@ -118,6 +118,7 @@ def compute_sector_exposures(positions, sectors):
     long_exposures = []
     short_exposures = []
     gross_exposures = []
+    net_exposures = []
 
     positions_wo_cash = positions.drop('cash', axis=1)
     long_exposure = positions_wo_cash[positions_wo_cash > 0].sum(axis=1)
@@ -129,17 +130,17 @@ def compute_sector_exposures(positions, sectors):
 
         long_sector = in_sector[in_sector > 0] \
             .sum(axis=1).divide(long_exposure)
-
         short_sector = in_sector[in_sector < 0] \
             .sum(axis=1).divide(short_exposure)
-
         gross_sector = in_sector.abs().sum(axis=1).divide(gross_exposure)
+        net_sector = long_sector.subtract(short_sector)
 
         long_exposures.append(long_sector)
         short_exposures.append(short_sector)
         gross_exposures.append(gross_sector)
+        net_exposures.append(net_sector)
 
-    return long_exposures, short_exposures, gross_exposures
+    return long_exposures, short_exposures, gross_exposures, net_exposures
 
 
 def plot_sector_exposures_longshort(long_exposures, short_exposures, ax=None):
@@ -169,14 +170,14 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures, ax=None):
     ax.set_title('Sector Exposures: Long and Short')
     ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Long/Short Exposure in Sectors')
-    ax.legend()
+    ax.legend(loc='upper left')
 
     return ax
 
 
 def plot_sector_exposures_gross(gross_exposures, ax=None):
     '''
-    Plots outputs of compute_sector_exposures as area charts
+    Plots output of compute_sector_exposures as area charts
 
     Parameters
     ----------
@@ -197,8 +198,36 @@ def plot_sector_exposures_gross(gross_exposures, ax=None):
     ax.axhline(0, color='k', linestyle='-')
     ax.set_title('Sector Exposures: Gross')
     ax.set_xlabel('Date')
-    ax.set_ylabel('Proportion of Gross Exposure in Sectors')
-    ax.legend()
+    ax.set_ylabel('Proportion of Gross Exposure \n in Sectors')
+    ax.legend(loc='upper left')
+
+    return ax
+
+
+def plot_sector_exposures_net(net_exposures, ax=None):
+    '''
+    Plots output of compute_sector_exposures as line graphs
+
+    Parameters
+    ----------
+    net_exposures : arrays
+        Arrays of net sector exposures (output of compute_sector_exposures).
+    '''
+
+    if ax is None:
+        ax = plt.gca()
+
+    sector_names = SECTORS.values()
+
+    colors = ['#FF9999', '#FFCC99', '#FFFF99', '#CCFF99', '#99FF99', '#99FFCC',
+              '#99FFFF', '#99CCFF', '#9999FF', '#CC99FF', '#FF99FF']
+
+    for i in range(len(net_exposures)):
+        ax.plot(net_exposures[i], color=colors[i], label=sector_names[i])
+    ax.set_title('Sector Exposures: Net')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Proportion of Net Exposure \n in Sectors')
+    ax.legend(loc='upper left')
 
     return ax
 
@@ -222,6 +251,7 @@ def compute_cap_exposures(positions, caps):
     long_exposures = []
     short_exposures = []
     gross_exposures = []
+    net_exposures = []
 
     positions_wo_cash = positions.drop('cash', axis=1)
     tot_gross_exposure = positions_wo_cash.abs().sum(axis=1)
@@ -241,12 +271,14 @@ def compute_cap_exposures(positions, caps):
             .sum(axis=1).divide(tot_long_exposure)
         short_bucket = in_bucket[in_bucket < 0] \
             .sum(axis=1).divide(tot_short_exposure)
+        net_bucket = long_bucket.subtract(short_bucket)
 
         gross_exposures.append(gross_bucket)
         long_exposures.append(long_bucket)
         short_exposures.append(short_bucket)
+        net_exposures.append(net_bucket)
 
-    return long_exposures, short_exposures, gross_exposures
+    return long_exposures, short_exposures, gross_exposures, net_exposures
 
 
 def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
@@ -273,7 +305,7 @@ def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
     ax.set_title('Market Cap Exposures: Long and Short')
     ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Long/Short Exposure in Market Cap Buckets')
-    ax.legend()
+    ax.legend(loc='upper left')
 
     return ax
 
@@ -284,7 +316,7 @@ def plot_cap_exposures_gross(gross_exposures, ax=None):
 
     Parameters
     ----------
-    gross_exposures : arrays
+    gross_exposures : array
         Arrays of gross market cap exposures (output of compute_cap_exposures).
     '''
 
@@ -298,8 +330,34 @@ def plot_cap_exposures_gross(gross_exposures, ax=None):
     ax.axhline(0, color='k', linestyle='-')
     ax.set_title('Market Cap Exposures: Gross')
     ax.set_xlabel('Date')
-    ax.set_ylabel('Proportion of Gross Exposure in Market Cap Buckets')
-    ax.legend()
+    ax.set_ylabel('Proportion of Gross Exposure \n in Market Cap Buckets')
+    ax.legend(loc='upper left')
+
+    return ax
+
+
+def plot_cap_exposures_net(net_exposures, ax=None):
+    '''
+    Plots outputs of compute_cap_exposures as line graphs
+
+    Parameters
+    ----------
+    net_exposures : array
+        Arrays of gross market cap exposures (output of compute_cap_exposures).
+    '''
+
+    if ax is None:
+        ax = plt.gca()
+
+    colors = ['#FF9999', '#FFCC99', '#99FF99', '#99CCFF', '#CC99FF']
+
+    for i in range(len(net_exposures)):
+        ax.plot(net_exposures[i], color=colors[i], label=CAP_NAMES[i])
+    ax.axhline(0, color='k', linestyle='-')
+    ax.set_title('Market Cap Exposures: Net')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Proportion of Net Exposure \n in Market Cap Buckets')
+    ax.legend(loc='upper left')
 
     return ax
 
@@ -396,7 +454,7 @@ def plot_volume_exposures_gross(grossed_threshold, percentile, ax=None):
     ax.set_title('{}th Percentile of Proportion of Volume: Gross'
                  .format(100*percentile))
     ax.set_xlabel('Date')
-    ax.set_ylabel('{}th Percentile of Proportion of Volume (%)'
+    ax.set_ylabel('{}th Percentile of \n Proportion of Volume (%)'
                   .format(100*percentile))
     ax.legend()
 
