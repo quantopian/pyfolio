@@ -227,6 +227,7 @@ def create_simple_tear_sheet(returns,
                              transactions=None,
                              benchmark_rets=None,
                              slippage=None,
+                             estimate_intraday='infer',
                              live_start_date=None):
     """
     Simpler version of create_full_tear_sheet; generates summary performance
@@ -285,6 +286,9 @@ def create_simple_tear_sheet(returns,
         The point in time when the strategy began live trading,
         after its backtest period. This datetime should be normalized.
     """
+
+    positions = utils.check_intraday(estimate_intraday, returns,
+                                     positions, transactions)
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
@@ -1233,12 +1237,15 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
 
 @plotting_context
 def create_risk_tear_sheet(positions,
-                           style_factor_panel,
+                           style_factor_panel=None,
                            sectors=None,
                            caps=None,
                            shares_held=None,
                            volumes=None,
                            percentile=None,
+                           returns=None,
+                           transactions=None,
+                           estimate_intraday='infer',
                            return_fig=False):
     '''
     Creates risk tear sheet: computes and plots style factor exposures, sector
@@ -1279,7 +1286,7 @@ def create_risk_tear_sheet(positions,
         2017-04-05	     311.0	     206.0
 
     caps : pd.DataFrame
-        Daily Morningstar sector code per asset
+        Daily market cap per asset
         - DataFrame with dates as index and equities as columns
         - Example:
                           Equity(24        Equity(62
@@ -1312,10 +1319,13 @@ def create_risk_tear_sheet(positions,
         - Defaults to 10th percentile
     '''
 
-    if percentile is None:
-        percentile = 0.1
+    positions = utils.check_intraday(estimate_intraday, returns,
+                                     positions, transactions)
 
-    vertical_sections = len(style_factor_panel.items)
+    vertical_sections = 0
+
+    if style_factor_panel is not None:
+        vertical_sections += len(style_factor_panel.items)
     if sectors is not None:
         vertical_sections += 4
     if caps is not None:
@@ -1324,19 +1334,23 @@ def create_risk_tear_sheet(positions,
                                  & (percentile is not None):
         vertical_sections += 3
 
+    if percentile is None:
+        percentile = 0.1
+
     fig = plt.figure(figsize=[14, vertical_sections * 6])
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
 
-    style_axes = []
-    style_axes.append(plt.subplot(gs[0, :]))
-    for i in range(1, len(style_factor_panel.items)):
-        style_axes.append(plt.subplot(gs[i, :], sharex=style_axes[0]))
+    if style_factor_panel is not None:
+        style_axes = []
+        style_axes.append(plt.subplot(gs[0, :]))
+        for i in range(1, len(style_factor_panel.items)):
+            style_axes.append(plt.subplot(gs[i, :], sharex=style_axes[0]))
 
-    j = 0
-    for name, df in style_factor_panel.iteritems():
-        sfe = risk.compute_style_factor_exposures(positions, df)
-        risk.plot_style_factor_exposures(sfe, name, style_axes[j])
-        j += 1
+        j = 0
+        for name, df in style_factor_panel.iteritems():
+            sfe = risk.compute_style_factor_exposures(positions, df)
+            risk.plot_style_factor_exposures(sfe, name, style_axes[j])
+            j += 1
 
     if sectors is not None:
         i += 1
@@ -1348,9 +1362,9 @@ def create_risk_tear_sheet(positions,
         long_exposures, short_exposures, gross_exposures, net_exposures \
             = risk.compute_sector_exposures(positions, sectors)
         risk.plot_sector_exposures_longshort(long_exposures, short_exposures,
-                                             ax_sector_longshort)
-        risk.plot_sector_exposures_gross(gross_exposures, ax_sector_gross)
-        risk.plot_sector_exposures_net(net_exposures, ax_sector_net)
+                                             ax=ax_sector_longshort)
+        risk.plot_sector_exposures_gross(gross_exposures, ax=ax_sector_gross)
+        risk.plot_sector_exposures_net(net_exposures, ax=ax_sector_net)
 
     if caps is not None:
         i += 1
