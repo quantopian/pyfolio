@@ -189,7 +189,6 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures,
                  colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
     ax.set_title('Sector Exposures: Long and Short')
-    ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Long/Short Exposure in Sectors')
     ax.legend(loc='upper left', frameon=True, framealpha=0.5)
 
@@ -225,7 +224,6 @@ def plot_sector_exposures_gross(gross_exposures, sector_dict=None, ax=None):
                  labels=sector_names, colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
     ax.set_title('Sector Exposures: Gross')
-    ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Gross Exposure \n in Sectors')
 
     return ax
@@ -259,7 +257,6 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
     for i in range(len(net_exposures)):
         ax.plot(net_exposures[i], color=colors[i], label=sector_names[i])
     ax.set_title('Sector Exposures: Net')
-    ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Net Exposure \n in Sectors')
 
     return ax
@@ -336,7 +333,6 @@ def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
                  colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
     ax.set_title('Market Cap Exposures: Long and Short')
-    ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Long/Short Exposure in Market Cap Buckets')
     ax.legend(loc='upper left', frameon=True, framealpha=0.5)
 
@@ -362,7 +358,6 @@ def plot_cap_exposures_gross(gross_exposures, ax=None):
                  labels=CAP_NAMES, colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
     ax.set_title('Market Cap Exposures: Gross')
-    ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Gross Exposure \n in Market Cap Buckets')
 
     return ax
@@ -387,7 +382,6 @@ def plot_cap_exposures_net(net_exposures, ax=None):
         ax.plot(net_exposures[i], color=colors[i], label=CAP_NAMES[i])
     ax.axhline(0, color='k', linestyle='-')
     ax.set_title('Market Cap Exposures: Net')
-    ax.set_xlabel('Date')
     ax.set_ylabel('Proportion of Net Exposure \n in Market Cap Buckets')
 
     return ax
@@ -456,7 +450,6 @@ def plot_volume_exposures_longshort(longed_threshold, shorted_threshold,
     ax.axhline(0, color='k')
     ax.set_title('{}th Percentile of Proportion of Volume: Longs and Shorts'
                  .format(100*percentile))
-    ax.set_xlabel('Date')
     ax.set_ylabel('{}th Percentile of Proportion of Volume (%)'
                   .format(100*percentile))
     ax.legend()
@@ -487,7 +480,6 @@ def plot_volume_exposures_gross(grossed_threshold, percentile, ax=None):
     ax.axhline(0, color='k')
     ax.set_title('{}th Percentile of Proportion of Volume: Gross'
                  .format(100*percentile))
-    ax.set_xlabel('Date')
     ax.set_ylabel('{}th Percentile of \n Proportion of Volume (%)'
                   .format(100*percentile))
     ax.legend()
