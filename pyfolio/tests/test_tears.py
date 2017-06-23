@@ -58,7 +58,7 @@ class PositionsTestCase(TestCase):
             index_col=0, parse_dates=True)
         style_dict.append({style: df})
     test_styles = pd.Panel()
-    test_styles.from_dict(style_dict)
+    test_styles = test_styles.from_dict(style_dict)
 
     @parameterized.expand([({},),
                            ({'slippage': 1},),
