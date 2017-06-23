@@ -24,7 +24,11 @@ import numpy as np
 from IPython.display import display
 import pandas as pd
 from pandas.tseries.offsets import BDay
-from pandas_datareader import data as web
+
+try:
+    from pandas_datareader import data as web
+except ImportError as e:
+    from pandas.io import data as web
 
 from . import pos
 from . import txn
@@ -248,6 +252,34 @@ def get_symbol_from_yahoo(symbol, start=None, end=None):
     return rets
 
 
+def get_symbol_from_google(symbol, start=None, end=None):
+    """
+    Wrapper for web.get_data_google()
+    Retrieves prices for symbol from google and computes returns
+    based on adjusted closing prices.
+
+    Parameters
+    ----------
+    symbol : str
+        Symbol name to load, e.g. 'SPY'
+    start : pandas.Timestamp compatible, optional
+        Start date of time period to retrieve
+    end : pandas.Timestamp compatible, optional
+        End date of time period to retrieve
+
+    Returns
+    -------
+    pandas.DataFrame
+        Returns of symbol in requested period.
+    """
+
+    px = web.get_data_google(symbol, start=start, end=end)
+    rets = px[['Close']].pct_change().dropna()
+    rets.index = rets.index.tz_localize("UTC")
+    rets.columns = [symbol]
+    return rets
+
+
 def default_returns_func(symbol, start=None, end=None):
     """
     Gets returns for a symbol.
@@ -282,14 +314,14 @@ def default_returns_func(symbol, start=None, end=None):
     if symbol == 'SPY':
         filepath = data_path('spy.csv')
         rets = get_returns_cached(filepath,
-                                  get_symbol_from_yahoo,
+                                  get_symbol_from_google,
                                   end,
                                   symbol='SPY',
                                   start='1/1/1970',
                                   end=datetime.now())
         rets = rets[start:end]
     else:
-        rets = get_symbol_from_yahoo(symbol, start=start, end=end)
+        rets = get_symbol_from_google(symbol, start=start, end=end)
 
     return rets[symbol]
 
