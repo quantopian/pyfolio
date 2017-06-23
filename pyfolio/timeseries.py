@@ -292,32 +292,6 @@ def sharpe_ratio(returns, risk_free=0, period=DAILY):
 
 
 @deprecated(msg=DEPRECATION_WARNING)
-def information_ratio(returns, factor_returns):
-    """
-    Determines the Information ratio of a strategy.
-
-    Parameters
-    ----------
-    returns : pd.Series or pd.DataFrame
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~pyfolio.timeseries.cum_returns`.
-    factor_returns: float / series
-        Benchmark return to compare returns against.
-
-    Returns
-    -------
-    float
-        The information ratio.
-
-    Note
-    -----
-    See https://en.wikipedia.org/wiki/information_ratio for more details.
-    """
-
-    return empyrical.information_ratio(returns, factor_returns)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
 def alpha_beta(returns, factor_returns):
     """
     Calculates both alpha and beta.
