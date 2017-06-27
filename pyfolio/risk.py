@@ -1,5 +1,5 @@
 #
-# Copyright 2016 Quantopian, Inc.
+# Copyright 2017 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ def plot_style_factor_exposures(tot_sfe, factor_name, ax=None):
     _, _, y1, y2 = plt.axis()
     a = max(abs(y1), abs(y2))
     ax.set_ylim(-a, a)
-    ax.set_title('{} Weighted Exposure'.format(factor_name))
+    ax.set_title('Exposure to {}'.format(factor_name))
     ax.set_ylabel('{} \n Weighted Exposure'.format(factor_name))
     ax.legend()
 
@@ -188,7 +188,7 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures,
     ax.stackplot(long_exposures[0].index, short_exposures,
                  colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set_title('Sector Exposures: Long and Short')
+    ax.set_title('Long and Short Exposures to Sectors')
     ax.set_ylabel('Proportion of Long/Short Exposure in Sectors')
     ax.legend(loc='upper left', frameon=True, framealpha=0.5)
 
@@ -223,7 +223,7 @@ def plot_sector_exposures_gross(gross_exposures, sector_dict=None, ax=None):
     ax.stackplot(gross_exposures[0].index, gross_exposures,
                  labels=sector_names, colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set_title('Sector Exposures: Gross')
+    ax.set_title('Gross Exposure to Sectors')
     ax.set_ylabel('Proportion of Gross Exposure \n in Sectors')
 
     return ax
@@ -256,7 +256,7 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
 
     for i in range(len(net_exposures)):
         ax.plot(net_exposures[i], color=colors[i], label=sector_names[i])
-    ax.set_title('Sector Exposures: Net')
+    ax.set_title('Net Exposures to Sectors')
     ax.set_ylabel('Proportion of Net Exposure \n in Sectors')
 
     return ax
@@ -332,7 +332,7 @@ def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
     ax.stackplot(long_exposures[0].index, short_exposures,
                  colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set_title('Market Cap Exposures: Long and Short')
+    ax.set_title('Long and Short Exposures to Market Caps')
     ax.set_ylabel('Proportion of Long/Short Exposure in Market Cap Buckets')
     ax.legend(loc='upper left', frameon=True, framealpha=0.5)
 
@@ -357,7 +357,7 @@ def plot_cap_exposures_gross(gross_exposures, ax=None):
     ax.stackplot(gross_exposures[0].index, gross_exposures,
                  labels=CAP_NAMES, colors=colors, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set_title('Market Cap Exposures: Gross')
+    ax.set_title('Gross Exposure to Market Caps')
     ax.set_ylabel('Proportion of Gross Exposure \n in Market Cap Buckets')
 
     return ax
@@ -381,7 +381,7 @@ def plot_cap_exposures_net(net_exposures, ax=None):
     for i in range(len(net_exposures)):
         ax.plot(net_exposures[i], color=colors[i], label=CAP_NAMES[i])
     ax.axhline(0, color='k', linestyle='-')
-    ax.set_title('Market Cap Exposures: Net')
+    ax.set_title('Net Exposure to Market Caps')
     ax.set_ylabel('Proportion of Net Exposure \n in Market Cap Buckets')
 
     return ax
@@ -448,8 +448,7 @@ def plot_volume_exposures_longshort(longed_threshold, shorted_threshold,
     ax.plot(shorted_threshold.index, shorted_threshold,
             color='r', label='short')
     ax.axhline(0, color='k')
-    ax.set_title('{}th Percentile of Proportion of Volume: Longs and Shorts'
-                 .format(100*percentile))
+    ax.set_title('Long and Short Exposures to Illiquidity')
     ax.set_ylabel('{}th Percentile of Proportion of Volume (%)'
                   .format(100*percentile))
     ax.legend()
@@ -478,8 +477,7 @@ def plot_volume_exposures_gross(grossed_threshold, percentile, ax=None):
     ax.plot(grossed_threshold.index, grossed_threshold,
             color='b', label='gross')
     ax.axhline(0, color='k')
-    ax.set_title('{}th Percentile of Proportion of Volume: Gross'
-                 .format(100*percentile))
+    ax.set_title('Gross Exposure to Illiquidity')
     ax.set_ylabel('{}th Percentile of \n Proportion of Volume (%)'
                   .format(100*percentile))
     ax.legend()
