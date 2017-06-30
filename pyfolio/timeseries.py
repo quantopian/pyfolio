@@ -706,7 +706,7 @@ def perf_stats(returns, factor_returns=None, positions=None,
         stats['Gross leverage'] = gross_lev(positions).mean()
         if transactions is not None:
             stats['Daily turnover'] = get_turnover(positions,
-												   transactions).mean()
+                                                   transactions).mean()
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
             res = stat_func(returns, factor_returns)
