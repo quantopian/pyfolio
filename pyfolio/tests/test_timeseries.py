@@ -183,7 +183,8 @@ class TestDrawdown(TestCase):
         pairs = list(zip(spy_drawdowns['Recovery date'],
                          spy_drawdowns['Peak date'].shift(-1)))[:-1]
         for recovery, peak in pairs:
-            self.assertLessEqual(recovery, peak)
+            if recovery != pd.NaT:
+                self.assertLessEqual(recovery, peak)
 
     @parameterized.expand([
         (pd.Series(px_list_1,
