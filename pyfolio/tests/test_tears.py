@@ -26,7 +26,7 @@ class PositionsTestCase(TestCase):
     test_returns = read_csv(
         gzip.open(
             __location__ + '/test_data/test_returns.csv.gz'),
-        index_col=0, parse_dates=True).iloc[4:]
+        index_col=0, parse_dates=True)
     test_returns = to_series(to_utc(test_returns))
     test_txn = to_utc(read_csv(
         gzip.open(

@@ -247,7 +247,7 @@ def get_symbol_from_yahoo(symbol, start=None, end=None):
         rets = px[['Adj Close']].pct_change().dropna()
     except Exception as e:
         warnings.warn(
-            'Yahoo Finance reader failed with {}, falling back to Google'.format(e),
+            'Yahoo Finance read failed: {}, falling back to Google'.format(e),
             UserWarning)
         px = web.get_data_google(symbol, start=start, end=end)
         rets = px[['Close']].pct_change().dropna()

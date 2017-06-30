@@ -18,7 +18,6 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 from scipy import stats
-import theano.tensor as tt
 
 import matplotlib.pyplot as plt
 
