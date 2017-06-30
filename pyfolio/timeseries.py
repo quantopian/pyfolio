@@ -630,25 +630,24 @@ def value_at_risk(returns, period=None, sigma=2.0):
 
 
 SIMPLE_STAT_FUNCS = [
-    annual_return,
+    empyrical.annual_return,
     empyrical.cum_returns_final,
-    annual_volatility,
-    sharpe_ratio,
-    calmar_ratio,
-    stability_of_timeseries,
-    max_drawdown,
-    omega_ratio,
-    sortino_ratio,
+    empyrical.annual_volatility,
+    empyrical.sharpe_ratio,
+    empyrical.calmar_ratio,
+    empyrical.stability_of_timeseries,
+    empyrical.max_drawdown,
+    empyrical.omega_ratio,
+    empyrical.sortino_ratio,
     stats.skew,
     stats.kurtosis,
-    tail_ratio,
-    common_sense_ratio,
+    empyrical.tail_ratio,
     value_at_risk
 ]
 
 FACTOR_STAT_FUNCS = [
-    alpha,
-    beta,
+    empyrical.alpha,
+    empyrical.beta,
 ]
 
 STAT_FUNC_NAMES = {
@@ -706,8 +705,8 @@ def perf_stats(returns, factor_returns=None, positions=None,
     if positions is not None:
         stats['Gross leverage'] = gross_lev(positions).mean()
         if transactions is not None:
-            stats['Daily turnover'] = get_turnover(positions, transactions,
-                                                   period='1D').mean()
+            stats['Daily turnover'] = get_turnover(positions,
+                                                   transactions).mean()
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
             res = stat_func(returns, factor_returns)
@@ -922,7 +921,7 @@ def get_top_drawdowns(returns, top=10):
     """
 
     returns = returns.copy()
-    df_cum = cum_returns(returns, 1.0)
+    df_cum = empyrical.cum_returns(returns, 1.0)
     running_max = np.maximum.accumulate(df_cum)
     underwater = df_cum / running_max - 1
 
@@ -962,7 +961,7 @@ def gen_drawdown_table(returns, top=10):
         Information about top drawdowns.
     """
 
-    df_cum = cum_returns(returns, 1.0)
+    df_cum = empyrical.cum_returns(returns, 1.0)
     drawdown_periods = get_top_drawdowns(returns, top=top)
     df_drawdowns = pd.DataFrame(index=list(range(top)),
                                 columns=['Net drawdown in %',

@@ -24,6 +24,7 @@ import numpy as np
 from IPython.display import display
 import pandas as pd
 from pandas.tseries.offsets import BDay
+
 from pandas_datareader import data as web
 
 from . import pos
@@ -241,8 +242,16 @@ def get_symbol_from_yahoo(symbol, start=None, end=None):
         Returns of symbol in requested period.
     """
 
-    px = web.get_data_yahoo(symbol, start=start, end=end)
-    rets = px[['Adj Close']].pct_change().dropna()
+    try:
+        px = web.get_data_yahoo(symbol, start=start, end=end)
+        rets = px[['Adj Close']].pct_change().dropna()
+    except Exception as e:
+        warnings.warn(
+            'Yahoo Finance read failed: {}, falling back to Google'.format(e),
+            UserWarning)
+        px = web.get_data_google(symbol, start=start, end=end)
+        rets = px[['Close']].pct_change().dropna()
+
     rets.index = rets.index.tz_localize("UTC")
     rets.columns = [symbol]
     return rets

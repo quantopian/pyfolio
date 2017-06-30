@@ -11,8 +11,7 @@ from pandas import (
     Timestamp,
     read_csv
 )
-from pandas.util.testing import (assert_frame_equal,
-                                 assert_equal)
+from pandas.util.testing import assert_frame_equal
 
 from numpy import (
     arange,
@@ -166,7 +165,7 @@ class PositionsTestCase(TestCase):
     ])
     def test_detect_intraday(self, positions, transactions, expected):
         detected = detect_intraday(positions, transactions, threshold=0.25)
-        assert_equal(detected, expected)
+        assert detected == expected
 
     @parameterized.expand([
         ('infer', test_returns, test_pos, test_txn, test_pos),
@@ -184,4 +183,4 @@ class PositionsTestCase(TestCase):
     def test_estimate_intraday(self, returns, positions,
                                transactions, expected):
         intraday_pos = estimate_intraday(returns, positions, transactions)
-        assert_equal(intraday_pos.shape, expected)
+        assert intraday_pos.shape == expected

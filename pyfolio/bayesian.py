@@ -18,7 +18,6 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 from scipy import stats
-import theano.tensor as tt
 
 import matplotlib.pyplot as plt
 
@@ -66,43 +65,28 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
         of the posterior.
     """
 
-    if data.shape[0] != bmark.shape[0]:
-        data = pd.Series(data, index=bmark.index)
-
-    data_no_missing = data.dropna()
-
-    if bmark.ndim == 1:
-        bmark = pd.DataFrame(bmark)
-
-    bmark = bmark.loc[data_no_missing.index]
-    n_bmark = bmark.shape[1]
+    data_bmark = pd.concat([data, bmark], axis='columns').dropna()
 
     with pm.Model() as model:
         sigma = pm.HalfCauchy(
             'sigma',
-            beta=1,
-            testval=data_no_missing.values.std())
-        nu = pm.Exponential('nu_minus_two', 1. / 10., testval=.3)
+            beta=1)
+        nu = pm.Exponential('nu_minus_two', 1. / 10.)
 
         # alpha and beta
-        X = bmark.loc[data_no_missing.index]
-        X.loc[:, 'ones'] = 1.
-        y = data_no_missing
-        alphabeta_init = np.linalg.lstsq(X, y)[0]
+        X = data_bmark.iloc[:, 1]
+        y = data_bmark.iloc[:, 0]
 
-        alpha_reg = pm.Normal('alpha', mu=0, sd=.1, testval=alphabeta_init[-1])
-        beta_reg = pm.Normal('beta', mu=0, sd=1,
-                             testval=alphabeta_init[:-1], shape=n_bmark)
-        bmark_theano = tt.as_tensor_variable(bmark.values.T)
-        mu_reg = alpha_reg + tt.dot(beta_reg, bmark_theano)
+        alpha_reg = pm.Normal('alpha', mu=0, sd=.1)
+        beta_reg = pm.Normal('beta', mu=0, sd=1)
+
+        mu_reg = alpha_reg + beta_reg * X
         StudentT('returns',
                  nu=nu + 2,
                  mu=mu_reg,
                  sd=sigma,
-                 observed=data)
-        start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
-        step = pm.NUTS(scaling=start)
-        trace = pm.sample(samples, step, start=start)
+                 observed=y)
+        trace = pm.sample(samples)
 
     return model, trace
 
@@ -141,9 +125,7 @@ def model_returns_normal(data, samples=500):
             returns.distribution.variance**.5 *
             np.sqrt(252))
 
-        start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
-        step = pm.NUTS(scaling=start)
-        trace = pm.sample(samples, step, start=start)
+        trace = pm.sample(samples)
     return model, trace
 
 
@@ -185,9 +167,7 @@ def model_returns_t(data, samples=500):
                          returns.distribution.variance**.5 *
                          np.sqrt(252))
 
-        start = pm.find_MAP(fmin=sp.optimize.fmin_powell)
-        step = pm.NUTS(scaling=start)
-        trace = pm.sample(samples, step, start=start)
+        trace = pm.sample(samples)
     return model, trace
 
 
@@ -272,9 +252,7 @@ def model_best(y1, y2, samples=1000):
                          returns_group2.distribution.variance**.5 *
                          np.sqrt(252))
 
-        step = pm.NUTS()
-
-        trace = pm.sample(samples, step)
+        trace = pm.sample(samples)
     return model, trace
 
 
@@ -406,15 +384,8 @@ def model_stoch_vol(data, samples=2000):
         volatility_process = pm.Deterministic('volatility_process',
                                               pm.math.exp(-2 * s))
         StudentT('r', nu, lam=volatility_process, observed=data)
-        start = pm.find_MAP(vars=[s], fmin=sp.optimize.fmin_l_bfgs_b)
 
-        step = pm.NUTS(scaling=start)
-        trace = pm.sample(100, step, progressbar=False)
-
-        # Start next run at the last sampled position.
-        step = pm.NUTS(scaling=trace[-1], gamma=.25)
-        trace = pm.sample(samples, step, start=trace[-1],
-                          progressbar=False)
+        trace = pm.sample(samples)
 
     return model, trace
 
