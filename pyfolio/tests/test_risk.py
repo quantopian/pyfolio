@@ -23,7 +23,7 @@ class RiskTestCase(TestCase):
         gzip.open(__location__ + '/test_data/test_pos.csv.gz'),
         index_col=0, parse_dates=True))
     test_pos.columns = [351, 1419, 1787, 25317, 3321, 3951, 4922, 'cash']
-    
+
     test_txn = to_utc(read_csv(
         gzip.open(
             __location__ + '/test_data/test_txn.csv.gz'),
@@ -65,35 +65,35 @@ class RiskTestCase(TestCase):
         __location__ + '/test_data/expected_volumes.csv',
         index_col=0, parse_dates=True))
 
-    # Need to format dataframes! Index properly, column names must be sids
-
     test_dict = {}
-    expected_dict = {}
     styles = ['LT_MOMENTUM', 'LMCAP', 'VLTY', 'MACDSignal']
     for style in styles:
         df = to_utc(read_csv(
             __location__ + '/test_data/test_{}.csv'.format(style),
             index_col=0, parse_dates=True))
         test_dict.update({style: df})
-        df2 = to_utc(read_csv(
-            __location__ + '/test_data/expected_{}.csv'.format(style),
-            index_col=0, parse_dates=True))
-        expected_dict.update({style: df2})
     test_styles = pd.Panel()
     test_styles = test_styles.from_dict(test_dict)
-    expected_styles = pd.Panel()
-    expected_styles = expected_styles.from_dict(expected_dict)
+
+    expected_styles = to_utc(read_csv(
+        __location__ + '/test_data/expected_styles.csv',
+        index_col=0, parse_dates=True))
 
     @parameterized.expand([
-        (test_pos, test_styles['LT_MOMENTUM'], expected_styles['LT_MOMENTUM']),
-        (test_pos, test_styles['LMCAP'], expected_styles['LMCAP']),
-        (test_pos, test_styles['VLTY'], expected_styles['VLTY']),
-        (test_pos, test_styles['MACDSignal'], expected_styles['MACDSignal'])
+        (test_pos, test_styles, expected_styles)
     ])
     def test_compute_style_factor_exposures(self, positions,
-                                            risk_factor, expected):
-        style_exposure = compute_style_factor_exposures(positions, risk_factor)
-        assert_frame_equal(style_exposure, expected)
+                                            risk_factor_panel, expected):
+        style_list = []
+        for name, value in risk_factor_panel.iteritems():
+            risk_factor_panel[name].columns = \
+                risk_factor_panel[name].columns.astype(int)
+            style_list.append(
+                compute_style_factor_exposures(positions,
+                                               risk_factor_panel[name])
+                )
+        expected.columns = expected.columns.astype(int)
+        assert_frame_equal(pd.concat(style_list, axis=1), expected)
 
     @parameterized.expand([
         (test_pos, test_sectors, expected_sectors_longed,
@@ -102,7 +102,13 @@ class RiskTestCase(TestCase):
     def test_compute_sector_exposures(self, positions, sectors,
                                       expected_longed, expected_shorted,
                                       expected_grossed):
+        sectors.columns = sectors.columns.astype(int)
         sector_exposures = compute_sector_exposures(positions, sectors)
+
+        expected_longed.columns = expected_longed.columns.astype(int)
+        expected_shorted.columns = expected_shorted.columns.astype(int)
+        expected_grossed.columns = expected_grossed.columns.astype(int)
+
         assert_frame_equal(pd.concat(sector_exposures[0], axis=1),
                            expected_longed)
         assert_frame_equal(pd.concat(sector_exposures[1], axis=1),
@@ -117,8 +123,14 @@ class RiskTestCase(TestCase):
     def test_compute_cap_exposures(self, positions, caps,
                                    expected_longed, expected_shorted,
                                    expected_grossed, expected_netted):
+        caps.columns = caps.columns.astype(int)
         cap_exposures = compute_cap_exposures(positions, caps)
+
         expected_longed.columns = expected_longed.columns.astype(int)
+        expected_shorted.columns = expected_shorted.columns.astype(int)
+        expected_grossed.columns = expected_grossed.columns.astype(int)
+        expected_netted.columns = expected_netted.columns.astype(int)
+
         assert_frame_equal(pd.concat(cap_exposures[0], axis=1),
                            expected_longed)
         assert_frame_equal(pd.concat(cap_exposures[1], axis=1),
@@ -135,4 +147,5 @@ class RiskTestCase(TestCase):
                                       percentile, expected):
         volume_exposures = compute_volume_exposures(shares_held, volumes,
                                                     percentile)
-        assert_frame_equal(volume_exposures, expected)
+        expected.columns = expected.columns.astype(int)
+        assert_frame_equal(pd.concat(volume_exposures, axis=1), expected)
