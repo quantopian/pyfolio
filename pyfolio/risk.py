@@ -137,6 +137,7 @@ def compute_sector_exposures(positions, sectors, sector_dict=None):
     long_exposure = positions_wo_cash[positions_wo_cash > 0].sum(axis=1)
     short_exposure = positions_wo_cash[positions_wo_cash < 0].abs().sum(axis=1)
     gross_exposure = positions_wo_cash.abs().sum(axis=1)
+    sectors.columns = sectors.columns.astype(int)
 
     for sector_id in sector_ids:
         in_sector = positions_wo_cash[sectors == sector_id]
