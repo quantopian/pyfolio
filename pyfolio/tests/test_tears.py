@@ -6,6 +6,7 @@ from nose_parameterized import parameterized
 import os
 import gzip
 
+import pandas as pd
 from pandas import read_csv
 
 from pyfolio.utils import (to_utc, to_series)
@@ -16,7 +17,8 @@ from pyfolio.tears import (create_full_tear_sheet,
                            create_txn_tear_sheet,
                            create_round_trip_tear_sheet,
                            create_interesting_times_tear_sheet,
-                           create_bayesian_tear_sheet)
+                           create_bayesian_tear_sheet,
+                           create_risk_tear_sheet)
 
 
 class PositionsTestCase(TestCase):
@@ -35,6 +37,28 @@ class PositionsTestCase(TestCase):
     test_pos = to_utc(read_csv(
         gzip.open(__location__ + '/test_data/test_pos.csv.gz'),
         index_col=0, parse_dates=True))
+    test_sectors = to_utc(read_csv(
+        __location__ + '/test_data/test_sectors.csv',
+        index_col=0, parse_dates=True))
+    test_caps = to_utc(read_csv(
+        __location__ + '/test_data/test_caps.csv',
+        index_col=0, parse_dates=True))
+    test_shares_held = to_utc(read_csv(
+        __location__ + '/test_data/test_shares_held.csv',
+        index_col=0, parse_dates=True))
+    test_volumes = to_utc(read_csv(
+        __location__ + '/test_data/test_volumes.csv',
+        index_col=0, parse_dates=True))
+
+    style_dict = {}
+    styles = ['LT_MOMENTUM', 'LMCAP', 'VLTY', 'MACDSignal']
+    for style in styles:
+        df = to_utc(read_csv(
+            __location__ + '/test_data/test_{}.csv'.format(style),
+            index_col=0, parse_dates=True))
+        style_dict.update({style: df})
+    test_styles = pd.Panel()
+    test_styles = test_styles.from_dict(style_dict)
 
     @parameterized.expand([({},),
                            ({'slippage': 1},),
@@ -128,4 +152,19 @@ class PositionsTestCase(TestCase):
         create_bayesian_tear_sheet(
             self.test_returns,
             live_start_date=self.test_returns.index[-20],
+            **kwargs)
+
+    @parameterized.expand([({},),
+                           ({'style_factor_panel': test_styles},),
+                           ({'sectors': test_sectors},),
+                           ({'caps': test_caps},),
+                           ({'shares_held': test_shares_held},),
+                           ({'volumes': test_volumes},),
+                           ({'returns': test_returns},),
+                           ({'transactions': test_txn},)
+                           ])
+    @cleanup
+    def test_create_risk_tear_sheet_breakdown(self, kwargs):
+        create_risk_tear_sheet(
+            self.test_pos,
             **kwargs)
