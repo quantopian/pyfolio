@@ -22,16 +22,6 @@ from collections import OrderedDict
 def label_bars(bars, heights, style='left', ax=None):
     '''
     Helper function to label bar charts with heights
-
-    Parameters
-    ----------
-    bars :
-
-    heights : np.array
-
-    style : str
-
-    ax : plt.ax
     '''
     if ax is None:
         ax = plt.gca()
@@ -422,7 +412,7 @@ def compute_price_pnl(round_trips, pricing):
         pnl = row[1].pnl
 
         # Assign price_bucket
-        entering_price = pricing.close.loc[day, asset]
+        entering_price = pricing.loc[day, asset]
         if 0 <= entering_price and entering_price < 1:
             price_bucket = 0
         elif 1 <= entering_price and entering_price < 2:
