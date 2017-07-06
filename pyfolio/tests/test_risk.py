@@ -145,7 +145,8 @@ class RiskTestCase(TestCase):
     ])
     def test_compute_volume_exposures(self, shares_held, volumes,
                                       percentile, expected):
-        l_thresh, s_thresh, g_thresh = compute_volume_exposures(shares_held, volumes,
+        l_thresh, s_thresh, g_thresh = compute_volume_exposures(shares_held,
+                                                                volumes,
                                                                 percentile)
 
         assert_series_equal(l_thresh, expected['0'], check_names=False)
