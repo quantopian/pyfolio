@@ -7,7 +7,7 @@ import pandas as pd
 from pandas import read_csv
 from pyfolio.utils import to_utc
 
-from pandas.util.testing import assert_frame_equal
+from pandas.util.testing import assert_frame_equal, assert_series_equal
 
 from pyfolio.risk import (compute_style_factor_exposures,
                           compute_sector_exposures,
@@ -145,7 +145,9 @@ class RiskTestCase(TestCase):
     ])
     def test_compute_volume_exposures(self, shares_held, volumes,
                                       percentile, expected):
-        volume_exposures = compute_volume_exposures(shares_held, volumes,
-                                                    percentile)
-        expected.columns = expected.columns.astype(int)
-        assert_frame_equal(pd.concat(volume_exposures, axis=1), expected)
+        l_thresh, s_thresh, g_thresh = compute_volume_exposures(shares_held, volumes,
+                                                                percentile)
+
+        assert_series_equal(l_thresh, expected['0'], check_names=False)
+        assert_series_equal(s_thresh, expected['1'], check_names=False)
+        assert_series_equal(g_thresh, expected['2'], check_names=False)
