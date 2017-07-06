@@ -294,8 +294,8 @@ def compute_cap_exposures(positions, caps):
         if i == len(CAP_CUTOFFS):
             in_bucket = positions_wo_cash[caps >= CAP_CUTOFFS[-1]]
         else:
-            in_bucket = positions_wo_cash[(caps <= CAP_CUTOFFS[i])
-                                          & (caps >= CAP_CUTOFFS[i-1])]
+            in_bucket = positions_wo_cash[((caps <= CAP_CUTOFFS[i]) &
+                                           (caps >= CAP_CUTOFFS[i-1]))]
 
         gross_bucket = in_bucket.abs().sum(axis=1).divide(tot_gross_exposure)
         long_bucket = in_bucket[in_bucket > 0] \
