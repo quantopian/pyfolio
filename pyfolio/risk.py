@@ -144,7 +144,6 @@ def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
     short_exposure = positions_wo_cash[positions_wo_cash < 0] \
         .abs().sum(axis='columns')
     gross_exposure = positions_wo_cash.abs().sum(axis='columns')
-    sectors.columns = sectors.columns.astype(int)
 
     for sector_id in sector_ids:
         in_sector = positions_wo_cash[sectors == sector_id]
@@ -166,7 +165,7 @@ def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
 
 
 def plot_sector_exposures_longshort(long_exposures, short_exposures,
-                                    sector_dict=None, ax=None):
+                                    sector_dict=SECTORS, ax=None):
     '''
     Plots outputs of compute_sector_exposures as area charts
 
