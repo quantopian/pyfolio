@@ -302,7 +302,7 @@ def compute_cap_exposures(positions, caps):
     tot_short_exposure = positions_wo_cash[positions_wo_cash < 0] \
         .abs().sum(axis='columns')
 
-    for bucket_name, boundaries in CAP_BUCKETS.iteritems():
+    for bucket_name, boundaries in CAP_BUCKETS.items():
         in_bucket = positions_wo_cash[(caps >= boundaries[0])
                                       & (caps <= boundaries[1])]
 
