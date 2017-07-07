@@ -71,7 +71,7 @@ def compute_style_factor_exposures(positions, risk_factor):
     return tot_style_factor_exposure
 
 
-def plot_style_factor_exposures(tot_style_factor_exposure, factor_name,
+def plot_style_factor_exposures(tot_style_factor_exposure, factor_name=None,
                                 ax=None):
     '''
     Plots DataFrame output of compute_style_factor_exposures as a line graph
@@ -89,10 +89,14 @@ def plot_style_factor_exposures(tot_style_factor_exposure, factor_name,
 
     factor_name : string
         Name of style factor, for use in graph title
+        - Defaults to tot_style_factor_exposure.name
     '''
 
     if ax is None:
         ax = plt.gca()
+
+    if factor_name is None:
+        factor_name = tot_style_factor_exposure.name
 
     ax.plot(tot_style_factor_exposure.index, tot_style_factor_exposure,
             label=factor_name)
