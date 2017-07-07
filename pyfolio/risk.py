@@ -303,8 +303,8 @@ def compute_cap_exposures(positions, caps):
         .abs().sum(axis='columns')
 
     for bucket_name, boundaries in CAP_BUCKETS.items():
-        in_bucket = positions_wo_cash[(caps >= boundaries[0])
-                                      & (caps <= boundaries[1])]
+        in_bucket = positions_wo_cash[(caps >= boundaries[0]) &
+                                      (caps <= boundaries[1])]
 
         gross_bucket = in_bucket.abs().sum(axis='columns') \
             .divide(tot_gross_exposure)
