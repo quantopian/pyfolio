@@ -192,13 +192,12 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures,
     else:
         sector_names = sector_dict.values()
 
-    colors = ['#FF9999', '#FFCC99', '#FFFF99', '#CCFF99', '#99FF99', '#99FFCC',
-              '#99FFFF', '#99CCFF', '#9999FF', '#CC99FF', '#FF99FF']
+    color_list = plt.cm.Set3(np.linspace(0, 1, 11))
 
     ax.stackplot(long_exposures[0].index, long_exposures,
-                 labels=sector_names, colors=colors, baseline='zero')
+                 labels=sector_names, colors=color_list, baseline='zero')
     ax.stackplot(long_exposures[0].index, short_exposures,
-                 colors=colors, baseline='zero')
+                 colors=color_list, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
     ax.set(title='Long and Short Exposures to Sectors',
            ylabel='Proportion of Long/Short Exposure in Sectors')
@@ -229,11 +228,10 @@ def plot_sector_exposures_gross(gross_exposures, sector_dict=None, ax=None):
     else:
         sector_names = sector_dict.values()
 
-    colors = ['#FF9999', '#FFCC99', '#FFFF99', '#CCFF99', '#99FF99', '#99FFCC',
-              '#99FFFF', '#99CCFF', '#9999FF', '#CC99FF', '#FF99FF']
+    color_list = plt.cm.Set3(np.linspace(0, 1, 11))
 
     ax.stackplot(gross_exposures[0].index, gross_exposures,
-                 labels=sector_names, colors=colors, baseline='zero')
+                 labels=sector_names, colors=color_list, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
     ax.set(title='Gross Exposure to Sectors',
            ylabel='Proportion of Gross Exposure \n in Sectors')
@@ -263,11 +261,10 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
     else:
         sector_names = sector_dict.values()
 
-    colors = ['#FF9999', '#FFCC99', '#FFFF99', '#CCFF99', '#99FF99', '#99FFCC',
-              '#99FFFF', '#99CCFF', '#9999FF', '#CC99FF', '#FF99FF']
+    color_list = plt.cm.Set3(np.linspace(0, 1, 11))
 
     for i in range(len(net_exposures)):
-        ax.plot(net_exposures[i], color=colors[i], label=sector_names[i])
+        ax.plot(net_exposures[i], color=color_list[i], label=sector_names[i])
     ax.set(title='Net Exposures to Sectors',
            ylabel='Proportion of Net Exposure \n in Sectors')
 
@@ -336,12 +333,12 @@ def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    colors = ['#FF9999', '#FFCC99', '#99FF99', '#99CCFF', '#CC99FF']
+    color_list = plt.cm.Set3(np.linspace(0, 1, 5))
 
     ax.stackplot(long_exposures[0].index, long_exposures,
-                 labels=CAP_BUCKETS.keys(), colors=colors, baseline='zero')
+                 labels=CAP_BUCKETS.keys(), colors=color_list, baseline='zero')
     ax.stackplot(long_exposures[0].index, short_exposures,
-                 colors=colors, baseline='zero')
+                 colors=color_list, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
     ax.set(title='Long and Short Exposures to Market Caps',
            ylabel='Proportion of Long/Short Exposure in Market Cap Buckets')
@@ -363,10 +360,10 @@ def plot_cap_exposures_gross(gross_exposures, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    colors = ['#FF9999', '#FFCC99', '#99FF99', '#99CCFF', '#CC99FF']
+    color_list = plt.cm.Set3(np.linspace(0, 1, 5))
 
     ax.stackplot(gross_exposures[0].index, gross_exposures,
-                 labels=CAP_BUCKETS.keys(), colors=colors, baseline='zero')
+                 labels=CAP_BUCKETS.keys(), colors=color_list, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
     ax.set(title='Gross Exposure to Market Caps',
            ylabel='Proportion of Gross Exposure \n in Market Cap Buckets')
@@ -387,11 +384,11 @@ def plot_cap_exposures_net(net_exposures, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    colors = ['#FF9999', '#FFCC99', '#99FF99', '#99CCFF', '#CC99FF']
+    color_list = plt.cm.Set3(np.linspace(0, 1, 5))
 
     cap_names = CAP_BUCKETS.keys()
     for i in range(len(net_exposures)):
-        ax.plot(net_exposures[i], color=colors[i], label=cap_names[i])
+        ax.plot(net_exposures[i], color=color_list[i], label=cap_names[i])
     ax.axhline(0, color='k', linestyle='-')
     ax.set(title='Net Exposure to Market Caps',
            ylabel='Proportion of Net Exposure \n in Market Cap Buckets')
