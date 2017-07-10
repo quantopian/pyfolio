@@ -1322,17 +1322,30 @@ def create_risk_tear_sheet(positions,
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
 
-    vertical_sections = 0
+    idx = positions.index & style_factor_panel.iloc[0].index & sectors.index \
+        & caps.index & shares_held.index & volumes.index
+    positions = positions.loc[idx]
 
+    vertical_sections = 0
     if style_factor_panel is not None:
         vertical_sections += len(style_factor_panel.items)
+        new_style_dict = {}
+        for item in style_factor_panel.items:
+            new_style_dict.update({item:
+                                   style_factor_panel.loc[item].loc[idx]})
+        style_factor_panel = pd.Panel()
+        style_factor_panel = style_factor_panel.from_dict(new_style_dict)
     if sectors is not None:
         vertical_sections += 4
+        sectors = sectors.loc[idx]
     if caps is not None:
         vertical_sections += 4
+        caps = caps.loc[idx]
     if (shares_held is not None) & (volumes is not None) \
                                  & (percentile is not None):
         vertical_sections += 3
+        shares_held = shares_held.loc[idx]
+        volumes = volumes.loc[idx]
 
     if percentile is None:
         percentile = 0.1
