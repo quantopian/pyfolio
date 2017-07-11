@@ -129,8 +129,7 @@ def perf_attrib_1d(factor_loadings,
         compute_vol_weighted_risk_factor_exposures(exposures,
                                                    factor_covariances)
 
-    common_factor_pnls = compute_common_factor_pnls(exposures, factor_returns,
-                                                    date)
+    common_factor_pnls = compute_common_factor_pnls(exposures, factor_returns)
 
     specific_pnl = compute_specific_pnl(pnl, common_factor_pnls)
 
@@ -206,21 +205,50 @@ def compute_vol_weighted_risk_factor_exposures(exposures, factor_covariances):
 
     factor_covariances : pd.DataFrame
         Risk factor variance-covariance matrix
+        - Square matrix with both columns and index being common risk factors
         - Example:
-                   momentum    size	        value
-        momentum   0.000313    0.009123     0.000353
-        size       0.000093    0.014261     0.000321
-        value      0.000012    0.001012     0.000093
+                       momentum    size	        value
+            momentum   0.000313    0.009123     0.000353
+            size       0.000093    0.014261     0.000321
+            value      0.000012    0.001012     0.000093
     '''
     vol = pd.Series(data=np.diag(factor_covariances), index=exposures.index)
     return exposures.multiply(np.sqrt(vol))
 
 
-def compute_common_factor_pnls(exposures, factor_returns, date):
-    return exposures.multiply(factor_returns.loc[date])
+def compute_common_factor_pnls(exposures, factor_returns):
+    '''
+    Computes PnL due to common risk factors
+
+    Parameters
+    ----------
+    exposures : pd.Series
+        Risk factor exposures of the portfolio on a given day
+        - Exact output of compute_risk_factor_exposures()
+
+    factor_returns : pd.Series
+        Returns associated with common risk factors on a given day
+        - Returns, indexed by common risk factor
+        - Example:
+            momentum   0.002313
+            size       -0.009314
+            value      0.012018
+    '''
+    return exposures.multiply(factor_returns)
 
 
 def compute_specific_pnl(pnl, common_factor_pnls):
+    '''
+    Computes PnL that is not due to common risk factors
+
+    Parameters
+    ----------
+    pnl : float
+        Total PnL for a given day
+
+    common_factor_pnls : pd.Series
+
+    '''
     return pnl - common_factor_pnls.sum()
 
 
