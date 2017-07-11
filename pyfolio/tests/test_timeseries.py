@@ -173,8 +173,8 @@ class TestDrawdown(TestCase):
         # Bug #145 observed for FB stock on the period 2014-10-24 - 2015-03-19
         # Reproduced on SPY data (cached) but need a large number of drawdowns
         spy_rets = get_symbol_rets('SPY',
-                                   start='1997-01-01',
-                                   end='2004-12-31')
+                                   start='2003-01-01',
+                                   end='2008-06-01')
         spy_drawdowns = timeseries.gen_drawdown_table(
             spy_rets,
             top=20).sort_values(by='Peak date')
@@ -183,7 +183,8 @@ class TestDrawdown(TestCase):
         pairs = list(zip(spy_drawdowns['Recovery date'],
                          spy_drawdowns['Peak date'].shift(-1)))[:-1]
         for recovery, peak in pairs:
-            self.assertLessEqual(recovery, peak)
+            if recovery != pd.NaT:
+                self.assertLessEqual(recovery, peak)
 
     @parameterized.expand([
         (pd.Series(px_list_1,
