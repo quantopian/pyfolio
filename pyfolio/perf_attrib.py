@@ -417,8 +417,7 @@ def compute_specific_pnl_1d(pnl_1d, common_factor_pnls_1d):
 
 def plot_pnl_attribution(pnls, ax=None):
     '''
-    Plots time series of volatility-weighted common factor exposures as a stack
-    plot
+    Plots time series of common factor and specific PnL
 
     Parameters
     ----------
@@ -445,14 +444,13 @@ def plot_pnl_attribution(pnls, ax=None):
     neg_pnls = pnls.copy()
     pos_pnls[pos_pnls < 0] = 0
     neg_pnls[neg_pnls > 0] = 0
+    tot_pnl = pnls.sum(axis='columns')
 
     pos_plot = []
     neg_plot = []
     for i in range(len(pnls.columns)):
         pos_plot.append(pos_pnls.iloc[:, i].values)
         neg_plot.append(neg_pnls.iloc[:, i].values)
-
-    tot_pnl = pnls.sum(axis='columns')
 
     ax.stackplot(pnls.index, pos_plot, colors=COLORS, alpha=0.8,
                  labels=pos_pnls.columns)
@@ -462,6 +460,46 @@ def plot_pnl_attribution(pnls, ax=None):
     ax.legend(frameon=True)
     ax.set_ylabel('PnL ($)')
     ax.set_title('PnL Attribution', fontsize='large')
+
+    return ax
+
+
+def plot_gross_pnl_attribution(pnls, ax=None):
+    '''
+    Plots time series of common factor and specific PnL, normalized to its
+    total contribution to daily PnL, as a stack plot
+
+    Parameters
+    ----------
+    pnls : pd.DataFrame
+        Time series of PnL attributable to common factors, and specific (non-
+        attributable) PnL
+        - Columns are common factor and specific PnL, index is datetime
+        - The output of compute_specific_pnl_1d is only one cell of the last
+        column of this DataFrame
+        - The output of compute_common_factor_pnls_1d is only one row of this
+        DataFrame (ignoring the last cell)
+        - Example:
+                      momentum	    size           	value          specific
+        2017-06-01	  6083.823143	-9192.538167	1421.304375    -1475.038534
+        2017-06-02	  7125.961984	-7685.951230	1131.029048    -1715.340134
+
+    ax : plt.Axes
+        Axes on which to plot
+    '''
+    abs_pnls = pnls.abs()
+
+    gross_plot = []
+    tot_abs_pnls = abs_pnls.sum(axis=1)
+    for i in range(len(abs_pnls.columns)):
+        gross_plot.append(abs_pnls.iloc[:, i].divide(tot_abs_pnls).values)
+
+    ax.stackplot(abs_pnls.index, gross_plot, colors=COLORS, alpha=0.8,
+                 labels=abs_pnls.columns)
+    ax.axhline(0, color='k')
+    ax.legend(frameon=True, loc=2)
+    ax.set_ylabel('Contribution to Gross PnL ($)')
+    ax.set_title('Gross PnL Attribution', fontsize='large')
 
     return ax
 
