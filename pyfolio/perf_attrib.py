@@ -152,7 +152,7 @@ def perf_attrib_1d(factor_loadings_1d,
 
     holdings_pnl_1d : float
         Fraction of specific PnL due to holdings
-        - Exact output of compute_trading_pnl()
+        - Exact output of compute_trading_pnl_1d
 
     aum_1d : float
         Total assets under management by the algorithm for the given day
@@ -180,39 +180,42 @@ def perf_attrib_1d(factor_loadings_1d,
     factor_loadings_1d.replace(np.nan, 0, inplace=True)
 
     # Now we proceed with performance attribution
-    exposures = compute_risk_factor_exposures(holdings_1d, factor_loadings_1d)
+    exposures_1d = compute_risk_factor_exposures_1d(holdings_1d,
+                                                    factor_loadings_1d)
 
     vol_weighted_exposures = \
-        compute_vol_weighted_risk_factor_exposures(exposures,
-                                                   factor_covariances_1d)
+        compute_vol_weighted_risk_factor_exposures_1d(exposures_1d,
+                                                      factor_covariances_1d)
 
-    common_factor_pnls = compute_common_factor_pnls(exposures,
-                                                    factor_returns_1d)
+    common_factor_pnls_1d = compute_common_factor_pnls_1d(exposures_1d,
+                                                          factor_returns_1d)
 
-    specific_pnl = compute_specific_pnl(pnl_1d, common_factor_pnls)
+    specific_pnl_1d = compute_specific_pnl_1d(pnl_1d, common_factor_pnls_1d)
 
     holdings_pnl_1d = compute_holdings_pnl()
 
-    trading_pnl = compute_trading_pnl(specific_pnl, holdings_pnl_1d)
+    trading_pnl = compute_trading_pnl_1d(specific_pnl_1d, holdings_pnl_1d)
 
     common_factor_var, specific_var, portfolio_var = \
-        compute_variances(holdings_1d, factor_loadings_1d,
-                          factor_covariances_1d, stock_specific_variances_1d)
+        compute_variances_1d(holdings_1d, factor_loadings_1d,
+                             factor_covariances_1d,
+                             stock_specific_variances_1d)
 
     proportion_specific = specific_var / portfolio_var
 
     MCR_common_factor, MCR_specific, MCR_portfolio = \
-        compute_marginal_contributions_to_risk(holdings_1d, factor_loadings_1d,
-                                               factor_covariances_1d,
-                                               stock_specific_variances_1d)
+        compute_marginal_contributions_to_risk_1d(holdings_1d,
+                                                  factor_loadings_1d,
+                                                  factor_covariances_1d,
+                                                  stock_specific_variances_1d)
 
     return (
         ('total pnl', pnl_1d),
-        ('factor exposure', exposures),
+        ('factor exposure', exposures_1d),
         ('vol weighted factor exposure', vol_weighted_exposures),
         ('AUM', aum_1d),
-        ('common factor pnls', common_factor_pnls),
-        ('specific pnl', specific_pnl),
+        ('common factor pnls', common_factor_pnls_1d),
+        ('specific pnl', specific_pnl_1d),
         ('holdings pnl', holdings_pnl_1d),
         ('trading pnl', trading_pnl),
         ('common factor risk', np.sqrt(common_factor_var)),
@@ -225,7 +228,7 @@ def perf_attrib_1d(factor_loadings_1d,
     )
 
 
-def compute_risk_factor_exposures(holdings_1d, factor_loadings_1d):
+def compute_risk_factor_exposures_1d(holdings_1d, factor_loadings_1d):
     '''
     Computes dollar risk factor exposures
 
@@ -246,12 +249,12 @@ def compute_risk_factor_exposures(holdings_1d, factor_loadings_1d):
     return holdings_1d.dot(factor_loadings_1d)
 
 
-def plot_risk_factor_exposures(exposures, ax=None):
+def plot_risk_factor_exposures(exposures_1d, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    pos_exposures = exposures.copy()
-    neg_exposures = exposures.copy()
+    pos_exposures = exposures_1d.copy()
+    neg_exposures = exposures_1d.copy()
     pos_exposures[pos_exposures < 0] = 0
     neg_exposures[neg_exposures > 0] = 0
 
@@ -261,9 +264,9 @@ def plot_risk_factor_exposures(exposures, ax=None):
         pos_list.append(pos_exposures.iloc[:, i].values)
         neg_list.append(neg_exposures.iloc[:, i].values)
 
-    ax.stackplot(exposures.index, pos_list, colors=COLORS, alpha=0.8,
+    ax.stackplot(exposures_1d.index, pos_list, colors=COLORS, alpha=0.8,
                  labels=pos_exposures.columns)
-    ax.stackplot(exposures.index, neg_list, colors=COLORS, alpha=0.8)
+    ax.stackplot(exposures_1d.index, neg_list, colors=COLORS, alpha=0.8)
     ax.axhline(0, color='k')
     ax.legend(loc=2, frameon=True)
     ax.set_ylabel('Exposure ($)')
@@ -272,43 +275,44 @@ def plot_risk_factor_exposures(exposures, ax=None):
     return ax
 
 
-def compute_vol_weighted_risk_factor_exposures(exposures,
-                                               factor_covariances_1d):
+def compute_vol_weighted_risk_factor_exposures_1d(exposures_1d,
+                                                  factor_covariances_1d):
     '''
     Computes volatility-weighted dollar risk factor exposures
 
     Parameters
     ----------
-    exposures : pd.Series
+    exposures_1d : pd.Series
         Risk factor exposures of the portfolio for the given day
-        - Exact output of compute_risk_factor_exposures
+        - Exact output of compute_risk_factor_exposures_1d
 
     factor_covariances_1d : pd.DataFrame
         Risk factor variance-covariance matrix
         - See full explanation in perf_attrib_1d
     '''
-    vol = pd.Series(data=np.diag(factor_covariances_1d), index=exposures.index)
-    return exposures.multiply(np.sqrt(vol))
+    vol = pd.Series(data=np.diag(factor_covariances_1d),
+                    index=exposures_1d.index)
+    return exposures_1d.multiply(np.sqrt(vol))
 
 
-def compute_common_factor_pnls(exposures, factor_returns_1d):
+def compute_common_factor_pnls_1d(exposures_1d, factor_returns_1d):
     '''
     Computes PnL due to common risk factors
 
     Parameters
     ----------
-    exposures : pd.Series
+    exposures_1d : pd.Series
         Risk factor exposures of the portfolio for the given day
-        - Exact output of compute_risk_factor_exposures()
+        - Exact output of compute_risk_factor_exposures_1d
 
     factor_returns_1d : pd.Series
         Returns associated with common risk factors for the given day
         - See full explanation in perf_attrib_1d
     '''
-    return exposures.multiply(factor_returns_1d)
+    return exposures_1d.multiply(factor_returns_1d)
 
 
-def compute_specific_pnl(pnl_1d, common_factor_pnls):
+def compute_specific_pnl_1d(pnl_1d, common_factor_pnls_1d):
     '''
     Computes PnL that is not due to common risk factors
 
@@ -317,36 +321,37 @@ def compute_specific_pnl(pnl_1d, common_factor_pnls):
     pnl_1d : float
         Total PnL for the given day
 
-    common_factor_pnls : pd.Series
+    common_factor_pnls_1d : pd.Series
         PnL due to common risk factors for the given day
-        - Exact output of compute_common_factor_pnls
+        - Exact output of compute_common_factor_pnls_1d
     '''
-    return pnl_1d - common_factor_pnls.sum()
+    return pnl_1d - common_factor_pnls_1d.sum()
 
 
 def compute_holdings_pnl():
     pass
 
 
-def compute_trading_pnl(specific_pnl, holdings_pnl_1d):
+def compute_trading_pnl_1d(specific_pnl_1d, holdings_pnl_1d):
     '''
     Computes fraction of specific PnL due to trading
 
     Parameters
     ----------
-    specific_pnl : float
+    specific_pnl_1d : float
         Specific PnL for the given day
-        - Exact output of compute_specific_pnl()
+        - Exact output of compute_specific_pnl_1d
 
     holdings_pnl_1d : float
         Fraction of specific PnL due to holdings
         - See full explanation in perf_attrib_1d
     '''
-    return specific_pnl - holdings_pnl_1d
+    return specific_pnl_1d - holdings_pnl_1d
 
 
-def compute_variances(holdings_1d, factor_loadings_1d, factor_covariances_1d,
-                      stock_specific_variances_1d):
+def compute_variances_1d(holdings_1d, factor_loadings_1d,
+                         factor_covariances_1d,
+                         stock_specific_variances_1d):
     '''
     Computes common factor variance, specific variance and portfolio variance
     of the algorithm.
@@ -379,9 +384,9 @@ def compute_variances(holdings_1d, factor_loadings_1d, factor_covariances_1d,
     return common_factor, specific, portfolio
 
 
-def compute_marginal_contributions_to_risk(holdings_1d, factor_loadings_1d,
-                                           factor_covariances_1d,
-                                           stock_specific_variances_1d):
+def compute_marginal_contributions_to_risk_1d(holdings_1d, factor_loadings_1d,
+                                              factor_covariances_1d,
+                                              stock_specific_variances_1d):
     '''
     Compute marginal contributions to risk (MCR) to common factor risk,
     specific risk and portfolio risk.
