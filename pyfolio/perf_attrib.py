@@ -105,7 +105,7 @@ def perf_attrib_1d(factor_loadings_1d,
     Parameters
     ----------
     factor_loadings_1d : pd.DataFrame
-        Factor loadings of each stock to common risk factors for the given day
+        Factor loadings of each stock to common factors for the given day
         - Columns are common factors, indexed by sids
         - Example:
                 momentum	size	     value
@@ -115,7 +115,7 @@ def perf_attrib_1d(factor_loadings_1d,
 
     factor_covariances_1d : pd.DataFrame
         Risk factor variance-covariance matrix
-        - Square matrix with both columns and index being common risk factors
+        - Square matrix with both columns and index being common factors
         - Example:
                        momentum    size	        value
             momentum   0.000313    0.009123     0.000353
@@ -132,8 +132,8 @@ def perf_attrib_1d(factor_loadings_1d,
             41    0.000000    0.000000     0.000498
 
     factor_returns_1d : pd.Series
-        Returns associated with common risk factors for the given day
-        - Returns, indexed by common risk factor
+        Returns associated with common factors for the given day
+        - Returns, indexed by common factor
         - Example:
             momentum   0.002313
             size       -0.009314
@@ -180,11 +180,11 @@ def perf_attrib_1d(factor_loadings_1d,
     factor_loadings_1d.replace(np.nan, 0, inplace=True)
 
     # Now we proceed with performance attribution
-    exposures_1d = compute_risk_factor_exposures_1d(holdings_1d,
+    exposures_1d = compute_common_factor_exposures_1d(holdings_1d,
                                                     factor_loadings_1d)
 
     vol_weighted_exposures_1d = \
-        compute_vol_weighted_risk_factor_exposures_1d(exposures_1d,
+        compute_vol_weighted_common_factor_exposures_1d(exposures_1d,
                                                       factor_covariances_1d)
 
     common_factor_pnls_1d = compute_common_factor_pnls_1d(exposures_1d,
@@ -228,9 +228,9 @@ def perf_attrib_1d(factor_loadings_1d,
     )
 
 
-def compute_risk_factor_exposures_1d(holdings_1d, factor_loadings_1d):
+def compute_common_factor_exposures_1d(holdings_1d, factor_loadings_1d):
     '''
-    Computes dollar risk factor exposures
+    Computes dollar common factor exposures
 
     Parameters
     ----------
@@ -239,7 +239,7 @@ def compute_risk_factor_exposures_1d(holdings_1d, factor_loadings_1d):
         - See full explanation in perf_attrib_1d
 
     factor_loadings_1d : pd.DataFrame
-        Factor loadings of each stock to common risk factors for the given day
+        Factor loadings of each stock to common factors for the given day
         - See full explanation in perf_attrib_1d
 
     Returns
@@ -252,16 +252,16 @@ def compute_risk_factor_exposures_1d(holdings_1d, factor_loadings_1d):
     return exposures_1d
 
 
-def plot_risk_factor_exposures(exposures, ax=None):
+def plot_common_factor_exposures(exposures, ax=None):
     '''
-    Plots time series of risk factor exposures as a stack plot
+    Plots time series of common factor exposures as a stack plot
 
     Parameters
     ----------
     exposures : pd.DataFrame
         Time series of dollar common factor exposures
         - Columns are common factors, index is datetime
-        - The output of compute_risk_factor_exposures_1d is only one row of
+        - The output of compute_common_factor_exposures_1d is only one row of
         this DataFrame
         - Example:
                         momentum	    size           	value
@@ -296,16 +296,16 @@ def plot_risk_factor_exposures(exposures, ax=None):
     return ax
 
 
-def compute_vol_weighted_risk_factor_exposures_1d(exposures_1d,
+def compute_vol_weighted_common_factor_exposures_1d(exposures_1d,
                                                   factor_covariances_1d):
     '''
-    Computes volatility-weighted dollar risk factor exposures
+    Computes volatility-weighted dollar common factor exposures
 
     Parameters
     ----------
     exposures_1d : pd.Series
         Risk factor exposures of the portfolio for the given day
-        - Exact output of compute_risk_factor_exposures_1d
+        - Exact output of compute_common_factor_exposures_1d
 
     factor_covariances_1d : pd.DataFrame
         Risk factor variance-covariance matrix
@@ -323,7 +323,7 @@ def compute_vol_weighted_risk_factor_exposures_1d(exposures_1d,
     return vol_weighted_exposures_1d
 
 
-def plot_vol_weighted_risk_factor_exposures(vol_weighted_exposures, ax=None):
+def plot_vol_weighted_common_factor_exposures(vol_weighted_exposures, ax=None):
     '''
     Plots time series of volatility-weighted common factor exposures as a stack
     plot
@@ -333,12 +333,12 @@ def plot_vol_weighted_risk_factor_exposures(vol_weighted_exposures, ax=None):
     vol_weighted_exposures : pd.DataFrame
         Time series of volatility-weighted dollar common factor exposures
         - Columns are common factors, index is datetime
-        - The output of compute_vol_weighted_risk_factor_exposures_1d is only
+        - The output of compute_vol_weighted_common_factor_exposures_1d is only
         one row of this DataFrame
         - Example:
                         momentum	    size           	value
-        2017-06-01	    60283.823143	39192.538167	14121.304375
-        2017-06-02	    70125.961984	47685.951230	15131.029048
+        2017-06-01	    6083.823143	    9192.538167	    1421.304375
+        2017-06-02	    7125.961984	    7685.951230	    1131.029048
 
     ax : plt.Axes
         Axes on which to plot
@@ -371,16 +371,16 @@ def plot_vol_weighted_risk_factor_exposures(vol_weighted_exposures, ax=None):
 
 def compute_common_factor_pnls_1d(exposures_1d, factor_returns_1d):
     '''
-    Computes PnL due to common risk factors
+    Computes PnL due to common factors
 
     Parameters
     ----------
     exposures_1d : pd.Series
         Risk factor exposures of the portfolio for the given day
-        - Exact output of compute_risk_factor_exposures_1d
+        - Exact output of compute_common_factor_exposures_1d
 
     factor_returns_1d : pd.Series
-        Returns associated with common risk factors for the given day
+        Returns associated with common factors for the given day
         - See full explanation in perf_attrib_1d
 
     Returns
@@ -395,7 +395,7 @@ def compute_common_factor_pnls_1d(exposures_1d, factor_returns_1d):
 
 def compute_specific_pnl_1d(pnl_1d, common_factor_pnls_1d):
     '''
-    Computes PnL that is not due to common risk factors
+    Computes PnL that is not due to common factors
 
     Parameters
     ----------
@@ -403,7 +403,7 @@ def compute_specific_pnl_1d(pnl_1d, common_factor_pnls_1d):
         Total PnL for the given day
 
     common_factor_pnls_1d : pd.Series
-        PnL due to common risk factors for the given day
+        PnL due to common factors for the given day
         - Exact output of compute_common_factor_pnls_1d
 
     Returns
@@ -456,7 +456,7 @@ def compute_variances_1d(holdings_1d, factor_loadings_1d,
         - See full explanation in perf_attrib_1d
 
     factor_loadings_1d : pd.DataFrame
-        Factor loadings of each stock to common risk factors for the given day
+        Factor loadings of each stock to common factors for the given day
         - See full explanation in perf_attrib_1d
 
     factor_covariances_1d : pd.DataFrame
@@ -504,7 +504,7 @@ def compute_marginal_contributions_to_risk_1d(holdings_1d, factor_loadings_1d,
         - See full explanation in perf_attrib_1d
 
     factor_loadings_1d : pd.DataFrame
-        Factor loadings of each stock to common risk factors for the given day
+        Factor loadings of each stock to common factors for the given day
         - See full explanation in perf_attrib_1d
 
     factor_covariances_1d : pd.DataFrame
