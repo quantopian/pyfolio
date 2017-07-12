@@ -504,6 +504,93 @@ def plot_gross_pnl_attribution(pnls, ax=None):
     return ax
 
 
+def plot_pnl_time_series(common_factor_pnl, specific_pnl, ax=None):
+    '''
+    Plots time series of common factor pnl, specific pnl and portfolio pnl as
+    a line graph
+
+    Parameters
+    ----------
+    common_factor_pnl : pd.Series
+        Time series of total PnL attributable to common risk factors
+        - PnL indexed by datetime
+        - Example:
+        2017-06-05   -14715.038534
+        2017-06-06    11774.696823
+        2017-06-07    -6778.749595
+
+    specific_pnl : pd.Series
+        Time series of PnL not attributable to common risk factors
+        - PnL indexed by datetime
+        - common_factor_pnl and specific_pnl should sum to total PnL
+        - Example:
+        2017-06-05    -8213.041651
+        2017-06-06       74.696823
+        2017-06-07     -778.749595
+
+    ax : plt.Axes
+        Axes on which to plot
+    '''
+    if ax is None:
+        ax = plt.gca()
+
+    tot_pnl = common_factor_pnl + specific_pnl
+
+    ax.plot(specific_pnl, color='b', label='specific pnl')
+    ax.plot(common_factor_pnl, color='r', label='common factor pnl')
+    ax.plot(tot_pnl, color='g', label='total pnl')
+    ax.set_title('Time Series of PnL')
+    ax.set_ylabel('PnL ($)')
+    ax.legend()
+
+    return ax
+
+
+def plot_cum_pnl_time_series(common_factor_pnl, specific_pnl, ax=None):
+    '''
+    Plots cumulative time series of common factor pnl, specific pnl and
+    portfolio pnl as a line graph
+
+    Parameters
+    ----------
+    common_factor_pnl : pd.Series
+        Time series of total PnL attributable to common risk factors
+        - PnL indexed by datetime
+        - Example:
+        2017-06-05   -14715.038534
+        2017-06-06    11774.696823
+        2017-06-07    -6778.749595
+
+    specific_pnl : pd.Series
+        Time series of PnL not attributable to common risk factors
+        - PnL indexed by datetime
+        - common_factor_pnl and specific_pnl should sum to total PnL
+        - Example:
+        2017-06-05    -8213.041651
+        2017-06-06       74.696823
+        2017-06-07     -778.749595
+
+    ax : plt.Axes
+        Axes on which to plot
+    '''
+    if ax is None:
+        ax = plt.gca()
+
+    tot_pnl = common_factor_pnl + specific_pnl
+    cum_common_factor_pnl = common_factor_pnl.cumsum()
+    cum_specific_pnl = specific_pnl.cumsum()
+    cum_tot_pnl = tot_pnl.cumsum()
+
+    ax.plot(cum_specific_pnl, color='b', label='cum specific pnl')
+    ax.plot(cum_common_factor_pnl, color='r', label='cum common factor pnl')
+    ax.plot(cum_tot_pnl, color='g', label='cum total pnl')
+    ax.set_title('Time Series of Cumulative PnL')
+    ax.set_ylabel('PnL ($)')
+    ax.legend()
+
+    return ax
+
+
 def compute_holdings_pnl_1d():
     pass
 
@@ -577,6 +664,109 @@ def compute_variances_1d(holdings_1d, factor_loadings_1d,
     portfolio_var_1d = common_factor_var_1d + specific_var_1d
 
     return common_factor_var_1d, specific_var_1d, portfolio_var_1d
+
+
+def plot_risks(common_factor_risk, specific_risk, portfolio_risk, ax=None):
+    '''
+    Plots time series of common factor risk, specific risk, and portfolio risk
+    as line plots.
+
+    Parameters
+    ----------
+    common_factor_risk : pd.Series
+        Time series of common factor risk (the square root of common factor
+        variance)
+        - The first output of compute_variances_1d gives the square of one
+        entry of this Series.
+        - Example:
+        2017-06-05    36102.833298
+        2017-06-06    41031.349716
+        2017-06-07    39010.162551
+
+    specific_risk : pd.Series
+        Time series of specific risk (the square root of specific variance)
+        - The second output of compute_variances_1d gives the square of one
+        entry of this Series.
+        - Example:
+        2017-06-05    58866.530000
+        2017-06-06    49601.650490
+        2017-06-07    50649.039005
+
+    portfolio_risk : pd.Series
+        Time series of portfolio risk (the square root of portfolio variance)
+        - The third output of compute_variances_1d gives the square of one
+        entry of this Series.
+        - Example:
+        2017-06-05    95321.833298
+        2017-06-06    61031.646536
+        2017-06-07    73268.162551
+
+    ax : plt.Axes
+        Axes on which to plot
+    '''
+
+    if ax is None:
+        ax = plt.gca()
+
+    ax.plot(common_factor_risk.index, common_factor_risk,
+            label='Common Factor Risk', color='r')
+    avg = common_factor_risk.mean()
+    ax.axhline(avg, color='r', linestyle='--',
+               label='Mean = {: .3}'.format(avg))
+
+    ax.plot(specific_risk.index, specific_risk,
+            label='Specific Risk', color='b')
+    avg = specific_risk.mean()
+    ax.axhline(avg, color='b', linestyle='--',
+               label='Mean = {: .3}'.format(avg))
+
+    ax.plot(portfolio_risk.index, portfolio_risk,
+            label='Portfolio Risk', color='g')
+    avg = portfolio_risk.mean()
+    ax.axhline(avg, color='g', linestyle='--',
+               label='Mean = {: .3}'.format(avg))
+
+    ax.legend()
+    ax.set_title('Common, Specific and Portfolio Risk', fontsize='medium')
+    ax.set_ylabel('Risk ($)')
+
+    return ax
+
+
+def plot_proportion_specific(specific_variance, portfolio_variance, ax=None):
+    '''
+    Plots time series of common factor risk, specific risk, and portfolio risk
+    as line plots.
+
+    Parameters
+    ----------
+    specific_variance : pd.Series
+        Time series of specific variance
+        - Exact second output of compute_variances_1d
+
+    portfolio_variance : pd.Series
+        Time series of portfolio variance
+        - Exact third output of compute_variances_1d
+
+    ax : plt.Axes
+        Axes on which to plot
+    '''
+    if ax is None:
+        ax = plt.gca()
+
+    proportion_specific = specific_variance.divide(portfolio_variance)
+
+    ax.plot(proportion_specific.index, proportion_specific,
+            label='Specific Variance / Portfolio Variance', color='k')
+    avg = proportion_specific.mean()
+    ax.axhline(avg, color='k', linestyle='-- d',
+               label='Mean = {: .3}'.format(avg))
+
+    ax.legend()
+    ax.set_title('Specific Variance / Portfolio Variance', fontsize='medium')
+    ax.set_ylabel('Proportion')
+
+    return ax
 
 
 def compute_marginal_contributions_to_risk_1d(holdings_1d, factor_loadings_1d,
