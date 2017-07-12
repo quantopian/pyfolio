@@ -759,7 +759,7 @@ def plot_proportion_specific(specific_variance, portfolio_variance, ax=None):
     ax.plot(proportion_specific.index, proportion_specific,
             label='Specific Variance / Portfolio Variance', color='k')
     avg = proportion_specific.mean()
-    ax.axhline(avg, color='k', linestyle='-- d',
+    ax.axhline(avg, color='k', linestyle='--',
                label='Mean = {: .3}'.format(avg))
 
     ax.legend()
