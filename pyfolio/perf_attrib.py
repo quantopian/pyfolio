@@ -252,24 +252,42 @@ def compute_risk_factor_exposures_1d(holdings_1d, factor_loadings_1d):
     return exposures_1d
 
 
-def plot_risk_factor_exposures(exposures_1d, ax=None):
+def plot_risk_factor_exposures(exposures, ax=None):
+    '''
+    Plots time series of risk factor exposures as a stack plot
+
+    Parameters
+    ----------
+    exposures : pd.DataFrame
+        Time series of dollar common factor exposures
+        - Columns are common factors, index is datetime
+        - The output of compute_risk_factor_exposures_1d is only one row of
+        this DataFrame
+        - Example:
+                        momentum	    size           	value
+        2017-06-01	    69183.823143	3.919257e+05	1.412135e+06
+        2017-06-02	    74165.961984	4.768590e+05	1.513102e+06
+
+    ax : plt.Axes
+        Axes on which to plot
+    '''
     if ax is None:
         ax = plt.gca()
 
-    pos_exposures = exposures_1d.copy()
-    neg_exposures = exposures_1d.copy()
+    pos_exposures = exposures.copy()
+    neg_exposures = exposures.copy()
     pos_exposures[pos_exposures < 0] = 0
     neg_exposures[neg_exposures > 0] = 0
 
-    pos_list = []
-    neg_list = []
-    for i in range(len(pos_exposures.columns)):
-        pos_list.append(pos_exposures.iloc[:, i].values)
-        neg_list.append(neg_exposures.iloc[:, i].values)
+    pos_plot = []
+    neg_plot = []
+    for i in range(len(exposures.columns)):
+        pos_plot.append(pos_exposures.iloc[:, i].values)
+        neg_plot.append(neg_exposures.iloc[:, i].values)
 
-    ax.stackplot(exposures_1d.index, pos_list, colors=COLORS, alpha=0.8,
+    ax.stackplot(exposures.index, pos_plot, colors=COLORS, alpha=0.8,
                  labels=pos_exposures.columns)
-    ax.stackplot(exposures_1d.index, neg_list, colors=COLORS, alpha=0.8)
+    ax.stackplot(exposures.index, neg_plot, colors=COLORS, alpha=0.8)
     ax.axhline(0, color='k')
     ax.legend(loc=2, frameon=True)
     ax.set_ylabel('Exposure ($)')
@@ -303,6 +321,52 @@ def compute_vol_weighted_risk_factor_exposures_1d(exposures_1d,
                     index=exposures_1d.index)
     vol_weighted_exposures_1d = exposures_1d.multiply(np.sqrt(vol))
     return vol_weighted_exposures_1d
+
+
+def plot_vol_weighted_risk_factor_exposures(vol_weighted_exposures, ax=None):
+    '''
+    Plots time series of volatility-weighted common factor exposures as a stack
+    plot
+
+    Parameters
+    ----------
+    vol_weighted_exposures : pd.DataFrame
+        Time series of volatility-weighted dollar common factor exposures
+        - Columns are common factors, index is datetime
+        - The output of compute_vol_weighted_risk_factor_exposures_1d is only
+        one row of this DataFrame
+        - Example:
+                        momentum	    size           	value
+        2017-06-01	    60283.823143	39192.538167	14121.304375
+        2017-06-02	    70125.961984	47685.951230	15131.029048
+
+    ax : plt.Axes
+        Axes on which to plot
+    '''
+    if ax is None:
+        ax = plt.gca()
+
+    pos_vol_weighted_exposures = vol_weighted_exposures.copy()
+    neg_vol_weighted_exposures = vol_weighted_exposures.copy()
+    pos_vol_weighted_exposures[pos_vol_weighted_exposures < 0] = 0
+    neg_vol_weighted_exposures[neg_vol_weighted_exposures > 0] = 0
+
+    pos_plot = []
+    neg_plot = []
+    for i in range(len(vol_weighted_exposures.columns)):
+        pos_plot.append(pos_vol_weighted_exposures.iloc[:, i].values)
+        neg_plot.append(neg_vol_weighted_exposures.iloc[:, i].values)
+
+    ax.stackplot(vol_weighted_exposures.index, pos_plot, colors=COLORS,
+                 alpha=0.8, labels=pos_vol_weighted_exposures.columns)
+    ax.stackplot(vol_weighted_exposures.index, neg_plot, colors=COLORS,
+                 alpha=0.8)
+    ax.axhline(0, color='k')
+    ax.legend(loc=2, frameon=True)
+    ax.set_ylabel('Vol-Weighted Exposure ($)')
+    ax.set_title('Volatility Weighted Risk Factor Exposures', fontsize='large')
+
+    return ax
 
 
 def compute_common_factor_pnls_1d(exposures_1d, factor_returns_1d):
