@@ -42,6 +42,7 @@ from .utils import (APPROX_BDAYS_PER_MONTH,
 from functools import wraps
 import empyrical
 
+
 def customize(func):
     """
     Decorator to set plotting context and axes style during function call.
@@ -51,7 +52,6 @@ def customize(func):
         set_context = kwargs.pop('set_context', True)
         if set_context:
             with plotting_context(), axes_style():
-                #sns.despine(left=True)
                 return func(*args, **kwargs)
         else:
             return func(*args, **kwargs)
@@ -102,7 +102,7 @@ def plotting_context(context='notebook', font_scale=1.5, rc=None):
 
     return sns.plotting_context(context=context, font_scale=font_scale, rc=rc)
 
-  
+
 def axes_style(style='darkgrid', rc=None):
     """
     Create pyfolio default axes style context.
