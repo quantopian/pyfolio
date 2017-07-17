@@ -32,7 +32,6 @@ from . import capacity
 from . import plotting
 from . import risk
 from . import _seaborn as sns
-from .plotting import plotting_context
 import empyrical
 
 try:
@@ -394,7 +393,7 @@ def create_simple_tear_sheet(returns,
     plt.show()
 
 
-@plotting_context
+@plotting.customize
 def create_returns_tear_sheet(returns, positions=None,
                               transactions=None,
                               live_start_date=None,
@@ -582,7 +581,7 @@ def create_returns_tear_sheet(returns, positions=None,
         return fig
 
 
-@plotting_context
+@plotting.customize
 def create_position_tear_sheet(returns, positions,
                                show_and_plot_top_pos=2, hide_positions=False,
                                return_fig=False, sector_mappings=None,
@@ -677,7 +676,7 @@ def create_position_tear_sheet(returns, positions,
         return fig
 
 
-@plotting_context
+@plotting.customize
 def create_txn_tear_sheet(returns, positions, transactions,
                           unadjusted_returns=None, estimate_intraday='infer',
                           return_fig=False):
@@ -758,7 +757,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
         return fig
 
 
-@plotting_context
+@plotting.customize
 def create_round_trip_tear_sheet(returns, positions, transactions,
                                  sector_mappings=None,
                                  estimate_intraday='infer', return_fig=False):
@@ -849,7 +848,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
         return fig
 
 
-@plotting_context
+@plotting.customize
 def create_interesting_times_tear_sheet(
         returns, benchmark_rets=None, legend_loc='best', return_fig=False):
     """
@@ -926,7 +925,7 @@ def create_interesting_times_tear_sheet(
         return fig
 
 
-@plotting_context
+@plotting.customize
 def create_capacity_tear_sheet(returns, positions, transactions,
                                market_data,
                                liquidation_daily_vol_limit=0.2,
@@ -1032,7 +1031,7 @@ def create_capacity_tear_sheet(returns, positions, transactions,
                                  ax=ax_capacity_sweep)
 
 
-@plotting_context
+@plotting.customize
 def create_bayesian_tear_sheet(returns, benchmark_rets=None,
                                live_start_date=None, samples=2000,
                                return_fig=False, stoch_vol=False):
@@ -1240,7 +1239,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         return fig
 
 
-@plotting_context
+@plotting.customize
 def create_risk_tear_sheet(positions,
                            style_factor_panel=None,
                            sectors=None,

@@ -43,23 +43,22 @@ from functools import wraps
 import empyrical
 
 
-def plotting_context(func):
+def customize(func):
     """
-    Decorator to set plotting context during function call.
+    Decorator to set plotting context and axes style during function call.
     """
-
     @wraps(func)
     def call_w_context(*args, **kwargs):
         set_context = kwargs.pop('set_context', True)
         if set_context:
-            with context():
+            with plotting_context(), axes_style():
                 return func(*args, **kwargs)
         else:
             return func(*args, **kwargs)
     return call_w_context
 
 
-def context(context='notebook', font_scale=1.5, rc=None):
+def plotting_context(context='notebook', font_scale=1.5, rc=None):
     """
     Create pyfolio default plotting style context.
 
@@ -74,9 +73,7 @@ def context(context='notebook', font_scale=1.5, rc=None):
         Scale font by factor font_scale.
     rc : dict, optional
         Config flags.
-        By default, {'lines.linewidth': 1.5,
-                     'axes.facecolor': '0.995',
-                     'figure.facecolor': '0.97'}
+        By default, {'lines.linewidth': 1.5}
         is being used and will be added to any
         rc passed in, unless explicitly overriden.
 
@@ -86,27 +83,64 @@ def context(context='notebook', font_scale=1.5, rc=None):
 
     Example
     -------
-    >>> with pyfolio.plotting.context(font_scale=2):
-    >>>    pyfolio.create_full_tear_sheet()
+    >>> with pyfolio.plotting.plotting_context(font_scale=2):
+    >>>    pyfolio.create_full_tear_sheet(..., set_context=False)
 
     See also
     --------
     For more information, see seaborn.plotting_context().
-    """
 
+    """
     if rc is None:
         rc = {}
 
-    rc_default = {'lines.linewidth': 1.5,
-                  'axes.facecolor': '0.995',
-                  'figure.facecolor': '0.97'}
+    rc_default = {'lines.linewidth': 1.5}
 
     # Add defaults if they do not exist
     for name, val in rc_default.items():
         rc.setdefault(name, val)
 
-    return sns.plotting_context(context=context, font_scale=font_scale,
-                                rc=rc)
+    return sns.plotting_context(context=context, font_scale=font_scale, rc=rc)
+
+
+def axes_style(style='darkgrid', rc=None):
+    """
+    Create pyfolio default axes style context.
+
+    Under the hood, calls and returns seaborn.axes_style() with
+    some custom settings. Usually you would use in a with-context.
+
+    Parameters
+    ----------
+    style : str, optional
+        Name of seaborn style.
+    rc : dict, optional
+        Config flags.
+
+    Returns
+    -------
+    seaborn plotting context
+
+    Example
+    -------
+    >>> with pyfolio.plotting.axes_style(style='whitegrid'):
+    >>>    pyfolio.create_full_tear_sheet(..., set_context=False)
+
+    See also
+    --------
+    For more information, see seaborn.plotting_context().
+
+    """
+    if rc is None:
+        rc = {}
+
+    rc_default = {}
+
+    # Add defaults if they do not exist
+    for name, val in rc_default.items():
+        rc.setdefault(name, val)
+
+    return sns.axes_style(style=style, rc=rc)
 
 
 def plot_rolling_fama_french(
