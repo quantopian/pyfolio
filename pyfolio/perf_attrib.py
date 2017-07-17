@@ -41,6 +41,14 @@ def perf_attrib(factor_loadings_list,
                 holdings_pnl_list,
                 aum_list,
                 date_range):
+    '''
+    This function should:
+
+    - Convert all these data structures from long to wide,
+    in preparation for perf_attrib_1d to analyze them.
+
+    - Remember everything that perf_attrib_1d spits out.
+    '''
 
     pnl_series = pd.Series()
     exposures_df = pd.DataFrame()
