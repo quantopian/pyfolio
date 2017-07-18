@@ -32,7 +32,7 @@ COLORS = [
 
 
 def perf_attrib(factor_loadings_long,
-                stock_specific_variances_long,
+                resid_var_long,
                 covariances_long,
                 factor_returns_long,
                 holdings,
@@ -91,8 +91,12 @@ def perf_attrib(factor_loadings_long,
 
     holdings : pd.DataFrame
         Dollar value of positions in each stock, per day, in wide format.
+        - Indexed by dates, columns are sids
         - Example:
-
+                        2           24          35
+        2017-06-08      103.19      18319.17    9913.01
+        2017-06-09      221.01      26301.90    5510.13
+        2017-06-10      -331.01     24105.36    -120.97
 
     pnls : pd.Series
         PnL per day
@@ -122,51 +126,50 @@ def perf_attrib(factor_loadings_long,
             have strings as keys and performance attribution metrics as values
     '''
 
-    pnl_series = pd.Series()
-    exposures_df = pd.DataFrame()
-    vol_weighted_exposures_df = pd.DataFrame()
-    aum_series = pd.Series()
-    common_factor_pnls_df = pd.DataFrame()
-    specific_pnl_series = pd.Series()
-    holdings_pnl_series = pd.Series()
-    trading_pnl_series = pd.Series()
-    common_factor_risk_series = pd.Series()
-    specific_risk_series = pd.Series()
-    portfolio_risk_series = pd.Series()
-    MCR_common_factor_df = pd.DataFrame()
-    MCR_specific_df = pd.DataFrame()
-    MCR_portfolio_df = pd.DataFrame()
+    perf_attrib_dict = OrderedDict([])
 
-    perf_attrib_dict = OrderedDict([
-        ('pnl', pnl_series)
-        ('exposures', exposures_df)
-        ('vol weighted exposures', vol_weighted_exposures_df)
-        ('aum', aum_series)
-        ('common factor pnl', common_factor_pnls_df)
-        ('specific pnl', specific_pnl_series)
-        ('holdings pnl', holdings_pnl_series)
-        ('trading pnl', trading_pnl_series)
-        ('common factor risk', common_factor_risk_series)
-        ('specific risk', specific_risk_series)
-        ('portfolio risk', portfolio_risk_series)
-        ('MCR common factor', MCR_common_factor_df)
-        ('MCR specific', MCR_specific_df)
-        ('MCR portfolio', MCR_portfolio_df)
-    ])
+    factor_loadings_long.dt = pd.to_datetime(factor_loadings_long.dt)
+    covariances_long.dt = pd.to_datetime(covariances_long.dt)
+    resid_var_long.dt = pd.to_datetime(resid_var_long.dt)
+    factor_returns_long.dt = pd.to_datetime(factor_returns_long.dt)
 
-    for i in len(date_range):
-        tup = perf_attrib_1d(factor_loadings_list[i],
-                             stock_specific_variances_list[i],
-                             factor_covariances_list[i],
-                             factor_returns_list[i],
-                             holdings_list[i],
-                             pnl_list[i],
-                             holdings_pnl_list[i],
-                             aum_list[i],
-                             date_range[i])
+    for date in date_range:
+        mask = (factor_loadings_long.dt == date)
+        factor_loadings_wide = factor_loadings_long[mask] \
+            .drop(['dt', 'family'], axis='columns') \
+            .set_index(['sid', 'name']).unstack()
+        factor_loadings_wide.index.name = None
+        factor_loadings_wide.columns = factor_loadings_wide.columns.droplevel()
+        factor_loadings_wide.columns.name = None
 
-        for key, value in perf_attrib_dict.items():
-            perf_attrib_dict[key] = perf_attrib_dict[key].append(tup[i])
+        mask = (covariances_long.dt == date)
+        covariances_wide = covariances_long[mask].drop('dt', axis='columns') \
+            .set_index(['primary', 'secondary']).unstack()
+        covariances_wide.index.name = None
+        covariances_wide.columns = covariances_wide.columns.droplevel()
+        covariances_wide.columns.name = None
+
+        # FORMAT resid_var_long... SORT OUT WHY THERE ARE DUPES.
+        mask = ((resid_var_long.dt == date) & (resid_var_long.family == 'pca'))
+        stock_specific_variances_wide = resid_var_long[mask] \
+            .drop(['dt', 'family', 'residual'], axis='columns') \
+            .sort_values('sid')
+
+        mask = (factor_returns_long.dt == date)
+        factor_returns_wide = factor_returns_long[mask] \
+            .drop('dt', axis='columns').set_index('factor').squeeze()
+        factor_returns_wide.name = None
+
+        to_update = perf_attrib_1d(factor_loadings_wide,
+                                   covariances_wide,
+                                   stock_specific_variances_wide,
+                                   factor_returns_wide,
+                                   holdings[date],
+                                   pnls[date],
+                                   holdings_pnls[date],
+                                   aums[date])
+
+        perf_attrib_dict.update(to_update)
 
     return perf_attrib_dict
 
@@ -239,8 +242,10 @@ def perf_attrib_1d(factor_loadings_1d,
 
     Returns
     -------
-    tup : tuple
-        Tuple containing performance attribution metrics
+    perf_attrib_entry : OrderedDict
+        OrderedDict containing performance attribution metrics
+        - Keys are strings (names of the performance attribution metric), and
+            values are the performance attribution metrics
     '''
     # There may be stocks in our holdings that are not in the risk model.
     # Record them and drop them from our holdings.
@@ -294,7 +299,7 @@ def perf_attrib_1d(factor_loadings_1d,
                                                   factor_covariances_1d,
                                                   stock_specific_variances_1d)
 
-    perf_attrib_tup = (
+    perf_attrib_entry = OrderedDict([
         ('total pnl', pnl_1d),
         ('factor exposure', exposures_1d),
         ('vol weighted factor exposure', vol_weighted_exposures_1d),
@@ -310,9 +315,9 @@ def perf_attrib_1d(factor_loadings_1d,
         ('MCR common factor', MCR_common_factor_1d),
         ('MCR specific', MCR_specific_1d),
         ('MCR portfolio', MCR_portfolio_1d)
-    )
+    ])
 
-    return perf_attrib_tup
+    return perf_attrib_entry
 
 
 def compute_common_factor_exposures_1d(holdings_1d, factor_loadings_1d):
