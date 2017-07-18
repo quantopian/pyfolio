@@ -19,8 +19,7 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 
 
-# 31 visually distinct colors...
-# http://phrogz.net/css/distinct-colors.html
+# 31 visually distinct colors... http://phrogz.net/css/distinct-colors.html
 COLORS = [
     '#f23d3d', '#828c23', '#698c83', '#594080', '#994d4d',
     '#206380', '#dd39e6', '#cc9999', '#7c8060', '#66adcc',
@@ -58,11 +57,15 @@ def perf_attrib(factor_loadings_long,
         2    2017-06-08	    24	    momentum	style	       0.5
         3    2017-06-08	    24	    stat_1	    statistical	   0.1
 
-    stock_specific_variances_long : pd.DataFrame
+    resid_var_long : pd.DataFrame
         Stock specific variances for all days in the date range, for all
         stocks, in long (tidy) format
         - Example:
-
+            dt          sid	    family	   residual	    variance
+        0	2015-06-03	2	    sector	   0.002282	    0.000231
+        1	2015-06-03	2	    style	   -0.006196	0.000216
+        2	2015-06-03	2	    pca	       -0.005679	0.000205
+        3	2015-06-03	24	    sector	   0.006446	    0.000231
 
     covariances_long : pd.DataFrame
         Factor covariances for all days in the date range, in long (tidy)
@@ -89,6 +92,7 @@ def perf_attrib(factor_loadings_long,
     holdings : pd.DataFrame
         Dollar value of positions in each stock, per day, in wide format.
         - Example:
+
 
     pnls : pd.Series
         PnL per day
