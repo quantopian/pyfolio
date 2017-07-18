@@ -20,6 +20,8 @@ from collections import OrderedDict
 
 
 # 31 visually distinct colors... http://phrogz.net/css/distinct-colors.html
+# There are so many factors to plot (26 so far) that using a matplotlib
+# colormap is unsatisfactory: either too few colors, or too similar colors
 COLORS = [
     '#f23d3d', '#828c23', '#698c83', '#594080', '#994d4d',
     '#206380', '#dd39e6', '#cc9999', '#7c8060', '#66adcc',
@@ -41,9 +43,10 @@ def perf_attrib(factor_loadings_long,
                 aums,
                 date_range):
     '''
-    Iteratively performs performance attribution over a date range. This
-    function takes data in long format a.k.a tidy data. For more information,
-    see Hadley Wickham's 2014 paper:
+    Iteratively calls perf_attrib_1d to performs performance attribution over
+    a date range. This function takes risk model data in long format (a.k.a
+    tidy data), whereas it takes portfolio data in wide format. For more
+    information, see Hadley Wickham's 2014 paper:
     http://vita.had.co.nz/papers/tidy-data.html
 
     Parameters
@@ -51,21 +54,21 @@ def perf_attrib(factor_loadings_long,
     factor_loadings_long : pd.DataFrame
         Factor loadings for all days in the date range, in long (tidy) format
         - Example:
-             dt             sid     name        family         factor_loading
-        0    2017-06-08	    24	    technology	sector	       0.9
-        1    2017-06-08	    24	    materials	sector	       0.0
-        2    2017-06-08	    24	    momentum	style	       0.5
-        3    2017-06-08	    24	    stat_1	    statistical	   0.1
+                 dt             sid   name        family         factor_loading
+            0    2017-06-08	    24	  technology  sector	     0.9
+            1    2017-06-08	    24	  materials	  sector	     0.0
+            2    2017-06-08	    24	  momentum	  style	         0.5
+            3    2017-06-08	    24	  stat_1	  statistical	 0.1
 
     resid_var_long : pd.DataFrame
         Stock specific variances for all days in the date range, for all
         stocks, in long (tidy) format
         - Example:
-            dt          sid	    family	   residual	    variance
-        0	2015-06-03	2	    sector	   0.002282	    0.000231
-        1	2015-06-03	2	    style	   -0.006196	0.000216
-        2	2015-06-03	2	    pca	       -0.005679	0.000205
-        3	2015-06-03	24	    sector	   0.006446	    0.000231
+                dt          sid	    family	   residual	    variance
+            0	2015-06-03	2	    sector	   0.002282	    0.000231
+            1	2015-06-03	2	    style	   -0.006196	0.000216
+            2	2015-06-03	2	    pca	       -0.005679	0.000205
+            3	2015-06-03	24	    sector	   0.006446	    0.000231
 
     covariances_long : pd.DataFrame
         Factor covariances for all days in the date range, in long (tidy)
@@ -73,30 +76,30 @@ def perf_attrib(factor_loadings_long,
         common factors X and Y are included twice: once with X as primary and Y
         as secondary, and vice versa.
         - Example:
-            dt           primary    secondary      covariance
-        0   2017-06-08	 momentum	momentum	   0.1
-        1   2017-06-08	 momentum	reversal	   0.2
-        2   2017-06-08	 momentum	stat_1	       -.05
-        3   2017-06-08	 reversal	momentum	   0.2
-        4   2017-06-08	 reversal	reversal	   0.0
+                dt           primary    secondary      covariance
+            0   2017-06-08	 momentum	momentum	   0.1
+            1   2017-06-08	 momentum	reversal	   0.2
+            2   2017-06-08	 momentum	stat_1	       -.05
+            3   2017-06-08	 reversal	momentum	   0.2
+            4   2017-06-08	 reversal	reversal	   0.0
 
     factor_returns_long : pd.DataFrame
         Common factor returns for all days in the date range, in long (tidy)
         format.
         - Example:
-                     dt      factor         returns
-        0    2017-06-08      technology     0.01
-        1    2017-06-08      momentum       -0.03
-        2    2017-06-08      stat_1         -0.2
+                         dt      factor         returns
+            0    2017-06-08      technology     0.01
+            1    2017-06-08      momentum       -0.03
+            2    2017-06-08      stat_1         -0.2
 
     holdings : pd.DataFrame
         Dollar value of positions in each stock, per day, in wide format.
         - Indexed by dates, columns are sids
         - Example:
-                        2           24          35
-        2017-06-08      103.19      18319.17    9913.01
-        2017-06-09      221.01      26301.90    5510.13
-        2017-06-10      -331.01     24105.36    -120.97
+                            2           24          35
+            2017-06-08      103.19      18319.17    9913.01
+            2017-06-09      221.01      26301.90    5510.13
+            2017-06-10      -331.01     24105.36    -120.97
 
     pnls : pd.Series
         PnL per day
@@ -322,7 +325,7 @@ def perf_attrib_1d(factor_loadings_1d,
 
 def compute_common_factor_exposures_1d(holdings_1d, factor_loadings_1d):
     '''
-    Computes dollar common factor exposures
+    Computes dollar common factor exposures for a given day
 
     Parameters
     ----------
@@ -356,9 +359,9 @@ def plot_common_factor_exposures(exposures, ax=None):
         - The output of compute_common_factor_exposures_1d is only one row of
         this DataFrame
         - Example:
-                        momentum	    size           	value
-        2017-06-01	    69183.823143	3.919257e+05	1.412135e+06
-        2017-06-02	    74165.961984	4.768590e+05	1.513102e+06
+                            momentum	    size           	value
+            2017-06-01	    69183.823143	3.919257e+05	1.412135e+06
+            2017-06-02	    74165.961984	4.768590e+05	1.513102e+06
 
     ax : plt.Axes
         Axes on which to plot
@@ -391,7 +394,7 @@ def plot_common_factor_exposures(exposures, ax=None):
 def compute_vol_weighted_common_factor_exposures_1d(exposures_1d,
                                                     factor_covariances_1d):
     '''
-    Computes volatility-weighted dollar common factor exposures
+    Computes volatility-weighted dollar common factor exposures for a given day
 
     Parameters
     ----------
@@ -428,9 +431,9 @@ def plot_vol_weighted_common_factor_exposures(vol_weighted_exposures, ax=None):
         - The output of compute_vol_weighted_common_factor_exposures_1d is only
         one row of this DataFrame
         - Example:
-                        momentum	    size           	value
-        2017-06-01	    6083.823143	    9192.538167	    1421.304375
-        2017-06-02	    7125.961984	    7685.951230	    1131.029048
+                            momentum	    size           	value
+            2017-06-01	    6083.823143	    9192.538167	    1421.304375
+            2017-06-02	    7125.961984	    7685.951230	    1131.029048
 
     ax : plt.Axes
         Axes on which to plot
@@ -463,7 +466,7 @@ def plot_vol_weighted_common_factor_exposures(vol_weighted_exposures, ax=None):
 
 def compute_common_factor_pnls_1d(exposures_1d, factor_returns_1d):
     '''
-    Computes PnL due to common factors
+    Computes PnL due to common factors for a given day
 
     Parameters
     ----------
@@ -487,7 +490,7 @@ def compute_common_factor_pnls_1d(exposures_1d, factor_returns_1d):
 
 def compute_specific_pnl_1d(pnl_1d, common_factor_pnls_1d):
     '''
-    Computes PnL that is not due to common factors
+    Computes PnL that is not due to common factors for a given day
 
     Parameters
     ----------
@@ -522,9 +525,9 @@ def plot_pnl_attribution(pnls, ax=None):
         - The output of compute_common_factor_pnls_1d is only one row of this
         DataFrame (ignoring the last cell)
         - Example:
-                      momentum	    size           	value          specific
-        2017-06-01	  6083.823143	-9192.538167	1421.304375    -1475.038534
-        2017-06-02	  7125.961984	-7685.951230	1131.029048    -1715.340134
+                          technology	momentum      	specific
+            2017-06-01	  6083.823143	-9192.538167	-1475.038534
+            2017-06-02	  7125.961984	-7685.951230	-1715.340134
 
     ax : plt.Axes
         Axes on which to plot
@@ -566,15 +569,7 @@ def plot_gross_pnl_attribution(pnls, ax=None):
     pnls : pd.DataFrame
         Time series of PnL attributable to common factors, and specific (non-
         attributable) PnL
-        - Columns are common factor and specific PnL, index is datetime
-        - The output of compute_specific_pnl_1d is only one cell of the last
-        column of this DataFrame
-        - The output of compute_common_factor_pnls_1d is only one row of this
-        DataFrame (ignoring the last cell)
-        - Example:
-                      momentum	    size           	value          specific
-        2017-06-01	  6083.823143	-9192.538167	1421.304375    -1475.038534
-        2017-06-02	  7125.961984	-7685.951230	1131.029048    -1715.340134
+        - See full description in plot_pnl_attribution
 
     ax : plt.Axes
         Axes on which to plot
@@ -607,18 +602,18 @@ def plot_pnl_time_series(common_factor_pnl, specific_pnl, ax=None):
         Time series of total PnL attributable to common risk factors
         - PnL indexed by datetime
         - Example:
-        2017-06-05   -14715.038534
-        2017-06-06    11774.696823
-        2017-06-07    -6778.749595
+            2017-06-05   -14715.038534
+            2017-06-06    11774.696823
+            2017-06-07    -6778.749595
 
     specific_pnl : pd.Series
         Time series of PnL not attributable to common risk factors
         - PnL indexed by datetime
         - common_factor_pnl and specific_pnl should sum to total PnL
         - Example:
-        2017-06-05    -8213.041651
-        2017-06-06       74.696823
-        2017-06-07     -778.749595
+            2017-06-05    -8213.041651
+            2017-06-06       74.696823
+            2017-06-07     -778.749595
 
     ax : plt.Axes
         Axes on which to plot
@@ -649,18 +644,18 @@ def plot_cum_pnl_time_series(common_factor_pnl, specific_pnl, ax=None):
         Time series of total PnL attributable to common risk factors
         - PnL indexed by datetime
         - Example:
-        2017-06-05   -14715.038534
-        2017-06-06    11774.696823
-        2017-06-07    -6778.749595
+            2017-06-05   -14715.038534
+            2017-06-06    11774.696823
+            2017-06-07    -6778.749595
 
     specific_pnl : pd.Series
         Time series of PnL not attributable to common risk factors
         - PnL indexed by datetime
         - common_factor_pnl and specific_pnl should sum to total PnL
         - Example:
-        2017-06-05    -8213.041651
-        2017-06-06       74.696823
-        2017-06-07     -778.749595
+            2017-06-05    -8213.041651
+            2017-06-06       74.696823
+            2017-06-07     -778.749595
 
     ax : plt.Axes
         Axes on which to plot
@@ -684,12 +679,15 @@ def plot_cum_pnl_time_series(common_factor_pnl, specific_pnl, ax=None):
 
 
 def compute_holdings_pnl_1d():
+    '''
+    Computes holdings PnL for a given day
+    '''
     pass
 
 
 def compute_trading_pnl_1d(specific_pnl_1d, holdings_pnl_1d):
     '''
-    Computes fraction of specific PnL due to trading
+    Computes fraction of specific PnL due to trading for a given day
 
     Parameters
     ----------
@@ -715,7 +713,7 @@ def compute_variances_1d(holdings_1d, factor_loadings_1d,
                          stock_specific_variances_1d):
     '''
     Computes common factor variance, specific variance and portfolio variance
-    of the algorithm.
+    of the algorithm for a given day
 
     Parameters
     ----------
@@ -771,27 +769,27 @@ def plot_risks(common_factor_risk, specific_risk, portfolio_risk, ax=None):
         - The first output of compute_variances_1d gives the square of one
         entry of this Series.
         - Example:
-        2017-06-05    36102.833298
-        2017-06-06    41031.349716
-        2017-06-07    39010.162551
+            2017-06-05    36102.833298
+            2017-06-06    41031.349716
+            2017-06-07    39010.162551
 
     specific_risk : pd.Series
         Time series of specific risk (the square root of specific variance)
         - The second output of compute_variances_1d gives the square of one
         entry of this Series.
         - Example:
-        2017-06-05    58866.530000
-        2017-06-06    49601.650490
-        2017-06-07    50649.039005
+            2017-06-05    58866.530000
+            2017-06-06    49601.650490
+            2017-06-07    50649.039005
 
     portfolio_risk : pd.Series
         Time series of portfolio risk (the square root of portfolio variance)
         - The third output of compute_variances_1d gives the square of one
         entry of this Series.
         - Example:
-        2017-06-05    95321.833298
-        2017-06-06    61031.646536
-        2017-06-07    73268.162551
+            2017-06-05    95321.833298
+            2017-06-06    61031.646536
+            2017-06-07    73268.162551
 
     ax : plt.Axes
         Axes on which to plot
@@ -866,7 +864,7 @@ def compute_marginal_contributions_to_risk_1d(holdings_1d, factor_loadings_1d,
                                               stock_specific_variances_1d):
     '''
     Compute marginal contributions to risk (MCR) to common factor risk,
-    specific risk and portfolio risk.
+    specific risk and portfolio risk for a given day
 
     Parameters
     ----------
