@@ -32,22 +32,90 @@ COLORS = [
 ]
 
 
-def perf_attrib(factor_loadings_list,
-                stock_specific_variances_list,
-                factor_covariances_list,
-                factor_returns_list,
-                holdings_list,
-                pnl_list,
-                holdings_pnl_list,
-                aum_list,
+def perf_attrib(factor_loadings_long,
+                stock_specific_variances_long,
+                covariances_long,
+                factor_returns_long,
+                holdings,
+                pnls,
+                holdings_pnls,
+                aums,
                 date_range):
     '''
-    This function should:
+    Iteratively performs performance attribution over a date range. This
+    function takes data in long format a.k.a tidy data. For more information,
+    see Hadley Wickham's 2014 paper:
+    http://vita.had.co.nz/papers/tidy-data.html
 
-    - Convert all these data structures from long to wide,
-    in preparation for perf_attrib_1d to analyze them.
+    Parameters
+    ----------
+    factor_loadings_long : pd.DataFrame
+        Factor loadings for all days in the date range, in long (tidy) format
+        - Example:
+             dt             sid     name        family         factor_loading
+        0    2017-06-08	    24	    technology	sector	       0.9
+        1    2017-06-08	    24	    materials	sector	       0.0
+        2    2017-06-08	    24	    momentum	style	       0.5
+        3    2017-06-08	    24	    stat_1	    statistical	   0.1
 
-    - Remember everything that perf_attrib_1d spits out.
+    stock_specific_variances_long : pd.DataFrame
+        Stock specific variances for all days in the date range, for all
+        stocks, in long (tidy) format
+        - Example:
+
+
+    covariances_long : pd.DataFrame
+        Factor covariances for all days in the date range, in long (tidy)
+        format. Note that there is duplication: i.e. the covariance between
+        common factors X and Y are included twice: once with X as primary and Y
+        as secondary, and vice versa.
+        - Example:
+            dt           primary    secondary      covariance
+        0   2017-06-08	 momentum	momentum	   0.1
+        1   2017-06-08	 momentum	reversal	   0.2
+        2   2017-06-08	 momentum	stat_1	       -.05
+        3   2017-06-08	 reversal	momentum	   0.2
+        4   2017-06-08	 reversal	reversal	   0.0
+
+    factor_returns_long : pd.DataFrame
+        Common factor returns for all days in the date range, in long (tidy)
+        format.
+        - Example:
+                     dt      factor         returns
+        0    2017-06-08      technology     0.01
+        1    2017-06-08      momentum       -0.03
+        2    2017-06-08      stat_1         -0.2
+
+    holdings : pd.DataFrame
+        Dollar value of positions in each stock, per day, in wide format.
+        - Example:
+
+    pnls : pd.Series
+        PnL per day
+        - PnL as values, indexed by dates
+        - Example:
+            2017-06-08      10183.19
+            2017-06-09      -9371.01
+            2017-06-10      6312.38
+
+    aums : pd.Series
+        Assets under management per day
+        - AUMs as values, indexed by dates
+        - Example:
+            2017-06-08      1.0183e6
+            2017-06-09      1.0238e6
+            2017-06-10      1.0192e6
+
+    date_range : pd.DatetimeIndex
+        Range of dates over which performance attribution is to be done
+
+    Returns
+    -------
+    perf_attrib_dict : OrderedDict
+        OrderedDict containing performance attribution metrics across all dates
+        - pd.Timestamps as keys, OrderedDicts as values.
+        - These OrderedDicts (that is, the values of perf_attrib_dict) have
+            have strings as keys and performance attribution metrics as values
     '''
 
     pnl_series = pd.Series()
@@ -164,6 +232,11 @@ def perf_attrib_1d(factor_loadings_1d,
 
     aum_1d : float
         Total assets under management by the algorithm for the given day
+
+    Returns
+    -------
+    tup : tuple
+        Tuple containing performance attribution metrics
     '''
     # There may be stocks in our holdings that are not in the risk model.
     # Record them and drop them from our holdings.
@@ -217,7 +290,7 @@ def perf_attrib_1d(factor_loadings_1d,
                                                   factor_covariances_1d,
                                                   stock_specific_variances_1d)
 
-    return (
+    perf_attrib_tup = (
         ('total pnl', pnl_1d),
         ('factor exposure', exposures_1d),
         ('vol weighted factor exposure', vol_weighted_exposures_1d),
@@ -234,6 +307,8 @@ def perf_attrib_1d(factor_loadings_1d,
         ('MCR specific', MCR_specific_1d),
         ('MCR portfolio', MCR_portfolio_1d)
     )
+
+    return perf_attrib_tup
 
 
 def compute_common_factor_exposures_1d(holdings_1d, factor_loadings_1d):
