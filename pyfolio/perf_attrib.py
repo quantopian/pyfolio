@@ -1354,47 +1354,47 @@ def plot_price_pnl(price_attrib, ax=None):
 
     tot_count = price_attrib.count()['pnl']
     price_buckets = OrderedDict((
-        ('$0-1', price_attrib[price_attrib.price_bucket == 0].count().pnl
-            / tot_count),
-        ('$1-2', price_attrib[price_attrib.price_bucket == 1].count().pnl
-            / tot_count),
-        ('$2-3', price_attrib[price_attrib.price_bucket == 2].count().pnl
-            / tot_count),
-        ('$3-4', price_attrib[price_attrib.price_bucket == 3].count().pnl
-            / tot_count),
-        ('$4-5', price_attrib[price_attrib.price_bucket == 4].count().pnl
-            / tot_count),
-        ('$5-10', price_attrib[price_attrib.price_bucket == 5].count().pnl
-            / tot_count),
-        ('$10-50', price_attrib[price_attrib.price_bucket == 6].count().pnl
-            / tot_count),
-        ('$50-100', price_attrib[price_attrib.price_bucket == 7].count().pnl
-            / tot_count),
-        ('$100+', price_attrib[price_attrib.price_bucket == 8].count().pnl
-            / tot_count),
+        ('$0-1', price_attrib[price_attrib.price_bucket == 0].count().pnl /
+            tot_count),
+        ('$1-2', price_attrib[price_attrib.price_bucket == 1].count().pnl /
+            tot_count),
+        ('$2-3', price_attrib[price_attrib.price_bucket == 2].count().pnl /
+            tot_count),
+        ('$3-4', price_attrib[price_attrib.price_bucket == 3].count().pnl /
+            tot_count),
+        ('$4-5', price_attrib[price_attrib.price_bucket == 4].count().pnl /
+            tot_count),
+        ('$5-10', price_attrib[price_attrib.price_bucket == 5].count().pnl /
+            tot_count),
+        ('$10-50', price_attrib[price_attrib.price_bucket == 6].count().pnl /
+            tot_count),
+        ('$50-100', price_attrib[price_attrib.price_bucket == 7].count().pnl /
+            tot_count),
+        ('$100+', price_attrib[price_attrib.price_bucket == 8].count().pnl /
+            tot_count),
     ))
     price_heights = price_buckets.values()
 
     tot_pnl = price_attrib.pnl.sum()
     pnl_price_buckets = OrderedDict((
-        ('$0-1', price_attrib[price_attrib.price_bucket == 0].pnl.sum()
-            / tot_pnl),
-        ('$1-2', price_attrib[price_attrib.price_bucket == 1].pnl.sum()
-            / tot_pnl),
-        ('$2-3', price_attrib[price_attrib.price_bucket == 2].pnl.sum()
-            / tot_pnl),
-        ('$3-4', price_attrib[price_attrib.price_bucket == 3].pnl.sum()
-            / tot_pnl),
-        ('$4-5', price_attrib[price_attrib.price_bucket == 4].pnl.sum()
-            / tot_pnl),
-        ('$5-10', price_attrib[price_attrib.price_bucket == 5].pnl.sum()
-            / tot_pnl),
-        ('$10-50', price_attrib[price_attrib.price_bucket == 6].pnl.sum()
-            / tot_pnl),
-        ('$50-100', price_attrib[price_attrib.price_bucket == 7].pnl.sum()
-            / tot_pnl),
-        ('$100+', price_attrib[price_attrib.price_bucket == 8].pnl.sum()
-            / tot_pnl),
+        ('$0-1', price_attrib[price_attrib.price_bucket == 0].pnl.sum() /
+            tot_pnl),
+        ('$1-2', price_attrib[price_attrib.price_bucket == 1].pnl.sum() /
+            tot_pnl),
+        ('$2-3', price_attrib[price_attrib.price_bucket == 2].pnl.sum() /
+            tot_pnl),
+        ('$3-4', price_attrib[price_attrib.price_bucket == 3].pnl.sum() /
+            tot_pnl),
+        ('$4-5', price_attrib[price_attrib.price_bucket == 4].pnl.sum() /
+            tot_pnl),
+        ('$5-10', price_attrib[price_attrib.price_bucket == 5].pnl.sum() /
+            tot_pnl),
+        ('$10-50', price_attrib[price_attrib.price_bucket == 6].pnl.sum() /
+            tot_pnl),
+        ('$50-100', price_attrib[price_attrib.price_bucket == 7].pnl.sum() /
+            tot_pnl),
+        ('$100+', price_attrib[price_attrib.price_bucket == 8].pnl.sum() /
+            tot_pnl),
     ))
     pnl_price_heights = pnl_price_buckets.values()
 
