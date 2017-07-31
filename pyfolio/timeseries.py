@@ -555,7 +555,7 @@ def rolling_fama_french(returns, factor_returns=None,
     """
     Computes rolling Fama-French single factor betas.
 
-    Specifically, returns SMB, HML, and Mom.
+    Specifically, returns SMB, HML, and UMD.
 
     Parameters
     ----------
@@ -573,7 +573,7 @@ def rolling_fama_french(returns, factor_returns=None,
     -------
     pandas.DataFrame
         DataFrame containing rolling beta coefficients for SMB, HML
-        and Mom
+        and UMD
     """
 
     if factor_returns is None:
@@ -583,22 +583,22 @@ def rolling_fama_french(returns, factor_returns=None,
                                              axis='columns')
 
     regression_df = pd.concat([returns, factor_returns], axis='columns')
-    regression_df.columns = ['rets', 'SMB', 'HML', 'Mom']
+    regression_df.columns = ['rets', 'SMB', 'HML', 'UMD']
 
     regression_coeffs = []
 
     for beg, end in zip(regression_df.index[:-rolling_window],
                         regression_df.index[rolling_window:]):
         window = regression_df.loc[beg:end]
-        coeffs = sm.ols(formula='rets ~ SMB + HML + Mom - 1', data=window) \
+        coeffs = sm.ols(formula='rets ~ SMB + HML + UMD - 1', data=window) \
             .fit().params.values
         regression_coeffs.append(coeffs)
 
     regression_coeffs = pd.DataFrame(data=regression_coeffs,
-                                     columns=['SMB', 'HML', 'Mom'],
+                                     columns=['SMB', 'HML', 'UMD'],
                                      index=regression_df.index[rolling_window:]
                                      )
-    nans = pd.DataFrame(np.nan, columns=['SMB', 'HML', 'Mom'],
+    nans = pd.DataFrame(np.nan, columns=['SMB', 'HML', 'UMD'],
                         index=regression_df.index[:rolling_window])
 
     rolling_fama_french = nans.append(regression_coeffs)
