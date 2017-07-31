@@ -553,9 +553,11 @@ def rolling_beta(returns, factor_returns,
 def rolling_fama_french(returns, factor_returns=None,
                         rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """
-    Computes rolling Fama-French single factor betas.
+    Computes rolling Fama-French single factor betas using a multivariate
+    linear regression (separate linear regressions is problematic because
+    the Fama-French factors are confounded).
 
-    Specifically, returns SMB, HML, and UMD.
+    Specifically, returns rolling betas to SMB, HML, and UMD.
 
     Parameters
     ----------
@@ -572,7 +574,7 @@ def rolling_fama_french(returns, factor_returns=None,
     Returns
     -------
     pandas.DataFrame
-        DataFrame containing rolling beta coefficients for SMB, HML
+        DataFrame containing rolling beta coefficients to SMB, HML
         and UMD
     """
 
