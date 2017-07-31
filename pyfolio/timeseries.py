@@ -1,5 +1,5 @@
 #
-# Copyright 2016 Quantopian, Inc.
+# Copyright 2017 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -508,7 +508,8 @@ def aggregate_returns(returns, convert_to):
 def rolling_beta(returns, factor_returns,
                  rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """
-    Determines the rolling beta of a strategy.
+    Determines the rolling beta of a strategy. If passed multiple factors,
+    will perform separate linear regressions, not a multivariate regression.
 
     Parameters
     ----------
