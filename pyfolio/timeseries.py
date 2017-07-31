@@ -587,6 +587,7 @@ def rolling_fama_french(returns, factor_returns=None,
     regression_df = pd.concat([returns, factor_returns], axis='columns')
     regression_df.columns = ['rets', 'SMB', 'HML', 'UMD']
 
+    # have NaNs when there is insufficient data to do a regression
     regression_coeffs = np.empty((len(regression_df.index[:rolling_window]),
                                   len(factor_returns.columns)))
     regression_coeffs.fill(np.nan)
@@ -601,7 +602,6 @@ def rolling_fama_french(returns, factor_returns=None,
     rolling_fama_french = pd.DataFrame(data=regression_coeffs,
                                        columns=['SMB', 'HML', 'UMD'],
                                        index=regression_df.index)
-
     rolling_fama_french.index.name = None
 
     return rolling_fama_french
