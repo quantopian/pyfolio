@@ -587,23 +587,21 @@ def rolling_fama_french(returns, factor_returns=None,
     regression_df = pd.concat([returns, factor_returns], axis='columns')
     regression_df.columns = ['rets', 'SMB', 'HML', 'UMD']
 
-    regression_coeffs = []
+    regression_coeffs = np.empty((len(regression_df.index[:rolling_window]),
+                                  len(factor_returns.columns)))
+    regression_coeffs.fill(np.nan)
 
     for beg, end in zip(regression_df.index[:-rolling_window],
                         regression_df.index[rolling_window:]):
         window = regression_df.loc[beg:end]
         coeffs = sm.ols(formula='rets ~ SMB + HML + UMD - 1', data=window) \
             .fit().params.values
-        regression_coeffs.append(coeffs)
+        regression_coeffs = np.append(regression_coeffs, [coeffs], axis=0)
 
-    regression_coeffs = pd.DataFrame(data=regression_coeffs,
-                                     columns=['SMB', 'HML', 'UMD'],
-                                     index=regression_df.index[rolling_window:]
-                                     )
-    nans = pd.DataFrame(np.nan, columns=['SMB', 'HML', 'UMD'],
-                        index=regression_df.index[:rolling_window])
+    rolling_fama_french = pd.DataFrame(data=regression_coeffs,
+                                       columns=['SMB', 'HML', 'UMD'],
+                                       index=regression_df.index)
 
-    rolling_fama_french = nans.append(regression_coeffs)
     rolling_fama_french.index.name = None
 
     return rolling_fama_french
