@@ -555,7 +555,7 @@ def rolling_fama_french(returns, factor_returns=None,
     """
     Computes rolling Fama-French single factor betas.
 
-    Specifically, returns SMB, HML, and UMD.
+    Specifically, returns SMB, HML, and Mom.
 
     Parameters
     ----------
@@ -573,7 +573,7 @@ def rolling_fama_french(returns, factor_returns=None,
     -------
     pandas.DataFrame
         DataFrame containing rolling beta coefficients for SMB, HML
-        and UMD
+        and Mom
     """
 
     if factor_returns is None:
