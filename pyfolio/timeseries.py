@@ -21,6 +21,7 @@ import pandas as pd
 import numpy as np
 import scipy as sp
 import scipy.stats as stats
+import statsmodels.formula.api as sm
 
 from . import utils
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
@@ -581,8 +582,29 @@ def rolling_fama_french(returns, factor_returns=None,
         factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
                                              axis='columns')
 
-    return rolling_beta(returns, factor_returns,
-                        rolling_window=rolling_window)
+    regression_df = pd.concat([returns, factor_returns], axis='columns')
+    regression_df.columns = ['rets', 'SMB', 'HML', 'Mom']
+
+    regression_coeffs = []
+
+    for beg, end in zip(regression_df.index[:-rolling_window],
+                        regression_df.index[rolling_window:]):
+        window = regression_df.loc[beg:end]
+        coeffs = sm.ols(formula='rets ~ SMB + HML + Mom - 1', data=window) \
+            .fit().params.values
+        regression_coeffs.append(coeffs)
+
+    regression_coeffs = pd.DataFrame(data=regression_coeffs,
+                                     columns=['SMB', 'HML', 'Mom'],
+                                     index=regression_df.index[rolling_window:]
+                                     )
+    nans = pd.DataFrame(np.nan, columns=['SMB', 'HML', 'Mom'],
+                        index=regression_df.index[:rolling_window])
+
+    rolling_fama_french = nans.append(regression_coeffs)
+    rolling_fama_french.index.name = None
+
+    return rolling_fama_french
 
 
 def gross_lev(positions):
