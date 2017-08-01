@@ -21,7 +21,7 @@ import pandas as pd
 import numpy as np
 import scipy as sp
 import scipy.stats as stats
-import statsmodels.formula.api as sm
+import statsmodels.formula.api as smf
 
 from . import utils
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
@@ -595,7 +595,7 @@ def rolling_fama_french(returns, factor_returns=None,
     for beg, end in zip(regression_df.index[:-rolling_window],
                         regression_df.index[rolling_window:]):
         window = regression_df.loc[beg:end]
-        coeffs = sm.ols(formula='rets ~ SMB + HML + UMD', data=window) \
+        coeffs = smf.ols(formula='rets ~ SMB + HML + UMD', data=window) \
             .fit().params.values.drop('Intercept')
         regression_coeffs = np.append(regression_coeffs, [coeffs], axis=0)
 

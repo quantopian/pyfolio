@@ -51,6 +51,7 @@ install_reqs = [
     'pandas>=0.19.0',
     'pytz>=2014.10',
     'scipy>=0.14.0',
+    'statsmodels>=0.5.0'
     'seaborn>=0.7.1',
     'pandas-datareader>=0.2',
     'empyrical>=0.3.0'
