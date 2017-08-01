@@ -565,17 +565,15 @@ def rolling_fama_french(returns, factor_returns=None,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.DataFrame, optional
-        data set containing the Fama-French risk factors. See
+        Data set containing the Fama-French risk factors. See
         utils.load_portfolio_risk_factors.
     rolling_window : int, optional
-        The days window over which to compute the beta.
-        Default is 6 months.
+        The days window over which to compute the beta. Defaults to 6 months.
 
     Returns
     -------
     pandas.DataFrame
-        DataFrame containing rolling beta coefficients to SMB, HML
-        and UMD
+        DataFrame containing rolling beta coefficients to SMB, HML and UMD
     """
 
     if factor_returns is None:
