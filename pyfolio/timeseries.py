@@ -594,7 +594,8 @@ def rolling_fama_french(returns, factor_returns=None,
                         regression_df.index[rolling_window:]):
         window = regression_df.loc[beg:end]
         coeffs = smf.ols(formula='rets ~ SMB + HML + UMD', data=window) \
-            .fit().params.values.drop('Intercept')
+            .fit().params.values
+        coeffs = np.delete(coeffs, 0)
         regression_coeffs = np.append(regression_coeffs, [coeffs], axis=0)
 
     rolling_fama_french = pd.DataFrame(data=regression_coeffs,
