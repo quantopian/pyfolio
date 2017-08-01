@@ -35,7 +35,7 @@ before_script:
   - "flake8 pyfolio"
 
 script:
-  - travis_wait 60 nosetests $TESTCMD
+  - travis_wait 90 nosetests $TESTCMD
 
 notifications:
   email: false
