@@ -601,7 +601,7 @@ def gross_lev(positions):
     """
 
     exposure = positions.drop('cash', axis=1).abs().sum(axis=1)
-    return exposure / positions.sum(axis=1)
+    return exposure / positions.abs().sum(axis=1)
 
 
 def value_at_risk(returns, period=None, sigma=2.0):
