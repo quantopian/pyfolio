@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Quantopian, Inc.
+# Copyright 2016 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import pandas as pd
 import numpy as np
 import scipy as sp
 import scipy.stats as stats
-import statsmodels.formula.api as smf
+from sklearn import linear_model
 
 from . import utils
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
@@ -509,8 +509,7 @@ def aggregate_returns(returns, convert_to):
 def rolling_beta(returns, factor_returns,
                  rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """
-    Determines the rolling beta of a strategy. If passed multiple factors,
-    will perform separate linear regressions, not a multivariate regression.
+    Determines the rolling beta of a strategy.
 
     Parameters
     ----------
@@ -582,25 +581,23 @@ def rolling_fama_french(returns, factor_returns=None,
         factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
                                              axis='columns')
 
-    regression_df = pd.concat([returns, factor_returns], axis='columns')
-    regression_df.columns = ['rets', 'SMB', 'HML', 'UMD']
+    # add constant to regression
+    factor_returns['const'] = 1
 
     # have NaNs when there is insufficient data to do a regression
-    regression_coeffs = np.empty((len(regression_df.index[:rolling_window]),
+    regression_coeffs = np.empty((rolling_window,
                                   len(factor_returns.columns)))
     regression_coeffs.fill(np.nan)
 
-    for beg, end in zip(regression_df.index[:-rolling_window],
-                        regression_df.index[rolling_window:]):
-        window = regression_df.loc[beg:end]
-        coeffs = smf.ols(formula='rets ~ SMB + HML + UMD', data=window) \
-            .fit().params.values
-        coeffs = np.delete(coeffs, 0)
+    for beg, end in zip(factor_returns.index[:-rolling_window],
+                        factor_returns.index[rolling_window:]):
+        coeffs = linear_model.LinearRegression().fit(factor_returns[beg:end],
+                                                     returns[beg:end]).coef_
         regression_coeffs = np.append(regression_coeffs, [coeffs], axis=0)
 
-    rolling_fama_french = pd.DataFrame(data=regression_coeffs,
+    rolling_fama_french = pd.DataFrame(data=regression_coeffs[:, :3],
                                        columns=['SMB', 'HML', 'UMD'],
-                                       index=regression_df.index)
+                                       index=factor_returns.index)
     rolling_fama_french.index.name = None
 
     return rolling_fama_french
