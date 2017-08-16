@@ -14,25 +14,25 @@
 # limitations under the License.
 from __future__ import division
 
-from time import time
 import warnings
+from time import time
 
-import matplotlib.pyplot as plt
+import empyrical
 import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
 import numpy as np
-import scipy.stats
 import pandas as pd
+import scipy.stats
 
-from . import timeseries
-from . import utils
-from . import pos
-from . import txn
-from . import round_trips
+from . import _seaborn as sns
 from . import capacity
 from . import plotting
+from . import pos
 from . import risk
-from . import _seaborn as sns
-import empyrical
+from . import round_trips
+from . import timeseries
+from . import txn
+from . import utils
 
 try:
     from . import bayesian
@@ -320,7 +320,7 @@ def create_simple_tear_sheet(returns,
 
     if live_start_date is not None:
         vertical_sections += 1
-        live_start_date = utils.get_utc_timestamp(live_start_date)
+        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
@@ -464,7 +464,7 @@ def create_returns_tear_sheet(returns, positions=None,
 
     if live_start_date is not None:
         vertical_sections += 1
-        live_start_date = utils.get_utc_timestamp(live_start_date)
+        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
 
     if bootstrap:
         vertical_sections += 1
@@ -1091,7 +1091,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         benchmark_rets = timeseries.rolling_fama_french(
             returns, rolling_window=rolling_window)
 
-    live_start_date = utils.get_utc_timestamp(live_start_date)
+    live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
     df_train = returns.loc[returns.index < live_start_date]
     df_test = returns.loc[returns.index >= live_start_date]
 

@@ -17,19 +17,17 @@ from __future__ import division
 from collections import OrderedDict
 from functools import partial
 
-import pandas as pd
+import empyrical
 import numpy as np
+import pandas as pd
 import scipy as sp
 import scipy.stats as stats
 
-from . import utils
+from .deprecate import deprecated
+from .interesting_periods import PERIODS
+from .txn import get_turnover
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
 from .utils import DAILY
-from .txn import get_turnover
-from .interesting_periods import PERIODS
-from .deprecate import deprecated
-
-import empyrical
 
 DEPRECATION_WARNING = ("Risk functions in pyfolio.timeseries are deprecated "
                        "and will be removed in a future release. Please "
@@ -575,7 +573,7 @@ def rolling_fama_french(returns, factor_returns=None,
     """
 
     if factor_returns is None:
-        factor_returns = utils.load_portfolio_risk_factors(
+        factor_returns = empyrical.utils.load_portfolio_risk_factors(
             start=returns.index[0], end=returns.index[-1])
         factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
                                              axis='columns')

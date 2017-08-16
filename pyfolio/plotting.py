@@ -13,34 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import division
-from collections import OrderedDict
-
-import pandas as pd
-import numpy as np
-import scipy as sp
 
 import datetime
-import pytz
+from collections import OrderedDict
+from functools import wraps
 
+import empyrical
 import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import pytz
+import scipy as sp
 from matplotlib import figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.ticker import FuncFormatter
 
-from . import utils
-from . import timeseries
-from . import pos
 from . import _seaborn as sns
-from . import txn
 from . import capacity
-
+from . import pos
+from . import timeseries
+from . import txn
+from . import utils
 from .utils import (APPROX_BDAYS_PER_MONTH,
                     MM_DISPLAY_UNIT)
-
-from functools import wraps
-import empyrical
 
 
 def customize(func):
@@ -652,7 +649,7 @@ def show_perf_stats(returns, factor_returns, positions=None,
         transactions=transactions)
 
     if live_start_date is not None:
-        live_start_date = utils.get_utc_timestamp(live_start_date)
+        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
         returns_is = returns[returns.index < live_start_date]
         returns_oos = returns[returns.index >= live_start_date]
 
@@ -741,7 +738,7 @@ def plot_returns(returns,
     ax.set_ylabel('Returns')
 
     if live_start_date is not None:
-        live_start_date = utils.get_utc_timestamp(live_start_date)
+        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
         is_returns = returns.loc[returns.index < live_start_date]
         oos_returns = returns.loc[returns.index >= live_start_date]
         is_returns.plot(ax=ax, color='g')
@@ -840,7 +837,7 @@ def plot_rolling_returns(returns,
                                 ax=ax, **kwargs)
 
     if live_start_date is not None:
-        live_start_date = utils.get_utc_timestamp(live_start_date)
+        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
         is_cum_returns = cum_rets.loc[cum_rets.index < live_start_date]
         oos_cum_returns = cum_rets.loc[cum_rets.index >= live_start_date]
     else:
