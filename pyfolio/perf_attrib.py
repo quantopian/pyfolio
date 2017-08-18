@@ -20,24 +20,18 @@ from pyfolio.pos import get_percent_alloc
 from pyfolio.utils import print_table
 
 
-def perf_attrib(factor_loadings, positions, factor_returns, returns):
+def perf_attrib(returns, positions, factor_returns, factor_loadings):
     """
     Does performance attribution given risk info.
 
     Parameters
     ----------
-    factor_loadings : pd.DataFrame
-        Factor loadings for all days in the date range, with date and ticker as
-        index, and factors as columns.
+    returns : pd.Series
+        Returns for each day in the date range.
         - Example:
-                               momentum  reversal
-            dt         ticker
-            2017-01-01 AAPL   -1.592914  0.852830
-                       TLT     0.184864  0.895534
-                       XOM     0.993160  1.149353
-            2017-01-02 AAPL   -0.140009 -0.524952
-                       TLT    -1.066978  0.185435
-                       XOM    -1.798401  0.761549
+            2017-01-01   -0.017098
+            2017-01-02    0.002683
+            2017-01-03   -0.008669
 
     positions: pd.DataFrame
         Daily holdings (in dollars or percentages), indexed by date.
@@ -55,16 +49,21 @@ def perf_attrib(factor_loadings, positions, factor_returns, returns):
             2017-01-01  0.002779 -0.005453
             2017-01-02  0.001096  0.010290
 
-    returns : pd.Series
-        Returns for each day in the date range.
+    factor_loadings : pd.DataFrame
+        Factor loadings for all days in the date range, with date and ticker as
+        index, and factors as columns.
         - Example:
-            2017-01-01   -0.017098
-            2017-01-02    0.002683
-            2017-01-03   -0.008669
+                               momentum  reversal
+            dt         ticker
+            2017-01-01 AAPL   -1.592914  0.852830
+                       TLT     0.184864  0.895534
+                       XOM     0.993160  1.149353
+            2017-01-02 AAPL   -0.140009 -0.524952
+                       TLT    -1.066978  0.185435
+                       XOM    -1.798401  0.761549
 
     Returns
     -------
-
     perf_attribution : pd.DataFrame
         df with factors, common returns, and specific returns as columns,
         and datetimes as index
@@ -91,10 +90,10 @@ def perf_attrib(factor_loadings, positions, factor_returns, returns):
                                'common_returns': common_returns,
                                'specific_returns': specific_returns})
 
-    return pd.concat([perf_attrib_by_factor, returns_df], axis='columns')
+    return  pd.concat([perf_attrib_by_factor, returns_df], axis='columns')
 
 
-def create_perf_attrib_stats(positions, perf_attrib):
+def create_perf_attrib_stats(perf_attrib):
     """
     Takes perf attribution data over a period of time and computes annualized
     multifactor alpha, multifactor sharpe, risk exposures.
@@ -103,15 +102,11 @@ def create_perf_attrib_stats(positions, perf_attrib):
     specific_returns = perf_attrib['specific_returns']
     common_returns = perf_attrib['common_returns']
 
-    daily_multifactor_alpha = (
-        specific_returns / positions.groupby(['dt']).sum()
-    ).mean()
-
     summary['Annual multi-factor alpha'] =\
-        empyrical.annual_return(daily_multifactor_alpha)
+        empyrical.annual_return(specific_returns)
 
-    summary['Multifactor sharpe'] =\
-        empyrical.sharpe_ratio(daily_multifactor_alpha)
+    summary['Multi-factor sharpe'] =\
+        empyrical.sharpe_ratio(specific_returns)
 
     summary['Cumulative specific returns'] =\
         empyrical.cum_returns(specific_returns)
