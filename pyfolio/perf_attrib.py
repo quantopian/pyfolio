@@ -14,15 +14,13 @@
 # limitations under the License.
 from __future__ import division
 import pandas as pd
-import numpy as np
 
+import empyrical
+from pyfolio.pos import get_percent_alloc
 from pyfolio.utils import print_table
 
 
-def perf_attrib(factor_loadings,
-                factor_returns,
-                strategy_daily_returns,
-                strategy_daily_holdings):
+def perf_attrib(factor_loadings, positions, factor_returns, returns):
     """
     Does performance attribution given risk info.
 
@@ -41,6 +39,15 @@ def perf_attrib(factor_loadings,
                        TLT    -1.066978  0.185435
                        XOM    -1.798401  0.761549
 
+    positions: pd.DataFrame
+        Daily holdings (in dollars or percentages), indexed by date.
+        Will be converted to percentages if positions are in dollars.
+        - Example:
+                        AAPL  TLT  XOM
+            2017-01-01    71   93   10
+            2017-01-02    71   16   71
+            2017-01-03    46   43   63
+
     factor_returns : pd.DataFrame
         Returns by factor, with date as index and factors as columns
         - Example:
@@ -48,38 +55,15 @@ def perf_attrib(factor_loadings,
             2017-01-01  0.002779 -0.005453
             2017-01-02  0.001096  0.010290
 
-    strategy_daily_returns : pd.DataFrame
+    returns : pd.Series
         Returns for each day in the date range.
         - Example:
-                            AAPL       TLT       XOM
-            2017-01-01 -0.014092 -0.003938 -0.001508
-            2017-01-02  0.011921  0.003039 -0.001546
-
-    strategy_daily_holdings: pd.Series
-        Daily holdings for all days in the date range, indexed by date
-        and ticker
-        - Example:
-            dt          ticker
-            2017-01-01  AAPL      71
-                        TLT       93
-                        XOM       10
-            2017-01-02  AAPL      71
-                        TLT       16
-                        XOM       71
+            2017-01-01   -0.017098
+            2017-01-02    0.002683
+            2017-01-03   -0.008669
 
     Returns
     -------
-    exposures : pd.DataFrame
-        df with factors as columns, and datetimes as index
-        - Example:
-                                 momentum    reversal
-            dt         ticker
-            2017-01-01 AAPL   -113.096901   60.550926
-                       TLT      17.192383   83.284658
-                       XOM       9.931600   11.493529
-            2017-01-02 AAPL     -9.940674  -37.271562
-                       TLT     -17.071643    2.966952
-                       XOM    -127.686503   54.070000
 
     perf_attribution : pd.DataFrame
         df with factors, common returns, and specific returns as columns,
@@ -90,59 +74,61 @@ def perf_attrib(factor_loadings,
             2017-01-01  0.249087  0.935925        1.185012          1.185012
             2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
     """
+    # convert holdings to percentages, and convert positions to long format
+    positions = get_percent_alloc(positions)
+    positions = positions.stack()
+    positions.index = positions.index.set_names(['dt', 'ticker'])
 
-    risk_exposures = factor_loadings.multiply(strategy_daily_holdings,
+    risk_exposures = factor_loadings.multiply(positions,
                                               axis='rows')
     risk_exposures_portfolio = risk_exposures.groupby(level='dt').sum()
-    perf_attrib_style = risk_exposures_portfolio.multiply(factor_returns)
+    perf_attrib_by_factor = risk_exposures_portfolio.multiply(factor_returns)
 
-    common_pa = perf_attrib_style.sum(axis=1)
-    total_returns_daily = strategy_daily_returns.sum(axis=1)
-    specific_pa = total_returns_daily - common_pa
+    common_returns = perf_attrib_by_factor.sum(axis='columns')
+    specific_returns = returns - common_returns
 
-    perf_attrib_common = perf_attrib_style.assign(common_returns=common_pa)
-    perf_attrib = perf_attrib_common.assign(specific_returns=specific_pa)
+    returns_df = pd.DataFrame({'total_returns': returns,
+                               'common_returns': common_returns,
+                               'specific_returns': specific_returns})
 
-    return strategy_daily_holdings, risk_exposures, perf_attrib
+    return pd.concat([perf_attrib_by_factor, returns_df], axis='columns')
 
 
-def create_perf_attrib_stats(strategy_daily_holdings, risk_exposures,
-                             perf_attrib):
+def create_perf_attrib_stats(positions, perf_attrib):
     """
     Takes perf attribution data over a period of time and computes annualized
-    alpha, multifactor sharpe, risk exposures.
+    multifactor alpha, multifactor sharpe, risk exposures.
     """
-
     summary = {}
     specific_returns = perf_attrib['specific_returns']
     common_returns = perf_attrib['common_returns']
 
-    summary['daily_mf_alpha'] = (
-        specific_returns / strategy_daily_holdings.groupby(['dt']).sum()
+    daily_multifactor_alpha = (
+        specific_returns / positions.groupby(['dt']).sum()
     ).mean()
 
-    summary['annualized_mf_alpha'] =\
-        np.power(summary['daily_mf_alpha'] + 1., 252) - 1.
+    summary['Annual multi-factor alpha'] =\
+        empyrical.annual_return(daily_multifactor_alpha)
 
-    summary['mf_sharpe'] = summary['daily_mf_alpha'] * np.sqrt(252) / (
-        specific_returns / strategy_daily_holdings.groupby(['dt']).sum()
-    ).std()
+    summary['Multifactor sharpe'] =\
+        empyrical.sharpe_ratio(daily_multifactor_alpha)
 
-    summary['total_specific_returns'] = specific_returns.sum()
-    summary['total_common_returns'] = common_returns.sum()
-
-    summary['total_returns'] =\
-        summary['total_common_returns'] + summary['total_specific_returns']
+    summary['Cumulative specific returns'] =\
+        empyrical.cum_returns(specific_returns)
+    summary['Cumulative common returns'] =\
+        empyrical.cum_returns(common_returns)
+    summary['Total returns'] =\
+        empyrical.cum_returns(perf_attrib['total_returns'])
 
     summary = pd.Series(summary)
-    return risk_exposures, summary
+    return summary
 
 
-def show_perf_attrib_stats(perf_attrib_data):
+def show_perf_attrib_stats(perf_attrib_data, risk_exposures):
     """
     Takes perf attribution data over a period of time, computes stats on it,
     and displays them using `utils.print_table`.
     """
     perf_attrib_stats = create_perf_attrib_stats(perf_attrib_data)
-    for df in perf_attrib_stats:
-        print_table(df)
+    print_table(perf_attrib_stats)
+    print_table(risk_exposures)
