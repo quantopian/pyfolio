@@ -357,6 +357,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     Plots total amount of stocks with an active position, either short
     or long. Displays daily total, daily average per month, and
     all-time daily average.
+
     Parameters
     ----------
     returns : pd.Series
@@ -371,6 +372,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
         Axes upon which to plot.
     **kwargs, optional
         Passed to plotting function.
+
     Returns
     -------
     ax : matplotlib.Axes
