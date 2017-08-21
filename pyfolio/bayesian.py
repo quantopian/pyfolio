@@ -632,5 +632,5 @@ def plot_bayes_cone(returns_train, returns_test, ppc,
         transform=ax.transAxes,
     )
 
-    ax.set_ylabel('Cumulative returns', fontsize=14)
+    ax.set_ylabel('Cumulative returns')
     return score
