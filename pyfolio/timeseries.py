@@ -21,6 +21,7 @@ import pandas as pd
 import numpy as np
 import scipy as sp
 import scipy.stats as stats
+from sklearn import linear_model
 
 from . import utils
 from .utils import APPROX_BDAYS_PER_MONTH, APPROX_BDAYS_PER_YEAR
@@ -551,9 +552,11 @@ def rolling_beta(returns, factor_returns,
 def rolling_fama_french(returns, factor_returns=None,
                         rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """
-    Computes rolling Fama-French single factor betas.
+    Computes rolling Fama-French single factor betas using a multivariate
+    linear regression (separate linear regressions is problematic because
+    the Fama-French factors are confounded).
 
-    Specifically, returns SMB, HML, and UMD.
+    Specifically, returns rolling betas to SMB, HML, and UMD.
 
     Parameters
     ----------
@@ -561,17 +564,15 @@ def rolling_fama_french(returns, factor_returns=None,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.DataFrame, optional
-        data set containing the Fama-French risk factors. See
+        Data set containing the Fama-French risk factors. See
         utils.load_portfolio_risk_factors.
     rolling_window : int, optional
-        The days window over which to compute the beta.
-        Default is 6 months.
+        The days window over which to compute the beta. Defaults to 6 months.
 
     Returns
     -------
     pandas.DataFrame
-        DataFrame containing rolling beta coefficients for SMB, HML
-        and UMD
+        DataFrame containing rolling beta coefficients to SMB, HML and UMD
     """
 
     if factor_returns is None:
@@ -580,8 +581,26 @@ def rolling_fama_french(returns, factor_returns=None,
         factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
                                              axis='columns')
 
-    return rolling_beta(returns, factor_returns,
-                        rolling_window=rolling_window)
+    # add constant to regression
+    factor_returns['const'] = 1
+
+    # have NaNs when there is insufficient data to do a regression
+    regression_coeffs = np.empty((rolling_window,
+                                  len(factor_returns.columns)))
+    regression_coeffs.fill(np.nan)
+
+    for beg, end in zip(factor_returns.index[:-rolling_window],
+                        factor_returns.index[rolling_window:]):
+        coeffs = linear_model.LinearRegression().fit(factor_returns[beg:end],
+                                                     returns[beg:end]).coef_
+        regression_coeffs = np.append(regression_coeffs, [coeffs], axis=0)
+
+    rolling_fama_french = pd.DataFrame(data=regression_coeffs[:, :3],
+                                       columns=['SMB', 'HML', 'UMD'],
+                                       index=factor_returns.index)
+    rolling_fama_french.index.name = None
+
+    return rolling_fama_french
 
 
 def gross_lev(positions):
