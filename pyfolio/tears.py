@@ -916,7 +916,7 @@ def create_interesting_times_tear_sheet(
         ax.legend(['Algo',
                    'SPY'],
                   loc=legend_loc, frameon=True, framealpha=0.5)
-        ax.set_title(name, size=14)
+        ax.set_title(name)
         ax.set_ylabel('Returns')
         ax.set_xlabel('')
 
