@@ -37,10 +37,11 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
         Daily holdings (in dollars or percentages), indexed by date.
         Will be converted to percentages if positions are in dollars.
         - Example:
-                        AAPL  TLT  XOM
-            2017-01-01    71   93   10
-            2017-01-02    71   16   71
-            2017-01-03    46   43   63
+                            AAPL       TLT       XOM
+            2017-01-01  0.408046  0.534483  0.057471
+            2017-01-02  0.449367  0.101266  0.449367
+            2017-01-03  0.302632  0.282895  0.414474
+
 
     factor_returns : pd.DataFrame
         Returns by factor, with date as index and factors as columns
@@ -77,7 +78,6 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
     positions = get_percent_alloc(positions)
     positions = positions.stack()
     positions.index = positions.index.set_names(['dt', 'ticker'])
-
     risk_exposures = factor_loadings.multiply(positions,
                                               axis='rows')
     risk_exposures_portfolio = risk_exposures.groupby(level='dt').sum()
@@ -90,7 +90,7 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
                                'common_returns': common_returns,
                                'specific_returns': specific_returns})
 
-    return  pd.concat([perf_attrib_by_factor, returns_df], axis='columns')
+    return pd.concat([perf_attrib_by_factor, returns_df], axis='columns')
 
 
 def create_perf_attrib_stats(perf_attrib):

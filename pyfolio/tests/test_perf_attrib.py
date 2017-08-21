@@ -2,11 +2,7 @@ import numpy as np
 import pandas as pd
 import unittest
 
-from pyfolio.perf_attrib import (
-    perf_attrib,
-    create_perf_attrib_stats,
-    show_perf_attrib_stats
-)
+from pyfolio.perf_attrib import perf_attrib
 
 
 def generate_toy_risk_model_output():
@@ -26,8 +22,7 @@ def generate_toy_risk_model_output():
     tickers = ['AAPL', 'TLT', 'XOM']
     styles = ['momentum', 'reversal']
 
-    returns = pd.Series(#columns=tickers,
-                        index=dts,
+    returns = pd.Series(index=dts,
                         data=np.random.randn(10)) / 100
 
     factor_returns = pd.DataFrame(columns=styles, index=dts,
@@ -40,8 +35,8 @@ def generate_toy_risk_model_output():
                              data=np.random.randint(100, size=(10, 3)))
 
     factor_loadings = pd.DataFrame(columns=['factor1', 'factor2'],
-                               index=index,
-                               data=np.random.randn(30, 2))
+                                   index=index,
+                                   data=np.random.randn(30, 2))
 
     return returns, positions, factor_returns, factor_loadings
 
