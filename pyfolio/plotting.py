@@ -276,7 +276,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
 
     x_axis_formatter = FuncFormatter(utils.percentage)
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
-    ax.tick_params(axis='x', which='major', labelsize=10)
+    ax.tick_params(axis='x', which='major')
 
     ann_ret_df = pd.DataFrame(
         empyrical.aggregate_returns(
@@ -326,7 +326,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
 
     x_axis_formatter = FuncFormatter(utils.percentage)
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
-    ax.tick_params(axis='x', which='major', labelsize=10)
+    ax.tick_params(axis='x', which='major')
 
     monthly_ret_table = empyrical.aggregate_returns(returns, 'monthly')
 
@@ -405,7 +405,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
                      'Average daily holdings, by month',
                      'Average daily holdings, overall'],
                     loc=legend_loc, frameon=True,
-                    framealpha=0.5, prop={'size': 12})
+                    framealpha=0.5)
     leg.get_frame().set_edgecolor('black')
 
     ax.set_title('Total holdings')
@@ -465,7 +465,7 @@ def plot_long_short_holdings(returns, positions,
                      'Short (max: %s, min: %s)' % (df_shorts.max(),
                                                    df_shorts.min()),
                      'Overlap'], loc=legend_loc, frameon=True,
-                    framealpha=0.5, prop={'size': 12})
+                    framealpha=0.5)
     leg.get_frame().set_edgecolor('black')
 
     ax.set_xlim((returns.index[0], returns.index[-1]))
