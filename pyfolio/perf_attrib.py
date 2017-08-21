@@ -76,10 +76,14 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
     """
     # convert holdings to percentages, and convert positions to long format
     positions = get_percent_alloc(positions)
+    # remove cash after normalizing positions
+    del positions['cash']
     positions = positions.stack()
     positions.index = positions.index.set_names(['dt', 'ticker'])
+
     risk_exposures = factor_loadings.multiply(positions,
                                               axis='rows')
+
     risk_exposures_portfolio = risk_exposures.groupby(level='dt').sum()
     perf_attrib_by_factor = risk_exposures_portfolio.multiply(factor_returns)
 
