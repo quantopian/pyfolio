@@ -199,7 +199,7 @@ def plot_rolling_fama_french(
     ax.legend(['Small-Caps (SMB)',
                'High-Growth (HML)',
                'Momentum (UMD)'],
-              loc=legend_loc)
+              loc=legend_loc, frameon=True, framealpha=0.5)
 
     y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
@@ -298,7 +298,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
     ax.set_ylabel('Year')
     ax.set_xlabel('Returns')
     ax.set_title("Annual returns")
-    ax.legend(['Mean'])
+    ax.legend(['Mean'], frameon=True, framealpha=0.5)
     return ax
 
 
@@ -346,7 +346,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
         alpha=1.0)
 
     ax.axvline(0.0, color='black', linestyle='-', lw=3, alpha=0.75)
-    ax.legend(['Mean'])
+    ax.legend(['Mean'], frameon=True, framealpha=0.5)
     ax.set_ylabel('Number of months')
     ax.set_xlabel('Returns')
     ax.set_title("Distribution of monthly returns")
@@ -404,7 +404,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
                      'Average daily holdings, by month',
                      'Average daily holdings, overall'],
                     loc=legend_loc, frameon=True,
-                    framealpha=0.8, prop={'size': 12})
+                    framealpha=0.5, prop={'size': 12})
     leg.get_frame().set_edgecolor('black')
 
     ax.set_title('Total holdings')
@@ -464,7 +464,7 @@ def plot_long_short_holdings(returns, positions,
                      'Short (max: %s, min: %s)' % (df_shorts.max(),
                                                    df_shorts.min()),
                      'Overlap'], loc=legend_loc, frameon=True,
-                    framealpha=0.8, prop={'size': 12})
+                    framealpha=0.5, prop={'size': 12})
     leg.get_frame().set_edgecolor('black')
 
     ax.set_xlim((returns.index[0], returns.index[-1]))
@@ -521,7 +521,8 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     ax.set_ylim(lim)
     ax.set_title('Top %i drawdown periods' % top)
     ax.set_ylabel('Cumulative returns')
-    ax.legend(['Portfolio'], loc='upper left')
+    ax.legend(['Portfolio'], loc='upper left',
+            frameon=True, framealpha=0.5)
     ax.set_xlabel('')
     return ax
 
@@ -873,7 +874,7 @@ def plot_rolling_returns(returns,
                                 color='steelblue', alpha=0.5)
 
     if legend_loc is not None:
-        ax.legend(loc=legend_loc)
+        ax.legend(loc=legend_loc, frameon=True, framealpha=0.5)
     ax.axhline(1.0, linestyle='--', color='black', lw=2)
 
     return ax
@@ -925,7 +926,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     ax.set_xlabel('')
     ax.legend(['6-mo',
                '12-mo'],
-              loc=legend_loc)
+              loc=legend_loc, frameon=True, framealpha=0.5)
     ax.set_ylim((-1.0, 1.0))
     return ax
 
@@ -987,10 +988,10 @@ def plot_rolling_volatility(returns, factor_returns=None,
     ax.set_xlabel('')
     if factor_returns.empty:
         ax.legend(['Volatility', 'Average volatility'],
-                  loc=legend_loc)
+                  loc=legend_loc, frameon=True, framealpha=0.5)
     else:
         ax.legend(['Volatility', 'Benchmark volatility', 'Average volatility'],
-                  loc=legend_loc)
+                  loc=legend_loc, frameon=True, framealpha=0.5)
     return ax
 
 
@@ -1041,7 +1042,7 @@ def plot_rolling_sharpe(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
     ax.set_ylabel('Sharpe ratio')
     ax.set_xlabel('')
     ax.legend(['Sharpe', 'Average'],
-              loc=legend_loc)
+              loc=legend_loc, frameon=True, framealpha=0.5)
     return ax
 
 
@@ -1129,7 +1130,7 @@ def plot_exposures(returns, positions, ax=None, **kwargs):
     ax.set_xlim((returns.index[0], returns.index[-1]))
     ax.set_title("Exposure")
     ax.set_ylabel('Exposure')
-    ax.legend(loc='lower left', frameon=True)
+    ax.legend(loc='lower left', frameon=True, framealpha=0.5)
     ax.set_xlabel('')
     return ax
 
@@ -1209,9 +1210,8 @@ def show_and_plot_top_positions(returns, positions_alloc,
                              box.width, box.height * 0.9])
 
             # Put a legend below current axis
-            ax.legend(
-                loc='upper center', frameon=True, bbox_to_anchor=(
-                    0.5, -0.14), ncol=5)
+            ax.legend(loc='upper center', frameon=True, framealpha=0.5,
+                      bbox_to_anchor=(0.5, -0.14), ncol=5)
         else:
             ax.legend(loc=legend_loc)
 
@@ -1249,7 +1249,7 @@ def plot_max_median_position_concentration(positions, ax=None, **kwargs):
     colors = ['mediumblue', 'steelblue', 'tomato', 'firebrick']
     alloc_summary.plot(linewidth=1, color=colors, alpha=0.6, ax=ax)
 
-    ax.legend(loc='center left')
+    ax.legend(loc='center left', frameon=True, framealpha=0.5)
     ax.set_ylabel('Exposure')
     ax.set_title('Long/short max and median position concentration')
 
@@ -1289,9 +1289,8 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
                      box.width, box.height * 0.9])
 
     # Put a legend below current axis
-    ax.legend(
-        loc='upper center', frameon=True, bbox_to_anchor=(
-            0.5, -0.14), ncol=5)
+    ax.legend(loc='upper center', frameon=True, framealpha=0.5,
+              bbox_to_anchor=(0.5, -0.14), ncol=5)
 
     ax.set_xlim((sector_alloc.index[0], sector_alloc.index[-1]))
     ax.set_ylabel('Exposure by sector')
@@ -1346,7 +1345,7 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
         red_dots = matplotlib.lines.Line2D([], [], color="red", marker="d",
                                            label="Out-of-sample data",
                                            linestyle='')
-        ax.legend(handles=[red_dots])
+        ax.legend(handles=[red_dots], frameon=True, framealpha=0.5)
     ax.set_xticklabels(['Daily', 'Weekly', 'Monthly'])
     ax.set_title('Return quantiles')
 
@@ -1408,7 +1407,7 @@ def plot_turnover(returns, transactions, positions,
     ax.legend(['Daily turnover',
                'Average daily turnover, by month',
                'Average daily turnover, net'],
-              loc=legend_loc)
+              loc=legend_loc, frameon=True, framealpha=0.5)
     ax.set_title('Daily turnover')
     ax.set_xlim((returns.index[0], returns.index[-1]))
     ax.set_ylim((0, 1))
@@ -1465,7 +1464,7 @@ def plot_slippage_sweep(returns, transactions, positions,
     ax.set_title('Cumulative returns given additional per-dollar slippage')
     ax.set_ylabel('')
 
-    ax.legend(loc='center left')
+    ax.legend(loc='center left', frameon=True, framealpha=0.5)
 
     return ax
 
@@ -1838,7 +1837,8 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
     ax.set_ylim((-0.5, min(len(sample), disp_amount) - 0.5))
     blue = patches.Rectangle([0, 0], 1, 1, color='b', label='Long')
     red = patches.Rectangle([0, 0], 1, 1, color='r', label='Short')
-    leg = ax.legend(handles=[blue, red], frameon=True, loc='lower left')
+    leg = ax.legend(handles=[blue, red], loc='lower left', 
+                    frameon=True, framealpha=0.5)
     leg.get_frame().set_edgecolor('black')
     ax.grid(False)
 
@@ -2011,7 +2011,7 @@ def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
     if name is not None:
         axes.set_title(name)
     axes.axhline(1, color='black', alpha=0.2)
-    axes.legend()
+    axes.legend(frameon=True, framealpha=0.5)
 
     if ax is None:
         return fig
