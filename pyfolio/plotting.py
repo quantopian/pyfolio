@@ -522,7 +522,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     ax.set_title('Top %i drawdown periods' % top)
     ax.set_ylabel('Cumulative returns')
     ax.legend(['Portfolio'], loc='upper left',
-            frameon=True, framealpha=0.5)
+              frameon=True, framealpha=0.5)
     ax.set_xlabel('')
     return ax
 
@@ -1743,7 +1743,7 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
     ax.set_ylim((-0.5, min(len(sample), disp_amount) - 0.5))
     blue = patches.Rectangle([0, 0], 1, 1, color='b', label='Long')
     red = patches.Rectangle([0, 0], 1, 1, color='r', label='Short')
-    leg = ax.legend(handles=[blue, red], loc='lower left', 
+    leg = ax.legend(handles=[blue, red], loc='lower left',
                     frameon=True, framealpha=0.5)
     leg.get_frame().set_edgecolor('black')
     ax.grid(False)
@@ -1923,4 +1923,3 @@ def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
         return fig
     else:
         return axes
-
