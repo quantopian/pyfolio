@@ -1679,44 +1679,6 @@ def plot_txn_time_hist(transactions, bin_minutes=5, tz='America/New_York',
     return ax
 
 
-def plot_daily_returns_similarity(returns_backtest, returns_live,
-                                  ax=None, **kwargs):
-    """
-    Plots overlapping distributions of in-sample (backtest) returns
-    and out-of-sample (live trading) returns.
-
-    Parameters
-    ----------
-    returns_backtest : pd.Series
-        Daily returns of the strategy's backtest, noncumulative.
-    returns_live : pd.Series
-        Daily returns of the strategy's live trading, noncumulative.
-    title : str, optional
-        The title to use for the plot.
-    ax : matplotlib.Axes, optional
-        Axes upon which to plot.
-    **kwargs, optional
-        Passed to seaborn plotting function.
-
-    Returns
-    -------
-    ax : matplotlib.Axes
-        The axes that were plotted on.
-    """
-
-    if ax is None:
-        ax = plt.gca()
-
-    sns.kdeplot(utils.standardize_data(returns_backtest),
-                bw='scott', shade=True, label='Backtest',
-                color='forestgreen', ax=ax, **kwargs)
-    sns.kdeplot(utils.standardize_data(returns_live),
-                bw='scott', shade=True, label='Out-of-sample',
-                color='red', ax=ax, **kwargs)
-
-    return ax
-
-
 def show_worst_drawdown_periods(returns, top=5):
     """
     Prints information about the worst drawdown periods.
