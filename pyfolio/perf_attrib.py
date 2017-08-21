@@ -36,12 +36,17 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
     positions: pd.DataFrame
         Daily holdings (in dollars or percentages), indexed by date.
         Will be converted to percentages if positions are in dollars.
-        - Example:
-                            AAPL       TLT       XOM
-            2017-01-01  0.408046  0.534483  0.057471
-            2017-01-02  0.449367  0.101266  0.449367
-            2017-01-03  0.302632  0.282895  0.414474
+        Short positions show up as cash in the 'cash' column.
+        - Examples:
+                        AAPL  TLT  XOM  cash
+            2017-01-01    34   58   10     0
+            2017-01-02    22   77   18     0
+            2017-01-03   -15   27   30    15
 
+                            AAPL       TLT       XOM  cash
+            2017-01-01  0.333333  0.568627  0.098039   0.0
+            2017-01-02  0.188034  0.658120  0.153846   0.0
+            2017-01-03  0.208333  0.375000  0.416667   0.0
 
     factor_returns : pd.DataFrame
         Returns by factor, with date as index and factors as columns

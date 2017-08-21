@@ -19,7 +19,7 @@ def generate_toy_risk_model_output():
     periods = 10
     dts = pd.date_range(start_date, periods=periods)
     np.random.seed(123)
-    tickers = ['AAPL', 'TLT', 'XOM']
+    tickers = ['AAPL', 'TLT', 'XOM', 'cash']
     styles = ['momentum', 'reversal']
 
     returns = pd.Series(index=dts,
@@ -52,6 +52,7 @@ class PerfAttribTestCase(unittest.TestCase):
         start_date = '2017-01-01'
         periods = 2
         dts = pd.date_range(start_date, periods=periods)
+        dts.name = 'dt'
 
         tickers = ['stock1', 'stock2']
         styles = ['risk_factor1', 'risk_factor2']
@@ -96,7 +97,8 @@ class PerfAttribTestCase(unittest.TestCase):
         perf_attrib_output = perf_attrib(returns, positions,
                                          factor_returns, factor_loadings)
 
-        self.assertTrue(expected_perf_attrib_output.equals(perf_attrib_output))
+        pd.util.testing.assert_frame_equal(expected_perf_attrib_output,
+                                           perf_attrib_output)
 
         # test long and short positions
         positions = pd.DataFrame(index=dts,
@@ -116,4 +118,5 @@ class PerfAttribTestCase(unittest.TestCase):
                   'specific_returns': [0.1, 0.1],
                   'total_returns': returns}
         )
-        self.assertTrue(expected_perf_attrib_output.equals(perf_attrib_output))
+        pd.util.testing.assert_frame_equal(expected_perf_attrib_output,
+                                           perf_attrib_output)
