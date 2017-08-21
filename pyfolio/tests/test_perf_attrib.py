@@ -25,14 +25,18 @@ def generate_toy_risk_model_output():
     returns = pd.Series(index=dts,
                         data=np.random.randn(10)) / 100
 
-    factor_returns = pd.DataFrame(columns=styles, index=dts,
-                                  data=np.random.randn(10, 2)) / 100
+    factor_returns = pd.DataFrame(
+        columns=styles, index=dts,
+        data=np.random.randn(periods, len(styles))) / 100
 
     arrays = [dts, tickers]
     index = pd.MultiIndex.from_product(arrays, names=['dt', 'ticker'])
 
-    positions = pd.DataFrame(columns=tickers, index=dts,
-                             data=np.random.randint(100, size=(10, 3)))
+    positions = pd.DataFrame(
+        columns=tickers, index=dts,
+        data=np.random.randint(100, size=(10, len(tickers)))
+    )
+    positions['cash'] = positions.sum(axis=1)
 
     factor_loadings = pd.DataFrame(columns=['factor1', 'factor2'],
                                    index=index,
@@ -60,7 +64,8 @@ class PerfAttribTestCase(unittest.TestCase):
         returns = pd.Series(data=[0.1, 0.1], index=dts)
 
         factor_returns = pd.DataFrame(
-            columns=styles, index=dts,
+            columns=styles,
+            index=dts,
             data={'risk_factor1': [.1, .1],
                   'risk_factor2': [.1, .1]}
         )
@@ -68,7 +73,8 @@ class PerfAttribTestCase(unittest.TestCase):
         positions = pd.DataFrame(
             index=dts,
             data={'stock1': [20, 20],
-                  'stock2': [50, 50]}
+                  'stock2': [50, 50],
+                  'cash': [0, 0]}
         )
 
         index = pd.MultiIndex.from_product(
@@ -95,4 +101,24 @@ class PerfAttribTestCase(unittest.TestCase):
         perf_attrib_output = perf_attrib(returns, positions,
                                          factor_returns, factor_loadings)
 
+        self.assertTrue(expected_perf_attrib_output.equals(perf_attrib_output))
+
+        # test long and short positions
+        positions = pd.DataFrame(index=dts,
+                                 data={'stock1': [20, 20],
+                                       'stock2': [-20, -20],
+                                       'cash': [20, 20]})
+
+        perf_attrib_output = perf_attrib(returns, positions,
+                                         factor_returns, factor_loadings)
+        expected_perf_attrib_output = pd.DataFrame(
+            index=dts,
+            columns=['risk_factor1', 'risk_factor2', 'common_returns',
+                     'specific_returns', 'total_returns'],
+            data={'risk_factor1': [0.0, 0.0],
+                  'risk_factor2': [0.0, 0.0],
+                  'common_returns': [0.0, 0.0],
+                  'specific_returns': [0.1, 0.1],
+                  'total_returns': returns}
+        )
         self.assertTrue(expected_perf_attrib_output.equals(perf_attrib_output))
