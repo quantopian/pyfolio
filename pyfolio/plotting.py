@@ -143,12 +143,11 @@ def axes_style(style='darkgrid', rc=None):
     return sns.axes_style(style=style, rc=rc)
 
 
-def plot_rolling_fama_french(
-        returns,
-        factor_returns=None,
-        rolling_window=APPROX_BDAYS_PER_MONTH * 6,
-        legend_loc='best',
-        ax=None, **kwargs):
+def plot_rolling_fama_french(returns,
+                             factor_returns=None,
+                             rolling_window=APPROX_BDAYS_PER_MONTH * 6,
+                             legend_loc='best',
+                             ax=None, **kwargs):
     """
     Plots rolling Fama-French single factor betas.
 
