@@ -831,7 +831,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
     trade_holding_times = [x.days for x in trades['duration']]
     sns.distplot(trade_holding_times, kde=False, ax=ax_holding_time)
-    ax_holding_time.set(xlabel='holding time in days')
+    ax_holding_time.set(xlabel='Holding time in days')
 
     sns.distplot(trades.pnl, kde=False, ax=ax_pnl_per_round_trip_dollars)
     ax_pnl_per_round_trip_dollars.set(xlabel='PnL per round-trip trade in $')
@@ -910,12 +910,12 @@ def create_interesting_times_tear_sheet(
         # i=0 -> 0, i=1 -> 0, i=2 -> 1 ;; i=0 -> 0, i=1 -> 1, i=2 -> 0
         ax = plt.subplot(gs[int(i / 2.0), i % 2])
         empyrical.cum_returns(rets_period).plot(
-            ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
+            ax=ax, color='forestgreen', label='Algo', alpha=0.7, lw=2)
         empyrical.cum_returns(bmark_interesting[name]).plot(
             ax=ax, color='gray', label='SPY', alpha=0.6)
-        ax.legend(['algo',
+        ax.legend(['Algo',
                    'SPY'],
-                  loc=legend_loc)
+                  loc=legend_loc, frameon=True, framealpha=0.5)
         ax.set_title(name, size=14)
         ax.set_ylabel('Returns')
         ax.set_xlabel('')
@@ -1197,7 +1197,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         for i in range(nbeta):
             sns.distplot(trace_alpha_beta['beta'][100:, i], ax=ax_beta,
                          label=betas[i])
-        plt.legend()
+        plt.legend(frameon=True, framealpha=0.5)
     else:
         sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1,
                      ax=ax_alpha)
