@@ -46,10 +46,6 @@ def generate_toy_risk_model_output():
 
 
 class PerfAttribTestCase(unittest.TestCase):
-    @classmethod
-    def setUpClass(self):
-        (self.returns, self.positions, self.factor_returns,
-         self.factor_loadings) = generate_toy_risk_model_output()
 
     def test_perf_attrib_simple(self):
 
@@ -57,7 +53,6 @@ class PerfAttribTestCase(unittest.TestCase):
         periods = 2
         dts = pd.date_range(start_date, periods=periods)
 
-        np.random.seed(123)
         tickers = ['stock1', 'stock2']
         styles = ['risk_factor1', 'risk_factor2']
 
