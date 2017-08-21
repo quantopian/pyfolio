@@ -298,7 +298,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
     ax.set_ylabel('Year')
     ax.set_xlabel('Returns')
     ax.set_title("Annual returns")
-    ax.legend(['mean'])
+    ax.legend(['Mean'])
     return ax
 
 
@@ -346,7 +346,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
         alpha=1.0)
 
     ax.axvline(0.0, color='black', linestyle='-', lw=3, alpha=0.75)
-    ax.legend(['mean'])
+    ax.legend(['Mean'])
     ax.set_ylabel('Number of months')
     ax.set_xlabel('Returns')
     ax.set_title("Distribution of monthly returns")
@@ -974,7 +974,7 @@ def plot_rolling_volatility(returns, factor_returns=None,
         rolling_vol_ts_factor.plot(alpha=.7, lw=3, color='grey', ax=ax,
                                    **kwargs)
 
-    ax.set_title('Rolling Volatility (6-month)')
+    ax.set_title('Rolling volatility (6-month)')
     ax.axhline(
         rolling_vol_ts.mean(),
         color='orangered',
@@ -986,10 +986,10 @@ def plot_rolling_volatility(returns, factor_returns=None,
     ax.set_ylabel('Volatility')
     ax.set_xlabel('')
     if factor_returns.empty:
-        ax.legend(['Volatility', 'Average Volatility'],
+        ax.legend(['Volatility', 'Average volatility'],
                   loc=legend_loc)
     else:
-        ax.legend(['Volatility', 'Benchmark Volatility', 'Average Volatility'],
+        ax.legend(['Volatility', 'Benchmark volatility', 'Average volatility'],
                   loc=legend_loc)
     return ax
 
@@ -1251,7 +1251,7 @@ def plot_max_median_position_concentration(positions, ax=None, **kwargs):
 
     ax.legend(loc='center left')
     ax.set_ylabel('Exposure')
-    ax.set_title('Long/Short max and median position concentration')
+    ax.set_title('Long/short max and median position concentration')
 
     return ax
 
@@ -1708,10 +1708,10 @@ def plot_daily_returns_similarity(returns_backtest, returns_live,
         ax = plt.gca()
 
     sns.kdeplot(utils.standardize_data(returns_backtest),
-                bw='scott', shade=True, label='backtest',
+                bw='scott', shade=True, label='Backtest',
                 color='forestgreen', ax=ax, **kwargs)
     sns.kdeplot(utils.standardize_data(returns_live),
-                bw='scott', shade=True, label='out-of-sample',
+                bw='scott', shade=True, label='Out-of-sample',
                 color='red', ax=ax, **kwargs)
 
     return ax

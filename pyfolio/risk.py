@@ -106,7 +106,7 @@ def plot_style_factor_exposures(tot_style_factor_exposure, factor_name=None,
     _, _, y1, y2 = plt.axis()
     lim = max(abs(y1), abs(y2))
     ax.set(title='Exposure to {}'.format(factor_name),
-           ylabel='{} \n Weighted Exposure'.format(factor_name),
+           ylabel='{} \n weighted exposure'.format(factor_name),
            ylim=(-lim, lim))
     ax.legend()
 
@@ -200,8 +200,8 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures,
     ax.stackplot(long_exposures[0].index, short_exposures,
                  colors=color_list, alpha=0.8, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set(title='Long and Short Exposures to Sectors',
-           ylabel='Proportion of Long/Short Exposure in Sectors')
+    ax.set(title='Long and short exposures to sectors',
+           ylabel='Proportion of long/short exposure in sectors')
     ax.legend(loc='upper left', frameon=True, framealpha=0.5)
 
     return ax
@@ -235,8 +235,8 @@ def plot_sector_exposures_gross(gross_exposures, sector_dict=None, ax=None):
                  labels=sector_names, colors=color_list, alpha=0.8,
                  baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set(title='Gross Exposure to Sectors',
-           ylabel='Proportion of Gross Exposure \n in Sectors')
+    ax.set(title='Gross exposure to sectors',
+           ylabel='Proportion of gross exposure \n in sectors')
 
     return ax
 
@@ -268,8 +268,8 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
     for i in range(len(net_exposures)):
         ax.plot(net_exposures[i], color=color_list[i], alpha=0.8,
                 label=sector_names[i])
-    ax.set(title='Net Exposures to Sectors',
-           ylabel='Proportion of Net Exposure \n in Sectors')
+    ax.set(title='Net exposures to sectors',
+           ylabel='Proportion of net exposure \n in sectors')
 
     return ax
 
@@ -344,8 +344,8 @@ def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
     ax.stackplot(long_exposures[0].index, short_exposures, colors=color_list,
                  alpha=0.8, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set(title='Long and Short Exposures to Market Caps',
-           ylabel='Proportion of Long/Short Exposure in Market Cap Buckets')
+    ax.set(title='Long and short exposures to market caps',
+           ylabel='Proportion of long/short exposure in market cap buckets')
     ax.legend(loc='upper left', frameon=True, framealpha=0.5)
 
     return ax
@@ -370,8 +370,8 @@ def plot_cap_exposures_gross(gross_exposures, ax=None):
                  labels=CAP_BUCKETS.keys(), colors=color_list, alpha=0.8,
                  baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set(title='Gross Exposure to Market Caps',
-           ylabel='Proportion of Gross Exposure \n in Market Cap Buckets')
+    ax.set(title='Gross exposure to market caps',
+           ylabel='Proportion of gross exposure \n in market cap buckets')
 
     return ax
 
@@ -396,8 +396,8 @@ def plot_cap_exposures_net(net_exposures, ax=None):
         ax.plot(net_exposures[i], color=color_list[i], alpha=0.8,
                 label=cap_names[i])
     ax.axhline(0, color='k', linestyle='-')
-    ax.set(title='Net Exposure to Market Caps',
-           ylabel='Proportion of Net Exposure \n in Market Cap Buckets')
+    ax.set(title='Net exposure to market caps',
+           ylabel='Proportion of net exposure \n in market cap buckets')
 
     return ax
 
@@ -463,8 +463,8 @@ def plot_volume_exposures_longshort(longed_threshold, shorted_threshold,
     ax.plot(shorted_threshold.index, shorted_threshold,
             color='r', label='short')
     ax.axhline(0, color='k')
-    ax.set(title='Long and Short Exposures to Illiquidity',
-           ylabel='{}th Percentile of Proportion of Volume (%)'
+    ax.set(title='Long and short exposures to illiquidity',
+           ylabel='{}th percentile of proportion of volume (%)'
            .format(100*percentile))
     ax.legend()
 
@@ -492,8 +492,8 @@ def plot_volume_exposures_gross(grossed_threshold, percentile, ax=None):
     ax.plot(grossed_threshold.index, grossed_threshold,
             color='b', label='gross')
     ax.axhline(0, color='k')
-    ax.set(title='Gross Exposure to Illiquidity',
-           ylabel='{}th Percentile of \n Proportion of Volume (%)'
+    ax.set(title='Gross exposure to illiquidity',
+           ylabel='{}th percentile of \n proportion of volume (%)'
            .format(100*percentile))
     ax.legend()
 
