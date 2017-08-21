@@ -195,8 +195,8 @@ def plot_rolling_fama_french(returns,
     rolling_beta.plot(alpha=0.7, ax=ax, **kwargs)
 
     ax.axhline(0.0, color='black')
-    ax.legend(['Small-Caps (SMB)',
-               'High-Growth (HML)',
+    ax.legend(['Small cap (SMB)',
+               'High growth (HML)',
                'Momentum (UMD)'],
               loc=legend_loc, frameon=True, framealpha=0.5)
 
@@ -238,8 +238,7 @@ def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
         monthly_ret_table.fillna(0) *
         100.0,
         annot=True,
-        annot_kws={
-            "size": 9},
+        annot_kws={"size": 9},
         alpha=1.0,
         center=0.0,
         cbar=False,
@@ -1421,7 +1420,7 @@ def plot_slippage_sweep(returns, transactions, positions,
                         slippage_params=(3, 8, 10, 12, 15, 20, 50),
                         ax=None, **kwargs):
     """
-    Plots a equity curves at different per-dollar slippage assumptions.
+    Plots equity curves at different per-dollar slippage assumptions.
 
     Parameters
     ----------

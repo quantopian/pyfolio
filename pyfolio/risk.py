@@ -53,11 +53,11 @@ def compute_style_factor_exposures(positions, risk_factor):
         Daily risk factor per asset.
         - DataFrame with dates as index and equities as columns
         - Example:
-                     Equity(24   Equity(62
-                       [AAPL])      [ABT])
+                         Equity(24   Equity(62
+                           [AAPL])      [ABT])
         2017-04-03	  -0.51284     1.39173
         2017-04-04	  -0.73381     0.98149
-        2017-04-05	  -0.90132	   1.13981
+        2017-04-05	  -0.90132     1.13981
     '''
 
     positions_wo_cash = positions.drop('cash', axis='columns')

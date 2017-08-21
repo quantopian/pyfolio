@@ -1017,7 +1017,7 @@ def create_capacity_tear_sheet(returns, positions, transactions,
     llt = capacity.get_low_liquidity_transactions(
         transactions, market_data, last_n_days=last_n_days)
 
-    print("last {} trading days:".format(last_n_days))
+    print("Last {} trading days:".format(last_n_days))
     utils.print_table(
         llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit * 100])
 
