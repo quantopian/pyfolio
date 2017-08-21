@@ -108,7 +108,7 @@ def plot_style_factor_exposures(tot_style_factor_exposure, factor_name=None,
     ax.set(title='Exposure to {}'.format(factor_name),
            ylabel='{} \n weighted exposure'.format(factor_name),
            ylim=(-lim, lim))
-    ax.legend()
+    ax.legend(frameon=True, framealpha=0.5)
 
     return ax
 
@@ -466,7 +466,7 @@ def plot_volume_exposures_longshort(longed_threshold, shorted_threshold,
     ax.set(title='Long and short exposures to illiquidity',
            ylabel='{}th percentile of proportion of volume (%)'
            .format(100*percentile))
-    ax.legend()
+    ax.legend(frameon=True, framealpha=0.5)
 
     return ax
 
@@ -495,6 +495,6 @@ def plot_volume_exposures_gross(grossed_threshold, percentile, ax=None):
     ax.set(title='Gross exposure to illiquidity',
            ylabel='{}th percentile of \n proportion of volume (%)'
            .format(100*percentile))
-    ax.legend()
+    ax.legend(frameon=True, framealpha=0.5)
 
     return ax
