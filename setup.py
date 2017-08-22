@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import sys
+
 from setuptools import setup
 
 import versioneer
-
 
 DISTNAME = 'pyfolio'
 DESCRIPTION = "pyfolio is a Python library for performance and risk analysis of financial portfolios"
@@ -53,7 +53,7 @@ install_reqs = [
     'scipy>=0.14.0',
     'seaborn>=0.7.1',
     'pandas-datareader>=0.2',
-    'empyrical>=0.3.0'
+    'empyrical>=0.3.2'
 ]
 
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
