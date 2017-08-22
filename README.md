@@ -18,7 +18,8 @@ sheet analyzing a strategy:
 ![simple tear 0](https://github.com/quantopian/pyfolio/raw/master/docs/simple_tear_0.png "Example tear sheet created from a Zipline algo")
 ![simple tear 1](https://github.com/quantopian/pyfolio/raw/master/docs/simple_tear_1.png "Example tear sheet created from a Zipline algo")
 
-Also see [slides of a talk about pyfolio](http://nbviewer.ipython.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/overview_slides.ipynb#/).
+Also see [slides of a talk about
+pyfolio](http://nbviewer.jupyter.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/pyfolio_talk_slides.ipynb#/).
 
 ## Installation
 
@@ -74,7 +75,7 @@ and hitting Shift+Enter.
 
 ## Questions?
 
-If you find a bug, feel free to open an issue in this repository.
+If you find a bug, feel free to [open an issue](https://github.com/quantopian/pyfolio/issues) in this repository.
 
 You can also join our [mailing list](https://groups.google.com/forum/#!forum/pyfolio) or
 our [Gitter channel](https://gitter.im/quantopian/pyfolio).
@@ -84,4 +85,4 @@ our [Gitter channel](https://gitter.im/quantopian/pyfolio).
 
 If you'd like to contribute, a great place to look is the [issues marked with help-wanted](https://github.com/quantopian/pyfolio/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
 
-For a list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.
+For a list of core developers and outside collaborators, see [the GitHub contributors list](https://github.com/quantopian/pyfolio/graphs/contributors).
