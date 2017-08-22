@@ -17,7 +17,7 @@ from __future__ import division
 import warnings
 from time import time
 
-import empyrical
+import empyrical as ep
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
@@ -320,7 +320,7 @@ def create_simple_tear_sheet(returns,
 
     if live_start_date is not None:
         vertical_sections += 1
-        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
+        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
@@ -464,7 +464,7 @@ def create_returns_tear_sheet(returns, positions=None,
 
     if live_start_date is not None:
         vertical_sections += 1
-        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
+        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
 
     if bootstrap:
         vertical_sections += 1
@@ -909,9 +909,9 @@ def create_interesting_times_tear_sheet(
 
         # i=0 -> 0, i=1 -> 0, i=2 -> 1 ;; i=0 -> 0, i=1 -> 1, i=2 -> 0
         ax = plt.subplot(gs[int(i / 2.0), i % 2])
-        empyrical.cum_returns(rets_period).plot(
+        ep.cum_returns(rets_period).plot(
             ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
-        empyrical.cum_returns(bmark_interesting[name]).plot(
+        ep.cum_returns(bmark_interesting[name]).plot(
             ax=ax, color='gray', label='SPY', alpha=0.6)
         ax.legend(['algo',
                    'SPY'],
@@ -1091,7 +1091,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         benchmark_rets = timeseries.rolling_fama_french(
             returns, rolling_window=rolling_window)
 
-    live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
+    live_start_date = ep.utils.get_utc_timestamp(live_start_date)
     df_train = returns.loc[returns.index < live_start_date]
     df_test = returns.loc[returns.index >= live_start_date]
 

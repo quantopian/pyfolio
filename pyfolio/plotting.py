@@ -18,7 +18,7 @@ import datetime
 from collections import OrderedDict
 from functools import wraps
 
-import empyrical
+import empyrical as ep
 import matplotlib
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
@@ -229,7 +229,7 @@ def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    monthly_ret_table = empyrical.aggregate_returns(returns, 'monthly')
+    monthly_ret_table = ep.aggregate_returns(returns, 'monthly')
     monthly_ret_table = monthly_ret_table.unstack().round(3)
 
     sns.heatmap(
@@ -277,7 +277,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
     ax.tick_params(axis='x', which='major', labelsize=10)
 
     ann_ret_df = pd.DataFrame(
-        empyrical.aggregate_returns(
+        ep.aggregate_returns(
             returns,
             'yearly'))
 
@@ -326,7 +326,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
     ax.tick_params(axis='x', which='major', labelsize=10)
 
-    monthly_ret_table = empyrical.aggregate_returns(returns, 'monthly')
+    monthly_ret_table = ep.aggregate_returns(returns, 'monthly')
 
     ax.hist(
         100 * monthly_ret_table,
@@ -499,7 +499,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_cum_rets = empyrical.cum_returns(returns, starting_value=1.0)
+    df_cum_rets = ep.cum_returns(returns, starting_value=1.0)
     df_drawdowns = timeseries.gen_drawdown_table(returns, top=top)
 
     df_cum_rets.plot(ax=ax, **kwargs)
@@ -550,7 +550,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     y_axis_formatter = FuncFormatter(utils.percentage)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_cum_rets = empyrical.cum_returns(returns, starting_value=1.0)
+    df_cum_rets = ep.cum_returns(returns, starting_value=1.0)
     running_max = np.maximum.accumulate(df_cum_rets)
     underwater = -100 * ((running_max - df_cum_rets) / running_max)
     (underwater).plot(ax=ax, kind='area', color='coral', alpha=0.7, **kwargs)
@@ -649,7 +649,7 @@ def show_perf_stats(returns, factor_returns, positions=None,
         transactions=transactions)
 
     if live_start_date is not None:
-        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
+        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
         returns_is = returns[returns.index < live_start_date]
         returns_oos = returns[returns.index >= live_start_date]
 
@@ -738,7 +738,7 @@ def plot_returns(returns,
     ax.set_ylabel('Returns')
 
     if live_start_date is not None:
-        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
+        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
         is_returns = returns.loc[returns.index < live_start_date]
         oos_returns = returns.loc[returns.index >= live_start_date]
         is_returns.plot(ax=ax, color='g')
@@ -824,20 +824,20 @@ def plot_rolling_returns(returns,
         bmark_vol = factor_returns.loc[returns.index].std()
         returns = (returns / returns.std()) * bmark_vol
 
-    cum_rets = empyrical.cum_returns(returns, 1.0)
+    cum_rets = ep.cum_returns(returns, 1.0)
 
     y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     if factor_returns is not None:
-        cum_factor_returns = empyrical.cum_returns(
+        cum_factor_returns = ep.cum_returns(
             factor_returns[cum_rets.index], 1.0)
         cum_factor_returns.plot(lw=2, color='gray',
                                 label=factor_returns.name, alpha=0.60,
                                 ax=ax, **kwargs)
 
     if live_start_date is not None:
-        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
+        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
         is_cum_returns = cum_rets.loc[cum_rets.index < live_start_date]
         oos_cum_returns = cum_rets.loc[cum_rets.index >= live_start_date]
     else:
@@ -1326,16 +1326,16 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
 
     is_returns = returns if live_start_date is None \
         else returns.loc[returns.index < live_start_date]
-    is_weekly = empyrical.aggregate_returns(is_returns, 'weekly')
-    is_monthly = empyrical.aggregate_returns(is_returns, 'monthly')
+    is_weekly = ep.aggregate_returns(is_returns, 'weekly')
+    is_monthly = ep.aggregate_returns(is_returns, 'monthly')
     sns.boxplot(data=[is_returns, is_weekly, is_monthly],
                 palette=["#4c72B0", "#55A868", "#CCB974"],
                 ax=ax, **kwargs)
 
     if live_start_date is not None:
         oos_returns = returns.loc[returns.index >= live_start_date]
-        oos_weekly = empyrical.aggregate_returns(oos_returns, 'weekly')
-        oos_monthly = empyrical.aggregate_returns(oos_returns, 'monthly')
+        oos_weekly = ep.aggregate_returns(oos_returns, 'weekly')
+        oos_monthly = ep.aggregate_returns(oos_returns, 'monthly')
 
         sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly], ax=ax,
                       color="red",
@@ -1455,7 +1455,7 @@ def plot_slippage_sweep(returns, transactions, positions,
     for bps in slippage_params:
         adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
         label = str(bps) + " bps"
-        slippage_sweep[label] = empyrical.cum_returns(adj_returns, 1)
+        slippage_sweep[label] = ep.cum_returns(adj_returns, 1)
 
     slippage_sweep.plot(alpha=1.0, lw=0.5, ax=ax)
 
@@ -1502,7 +1502,7 @@ def plot_slippage_sensitivity(returns, transactions, positions,
     avg_returns_given_slippage = pd.Series()
     for bps in range(1, 100):
         adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
-        avg_returns = empyrical.annual_return(adj_returns)
+        avg_returns = ep.annual_return(adj_returns)
         avg_returns_given_slippage.loc[bps] = avg_returns
 
     avg_returns_given_slippage.plot(alpha=1.0, lw=2, ax=ax)
@@ -1530,7 +1530,7 @@ def plot_capacity_sweep(returns, transactions, market_data,
                                                   txn_daily_w_bar,
                                                   start_pv,
                                                   bt_starting_capital)
-        sharpe = empyrical.sharpe_ratio(adj_ret)
+        sharpe = ep.sharpe_ratio(adj_ret)
         if sharpe < -1:
             break
         captial_base_sweep.loc[start_pv] = sharpe
@@ -1757,7 +1757,7 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     """
 
     def cumulate_returns(x):
-        return empyrical.cum_returns(x)[-1]
+        return ep.cum_returns(x)[-1]
 
     if ax is None:
         ax = plt.gca()
@@ -1977,7 +1977,7 @@ def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
     else:
         axes = ax
 
-    returns = empyrical.cum_returns(oos_returns, starting_value=1.)
+    returns = ep.cum_returns(oos_returns, starting_value=1.)
     bounds_tmp = bounds.copy()
     returns_tmp = returns.copy()
     cone_start = returns.index[0]
