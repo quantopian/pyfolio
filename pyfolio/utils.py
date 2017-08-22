@@ -17,10 +17,10 @@ from __future__ import division
 
 import warnings
 
-import empyrical
 import numpy as np
 import pandas as pd
 from IPython.display import display
+from empyrical.utils import default_returns_func
 
 from . import pos
 from . import txn
@@ -161,7 +161,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
 # Settings dict to store functions/values that may
 # need to be overridden depending on the users environment
 SETTINGS = {
-    'returns_func': empyrical.utils.default_returns_func
+    'returns_func': default_returns_func
 }
 
 
