@@ -1,5 +1,5 @@
 #
-# Copyright 2016 Quantopian, Inc.
+# Copyright 2017 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -140,12 +140,11 @@ def axes_style(style='darkgrid', rc=None):
     return sns.axes_style(style=style, rc=rc)
 
 
-def plot_rolling_fama_french(
-        returns,
-        factor_returns=None,
-        rolling_window=APPROX_BDAYS_PER_MONTH * 6,
-        legend_loc='best',
-        ax=None, **kwargs):
+def plot_rolling_fama_french(returns,
+                             factor_returns=None,
+                             rolling_window=APPROX_BDAYS_PER_MONTH * 6,
+                             legend_loc='best',
+                             ax=None, **kwargs):
     """
     Plots rolling Fama-French single factor betas.
 
@@ -193,10 +192,10 @@ def plot_rolling_fama_french(
     rolling_beta.plot(alpha=0.7, ax=ax, **kwargs)
 
     ax.axhline(0.0, color='black')
-    ax.legend(['Small-Caps (SMB)',
-               'High-Growth (HML)',
+    ax.legend(['Small cap (SMB)',
+               'High growth (HML)',
                'Momentum (UMD)'],
-              loc=legend_loc)
+              loc=legend_loc, frameon=True, framealpha=0.5)
 
     y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
@@ -236,8 +235,7 @@ def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
         monthly_ret_table.fillna(0) *
         100.0,
         annot=True,
-        annot_kws={
-            "size": 9},
+        annot_kws={"size": 9},
         alpha=1.0,
         center=0.0,
         cbar=False,
@@ -274,7 +272,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
 
     x_axis_formatter = FuncFormatter(utils.percentage)
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
-    ax.tick_params(axis='x', which='major', labelsize=10)
+    ax.tick_params(axis='x', which='major')
 
     ann_ret_df = pd.DataFrame(
         empyrical.aggregate_returns(
@@ -295,7 +293,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
     ax.set_ylabel('Year')
     ax.set_xlabel('Returns')
     ax.set_title("Annual returns")
-    ax.legend(['mean'])
+    ax.legend(['Mean'], frameon=True, framealpha=0.5)
     return ax
 
 
@@ -324,7 +322,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
 
     x_axis_formatter = FuncFormatter(utils.percentage)
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
-    ax.tick_params(axis='x', which='major', labelsize=10)
+    ax.tick_params(axis='x', which='major')
 
     monthly_ret_table = empyrical.aggregate_returns(returns, 'monthly')
 
@@ -343,7 +341,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
         alpha=1.0)
 
     ax.axvline(0.0, color='black', linestyle='-', lw=3, alpha=0.75)
-    ax.legend(['mean'])
+    ax.legend(['Mean'], frameon=True, framealpha=0.5)
     ax.set_ylabel('Number of months')
     ax.set_xlabel('Returns')
     ax.set_title("Distribution of monthly returns")
@@ -355,6 +353,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     Plots total amount of stocks with an active position, either short
     or long. Displays daily total, daily average per month, and
     all-time daily average.
+
     Parameters
     ----------
     returns : pd.Series
@@ -369,6 +368,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
         Axes upon which to plot.
     **kwargs, optional
         Passed to plotting function.
+
     Returns
     -------
     ax : matplotlib.Axes
@@ -384,7 +384,6 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     df_holdings.plot(color='steelblue', alpha=0.6, lw=0.5, ax=ax, **kwargs)
     df_holdings_by_month.plot(
         color='orangered',
-        alpha=0.5,
         lw=2,
         ax=ax,
         **kwargs)
@@ -392,8 +391,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
         df_holdings.values.mean(),
         color='steelblue',
         ls='--',
-        lw=3,
-        alpha=1.0)
+        lw=3)
 
     ax.set_xlim((returns.index[0], returns.index[-1]))
 
@@ -401,7 +399,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
                      'Average daily holdings, by month',
                      'Average daily holdings, overall'],
                     loc=legend_loc, frameon=True,
-                    framealpha=0.8, prop={'size': 12})
+                    framealpha=0.5)
     leg.get_frame().set_edgecolor('black')
 
     ax.set_title('Total holdings')
@@ -445,23 +443,19 @@ def plot_long_short_holdings(returns, positions,
     positions = positions.replace(0, np.nan)
     df_longs = positions[positions > 0].count(axis=1)
     df_shorts = positions[positions < 0].count(axis=1)
-    l_color = matplotlib.colors.colorConverter.to_rgba('#28B121', alpha=.7)
-    s_color = matplotlib.colors.colorConverter.to_rgba('#D9292E', alpha=.7)
     lf = ax.fill_between(df_longs.index, 0, df_longs.values,
-                         color='#28B121', alpha=0.25, lw=2.0,
-                         edgecolor=l_color)
+                         color='g', alpha=0.5, lw=2.0)
     sf = ax.fill_between(df_shorts.index, 0, df_shorts.values,
-                         color='#D9292E', alpha=0.25, lw=2.0,
-                         edgecolor=s_color)
+                         color='r', alpha=0.5, lw=2.0)
 
-    bf = patches.Rectangle([0, 0], 1, 1, color='#B08C65')
+    bf = patches.Rectangle([0, 0], 1, 1, color='darkgoldenrod')
     leg = ax.legend([lf, sf, bf],
                     ['Long (max: %s, min: %s)' % (df_longs.max(),
                                                   df_longs.min()),
                      'Short (max: %s, min: %s)' % (df_shorts.max(),
                                                    df_shorts.min()),
                      'Overlap'], loc=legend_loc, frameon=True,
-                    framealpha=0.8, prop={'size': 12})
+                    framealpha=0.5)
     leg.get_frame().set_edgecolor('black')
 
     ax.set_xlim((returns.index[0], returns.index[-1]))
@@ -518,7 +512,8 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     ax.set_ylim(lim)
     ax.set_title('Top %i drawdown periods' % top)
     ax.set_ylabel('Cumulative returns')
-    ax.legend(['Portfolio'], loc='upper left')
+    ax.legend(['Portfolio'], loc='upper left',
+              frameon=True, framealpha=0.5)
     ax.set_xlabel('')
     return ax
 
@@ -870,7 +865,7 @@ def plot_rolling_returns(returns,
                                 color='steelblue', alpha=0.5)
 
     if legend_loc is not None:
-        ax.legend(loc=legend_loc)
+        ax.legend(loc=legend_loc, frameon=True, framealpha=0.5)
     ax.axhline(1.0, linestyle='--', color='black', lw=2)
 
     return ax
@@ -922,7 +917,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     ax.set_xlabel('')
     ax.legend(['6-mo',
                '12-mo'],
-              loc=legend_loc)
+              loc=legend_loc, frameon=True, framealpha=0.5)
     ax.set_ylim((-1.0, 1.0))
     return ax
 
@@ -971,10 +966,10 @@ def plot_rolling_volatility(returns, factor_returns=None,
         rolling_vol_ts_factor.plot(alpha=.7, lw=3, color='grey', ax=ax,
                                    **kwargs)
 
-    ax.set_title('Rolling Volatility (6-month)')
+    ax.set_title('Rolling volatility (6-month)')
     ax.axhline(
         rolling_vol_ts.mean(),
-        color='orangered',
+        color='steelblue',
         linestyle='--',
         lw=3)
 
@@ -983,11 +978,11 @@ def plot_rolling_volatility(returns, factor_returns=None,
     ax.set_ylabel('Volatility')
     ax.set_xlabel('')
     if factor_returns.empty:
-        ax.legend(['Volatility', 'Average Volatility'],
-                  loc=legend_loc)
+        ax.legend(['Volatility', 'Average volatility'],
+                  loc=legend_loc, frameon=True, framealpha=0.5)
     else:
-        ax.legend(['Volatility', 'Benchmark Volatility', 'Average Volatility'],
-                  loc=legend_loc)
+        ax.legend(['Volatility', 'Benchmark volatility', 'Average volatility'],
+                  loc=legend_loc, frameon=True, framealpha=0.5)
     return ax
 
 
@@ -1038,7 +1033,7 @@ def plot_rolling_sharpe(returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6,
     ax.set_ylabel('Sharpe ratio')
     ax.set_xlabel('')
     ax.legend(['Sharpe', 'Average'],
-              loc=legend_loc)
+              loc=legend_loc, frameon=True, framealpha=0.5)
     return ax
 
 
@@ -1071,9 +1066,9 @@ def plot_gross_leverage(returns, positions, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
     gl = timeseries.gross_lev(positions)
-    gl.plot(alpha=0.8, lw=0.5, color='g', legend=False, ax=ax, **kwargs)
+    gl.plot(lw=0.5, color='limegreen', legend=False, ax=ax, **kwargs)
 
-    ax.axhline(gl.mean(), color='g', linestyle='--', lw=3, alpha=1.0)
+    ax.axhline(gl.mean(), color='g', linestyle='--', lw=3)
 
     ax.set_title('Gross leverage')
     ax.set_ylabel('Gross leverage')
@@ -1115,18 +1110,18 @@ def plot_exposures(returns, positions, ax=None, **kwargs):
     ax.fill_between(l_exp.index,
                     0,
                     l_exp.values,
-                    label='Long', color='green')
+                    label='Long', color='green', alpha=0.5)
     ax.fill_between(s_exp.index,
                     0,
                     s_exp.values,
-                    label='Short', color='red')
+                    label='Short', color='red', alpha=0.5)
     ax.plot(net_exp.index, net_exp.values,
             label='Net', color='black', linestyle='dotted')
 
     ax.set_xlim((returns.index[0], returns.index[-1]))
     ax.set_title("Exposure")
     ax.set_ylabel('Exposure')
-    ax.legend(loc='lower left', frameon=True)
+    ax.legend(loc='lower left', frameon=True, framealpha=0.5)
     ax.set_xlabel('')
     return ax
 
@@ -1197,7 +1192,7 @@ def show_and_plot_top_positions(returns, positions_alloc,
 
         positions_alloc[df_top_abs.index].plot(
             title='Portfolio allocation over time, only top 10 holdings',
-            alpha=0.4, ax=ax, **kwargs)
+            alpha=0.5, ax=ax, **kwargs)
 
         # Place legend below plot, shrink plot by 20%
         if legend_loc == 'real_best':
@@ -1206,9 +1201,8 @@ def show_and_plot_top_positions(returns, positions_alloc,
                              box.width, box.height * 0.9])
 
             # Put a legend below current axis
-            ax.legend(
-                loc='upper center', frameon=True, bbox_to_anchor=(
-                    0.5, -0.14), ncol=5)
+            ax.legend(loc='upper center', frameon=True, framealpha=0.5,
+                      bbox_to_anchor=(0.5, -0.14), ncol=5)
         else:
             ax.legend(loc=legend_loc)
 
@@ -1246,9 +1240,9 @@ def plot_max_median_position_concentration(positions, ax=None, **kwargs):
     colors = ['mediumblue', 'steelblue', 'tomato', 'firebrick']
     alloc_summary.plot(linewidth=1, color=colors, alpha=0.6, ax=ax)
 
-    ax.legend(loc='center left')
+    ax.legend(loc='center left', frameon=True, framealpha=0.5)
     ax.set_ylabel('Exposure')
-    ax.set_title('Long/Short max and median position concentration')
+    ax.set_title('Long/short max and median position concentration')
 
     return ax
 
@@ -1279,16 +1273,15 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
         ax = plt.gcf()
 
     sector_alloc.plot(title='Sector allocation over time',
-                      alpha=0.4, ax=ax, **kwargs)
+                      alpha=0.5, ax=ax, **kwargs)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.1,
                      box.width, box.height * 0.9])
 
     # Put a legend below current axis
-    ax.legend(
-        loc='upper center', frameon=True, bbox_to_anchor=(
-            0.5, -0.14), ncol=5)
+    ax.legend(loc='upper center', frameon=True, framealpha=0.5,
+              bbox_to_anchor=(0.5, -0.14), ncol=5)
 
     ax.set_xlim((sector_alloc.index[0], sector_alloc.index[-1]))
     ax.set_ylabel('Exposure by sector')
@@ -1343,7 +1336,7 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
         red_dots = matplotlib.lines.Line2D([], [], color="red", marker="d",
                                            label="Out-of-sample data",
                                            linestyle='')
-        ax.legend(handles=[red_dots])
+        ax.legend(handles=[red_dots], frameon=True, framealpha=0.5)
     ax.set_xticklabels(['Daily', 'Weekly', 'Monthly'])
     ax.set_title('Return quantiles')
 
@@ -1405,7 +1398,7 @@ def plot_turnover(returns, transactions, positions,
     ax.legend(['Daily turnover',
                'Average daily turnover, by month',
                'Average daily turnover, net'],
-              loc=legend_loc)
+              loc=legend_loc, frameon=True, framealpha=0.5)
     ax.set_title('Daily turnover')
     ax.set_xlim((returns.index[0], returns.index[-1]))
     ax.set_ylim((0, 1))
@@ -1418,7 +1411,7 @@ def plot_slippage_sweep(returns, transactions, positions,
                         slippage_params=(3, 8, 10, 12, 15, 20, 50),
                         ax=None, **kwargs):
     """
-    Plots a equity curves at different per-dollar slippage assumptions.
+    Plots equity curves at different per-dollar slippage assumptions.
 
     Parameters
     ----------
@@ -1462,7 +1455,7 @@ def plot_slippage_sweep(returns, transactions, positions,
     ax.set_title('Cumulative returns given additional per-dollar slippage')
     ax.set_ylabel('')
 
-    ax.legend(loc='center left')
+    ax.legend(loc='center left', frameon=True, framealpha=0.5)
 
     return ax
 
@@ -1676,44 +1669,6 @@ def plot_txn_time_hist(transactions, bin_minutes=5, tz='America/New_York',
     return ax
 
 
-def plot_daily_returns_similarity(returns_backtest, returns_live,
-                                  ax=None, **kwargs):
-    """
-    Plots overlapping distributions of in-sample (backtest) returns
-    and out-of-sample (live trading) returns.
-
-    Parameters
-    ----------
-    returns_backtest : pd.Series
-        Daily returns of the strategy's backtest, noncumulative.
-    returns_live : pd.Series
-        Daily returns of the strategy's live trading, noncumulative.
-    title : str, optional
-        The title to use for the plot.
-    ax : matplotlib.Axes, optional
-        Axes upon which to plot.
-    **kwargs, optional
-        Passed to seaborn plotting function.
-
-    Returns
-    -------
-    ax : matplotlib.Axes
-        The axes that were plotted on.
-    """
-
-    if ax is None:
-        ax = plt.gca()
-
-    sns.kdeplot(utils.standardize_data(returns_backtest),
-                bw='scott', shade=True, label='backtest',
-                color='forestgreen', ax=ax, **kwargs)
-    sns.kdeplot(utils.standardize_data(returns_live),
-                bw='scott', shade=True, label='out-of-sample',
-                color='red', ax=ax, **kwargs)
-
-    return ax
-
-
 def show_worst_drawdown_periods(returns, top=5):
     """
     Prints information about the worst drawdown periods.
@@ -1734,62 +1689,6 @@ def show_worst_drawdown_periods(returns, top=5):
     utils.print_table(drawdown_df.sort_values('Net drawdown in %',
                                               ascending=False),
                       name='Worst drawdown periods', fmt='{0:.2f}')
-
-
-def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
-    """
-    Plots monthly returns as a timeseries.
-
-    Parameters
-    ----------
-    returns : pd.Series
-        Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
-    ax : matplotlib.Axes, optional
-        Axes upon which to plot.
-    **kwargs, optional
-        Passed to seaborn plotting function.
-
-    Returns
-    -------
-    ax : matplotlib.Axes
-        The axes that were plotted on.
-    """
-
-    def cumulate_returns(x):
-        return empyrical.cum_returns(x)[-1]
-
-    if ax is None:
-        ax = plt.gca()
-
-    monthly_rets = returns.resample('M').apply(lambda x: cumulate_returns(x))
-    monthly_rets = monthly_rets.to_period()
-
-    sns.barplot(x=monthly_rets.index,
-                y=monthly_rets.values,
-                color='steelblue')
-
-    locs, labels = plt.xticks()
-    plt.setp(labels, rotation=90)
-
-    # only show x-labels on year boundary
-    xticks_coord = []
-    xticks_label = []
-    count = 0
-    for i in monthly_rets.index:
-        if i.month == 1:
-            xticks_label.append(i)
-            xticks_coord.append(count)
-            # plot yearly boundary line
-            ax.axvline(count, color='gray', ls='--', alpha=0.3)
-
-        count += 1
-
-    ax.axhline(0.0, color='darkgray', ls='-')
-    ax.set_xticks(xticks_coord)
-    ax.set_xticklabels(xticks_label)
-
-    return ax
 
 
 def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
@@ -1835,7 +1734,8 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
     ax.set_ylim((-0.5, min(len(sample), disp_amount) - 0.5))
     blue = patches.Rectangle([0, 0], 1, 1, color='b', label='Long')
     red = patches.Rectangle([0, 0], 1, 1, color='r', label='Short')
-    leg = ax.legend(handles=[blue, red], frameon=True, loc='lower left')
+    leg = ax.legend(handles=[blue, red], loc='lower left',
+                    frameon=True, framealpha=0.5)
     leg.get_frame().set_edgecolor('black')
     ax.grid(False)
 
@@ -2008,76 +1908,9 @@ def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
     if name is not None:
         axes.set_title(name)
     axes.axhline(1, color='black', alpha=0.2)
-    axes.legend()
+    axes.legend(frameon=True, framealpha=0.5)
 
     if ax is None:
         return fig
     else:
         return axes
-
-
-def plot_multistrike_cones(is_returns, oos_returns, num_samples=1000,
-                           name=None, ax=None, cone_std=(1., 1.5, 2.),
-                           random_seed=None, num_strikes=0):
-    """
-    Plots the upper and lower bounds of an n standard deviation
-    cone of forecasted cumulative returns. This cone is non-parametric,
-    meaning it does not assume that returns are normally distributed. Redraws
-    a new cone when returns fall outside of last cone drawn.
-    Parameters
-    ----------
-    is_returns : pandas.core.frame.DataFrame
-        Non-cumulative in-sample returns.
-    oos_returns : pandas.core.frame.DataFrame
-        Non-cumulative out-of-sample returns.
-    num_samples : int
-        Number of samples to draw from the in-sample daily returns.
-        Each sample will be an array with length num_days.
-        A higher number of samples will generate a more accurate
-        bootstrap cone.
-    name : str, optional
-        Plot title
-    ax : matplotlib.Axes, optional
-        Axes upon which to plot.
-    cone_std : list of int/float
-        Number of standard devations to use in the boundaries of
-        the cone. If multiple values are passed, cone bounds will
-        be generated for each value.
-    random_seed : int
-        Seed for the pseudorandom number generator used by the pandas
-        sample method.
-    num_strikes : int
-        Upper limit for number of cones drawn. Can be anything from 0 to 3.
-
-    Returns
-    -------
-    Returns are either an ax or fig option, but not both. If a
-    matplotlib.Axes instance is passed in as ax, then it will be modified
-    and returned. This allows for users to plot interactively in jupyter
-    notebook. When no ax object is passed in, a matplotlib.figure instance
-    is generated and returned. This figure can then be used to save
-    the plot as an image without viewing it.
-    ax : matplotlib.Axes
-        The axes that were plotted on.
-    fig : matplotlib.figure
-        The figure instance which contains all the plot elements.
-    """
-
-    bounds = timeseries.forecast_cone_bootstrap(
-        is_returns=is_returns,
-        num_days=len(oos_returns),
-        cone_std=cone_std,
-        num_samples=num_samples,
-        random_seed=random_seed
-    )
-
-    return plot_cones(
-        name=name,
-        bounds=bounds.set_index(oos_returns.index),
-        oos_returns=oos_returns,
-        num_samples=num_samples,
-        ax=ax,
-        cone_std=cone_std,
-        random_seed=random_seed,
-        num_strikes=num_strikes
-    )

@@ -1,5 +1,5 @@
 #
-# Copyright 2016 Quantopian, Inc.
+# Copyright 2017 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -307,34 +307,34 @@ def plot_best(trace=None, data_train=None, data_test=None,
             stats.scoreatpercentile(trace, 97.5),
             color='0.5')
 
-    sns.distplot(trace['group1_mean'], ax=axs[0], label='backtest')
-    sns.distplot(trace['group2_mean'], ax=axs[0], label='forward')
-    axs[0].legend(loc=0)
-    axs[1].legend(loc=0)
+    sns.distplot(trace['group1_mean'], ax=axs[0], label='Backtest')
+    sns.distplot(trace['group2_mean'], ax=axs[0], label='Forward')
+    axs[0].legend(loc=0, frameon=True, framealpha=0.5)
+    axs[1].legend(loc=0, frameon=True, framealpha=0.5)
 
     distplot_w_perc(trace['difference of means'], axs[1])
 
-    axs[0].set(xlabel='mean', ylabel='belief', yticklabels=[])
-    axs[1].set(xlabel='difference of means', yticklabels=[])
+    axs[0].set(xlabel='Mean', ylabel='Belief', yticklabels=[])
+    axs[1].set(xlabel='Difference of means', yticklabels=[])
 
     sns.distplot(trace['group1_annual_volatility'], ax=axs[2],
-                 label='backtest')
+                 label='Backtest')
     sns.distplot(trace['group2_annual_volatility'], ax=axs[2],
-                 label='forward')
+                 label='Forward')
     distplot_w_perc(trace['group2_annual_volatility'] -
                     trace['group1_annual_volatility'], axs[3])
-    axs[2].set(xlabel='Annual volatility', ylabel='belief',
+    axs[2].set(xlabel='Annual volatility', ylabel='Belief',
                yticklabels=[])
-    axs[2].legend(loc=0)
-    axs[3].set(xlabel='difference of volatility', yticklabels=[])
+    axs[2].legend(loc=0, frameon=True, framealpha=0.5)
+    axs[3].set(xlabel='Difference of volatility', yticklabels=[])
 
-    sns.distplot(trace['group1_sharpe'], ax=axs[4], label='backtest')
-    sns.distplot(trace['group2_sharpe'], ax=axs[4], label='forward')
+    sns.distplot(trace['group1_sharpe'], ax=axs[4], label='Backtest')
+    sns.distplot(trace['group2_sharpe'], ax=axs[4], label='Forward')
     distplot_w_perc(trace['group2_sharpe'] - trace['group1_sharpe'],
                     axs[5])
-    axs[4].set(xlabel='Sharpe', ylabel='belief', yticklabels=[])
-    axs[4].legend(loc=0)
-    axs[5].set(xlabel='difference of Sharpes', yticklabels=[])
+    axs[4].set(xlabel='Sharpe', ylabel='Belief', yticklabels=[])
+    axs[4].legend(loc=0, frameon=True, framealpha=0.5)
+    axs[5].set(xlabel='Difference of Sharpes', yticklabels=[])
 
     sns.distplot(trace['effect size'], ax=axs[6])
     axs[6].axvline(
@@ -343,8 +343,8 @@ def plot_best(trace=None, data_train=None, data_test=None,
     axs[6].axvline(
         stats.scoreatpercentile(trace['effect size'], 97.5),
         color='0.5')
-    axs[6].set(xlabel='difference of means normalized by volatility',
-               ylabel='belief', yticklabels=[])
+    axs[6].set(xlabel='Difference of means normalized by volatility',
+               ylabel='Belief', yticklabels=[])
 
 
 def model_stoch_vol(data, samples=2000):
@@ -421,8 +421,9 @@ def plot_stoch_vol(data, trace=None, ax=None):
 
     data.abs().plot(ax=ax)
     ax.plot(data.index, np.exp(trace['s', ::30].T), 'r', alpha=.03)
-    ax.set(title='Stochastic Volatility', xlabel='time', ylabel='volatility')
-    ax.legend(['abs returns', 'stochastic volatility process'])
+    ax.set(title='Stochastic volatility', xlabel='Time', ylabel='Volatility')
+    ax.legend(['Abs returns', 'Stochastic volatility process'],
+              frameon=True, framealpha=0.5)
 
     return ax
 
@@ -510,15 +511,15 @@ def _plot_bayes_cone(returns_train, returns_test,
     if plot_train_len is not None:
         returns_train_cum = returns_train_cum.iloc[-plot_train_len:]
 
-    returns_train_cum.plot(ax=ax, color='g', label='in-sample')
-    returns_test_cum_rel.plot(ax=ax, color='r', label='out-of-sample')
+    returns_train_cum.plot(ax=ax, color='g', label='In-sample')
+    returns_test_cum_rel.plot(ax=ax, color='r', label='Out-of-sample')
 
     ax.fill_between(returns_test.index, perc[5], perc[95], alpha=.3)
     ax.fill_between(returns_test.index, perc[25], perc[75], alpha=.6)
-    ax.legend(loc='best')
-    ax.set_title('Bayesian Cone')
+    ax.legend(loc='best', frameon=True, framealpha=0.5)
+    ax.set_title('Bayesian cone')
     ax.set_xlabel('')
-    ax.set_ylabel('Cumulative Returns')
+    ax.set_ylabel('Cumulative returns')
 
     return ax
 
@@ -632,5 +633,5 @@ def plot_bayes_cone(returns_train, returns_test, ppc,
         transform=ax.transAxes,
     )
 
-    ax.set_ylabel('Cumulative returns', fontsize=14)
+    ax.set_ylabel('Cumulative returns')
     return score
