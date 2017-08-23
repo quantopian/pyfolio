@@ -70,6 +70,16 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
 
     Returns
     -------
+    tuple of (risk_exposures_portfolio, perf_attribution)
+
+    risk_exposures_portfolio : pd.DataFrame
+        df indexed by datetime, with factors as columns
+        - Example:
+                        momentum  reversal
+            dt
+            2017-01-01 -0.238655  0.077123
+            2017-01-02  0.821872  1.520515
+
     perf_attribution : pd.DataFrame
         df with factors, common returns, and specific returns as columns,
         and datetimes as index
@@ -99,7 +109,8 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
                                'common_returns': common_returns,
                                'specific_returns': specific_returns})
 
-    return pd.concat([perf_attrib_by_factor, returns_df], axis='columns')
+    return (risk_exposures_portfolio,
+            pd.concat([perf_attrib_by_factor, returns_df], axis='columns'))
 
 
 def create_perf_attrib_stats(perf_attrib):
@@ -118,21 +129,27 @@ def create_perf_attrib_stats(perf_attrib):
         empyrical.sharpe_ratio(specific_returns)
 
     summary['Cumulative specific returns'] =\
-        empyrical.cum_returns(specific_returns)
+        empyrical.cum_returns_final(specific_returns)
     summary['Cumulative common returns'] =\
-        empyrical.cum_returns(common_returns)
+        empyrical.cum_returns_final(common_returns)
     summary['Total returns'] =\
-        empyrical.cum_returns(perf_attrib['total_returns'])
+        empyrical.cum_returns_final(perf_attrib['total_returns'])
 
     summary = pd.Series(summary)
     return summary
 
 
-def show_perf_attrib_stats(perf_attrib_data, risk_exposures):
+def show_perf_attrib_stats(returns, positions, factor_returns,
+                           factor_loadings):
     """
-    Takes perf attribution data over a period of time, computes stats on it,
-    and displays them using `utils.print_table`.
+    Calls `perf_attrib` using inputs, and displays outputs using
+    `utils.print_table`.
     """
+    risk_exposures, perf_attrib_data = perf_attrib(returns,
+                                                   positions,
+                                                   factor_returns,
+                                                   factor_loadings)
+
     perf_attrib_stats = create_perf_attrib_stats(perf_attrib_data)
     print_table(perf_attrib_stats)
     print_table(risk_exposures)
