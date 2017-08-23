@@ -387,7 +387,6 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
     df_holdings.plot(color='steelblue', alpha=0.6, lw=0.5, ax=ax, **kwargs)
     df_holdings_by_month.plot(
         color='orangered',
-        alpha=0.5,
         lw=2,
         ax=ax,
         **kwargs)
@@ -395,8 +394,7 @@ def plot_holdings(returns, positions, legend_loc='best', ax=None, **kwargs):
         df_holdings.values.mean(),
         color='steelblue',
         ls='--',
-        lw=3,
-        alpha=1.0)
+        lw=3)
 
     ax.set_xlim((returns.index[0], returns.index[-1]))
 
@@ -1071,9 +1069,9 @@ def plot_gross_leverage(returns, positions, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
     gl = timeseries.gross_lev(positions)
-    gl.plot(alpha=0.8, lw=0.5, color='g', legend=False, ax=ax, **kwargs)
+    gl.plot(lw=0.5, color='limegreen', legend=False, ax=ax, **kwargs)
 
-    ax.axhline(gl.mean(), color='g', linestyle='--', lw=3, alpha=1.0)
+    ax.axhline(gl.mean(), color='g', linestyle='--', lw=3)
 
     ax.set_title('Gross leverage')
     ax.set_ylabel('Gross leverage')
@@ -1115,11 +1113,11 @@ def plot_exposures(returns, positions, ax=None, **kwargs):
     ax.fill_between(l_exp.index,
                     0,
                     l_exp.values,
-                    label='Long', color='green')
+                    label='Long', color='green', alpha=0.5)
     ax.fill_between(s_exp.index,
                     0,
                     s_exp.values,
-                    label='Short', color='red')
+                    label='Short', color='red', alpha=0.5)
     ax.plot(net_exp.index, net_exp.values,
             label='Net', color='black', linestyle='dotted')
 
@@ -1197,7 +1195,7 @@ def show_and_plot_top_positions(returns, positions_alloc,
 
         positions_alloc[df_top_abs.index].plot(
             title='Portfolio allocation over time, only top 10 holdings',
-            alpha=0.4, ax=ax, **kwargs)
+            alpha=0.5, ax=ax, **kwargs)
 
         # Place legend below plot, shrink plot by 20%
         if legend_loc == 'real_best':
@@ -1278,7 +1276,7 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
         ax = plt.gcf()
 
     sector_alloc.plot(title='Sector allocation over time',
-                      alpha=0.4, ax=ax, **kwargs)
+                      alpha=0.5, ax=ax, **kwargs)
 
     box = ax.get_position()
     ax.set_position([box.x0, box.y0 + box.height * 0.1,
