@@ -972,7 +972,7 @@ def plot_rolling_volatility(returns, factor_returns=None,
     ax.set_title('Rolling volatility (6-month)')
     ax.axhline(
         rolling_vol_ts.mean(),
-        color='orangered',
+        color='steelblue',
         linestyle='--',
         lw=3)
 
