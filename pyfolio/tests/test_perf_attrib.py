@@ -5,9 +5,16 @@ import unittest
 from pyfolio.perf_attrib import perf_attrib
 
 
-def generate_toy_risk_model_output():
+def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
     """
     Generate toy risk model output.
+
+    Parameters
+    ----------
+    start_date : str
+        date to start generating toy data
+    periods : int
+        number of days for which to generate toy data
 
     Returns
     -------
@@ -15,15 +22,13 @@ def generate_toy_risk_model_output():
     returns : pd.DataFrame
     factor_returns : pd.DataFrame
     """
-    start_date = '2017-01-01'
-    periods = 10
     dts = pd.date_range(start_date, periods=periods)
     np.random.seed(123)
-    tickers = ['AAPL', 'TLT', 'XOM', 'cash']
-    styles = ['momentum', 'reversal']
+    tickers = ['AAPL', 'TLT', 'XOM']
+    styles = ['factor1', 'factor2']
 
     returns = pd.Series(index=dts,
-                        data=np.random.randn(10)) / 100
+                        data=np.random.randn(periods)) / 100
 
     factor_returns = pd.DataFrame(
         columns=styles, index=dts,
@@ -34,13 +39,14 @@ def generate_toy_risk_model_output():
 
     positions = pd.DataFrame(
         columns=tickers, index=dts,
-        data=np.random.randint(100, size=(10, len(tickers)))
+        data=np.random.randint(100, size=(periods, len(tickers)))
     )
-    positions['cash'] = positions.sum(axis=1)
+    positions['cash'] = np.zeros(periods)
 
-    factor_loadings = pd.DataFrame(columns=['factor1', 'factor2'],
-                                   index=index,
-                                   data=np.random.randn(30, 2))
+    factor_loadings = pd.DataFrame(
+        columns=styles, index=index,
+        data=np.random.randn(periods * len(tickers), len(styles))
+    )
 
     return returns, positions, factor_returns, factor_loadings
 
@@ -94,11 +100,23 @@ class PerfAttribTestCase(unittest.TestCase):
                   'total_returns': returns}
         )
 
-        perf_attrib_output = perf_attrib(returns, positions,
-                                         factor_returns, factor_loadings)
+        expected_exposures_portfolio = pd.DataFrame(
+            index=dts,
+            columns=['risk_factor1', 'risk_factor2'],
+            data={'risk_factor1': [0.25, 0.25],
+                  'risk_factor2': [0.25, 0.25]}
+        )
+
+        exposures_portfolio, perf_attrib_output = perf_attrib(returns,
+                                                              positions,
+                                                              factor_returns,
+                                                              factor_loadings)
 
         pd.util.testing.assert_frame_equal(expected_perf_attrib_output,
                                            perf_attrib_output)
+
+        pd.util.testing.assert_frame_equal(expected_exposures_portfolio,
+                                           exposures_portfolio)
 
         # test long and short positions
         positions = pd.DataFrame(index=dts,
@@ -106,8 +124,11 @@ class PerfAttribTestCase(unittest.TestCase):
                                        'stock2': [-20, -20],
                                        'cash': [20, 20]})
 
-        perf_attrib_output = perf_attrib(returns, positions,
-                                         factor_returns, factor_loadings)
+        exposures_portfolio, perf_attrib_output = perf_attrib(returns,
+                                                              positions,
+                                                              factor_returns,
+                                                              factor_loadings)
+
         expected_perf_attrib_output = pd.DataFrame(
             index=dts,
             columns=['risk_factor1', 'risk_factor2', 'common_returns',
@@ -118,5 +139,16 @@ class PerfAttribTestCase(unittest.TestCase):
                   'specific_returns': [0.1, 0.1],
                   'total_returns': returns}
         )
+
+        expected_exposures_portfolio = pd.DataFrame(
+            index=dts,
+            columns=['risk_factor1', 'risk_factor2'],
+            data={'risk_factor1': [0.0, 0.0],
+                  'risk_factor2': [0.0, 0.0]}
+        )
+
         pd.util.testing.assert_frame_equal(expected_perf_attrib_output,
                                            perf_attrib_output)
+
+        pd.util.testing.assert_frame_equal(expected_exposures_portfolio,
+                                           exposures_portfolio)
