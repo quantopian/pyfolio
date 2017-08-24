@@ -4,7 +4,7 @@ These are new features and improvements of note in each release.
 
 ## v0.8.0 (Aug 23rd, 2017)
 
-This is a major release from `0.7.0`, and all users are recoommended to upgrade.
+This is a major release from `0.7.0`, and all users are recommended to upgrade.
 
 ### New features
 
