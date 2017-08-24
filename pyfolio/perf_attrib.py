@@ -16,6 +16,7 @@ from __future__ import division
 import pandas as pd
 
 import empyrical
+import matplotlib.pyplot as plt
 from pyfolio.pos import get_percent_alloc
 from pyfolio.utils import print_table
 
@@ -153,3 +154,59 @@ def show_perf_attrib_stats(returns, positions, factor_returns,
     perf_attrib_stats = create_perf_attrib_stats(perf_attrib_data)
     print_table(perf_attrib_stats)
     print_table(risk_exposures)
+
+
+def plot_returns(returns, specific_returns, common_returns, ax=None):
+    """
+    Plot total, specific, and common returns.
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    ax.plot(returns, color='g', label='Total returns')
+    ax.plot(specific_returns, color='b', label='Cumulative specific returns')
+    ax.plot(common_returns, color='r', label='Cumulative common returns')
+
+    ax.set_title('Time Series of Cumulative Returns')
+    ax.set_ylabel('Returns')
+    ax.legend()
+
+    return ax
+
+
+def plot_alpha_returns(alpha_returns, ax=None):
+    """
+    Plot histogram of daily multi-factor alpha returns.
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    plt.hist(alpha_returns, color='g', label='multi-factor alpha')
+    plt.title('Histogram of alphas (specific pnl / AUM)')
+    plt.axvline(0, color='k', linestyle='--', label='zero')
+
+    avg = alpha_returns.mean()
+    plt.axvline(avg, color='b', label='mean = {: 0.5f}'.format(avg))
+    plt.legend()
+
+
+def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
+    """
+    Plot each factor's contribution to performance.
+
+    Parameters
+    ----------
+    perf_attrib_data : pd.DataFrame
+        df with factors, common returns, and specific returns as columns,
+        and datetimes as index
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    ax.stackplot(perf_attrib_data.index, perf_attrib_data.iloc[:, :-3])
+
+    ax.axhline(0, color='k')
+    ax.legend(frameon=True, loc=2)
+
+    ax.set_ylabel('Contribution to Returns by Factor')
+    ax.set_title('Returns Attribution', fontsize='large')
