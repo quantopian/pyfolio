@@ -583,7 +583,7 @@ def rolling_fama_french(returns, factor_returns=None,
     factor_returns['const'] = 1
 
     # have NaNs when there is insufficient data to do a regression
-    regression_coeffs = np.empty((rolling_window,
+    regression_coeffs = np.empty((min(rolling_window, len(factor_returns)),
                                   len(factor_returns.columns)))
     regression_coeffs.fill(np.nan)
 
