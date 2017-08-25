@@ -17,7 +17,7 @@ from __future__ import division
 from collections import OrderedDict
 from functools import partial
 
-import empyrical
+import empyrical as ep
 import numpy as np
 import pandas as pd
 import scipy as sp
@@ -80,7 +80,7 @@ def max_drawdown(returns):
     See https://en.wikipedia.org/wiki/Drawdown_(economics) for more details.
     """
 
-    return empyrical.max_drawdown(returns)
+    return ep.max_drawdown(returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -104,7 +104,7 @@ def annual_return(returns, period=DAILY):
         Annual Return as CAGR (Compounded Annual Growth Rate).
     """
 
-    return empyrical.annual_return(returns, period=period)
+    return ep.annual_return(returns, period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -128,7 +128,7 @@ def annual_volatility(returns, period=DAILY):
         Annual volatility.
     """
 
-    return empyrical.annual_volatility(returns, period=period)
+    return ep.annual_volatility(returns, period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -157,7 +157,7 @@ def calmar_ratio(returns, period=DAILY):
     See https://en.wikipedia.org/wiki/Calmar_ratio for more details.
     """
 
-    return empyrical.calmar_ratio(returns, period=period)
+    return ep.calmar_ratio(returns, period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -194,7 +194,7 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
     See https://en.wikipedia.org/wiki/Omega_ratio for more details.
     """
 
-    return empyrical.omega_ratio(returns,
+    return ep.omega_ratio(returns,
                                  required_return=annual_return_threshhold)
 
 
@@ -224,7 +224,7 @@ def sortino_ratio(returns, required_return=0, period=DAILY):
         Annualized Sortino ratio.
     """
 
-    return empyrical.sortino_ratio(returns, required_return=required_return)
+    return ep.sortino_ratio(returns, required_return=required_return)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -253,7 +253,7 @@ def downside_risk(returns, required_return=0, period=DAILY):
         Annualized downside deviation
     """
 
-    return empyrical.downside_risk(returns,
+    return ep.downside_risk(returns,
                                    required_return=required_return,
                                    period=period)
 
@@ -287,7 +287,7 @@ def sharpe_ratio(returns, risk_free=0, period=DAILY):
     See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
     """
 
-    return empyrical.sharpe_ratio(returns, risk_free=risk_free, period=period)
+    return ep.sharpe_ratio(returns, risk_free=risk_free, period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -313,7 +313,7 @@ def alpha_beta(returns, factor_returns):
         Beta.
     """
 
-    return empyrical.alpha_beta(returns, factor_returns=factor_returns)
+    return ep.alpha_beta(returns, factor_returns=factor_returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -337,7 +337,7 @@ def alpha(returns, factor_returns):
         Alpha.
     """
 
-    return empyrical.alpha(returns, factor_returns=factor_returns)
+    return ep.alpha(returns, factor_returns=factor_returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -361,7 +361,7 @@ def beta(returns, factor_returns):
         Beta.
     """
 
-    return empyrical.beta(returns, factor_returns)
+    return ep.beta(returns, factor_returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -383,7 +383,7 @@ def stability_of_timeseries(returns):
         R-squared.
     """
 
-    return empyrical.stability_of_timeseries(returns)
+    return ep.stability_of_timeseries(returns)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -406,7 +406,7 @@ def tail_ratio(returns):
         tail ratio
     """
 
-    return empyrical.tail_ratio(returns)
+    return ep.tail_ratio(returns)
 
 
 def common_sense_ratio(returns):
@@ -430,8 +430,8 @@ def common_sense_ratio(returns):
         common sense ratio
     """
 
-    return empyrical.tail_ratio(returns) * \
-        (1 + empyrical.annual_return(returns))
+    return ep.tail_ratio(returns) * \
+        (1 + ep.annual_return(returns))
 
 
 def normalize(returns, starting_value=1):
@@ -479,7 +479,7 @@ def cum_returns(returns, starting_value=0):
     where it is possible to sum instead of multiplying.
     """
 
-    return empyrical.cum_returns(returns, starting_value=starting_value)
+    return ep.cum_returns(returns, starting_value=starting_value)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -501,7 +501,7 @@ def aggregate_returns(returns, convert_to):
         Aggregated returns.
     """
 
-    return empyrical.aggregate_returns(returns, convert_to=convert_to)
+    return ep.aggregate_returns(returns, convert_to=convert_to)
 
 
 def rolling_beta(returns, factor_returns,
@@ -540,7 +540,7 @@ def rolling_beta(returns, factor_returns,
         out = pd.Series(index=returns.index)
         for beg, end in zip(returns.index[0:-rolling_window],
                             returns.index[rolling_window:]):
-            out.loc[end] = empyrical.beta(
+            out.loc[end] = ep.beta(
                 returns.loc[beg:end],
                 factor_returns.loc[beg:end])
 
@@ -574,7 +574,7 @@ def rolling_fama_french(returns, factor_returns=None,
     """
 
     if factor_returns is None:
-        factor_returns = empyrical.utils.load_portfolio_risk_factors(
+        factor_returns = ep.utils.load_portfolio_risk_factors(
             start=returns.index[0], end=returns.index[-1])
         factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
                                              axis='columns')
@@ -638,7 +638,7 @@ def value_at_risk(returns, period=None, sigma=2.0):
         Standard deviations of VaR, default 2.
     """
     if period is not None:
-        returns_agg = empyrical.aggregate_returns(returns, period)
+        returns_agg = ep.aggregate_returns(returns, period)
     else:
         returns_agg = returns.copy()
 
@@ -647,24 +647,24 @@ def value_at_risk(returns, period=None, sigma=2.0):
 
 
 SIMPLE_STAT_FUNCS = [
-    empyrical.annual_return,
-    empyrical.cum_returns_final,
-    empyrical.annual_volatility,
-    empyrical.sharpe_ratio,
-    empyrical.calmar_ratio,
-    empyrical.stability_of_timeseries,
-    empyrical.max_drawdown,
-    empyrical.omega_ratio,
-    empyrical.sortino_ratio,
+    ep.annual_return,
+    ep.cum_returns_final,
+    ep.annual_volatility,
+    ep.sharpe_ratio,
+    ep.calmar_ratio,
+    ep.stability_of_timeseries,
+    ep.max_drawdown,
+    ep.omega_ratio,
+    ep.sortino_ratio,
     stats.skew,
     stats.kurtosis,
-    empyrical.tail_ratio,
+    ep.tail_ratio,
     value_at_risk
 ]
 
 FACTOR_STAT_FUNCS = [
-    empyrical.alpha,
-    empyrical.beta,
+    ep.alpha,
+    ep.beta,
 ]
 
 STAT_FUNC_NAMES = {
@@ -938,7 +938,7 @@ def get_top_drawdowns(returns, top=10):
     """
 
     returns = returns.copy()
-    df_cum = empyrical.cum_returns(returns, 1.0)
+    df_cum = ep.cum_returns(returns, 1.0)
     running_max = np.maximum.accumulate(df_cum)
     underwater = df_cum / running_max - 1
 
@@ -978,7 +978,7 @@ def gen_drawdown_table(returns, top=10):
         Information about top drawdowns.
     """
 
-    df_cum = empyrical.cum_returns(returns, 1.0)
+    df_cum = ep.cum_returns(returns, 1.0)
     drawdown_periods = get_top_drawdowns(returns, top=top)
     df_drawdowns = pd.DataFrame(index=list(range(top)),
                                 columns=['Net drawdown in %',
@@ -1118,7 +1118,7 @@ def summarize_paths(samples, cone_std=(1., 1.5, 2.), starting_value=1.):
     samples : pandas.core.frame.DataFrame
     """
 
-    cum_samples = empyrical.cum_returns(samples.T,
+    cum_samples = ep.cum_returns(samples.T,
                                         starting_value=starting_value).T
 
     cum_mean = cum_samples.mean(axis=0)

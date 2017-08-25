@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import division
+
+import empyrical as ep
 import pandas as pd
 
-import empyrical
 from pyfolio.pos import get_percent_alloc
 from pyfolio.utils import print_table
 
@@ -112,17 +113,17 @@ def create_perf_attrib_stats(perf_attrib):
     common_returns = perf_attrib['common_returns']
 
     summary['Annual multi-factor alpha'] =\
-        empyrical.annual_return(specific_returns)
+        ep.annual_return(specific_returns)
 
     summary['Multi-factor sharpe'] =\
-        empyrical.sharpe_ratio(specific_returns)
+        ep.sharpe_ratio(specific_returns)
 
     summary['Cumulative specific returns'] =\
-        empyrical.cum_returns(specific_returns)
+        ep.cum_returns(specific_returns)
     summary['Cumulative common returns'] =\
-        empyrical.cum_returns(common_returns)
+        ep.cum_returns(common_returns)
     summary['Total returns'] =\
-        empyrical.cum_returns(perf_attrib['total_returns'])
+        ep.cum_returns(perf_attrib['total_returns'])
 
     summary = pd.Series(summary)
     return summary
