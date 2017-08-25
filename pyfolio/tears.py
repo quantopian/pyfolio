@@ -1,5 +1,5 @@
 #
-# Copyright 2016 Quantopian, Inc.
+# Copyright 2017 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -831,7 +831,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
     trade_holding_times = [x.days for x in trades['duration']]
     sns.distplot(trade_holding_times, kde=False, ax=ax_holding_time)
-    ax_holding_time.set(xlabel='holding time in days')
+    ax_holding_time.set(xlabel='Holding time in days')
 
     sns.distplot(trades.pnl, kde=False, ax=ax_pnl_per_round_trip_dollars)
     ax_pnl_per_round_trip_dollars.set(xlabel='PnL per round-trip trade in $')
@@ -913,10 +913,10 @@ def create_interesting_times_tear_sheet(
             ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
         ep.cum_returns(bmark_interesting[name]).plot(
             ax=ax, color='gray', label='SPY', alpha=0.6)
-        ax.legend(['algo',
+        ax.legend(['Algo',
                    'SPY'],
-                  loc=legend_loc)
-        ax.set_title(name, size=14)
+                  loc=legend_loc, frameon=True, framealpha=0.5)
+        ax.set_title(name)
         ax.set_ylabel('Returns')
         ax.set_xlabel('')
 
@@ -1017,7 +1017,7 @@ def create_capacity_tear_sheet(returns, positions, transactions,
     llt = capacity.get_low_liquidity_transactions(
         transactions, market_data, last_n_days=last_n_days)
 
-    print("last {} trading days:".format(last_n_days))
+    print("Last {} trading days:".format(last_n_days))
     utils.print_table(
         llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit * 100])
 
@@ -1197,7 +1197,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         for i in range(nbeta):
             sns.distplot(trace_alpha_beta['beta'][100:, i], ax=ax_beta,
                          label=betas[i])
-        plt.legend()
+        plt.legend(frameon=True, framealpha=0.5)
     else:
         sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1,
                      ax=ax_alpha)

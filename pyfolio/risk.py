@@ -40,7 +40,7 @@ CAP_BUCKETS = OrderedDict([
 
 
 def compute_style_factor_exposures(positions, risk_factor):
-    '''
+    """
     Returns style factor exposure of an algorithm's positions
 
     Parameters
@@ -53,12 +53,12 @@ def compute_style_factor_exposures(positions, risk_factor):
         Daily risk factor per asset.
         - DataFrame with dates as index and equities as columns
         - Example:
-                     Equity(24   Equity(62
-                       [AAPL])      [ABT])
+                         Equity(24   Equity(62
+                           [AAPL])      [ABT])
         2017-04-03	  -0.51284     1.39173
         2017-04-04	  -0.73381     0.98149
-        2017-04-05	  -0.90132	   1.13981
-    '''
+        2017-04-05	  -0.90132     1.13981
+    """
 
     positions_wo_cash = positions.drop('cash', axis='columns')
     gross_exposure = positions_wo_cash.abs().sum(axis='columns')
@@ -73,7 +73,7 @@ def compute_style_factor_exposures(positions, risk_factor):
 
 def plot_style_factor_exposures(tot_style_factor_exposure, factor_name=None,
                                 ax=None):
-    '''
+    """
     Plots DataFrame output of compute_style_factor_exposures as a line graph
 
     Parameters
@@ -90,7 +90,7 @@ def plot_style_factor_exposures(tot_style_factor_exposure, factor_name=None,
     factor_name : string
         Name of style factor, for use in graph title
         - Defaults to tot_style_factor_exposure.name
-    '''
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -106,15 +106,15 @@ def plot_style_factor_exposures(tot_style_factor_exposure, factor_name=None,
     _, _, y1, y2 = plt.axis()
     lim = max(abs(y1), abs(y2))
     ax.set(title='Exposure to {}'.format(factor_name),
-           ylabel='{} \n Weighted Exposure'.format(factor_name),
+           ylabel='{} \n weighted exposure'.format(factor_name),
            ylim=(-lim, lim))
-    ax.legend()
+    ax.legend(frameon=True, framealpha=0.5)
 
     return ax
 
 
 def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
-    '''
+    """
     Returns arrays of long, short and gross sector exposures of an algorithm's
     positions
 
@@ -133,7 +133,7 @@ def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
         - Keys are sector codes (e.g. ints or strings) and values are sector
           names (which must be strings)
         - Defaults to Morningstar sectors
-    '''
+    """
 
     sector_ids = sector_dict.keys()
 
@@ -170,7 +170,7 @@ def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
 
 def plot_sector_exposures_longshort(long_exposures, short_exposures,
                                     sector_dict=SECTORS, ax=None):
-    '''
+    """
     Plots outputs of compute_sector_exposures as area charts
 
     Parameters
@@ -182,7 +182,7 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures,
     sector_dict : dict or OrderedDict
         Dictionary of all sectors
         - See full description in compute_sector_exposures
-    '''
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -200,15 +200,15 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures,
     ax.stackplot(long_exposures[0].index, short_exposures,
                  colors=color_list, alpha=0.8, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set(title='Long and Short Exposures to Sectors',
-           ylabel='Proportion of Long/Short Exposure in Sectors')
+    ax.set(title='Long and short exposures to sectors',
+           ylabel='Proportion of long/short exposure in sectors')
     ax.legend(loc='upper left', frameon=True, framealpha=0.5)
 
     return ax
 
 
 def plot_sector_exposures_gross(gross_exposures, sector_dict=None, ax=None):
-    '''
+    """
     Plots output of compute_sector_exposures as area charts
 
     Parameters
@@ -219,7 +219,7 @@ def plot_sector_exposures_gross(gross_exposures, sector_dict=None, ax=None):
     sector_dict : dict or OrderedDict
         Dictionary of all sectors
         - See full description in compute_sector_exposures
-    '''
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -235,14 +235,14 @@ def plot_sector_exposures_gross(gross_exposures, sector_dict=None, ax=None):
                  labels=sector_names, colors=color_list, alpha=0.8,
                  baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set(title='Gross Exposure to Sectors',
-           ylabel='Proportion of Gross Exposure \n in Sectors')
+    ax.set(title='Gross exposure to sectors',
+           ylabel='Proportion of gross exposure \n in sectors')
 
     return ax
 
 
 def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
-    '''
+    """
     Plots output of compute_sector_exposures as line graphs
 
     Parameters
@@ -253,7 +253,7 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
     sector_dict : dict or OrderedDict
         Dictionary of all sectors
         - See full description in compute_sector_exposures
-    '''
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -268,14 +268,14 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
     for i in range(len(net_exposures)):
         ax.plot(net_exposures[i], color=color_list[i], alpha=0.8,
                 label=sector_names[i])
-    ax.set(title='Net Exposures to Sectors',
-           ylabel='Proportion of Net Exposure \n in Sectors')
+    ax.set(title='Net exposures to sectors',
+           ylabel='Proportion of net exposure \n in sectors')
 
     return ax
 
 
 def compute_cap_exposures(positions, caps):
-    '''
+    """
     Returns arrays of long, short and gross market cap exposures of an
     algorithm's positions
 
@@ -288,7 +288,7 @@ def compute_cap_exposures(positions, caps):
     caps : pd.DataFrame
         Daily Morningstar sector code per asset
         - See full explanation in create_risk_tear_sheet
-    '''
+    """
 
     long_exposures = []
     short_exposures = []
@@ -323,7 +323,7 @@ def compute_cap_exposures(positions, caps):
 
 
 def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
-    '''
+    """
     Plots outputs of compute_cap_exposures as area charts
 
     Parameters
@@ -331,7 +331,7 @@ def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
     long_exposures, short_exposures : arrays
         Arrays of long and short market cap exposures (output of
         compute_cap_exposures).
-    '''
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -344,22 +344,22 @@ def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
     ax.stackplot(long_exposures[0].index, short_exposures, colors=color_list,
                  alpha=0.8, baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set(title='Long and Short Exposures to Market Caps',
-           ylabel='Proportion of Long/Short Exposure in Market Cap Buckets')
+    ax.set(title='Long and short exposures to market caps',
+           ylabel='Proportion of long/short exposure in market cap buckets')
     ax.legend(loc='upper left', frameon=True, framealpha=0.5)
 
     return ax
 
 
 def plot_cap_exposures_gross(gross_exposures, ax=None):
-    '''
+    """
     Plots outputs of compute_cap_exposures as area charts
 
     Parameters
     ----------
     gross_exposures : array
         Arrays of gross market cap exposures (output of compute_cap_exposures).
-    '''
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -370,21 +370,21 @@ def plot_cap_exposures_gross(gross_exposures, ax=None):
                  labels=CAP_BUCKETS.keys(), colors=color_list, alpha=0.8,
                  baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
-    ax.set(title='Gross Exposure to Market Caps',
-           ylabel='Proportion of Gross Exposure \n in Market Cap Buckets')
+    ax.set(title='Gross exposure to market caps',
+           ylabel='Proportion of gross exposure \n in market cap buckets')
 
     return ax
 
 
 def plot_cap_exposures_net(net_exposures, ax=None):
-    '''
+    """
     Plots outputs of compute_cap_exposures as line graphs
 
     Parameters
     ----------
     net_exposures : array
         Arrays of gross market cap exposures (output of compute_cap_exposures).
-    '''
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -396,14 +396,14 @@ def plot_cap_exposures_net(net_exposures, ax=None):
         ax.plot(net_exposures[i], color=color_list[i], alpha=0.8,
                 label=cap_names[i])
     ax.axhline(0, color='k', linestyle='-')
-    ax.set(title='Net Exposure to Market Caps',
-           ylabel='Proportion of Net Exposure \n in Market Cap Buckets')
+    ax.set(title='Net exposure to market caps',
+           ylabel='Proportion of net exposure \n in market cap buckets')
 
     return ax
 
 
 def compute_volume_exposures(shares_held, volumes, percentile):
-    '''
+    """
     Returns arrays of pth percentile of long, short and gross volume exposures
     of an algorithm's held shares
 
@@ -420,7 +420,7 @@ def compute_volume_exposures(shares_held, volumes, percentile):
     percentile : float
         Percentile to use when computing and plotting volume exposures
         - See full explanation in create_risk_tear_sheet
-    '''
+    """
 
     shares_held = shares_held.replace(0, np.nan)
 
@@ -441,7 +441,7 @@ def compute_volume_exposures(shares_held, volumes, percentile):
 
 def plot_volume_exposures_longshort(longed_threshold, shorted_threshold,
                                     percentile, ax=None):
-    '''
+    """
     Plots outputs of compute_volume_exposures as line graphs
 
     Parameters
@@ -453,7 +453,7 @@ def plot_volume_exposures_longshort(longed_threshold, shorted_threshold,
     percentile : float
         Percentile to use when computing and plotting volume exposures.
         - See full explanation in create_risk_tear_sheet
-    '''
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -463,16 +463,16 @@ def plot_volume_exposures_longshort(longed_threshold, shorted_threshold,
     ax.plot(shorted_threshold.index, shorted_threshold,
             color='r', label='short')
     ax.axhline(0, color='k')
-    ax.set(title='Long and Short Exposures to Illiquidity',
-           ylabel='{}th Percentile of Proportion of Volume (%)'
+    ax.set(title='Long and short exposures to illiquidity',
+           ylabel='{}th percentile of proportion of volume (%)'
            .format(100*percentile))
-    ax.legend()
+    ax.legend(frameon=True, framealpha=0.5)
 
     return ax
 
 
 def plot_volume_exposures_gross(grossed_threshold, percentile, ax=None):
-    '''
+    """
     Plots outputs of compute_volume_exposures as line graphs
 
     Parameters
@@ -484,7 +484,7 @@ def plot_volume_exposures_gross(grossed_threshold, percentile, ax=None):
     percentile : float
         Percentile to use when computing and plotting volume exposures
         - See full explanation in create_risk_tear_sheet
-    '''
+    """
 
     if ax is None:
         ax = plt.gca()
@@ -492,9 +492,9 @@ def plot_volume_exposures_gross(grossed_threshold, percentile, ax=None):
     ax.plot(grossed_threshold.index, grossed_threshold,
             color='b', label='gross')
     ax.axhline(0, color='k')
-    ax.set(title='Gross Exposure to Illiquidity',
-           ylabel='{}th Percentile of \n Proportion of Volume (%)'
+    ax.set(title='Gross exposure to illiquidity',
+           ylabel='{}th percentile of \n proportion of volume (%)'
            .format(100*percentile))
-    ax.legend()
+    ax.legend(frameon=True, framealpha=0.5)
 
     return ax
