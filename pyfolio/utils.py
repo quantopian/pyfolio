@@ -20,7 +20,10 @@ import warnings
 import numpy as np
 import pandas as pd
 from IPython.display import display
-from empyrical.utils import default_returns_func
+from empyrical.utils import default_returns_func, get_fama_french,\
+    get_returns_cached, get_symbol_returns_from_yahoo, get_treasury_yield,\
+    get_utc_timestamp, cache_dir, ensure_directory, data_path, _1_bday,\
+    _1_bday_ago, load_portfolio_risk_factors
 
 from . import pos
 from . import txn
