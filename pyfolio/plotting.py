@@ -1407,7 +1407,7 @@ def plot_turnover(returns, transactions, positions,
     return ax
 
 
-def plot_slippage_sweep(returns, transactions, positions,
+def plot_slippage_sweep(returns, positions, transactions,
                         slippage_params=(3, 8, 10, 12, 15, 20, 50),
                         ax=None, **kwargs):
     """
@@ -1418,11 +1418,11 @@ def plot_slippage_sweep(returns, transactions, positions,
     returns : pd.Series
         Timeseries of portfolio returns to be adjusted for various
         degrees of slippage.
-    transactions : pd.DataFrame
-        Prices and amounts of executed trades. One row per trade.
-         - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     slippage_params: tuple
         Slippage pameters to apply to the return time series (in
@@ -1441,12 +1441,10 @@ def plot_slippage_sweep(returns, transactions, positions,
     if ax is None:
         ax = plt.gca()
 
-    turnover = txn.get_turnover(positions, transactions,
-                                period=None, average=False)
-
     slippage_sweep = pd.DataFrame()
     for bps in slippage_params:
-        adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
+        adj_returns = txn.adjust_returns_for_slippage(returns, positions,
+                                                      transactions, bps)
         label = str(bps) + " bps"
         slippage_sweep[label] = empyrical.cum_returns(adj_returns, 1)
 
@@ -1460,7 +1458,7 @@ def plot_slippage_sweep(returns, transactions, positions,
     return ax
 
 
-def plot_slippage_sensitivity(returns, transactions, positions,
+def plot_slippage_sensitivity(returns, positions, transactions,
                               ax=None, **kwargs):
     """
     Plots curve relating per-dollar slippage to average annual returns.
@@ -1470,11 +1468,11 @@ def plot_slippage_sensitivity(returns, transactions, positions,
     returns : pd.Series
         Timeseries of portfolio returns to be adjusted for various
         degrees of slippage.
-    transactions : pd.DataFrame
-        Prices and amounts of executed trades. One row per trade.
-         - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -1490,11 +1488,10 @@ def plot_slippage_sensitivity(returns, transactions, positions,
     if ax is None:
         ax = plt.gca()
 
-    turnover = txn.get_turnover(positions, transactions,
-                                period=None, average=False)
     avg_returns_given_slippage = pd.Series()
     for bps in range(1, 100):
-        adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
+        adj_returns = txn.adjust_returns_for_slippage(returns, positions,
+                                                      transactions, bps)
         avg_returns = empyrical.annual_return(adj_returns)
         avg_returns_given_slippage.loc[bps] = avg_returns
 
@@ -1566,7 +1563,7 @@ def plot_daily_turnover_hist(transactions, positions,
 
     if ax is None:
         ax = plt.gca()
-    turnover = txn.get_turnover(positions, transactions, period=None)
+    turnover = txn.get_turnover(positions, transactions)
     sns.distplot(turnover, ax=ax, **kwargs)
     ax.set_title('Distribution of daily turnover rates')
     ax.set_xlabel('Turnover rate')

@@ -162,10 +162,9 @@ def create_full_tear_sheet(returns,
 
     if (unadjusted_returns is None) and (slippage is not None) and\
        (transactions is not None):
-        turnover = txn.get_turnover(positions, transactions,
-                                    period=None, average=False)
         unadjusted_returns = returns.copy()
-        returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
+        returns = txn.adjust_returns_for_slippage(returns, positions,
+                                                  transactions, slippage)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -293,9 +292,8 @@ def create_simple_tear_sheet(returns,
         benchmark_rets = utils.get_symbol_rets('SPY')
 
     if (slippage is not None) and (transactions is not None):
-        turnover = txn.get_turnover(positions, transactions,
-                                    period=None, average=False)
-        returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
+        returns = txn.adjust_returns_for_slippage(returns, positions,
+                                                  transactions, slippage)
 
     if (positions is not None) and (transactions is not None):
         vertical_sections = 11
@@ -739,14 +737,14 @@ def create_txn_tear_sheet(returns, positions, transactions,
     if unadjusted_returns is not None:
         ax_slippage_sweep = plt.subplot(gs[4, :])
         plotting.plot_slippage_sweep(unadjusted_returns,
-                                     transactions,
                                      positions,
+                                     transactions,
                                      ax=ax_slippage_sweep
                                      )
         ax_slippage_sensitivity = plt.subplot(gs[5, :])
         plotting.plot_slippage_sensitivity(unadjusted_returns,
-                                           transactions,
                                            positions,
+                                           transactions,
                                            ax=ax_slippage_sensitivity
                                            )
     for ax in fig.axes:
