@@ -15,7 +15,7 @@
 from __future__ import division
 import pandas as pd
 
-import empyrical
+import empyrical as ep
 import matplotlib.pyplot as plt
 from pyfolio.pos import get_percent_alloc
 from pyfolio.utils import print_table
@@ -124,17 +124,17 @@ def create_perf_attrib_stats(perf_attrib):
     common_returns = perf_attrib['common_returns']
 
     summary['Annual multi-factor alpha'] =\
-        empyrical.annual_return(specific_returns)
+        ep.annual_return(specific_returns)
 
     summary['Multi-factor sharpe'] =\
-        empyrical.sharpe_ratio(specific_returns)
+        ep.sharpe_ratio(specific_returns)
 
     summary['Cumulative specific returns'] =\
-        empyrical.cum_returns_final(specific_returns)
+        ep.cum_returns_final(specific_returns)
     summary['Cumulative common returns'] =\
-        empyrical.cum_returns_final(common_returns)
+        ep.cum_returns_final(common_returns)
     summary['Total returns'] =\
-        empyrical.cum_returns_final(perf_attrib['total_returns'])
+        ep.cum_returns_final(perf_attrib['total_returns'])
 
     summary = pd.Series(summary)
     return summary
@@ -167,7 +167,7 @@ def plot_returns(returns, specific_returns, common_returns, ax=None):
     ax.plot(specific_returns, color='b', label='Cumulative specific returns')
     ax.plot(common_returns, color='r', label='Cumulative common returns')
 
-    ax.set_title('Time Series of Cumulative Returns')
+    ax.set_title('Time Series of cumulative returns')
     ax.set_ylabel('Returns')
     ax.legend()
 
@@ -190,7 +190,7 @@ def plot_alpha_returns(alpha_returns, ax=None):
     plt.legend()
 
 
-def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
+def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
     """
     Plot each factor's contribution to performance.
 
@@ -203,10 +203,14 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    ax.stackplot(perf_attrib_data.index, perf_attrib_data.iloc[:, :-3])
+    ax.stackplot(perf_attrib_data.index,
+                 [perf_attrib_data['factor1'],
+                  perf_attrib_data['factor2'],
+                  perf_attrib_data['specific_returns']],
+                 labels=perf_attrib_data.iloc[:, :-3].columns)
 
     ax.axhline(0, color='k')
     ax.legend(frameon=True, loc=2)
 
-    ax.set_ylabel('Contribution to Returns by Factor')
-    ax.set_title('Returns Attribution', fontsize='large')
+    ax.set_ylabel('Contribution to returns by factor')
+    ax.set_title('Returns attribution', fontsize='large')
