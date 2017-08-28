@@ -16,8 +16,6 @@ from __future__ import division
 
 import pandas as pd
 
-from .timeseries import gross_lev
-
 def map_transaction(txn):
     """
     Maps a single transaction row to a dictionary.
@@ -174,12 +172,11 @@ def get_turnover(positions, transactions):
 
     txn_vol = get_txn_vol(transactions)
     traded_value = txn_vol.txn_volume
-    portfolio_value = positions.sum(axis=1)
 
     # Actual gross book is the same thing as the algo's GMV
     # We want our denom to be avg(AGB yesterday, AGB today)
-    AGB = portfolio_value * timeseries.gross_lev(positions)
-    avg_AGB = AGB.rolling(2).mean() / 2
+    AGB = positions.drop('cash', axis=1).abs().sum(axis=1)
+    avg_AGB = AGB.rolling(2).mean()
     avg_AGB.iloc[0] = AGB.iloc[0] / 2 # "day 0" AGB = 0
 
     turnover = traded_value.div(avg_AGB, axis='index')

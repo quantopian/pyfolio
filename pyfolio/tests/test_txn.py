@@ -40,7 +40,7 @@ class TransactionsTestCase(TestCase):
         transactions = DataFrame(data=[[1, 1, 10, 'A']]*len(dates) +
                                  [[2, -1, 10, 'B']]*len(dates),
                                  columns=['sid', 'amount', 'price', 'symbol'],
-                                 index=dates * 2).sort_index()
+                                 index=dates.append(dates)).sort_index()
 
         expected = Series([4.0] + [2.0] * (len(dates) - 1), index=dates)
         result = get_turnover(positions, transactions)
