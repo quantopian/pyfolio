@@ -181,13 +181,15 @@ def plot_alpha_returns(alpha_returns, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    plt.hist(alpha_returns, color='g', label='multi-factor alpha')
-    plt.title('Histogram of alphas (specific pnl / AUM)')
-    plt.axvline(0, color='k', linestyle='--', label='zero')
+    ax.hist(alpha_returns, color='g', label='Multi-factor alpha')
+    ax.set_title('Histogram of alphas')
+    ax.axvline(0, color='k', linestyle='--', label='Zero')
 
     avg = alpha_returns.mean()
-    plt.axvline(avg, color='b', label='mean = {: 0.5f}'.format(avg))
-    plt.legend()
+    ax.axvline(avg, color='b', label='Mean = {: 0.5f}'.format(avg))
+    ax.legend()
+
+    return ax
 
 
 def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
@@ -210,7 +212,9 @@ def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
                  labels=perf_attrib_data.iloc[:, :-3].columns)
 
     ax.axhline(0, color='k')
-    ax.legend(frameon=True, loc=2)
+    ax.legend(frameon=True, framealpha=0.5, loc='upper left')
 
     ax.set_ylabel('Contribution to returns by factor')
-    ax.set_title('Returns attribution', fontsize='large')
+    ax.set_title('Returns attribution')
+
+    return ax
