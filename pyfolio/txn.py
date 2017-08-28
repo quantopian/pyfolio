@@ -16,6 +16,7 @@ from __future__ import division
 
 import pandas as pd
 
+
 def map_transaction(txn):
     """
     Maps a single transaction row to a dictionary.
@@ -177,7 +178,7 @@ def get_turnover(positions, transactions):
     # We want our denom to be avg(AGB yesterday, AGB today)
     AGB = positions.drop('cash', axis=1).abs().sum(axis=1)
     avg_AGB = AGB.rolling(2).mean()
-    avg_AGB.iloc[0] = AGB.iloc[0] / 2 # "day 0" AGB = 0
+    avg_AGB.iloc[0] = AGB.iloc[0] / 2  # "day 0" AGB = 0
 
     turnover = traded_value.div(avg_AGB, axis='index')
     turnover = turnover.fillna(0)

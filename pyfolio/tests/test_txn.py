@@ -36,7 +36,6 @@ class TransactionsTestCase(TestCase):
         result = get_turnover(positions, transactions)
         assert_series_equal(result, expected)
 
-
         transactions = DataFrame(data=[[1, 1, 10, 'A']]*len(dates) +
                                  [[2, -1, 10, 'B']]*len(dates),
                                  columns=['sid', 'amount', 'price', 'symbol'],
