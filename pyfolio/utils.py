@@ -377,6 +377,7 @@ def to_series(df):
     return df[df.columns[0]]
 
 
+<<<<<<< HEAD
 @deprecated(msg=DEPRECATION_WARNING)
 def default_returns_func(symbol, start=None, end=None):
     """
@@ -598,3 +599,15 @@ def get_symbol_rets(symbol, start=None, end=None):
     return SETTINGS['returns_func'](symbol,
                                     start=start,
                                     end=end)
+
+
+def set_legend_location(ax):
+    """
+    Put legend in right of plot instead of overlapping with the it.
+    """
+    chartBox = ax.get_position()
+    ax.set_position([chartBox.x0, chartBox.y0,
+                     chartBox.width * 0.75, chartBox.height])
+
+    ax.legend(frameon=True, framealpha=0.5, loc='upper left',
+              bbox_to_anchor=(1.05, 1))

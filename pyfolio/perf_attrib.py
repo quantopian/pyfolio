@@ -17,10 +17,21 @@ from __future__ import division
 import empyrical as ep
 import pandas as pd
 
-from itertools import chain
 import matplotlib.pyplot as plt
 from pyfolio.pos import get_percent_alloc
-from pyfolio.utils import print_table
+from pyfolio.utils import print_table, set_legend_location
+
+# 31 visually distinct colors
+# http://phrogz.net/css/distinct-colors.html
+COLORS = [
+    '#f23d3d', '#828c23', '#698c83', '#594080', '#994d4d',
+    '#206380', '#dd39e6', '#cc9999', '#7c8060', '#66adcc',
+    '#6c7dd9', '#8a698c', '#7f6340', '#66cc7a', '#a3abd9',
+    '#d9c0a3', '#bfffcc', '#542699', '#b35986', '#d4e639',
+    '#b380ff', '#e0e6ac', '#a253a6', '#418020', '#ff409f',
+    '#ffa940', '#83ff40', '#3d58f2', '#e3ace6', '#d9a86c',
+    '#2db391'
+]
 
 
 def perf_attrib(returns, positions, factor_returns, factor_loadings):
@@ -161,6 +172,15 @@ def show_perf_attrib_stats(returns, positions, factor_returns,
 def plot_returns(returns, specific_returns, common_returns, ax=None):
     """
     Plot total, specific, and common returns.
+
+    Parameters
+    ----------
+    ax :  matplotlib.axes.Axes
+        axes on which plots are made. if None, current axes will be used
+
+    Returns
+    -------
+    ax :  matplotlib.axes.Axes
     """
     if ax is None:
         ax = plt.gca()
@@ -173,7 +193,8 @@ def plot_returns(returns, specific_returns, common_returns, ax=None):
 
     ax.set_title('Time Series of cumulative returns')
     ax.set_ylabel('Returns')
-    ax.legend()
+
+    set_legend_location(ax)
 
     return ax
 
@@ -181,6 +202,18 @@ def plot_returns(returns, specific_returns, common_returns, ax=None):
 def plot_alpha_returns(alpha_returns, ax=None):
     """
     Plot histogram of daily multi-factor alpha returns (specific returns).
+
+    Parameters
+    ----------
+    alpha_returns : pd.Series
+        series of daily alpha returns indexed by datetime
+
+    ax :  matplotlib.axes.Axes
+        axes on which plots are made. if None, current axes will be used
+
+    Returns
+    -------
+    ax :  matplotlib.axes.Axes
     """
     if ax is None:
         ax = plt.gca()
@@ -191,7 +224,7 @@ def plot_alpha_returns(alpha_returns, ax=None):
 
     avg = alpha_returns.mean()
     ax.axvline(avg, color='b', label='Mean = {: 0.5f}'.format(avg))
-    ax.legend()
+    set_legend_location(ax)
 
     return ax
 
@@ -218,21 +251,65 @@ def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
             dt
             2017-01-01  0.249087  0.935925        1.185012          1.185012
             2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
+
+    ax :  matplotlib.axes.Axes
+        axes on which plots are made. if None, current axes will be used
+
+    Returns
+    -------
+    ax :  matplotlib.axes.Axes
     """
     if ax is None:
         ax = plt.gca()
 
+    factors_and_specific = perf_attrib_data.drop(
+        ['total_returns', 'common_returns'], axis='columns')
+
     ax.stackplot(
-        perf_attrib_data.index,
-        [perf_attrib_data[s] for s in chain(perf_attrib_data.iloc[:, :-3],
-                                            ['specific_returns'])],
-        labels=list(perf_attrib_data.iloc[:, :-3]) + ['specific returns']
+        factors_and_specific.index,
+        [factors_and_specific[s] for s in factors_and_specific],
+        labels=factors_and_specific.columns,
+        colors=COLORS
     )
 
     ax.axhline(0, color='k')
-    ax.legend(frameon=True, framealpha=0.5, loc='upper left')
+    set_legend_location(ax)
 
     ax.set_ylabel('Contribution to returns by factor')
     ax.set_title('Returns attribution')
+
+    return ax
+
+
+def plot_risk_exposures(exposures, ax=None):
+    """
+    Parameters
+    ----------
+    exposures : pd.DataFrame
+        df indexed by datetime, with factors as columns
+        - Example:
+                        momentum  reversal
+            dt
+            2017-01-01 -0.238655  0.077123
+            2017-01-02  0.821872  1.520515
+
+    ax :  matplotlib.axes.Axes
+        axes on which plots are made. if None, current axes will be used
+
+    Returns
+    -------
+    ax :  matplotlib.axes.Axes
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    ax.stackplot(exposures.index,
+                 [exposures[s] for s in exposures],
+                 labels=exposures.columns,
+                 colors=COLORS)
+
+    set_legend_location(ax)
+    ax.set_ylabel('Factor exposures')
+    ax.set_title('Risk factor exposures')
 
     return ax
