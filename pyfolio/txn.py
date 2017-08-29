@@ -167,10 +167,11 @@ def get_turnover(positions, transactions, denominator='AGB'):
         Swapping out an entire portfolio of stocks for
         another will yield 200% turnover, not 100%, since
         transactions are being made for both sides.
-        - We use average of yesterday's and today's end-of-day
-        AGB to avoid singularities.
+        - We use average of the previous and the current end-of-period
+        AGB to avoid singularities when trading only into or
+        out of an entire book in one trading period.
         - portfolio_value is the total value of the algo's
-        assets end-of-day, including cash.
+        positions end-of-period, including cash.
 
     Returns
     -------
@@ -183,7 +184,7 @@ def get_turnover(positions, transactions, denominator='AGB'):
 
     if denominator == 'AGB':
         # Actual gross book is the same thing as the algo's GMV
-        # We want our denom to be avg(AGB yesterday, AGB today)
+        # We want our denom to be avg(AGB previous, AGB current)
         AGB = positions.drop('cash', axis=1).abs().sum(axis=1)
         denom = AGB.rolling(2).mean()
         denom.iloc[0] = AGB.iloc[0] / 2  # "day 0" AGB = 0
