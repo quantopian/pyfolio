@@ -163,9 +163,11 @@ def plot_returns(returns, specific_returns, common_returns, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    ax.plot(returns, color='g', label='Total returns')
-    ax.plot(specific_returns, color='b', label='Cumulative specific returns')
-    ax.plot(common_returns, color='r', label='Cumulative common returns')
+    ax.plot(ep.cum_returns(returns), color='g', label='Total returns')
+    ax.plot(ep.cum_returns(specific_returns), color='b',
+            label='Cumulative specific returns')
+    ax.plot(ep.cum_returns(common_returns), color='r',
+            label='Cumulative common returns')
 
     ax.set_title('Time Series of cumulative returns')
     ax.set_ylabel('Returns')
@@ -198,9 +200,22 @@ def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
 
     Parameters
     ----------
+    exposures : pd.DataFrame
+        df indexed by datetime, with factors as columns
+        - Example:
+                        momentum  reversal
+            dt
+            2017-01-01 -0.238655  0.077123
+            2017-01-02  0.821872  1.520515
+
     perf_attrib_data : pd.DataFrame
         df with factors, common returns, and specific returns as columns,
         and datetimes as index
+        - Example:
+                        momentum  reversal  common_returns  specific_returns
+            dt
+            2017-01-01  0.249087  0.935925        1.185012          1.185012
+            2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
     """
     if ax is None:
         ax = plt.gca()
