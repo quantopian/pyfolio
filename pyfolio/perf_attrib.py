@@ -124,6 +124,86 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
             pd.concat([perf_attrib_by_factor, returns_df], axis='columns'))
 
 
+def perf_attrib_periods(returns, positions, factor_returns, factor_loadings,
+                        pos_in_dollars=True, periods=None):
+    """
+    Calls `perf_attrib` on subsections of the parameters.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Returns for each day in the date range.
+
+    positions: pd.DataFrame
+        Daily holdings (in dollars or percentages), indexed by date.
+        Will be converted to percentages if positions are in dollars.
+        Short positions show up as cash in the 'cash' column.
+
+    factor_returns : pd.DataFrame
+        Returns by factor, with date as index and factors as columns
+
+    factor_loadings : pd.DataFrame
+        Factor loadings for all days in the date range, with date and ticker as
+        index, and factors as columns.
+
+    pos_in_dollars : bool
+        Flag indicating whether `positions` are in dollars or percentages
+        If True, positions are in dollars.
+
+    periods : dict of (str, datetime)
+        Dict containing datetimes that split up the performance and risk data
+        into time periods, so that performance attribution is done separately
+        on each of the time periods.
+
+        Has time period names as keys, and time period start dates as values.
+
+        One of the values must be the first date in the date range.
+        - Example:
+            Assuming the date range is 2017-01-01 to 2017-02-01:
+            {'time_period1': '2017-01-01',
+             'time_period2': '2017-01-05',
+             'time_period3': '2017-01-20'}
+
+    Returns
+    -------
+    perf_attrib_by_period : dict
+        dict keyed by the same keys as `periods`, where the values are the
+        output of `perf_attrib`, i.e., a tuple of
+        (risk_exposures_portfolio, perf_attribution).
+    """
+    if periods is None:
+        return perf_attrib(returns, positions, factor_returns, factor_loadings,
+                           pos_in_dollars=pos_in_dollars)
+
+    # have to sort dict to know how periods are organized
+    periods_sorted = sorted(periods, key=periods.get, reverse=True)
+
+    perf_attrib_by_period = {}
+    last_period_start = None
+
+    for period in periods_sorted:
+
+        period_start = periods[period]
+        period_returns = returns[period_start:last_period_start]
+        period_positions = positions[period_start:last_period_start]
+
+        period_factor_returns =\
+            factor_returns[period_start:last_period_start]
+
+        period_factor_loadings =\
+            factor_loadings[period_start:last_period_start]
+
+        perf_attrib_by_period[period] = perf_attrib(period_returns,
+                                                    period_positions,
+                                                    period_factor_returns,
+                                                    period_factor_loadings,
+                                                    pos_in_dollars)
+
+        last_period_start = period_start
+
+    return perf_attrib_by_period
+
+
 def create_perf_attrib_stats(perf_attrib):
     """
     Takes perf attribution data over a period of time and computes annualized

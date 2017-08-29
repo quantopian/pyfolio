@@ -2,7 +2,10 @@ import numpy as np
 import pandas as pd
 import unittest
 
-from pyfolio.perf_attrib import perf_attrib
+from pyfolio.perf_attrib import (
+    perf_attrib,
+    perf_attrib_periods,
+)
 
 
 def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
@@ -19,8 +22,15 @@ def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
     Returns
     -------
     tuple of (returns, factor_returns, positions, factor_loadings)
-    returns : pd.DataFrame
+
+    returns : pd.Series
+        Daily returns
     factor_returns : pd.DataFrame
+        Returns by factor
+    positions : pd.DataFrame
+        Daily holdings indexed by date
+    factor_loadings : pd.DataFrame
+        Factor loadings for all days in the date range
     """
     dts = pd.date_range(start_date, periods=periods)
     np.random.seed(123)
@@ -152,3 +162,50 @@ class PerfAttribTestCase(unittest.TestCase):
 
         pd.util.testing.assert_frame_equal(expected_exposures_portfolio,
                                            exposures_portfolio)
+
+    def test_perf_attrib_periods(self):
+
+        returns, positions, factor_returns, factor_loadings =\
+            generate_toy_risk_model_output()
+
+        periods = {'period1': '2017-01-01', 'period2': '2017-01-05'}
+
+        perf_attrib_by_period = perf_attrib_periods(
+            returns, positions, factor_returns,
+            factor_loadings, periods=periods
+        )
+
+        for period, period_start, period_end in [('period1', '2017-01-01',
+                                                  '2017-01-05'),
+                                                 ('period2', '2017-01-05',
+                                                  None)]:
+
+            normal_perf_attrib = perf_attrib(
+                returns[period_start:period_end],
+                positions[period_start:period_end],
+                factor_returns[period_start:period_end],
+                factor_loadings[period_start:period_end]
+            )
+
+            # check portfolio risk exposures (0) and perf attribution (1)
+            for i in [0, 1]:
+                pd.util.testing.assert_frame_equal(
+                    perf_attrib_by_period[period][i],
+                    normal_perf_attrib[i],
+                )
+
+        # when periods is None, `perf_attrib_periods` should
+        # be the same as `perf_attrib`
+        perf_attrib_by_period = perf_attrib_periods(
+            returns, positions, factor_returns,
+            factor_loadings, periods=None
+        )
+
+        normal_perf_attrib = perf_attrib(returns, positions, factor_returns,
+                                         factor_loadings)
+
+        for i in [0, 1]:
+            pd.util.testing.assert_frame_equal(
+                perf_attrib_by_period[i],
+                normal_perf_attrib[i],
+            )
