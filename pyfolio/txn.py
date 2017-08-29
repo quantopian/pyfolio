@@ -146,24 +146,31 @@ def adjust_returns_for_slippage(returns, positions, transactions,
     return adjusted_returns
 
 
-def get_turnover(positions, transactions):
+def get_turnover(positions, transactions, denominator='AGB'):
     """
      - Value of purchases and sales divided
-    by the actual gross book for the time step.
-     - Actual gross book, in this case, is the gross market
-    value (GMV) of the specific algo being analyzed.
-     - Swapping out an entire portfolio of stocks
-    for another will yield 200% turnover, not 100%, since
-    transactions are being made for both sides.
+    by either the actual gross book or the portfolio value
+    for the time step.
 
     Parameters
     ----------
     positions : pd.DataFrame
-        Contains daily position values including cash
+        Contains daily position values including cash.
         - See full explanation in tears.create_full_tear_sheet
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
         - See full explanation in tears.create_full_tear_sheet
+    denominator : str, optional
+        Either 'AGB' or 'portfolio_value', default AGB.
+        - AGB (Actual gross book) is the gross market
+        value (GMV) of the specific algo being analyzed.
+        Swapping out an entire portfolio of stocks for
+        another will yield 200% turnover, not 100%, since
+        transactions are being made for both sides.
+        - We use average of yesterday's and today's end-of-day
+        AGB to avoid singularities.
+        - portfolio_value is the total value of the algo's
+        assets end-of-day, including cash.
 
     Returns
     -------
@@ -174,12 +181,18 @@ def get_turnover(positions, transactions):
     txn_vol = get_txn_vol(transactions)
     traded_value = txn_vol.txn_volume
 
-    # Actual gross book is the same thing as the algo's GMV
-    # We want our denom to be avg(AGB yesterday, AGB today)
-    AGB = positions.drop('cash', axis=1).abs().sum(axis=1)
-    avg_AGB = AGB.rolling(2).mean()
-    avg_AGB.iloc[0] = AGB.iloc[0] / 2  # "day 0" AGB = 0
+    if denominator == 'AGB':
+        # Actual gross book is the same thing as the algo's GMV
+        # We want our denom to be avg(AGB yesterday, AGB today)
+        AGB = positions.drop('cash', axis=1).abs().sum(axis=1)
+        denom = AGB.rolling(2).mean()
+        denom.iloc[0] = AGB.iloc[0] / 2  # "day 0" AGB = 0
+    elif denominator == 'portfolio_value':
+        denom = positions.sum(axis=1)
+    else:
+        raise Exception('Passed denominator must be either' +
+                        'AGB or portfolio_value')
 
-    turnover = traded_value.div(avg_AGB, axis='index')
+    turnover = traded_value.div(denom, axis='index')
     turnover = turnover.fillna(0)
     return turnover

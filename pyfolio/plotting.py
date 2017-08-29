@@ -601,8 +601,8 @@ STAT_FUNCS_PCT = [
 
 
 def show_perf_stats(returns, factor_returns, positions=None,
-                    transactions=None, live_start_date=None,
-                    bootstrap=False):
+                    transactions=None, turnover_denom='AGB',
+                    live_start_date=None, bootstrap=False):
     """
     Prints some performance metrics of the strategy.
 
@@ -623,6 +623,12 @@ def show_perf_stats(returns, factor_returns, positions=None,
     positions : pd.DataFrame
         Daily net position values.
          - See full explanation in create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
+        - See full explanation in tears.create_full_tear_sheet
+    turnover_denom : str
+        Either AGB or portfolio_value, default AGB.
+        - See full explanation in txn.get_turnover.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
@@ -641,7 +647,8 @@ def show_perf_stats(returns, factor_returns, positions=None,
         returns,
         factor_returns=factor_returns,
         positions=positions,
-        transactions=transactions)
+        transactions=transactions,
+        turnover_denom=turnover_denom)
 
     if live_start_date is not None:
         live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
@@ -666,13 +673,15 @@ def show_perf_stats(returns, factor_returns, positions=None,
             returns_is,
             factor_returns=factor_returns,
             positions=positions_is,
-            transactions=transactions_is)
+            transactions=transactions_is,
+            turnover_denom=turnover_denom)
 
         perf_stats_oos = perf_func(
             returns_oos,
             factor_returns=factor_returns,
             positions=positions_oos,
-            transactions=transactions_oos)
+            transactions=transactions_oos,
+            turnover_denom=turnover_denom)
 
         print('In-sample months: ' +
               str(int(len(returns_is) / APPROX_BDAYS_PER_MONTH)))
