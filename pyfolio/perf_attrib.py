@@ -15,6 +15,7 @@
 from __future__ import division
 import pandas as pd
 
+from itertools import chain
 import empyrical as ep
 import matplotlib.pyplot as plt
 from pyfolio.pos import get_percent_alloc
@@ -178,7 +179,7 @@ def plot_returns(returns, specific_returns, common_returns, ax=None):
 
 def plot_alpha_returns(alpha_returns, ax=None):
     """
-    Plot histogram of daily multi-factor alpha returns.
+    Plot histogram of daily multi-factor alpha returns (specific returns).
     """
     if ax is None:
         ax = plt.gca()
@@ -220,11 +221,12 @@ def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    ax.stackplot(perf_attrib_data.index,
-                 [perf_attrib_data['factor1'],
-                  perf_attrib_data['factor2'],
-                  perf_attrib_data['specific_returns']],
-                 labels=perf_attrib_data.iloc[:, :-3].columns)
+    ax.stackplot(
+        perf_attrib_data.index,
+        [perf_attrib_data[s] for s in chain(perf_attrib_data.iloc[:, :-3],
+                                            ['specific_returns'])],
+        labels=list(perf_attrib_data.iloc[:, :-3]) + ['specific returns']
+    )
 
     ax.axhline(0, color='k')
     ax.legend(frameon=True, framealpha=0.5, loc='upper left')
