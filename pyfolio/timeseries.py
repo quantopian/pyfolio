@@ -573,9 +573,12 @@ def rolling_fama_french(returns, factor_returns=None,
         DataFrame containing rolling beta coefficients to SMB, HML and UMD
     """
 
+    # We need to drop NaNs to regress
+    ret_no_na = returns.dropna()
+
     if factor_returns is None:
         factor_returns = empyrical.utils.load_portfolio_risk_factors(
-            start=returns.index[0], end=returns.index[-1])
+            start=ret_no_na.index[0], end=ret_no_na.index[-1])
         factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
                                              axis='columns')
 
@@ -589,13 +592,8 @@ def rolling_fama_french(returns, factor_returns=None,
 
     for beg, end in zip(factor_returns.index[:-rolling_window],
                         factor_returns.index[rolling_window:]):
-        print((beg, end))
-        print(factor_returns[beg:end])
-        print(returns[beg:end])
-        print('-------')
-        print('-------')
         coeffs = linear_model.LinearRegression().fit(factor_returns[beg:end],
-                                                     returns[beg:end]).coef_
+                                                     ret_no_na[beg:end]).coef_
         regression_coeffs = np.append(regression_coeffs, [coeffs], axis=0)
 
     rolling_fama_french = pd.DataFrame(data=regression_coeffs[:, :3],
