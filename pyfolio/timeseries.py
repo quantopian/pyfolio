@@ -589,11 +589,11 @@ def rolling_fama_french(returns, factor_returns=None,
 
     for beg, end in zip(factor_returns.index[:-rolling_window],
                         factor_returns.index[rolling_window:]):
-        print beg, end
-        print factor_returns[beg:end]
-        print returns[beg:end]
-        print '-------'
-        print '-------'
+        print((beg, end))
+        print(factor_returns[beg:end])
+        print(returns[beg:end])
+        print('-------')
+        print('-------')
         coeffs = linear_model.LinearRegression().fit(factor_returns[beg:end],
                                                      returns[beg:end]).coef_
         regression_coeffs = np.append(regression_coeffs, [coeffs], axis=0)
