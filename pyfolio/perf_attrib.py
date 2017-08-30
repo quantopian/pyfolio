@@ -15,7 +15,9 @@
 from __future__ import division
 import pandas as pd
 
-import empyrical
+from itertools import chain
+import empyrical as ep
+import matplotlib.pyplot as plt
 from pyfolio.pos import get_percent_alloc
 from pyfolio.utils import print_table
 
@@ -70,6 +72,16 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
 
     Returns
     -------
+    tuple of (risk_exposures_portfolio, perf_attribution)
+
+    risk_exposures_portfolio : pd.DataFrame
+        df indexed by datetime, with factors as columns
+        - Example:
+                        momentum  reversal
+            dt
+            2017-01-01 -0.238655  0.077123
+            2017-01-02  0.821872  1.520515
+
     perf_attribution : pd.DataFrame
         df with factors, common returns, and specific returns as columns,
         and datetimes as index
@@ -99,7 +111,8 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
                                'common_returns': common_returns,
                                'specific_returns': specific_returns})
 
-    return pd.concat([perf_attrib_by_factor, returns_df], axis='columns')
+    return (risk_exposures_portfolio,
+            pd.concat([perf_attrib_by_factor, returns_df], axis='columns'))
 
 
 def create_perf_attrib_stats(perf_attrib):
@@ -112,27 +125,113 @@ def create_perf_attrib_stats(perf_attrib):
     common_returns = perf_attrib['common_returns']
 
     summary['Annual multi-factor alpha'] =\
-        empyrical.annual_return(specific_returns)
+        ep.annual_return(specific_returns)
 
     summary['Multi-factor sharpe'] =\
-        empyrical.sharpe_ratio(specific_returns)
+        ep.sharpe_ratio(specific_returns)
 
     summary['Cumulative specific returns'] =\
-        empyrical.cum_returns(specific_returns)
+        ep.cum_returns_final(specific_returns)
     summary['Cumulative common returns'] =\
-        empyrical.cum_returns(common_returns)
+        ep.cum_returns_final(common_returns)
     summary['Total returns'] =\
-        empyrical.cum_returns(perf_attrib['total_returns'])
+        ep.cum_returns_final(perf_attrib['total_returns'])
 
     summary = pd.Series(summary)
     return summary
 
 
-def show_perf_attrib_stats(perf_attrib_data, risk_exposures):
+def show_perf_attrib_stats(returns, positions, factor_returns,
+                           factor_loadings):
     """
-    Takes perf attribution data over a period of time, computes stats on it,
-    and displays them using `utils.print_table`.
+    Calls `perf_attrib` using inputs, and displays outputs using
+    `utils.print_table`.
     """
+    risk_exposures, perf_attrib_data = perf_attrib(returns,
+                                                   positions,
+                                                   factor_returns,
+                                                   factor_loadings)
+
     perf_attrib_stats = create_perf_attrib_stats(perf_attrib_data)
     print_table(perf_attrib_stats)
     print_table(risk_exposures)
+
+
+def plot_returns(returns, specific_returns, common_returns, ax=None):
+    """
+    Plot total, specific, and common returns.
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    ax.plot(ep.cum_returns(returns), color='g', label='Total returns')
+    ax.plot(ep.cum_returns(specific_returns), color='b',
+            label='Cumulative specific returns')
+    ax.plot(ep.cum_returns(common_returns), color='r',
+            label='Cumulative common returns')
+
+    ax.set_title('Time Series of cumulative returns')
+    ax.set_ylabel('Returns')
+    ax.legend()
+
+    return ax
+
+
+def plot_alpha_returns(alpha_returns, ax=None):
+    """
+    Plot histogram of daily multi-factor alpha returns (specific returns).
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    ax.hist(alpha_returns, color='g', label='Multi-factor alpha')
+    ax.set_title('Histogram of alphas')
+    ax.axvline(0, color='k', linestyle='--', label='Zero')
+
+    avg = alpha_returns.mean()
+    ax.axvline(avg, color='b', label='Mean = {: 0.5f}'.format(avg))
+    ax.legend()
+
+    return ax
+
+
+def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
+    """
+    Plot each factor's contribution to performance.
+
+    Parameters
+    ----------
+    exposures : pd.DataFrame
+        df indexed by datetime, with factors as columns
+        - Example:
+                        momentum  reversal
+            dt
+            2017-01-01 -0.238655  0.077123
+            2017-01-02  0.821872  1.520515
+
+    perf_attrib_data : pd.DataFrame
+        df with factors, common returns, and specific returns as columns,
+        and datetimes as index
+        - Example:
+                        momentum  reversal  common_returns  specific_returns
+            dt
+            2017-01-01  0.249087  0.935925        1.185012          1.185012
+            2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    ax.stackplot(
+        perf_attrib_data.index,
+        [perf_attrib_data[s] for s in chain(perf_attrib_data.iloc[:, :-3],
+                                            ['specific_returns'])],
+        labels=list(perf_attrib_data.iloc[:, :-3]) + ['specific returns']
+    )
+
+    ax.axhline(0, color='k')
+    ax.legend(frameon=True, framealpha=0.5, loc='upper left')
+
+    ax.set_ylabel('Contribution to returns by factor')
+    ax.set_title('Returns attribution')
+
+    return ax
