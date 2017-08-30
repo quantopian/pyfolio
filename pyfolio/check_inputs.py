@@ -55,6 +55,7 @@ def check_returns(returns):
     if returns.dtype != float:
         raise TearSheetInputError('returns data types are not all float')
 
+
 def check_positions(positions):
     """
     Check positions for specification
@@ -76,7 +77,10 @@ def check_positions(positions):
     if 'cash' not in positions.columns:
         raise TearSheetInputError('positions does not have a cash column')
 
-    if not all(positions.apply(lambda col: col.dtype, axis='columns') == float):
+    if not all(
+        positions.apply(
+            lambda col: col.dtype,
+            axis='columns') == float):
         raise TearSheetInputError('''positions data types are not all float''')
 
 
@@ -101,16 +105,16 @@ def check_txns(txns):
         raise TearSheetInputError('''transactions index is not
                                   timezone-localized''')
 
-    if all([col in txns.columns for col in ['amount',
-                                            'price',
-                                            'symbol']]) == False:
+    if not all([col in txns.columns for col in ['amount',
+                                                'price',
+                                                'symbol']]):
         raise TearSheetInputError('''transactions does not have correct columns.
                                   Columns must be "amount", "price" and
                                   "symbol"''')
 
     try:
-        ed.has_dtypes(txns, {'amount': int;
-                             'price': float;
+        ed.has_dtypes(txns, {'amount': int,
+                             'price': float,
                              'symbol': str})
     except AssertionError as e:
         raise TearSheetInputError('''transactions columns do not have correct
