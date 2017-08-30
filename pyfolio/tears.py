@@ -1072,7 +1072,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     stoch_vol : boolean, optional
         If True, run and plot the stochastic volatility model
     """
-    check_inputs.check_inputs(returns, positions, transactions)
+    check_inputs.check_inputs(returns)
 
     if not have_bayesian:
         raise NotImplementedError(
