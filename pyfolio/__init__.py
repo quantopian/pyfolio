@@ -1,6 +1,7 @@
 import warnings
 
 from . import utils
+from . import check_inputs
 from . import timeseries
 from . import pos
 from . import txn
@@ -25,6 +26,6 @@ except ImportError:
 __version__ = get_versions()['version']
 del get_versions
 
-__all__ = ['utils', 'timeseries', 'pos', 'txn', 'bayesian',
-           'interesting_periods', 'capacity', 'round_trips',
-           'risk', 'perf_attrib']
+__all__ = ['utils', 'check_inputs', 'timeseries', 'pos', 'txn', 'bayesian',
+           'interesting_periods', 'capacity', 'round_trips', 'risk',
+           'perf_attrib']
