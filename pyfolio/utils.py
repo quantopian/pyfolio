@@ -22,6 +22,7 @@ import pandas as pd
 from IPython.display import display
 
 import empyrical.utils
+from os import environ
 from .deprecate import deprecated
 
 from . import pos
@@ -49,6 +50,7 @@ ANNUALIZATION_FACTORS = {
 DEPRECATION_WARNING = ("Data loaders in pyfolio.utils are deprecated "
                        "and will be removed in a future release. Please "
                        "install the empyrical package instead.")
+
 
 def one_dec_places(x, pos):
     """
@@ -161,64 +163,6 @@ def extract_rets_pos_txn_from_zipline(backtest):
         transactions.index = transactions.index.tz_localize('utc')
 
     return returns, positions, transactions
-
-
-# Settings dict to store functions/values that may
-# need to be overridden depending on the users environment
-SETTINGS = {
-    'returns_func': default_returns_func
-}
-
-
-def register_return_func(func):
-    """
-    Registers the 'returns_func' that will be called for
-    retrieving returns data.
-
-    Parameters
-    ----------
-    func : function
-        A function that returns a pandas Series of asset returns.
-        The signature of the function must be as follows
-
-        >>> func(symbol)
-
-        Where symbol is an asset identifier
-
-    Returns
-    -------
-    None
-    """
-
-    SETTINGS['returns_func'] = func
-
-
-def get_symbol_rets(symbol, start=None, end=None):
-    """
-    Calls the currently registered 'returns_func'
-
-    Parameters
-    ----------
-    symbol : object
-        An identifier for the asset whose return
-        series is desired.
-        e.g. ticker symbol or database ID
-    start : date, optional
-        Earliest date to fetch data for.
-        Defaults to earliest date available.
-    end : date, optional
-        Latest date to fetch data for.
-        Defaults to latest date available.
-
-    Returns
-    -------
-    pandas.Series
-        Returned by the current 'returns_func'
-    """
-
-    return SETTINGS['returns_func'](symbol,
-                                    start=start,
-                                    end=end)
 
 
 def print_table(table, name=None, fmt=None):
@@ -595,3 +539,61 @@ def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     return empyrical.utils.load_portfolio_risk_factors(filepath_prefix=None,
                                                        start=None,
                                                        end=None)
+
+
+# Settings dict to store functions/values that may
+# need to be overridden depending on the users environment
+SETTINGS = {
+    'returns_func': default_returns_func
+}
+
+
+def register_return_func(func):
+    """
+    Registers the 'returns_func' that will be called for
+    retrieving returns data.
+
+    Parameters
+    ----------
+    func : function
+        A function that returns a pandas Series of asset returns.
+        The signature of the function must be as follows
+
+        >>> func(symbol)
+
+        Where symbol is an asset identifier
+
+    Returns
+    -------
+    None
+    """
+
+    SETTINGS['returns_func'] = func
+
+
+def get_symbol_rets(symbol, start=None, end=None):
+    """
+    Calls the currently registered 'returns_func'
+
+    Parameters
+    ----------
+    symbol : object
+        An identifier for the asset whose return
+        series is desired.
+        e.g. ticker symbol or database ID
+    start : date, optional
+        Earliest date to fetch data for.
+        Defaults to earliest date available.
+    end : date, optional
+        Latest date to fetch data for.
+        Defaults to latest date available.
+
+    Returns
+    -------
+    pandas.Series
+        Returned by the current 'returns_func'
+    """
+
+    return SETTINGS['returns_func'](symbol,
+                                    start=start,
+                                    end=end)
