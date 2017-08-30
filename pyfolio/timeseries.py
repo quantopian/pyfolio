@@ -195,7 +195,7 @@ def omega_ratio(returns, annual_return_threshhold=0.0):
     """
 
     return ep.omega_ratio(returns,
-                                 required_return=annual_return_threshhold)
+                          required_return=annual_return_threshhold)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -254,8 +254,8 @@ def downside_risk(returns, required_return=0, period=DAILY):
     """
 
     return ep.downside_risk(returns,
-                                   required_return=required_return,
-                                   period=period)
+                            required_return=required_return,
+                            period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -1119,7 +1119,7 @@ def summarize_paths(samples, cone_std=(1., 1.5, 2.), starting_value=1.):
     """
 
     cum_samples = ep.cum_returns(samples.T,
-                                        starting_value=starting_value).T
+                                 starting_value=starting_value).T
 
     cum_mean = cum_samples.mean(axis=0)
     cum_std = cum_samples.std(axis=0)
@@ -1219,7 +1219,7 @@ def extract_interesting_date_ranges(returns):
             if len(period) == 0:
                 continue
             ranges[name] = period
-        except:
+        except BaseException:
             continue
 
     return ranges

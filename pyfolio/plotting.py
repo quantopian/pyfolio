@@ -1645,14 +1645,14 @@ def plot_txn_time_hist(transactions, bin_minutes=5, tz='America/New_York',
     txn_time = transactions.copy()
 
     txn_time.index = txn_time.index.tz_convert(pytz.timezone(tz))
-    txn_time.index = txn_time.index.map(lambda x: x.hour*60 + x.minute)
+    txn_time.index = txn_time.index.map(lambda x: x.hour * 60 + x.minute)
     txn_time['trade_value'] = (txn_time.amount * txn_time.price).abs()
     txn_time = txn_time.groupby(level=0).sum().reindex(index=range(570, 961))
-    txn_time.index = (txn_time.index/bin_minutes).astype(int) * bin_minutes
+    txn_time.index = (txn_time.index / bin_minutes).astype(int) * bin_minutes
     txn_time = txn_time.groupby(level=0).sum()
 
     txn_time['time_str'] = txn_time.index.map(lambda x:
-                                              str(datetime.time(int(x/60),
+                                              str(datetime.time(int(x / 60),
                                                                 x % 60))[:-3])
 
     trade_value_sum = txn_time.trade_value.sum()
@@ -1661,8 +1661,8 @@ def plot_txn_time_hist(transactions, bin_minutes=5, tz='America/New_York',
     ax.bar(txn_time.index, txn_time.trade_value, width=bin_minutes, **kwargs)
 
     ax.set_xlim(570, 960)
-    ax.set_xticks(txn_time.index[::int(30/bin_minutes)])
-    ax.set_xticklabels(txn_time.time_str[::int(30/bin_minutes)])
+    ax.set_xticks(txn_time.index[::int(30 / bin_minutes)])
+    ax.set_xticklabels(txn_time.time_str[::int(30 / bin_minutes)])
     ax.set_title('Transaction time distribution')
     ax.set_ylabel('Proportion')
     ax.set_xlabel('')
@@ -1690,7 +1690,7 @@ def show_worst_drawdown_periods(returns, top=5):
                                               ascending=False),
                       name='Worst drawdown periods', fmt='{0:.2f}')
 
-    
+
 def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     """
     Plots monthly returns as a timeseries.
@@ -1745,8 +1745,8 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
     ax.set_xticklabels(xticks_label)
 
     return ax
-  
-  
+
+
 def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
     """
     Plots timespans and directions of a sample of round trip trades.
