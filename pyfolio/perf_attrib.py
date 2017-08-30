@@ -18,7 +18,6 @@ import empyrical as ep
 import pandas as pd
 
 from itertools import chain
-import empyrical as ep
 import matplotlib.pyplot as plt
 from pyfolio.pos import get_percent_alloc
 from pyfolio.utils import print_table
