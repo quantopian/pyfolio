@@ -22,17 +22,22 @@ class TearSheetInputError(Exception):
     pass
 
 
-def check_inputs(returns,
-                 positions,
-                 txns):
+def check_inputs(returns=None,
+                 positions=None,
+                 txns=None):
     """
     Check inputs to create_foo_tear_sheet functions
 
     - Raises a TearSheetInputError if inputs violate specification
     """
-    check_returns(returns)
-    check_positions(positions)
-    check_txns(txns)
+    if returns is not None:
+        check_returns(returns)
+
+    if positions is not None:
+        check_positions(positions)
+
+    if txns is not None:
+        check_txns(txns)
 
 
 def check_returns(returns):
