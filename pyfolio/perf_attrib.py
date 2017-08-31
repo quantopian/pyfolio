@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import division
+
+import empyrical as ep
 import pandas as pd
 
 from itertools import chain
-import empyrical as ep
 import matplotlib.pyplot as plt
 from pyfolio.pos import get_percent_alloc
 from pyfolio.utils import print_table
