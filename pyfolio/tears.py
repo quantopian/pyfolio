@@ -610,11 +610,11 @@ def create_position_tear_sheet(returns, positions,
         Overrides show_and_plot_top_pos to 0 to suppress text output.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
-    set_context : boolean, optional
-        If True, set default plotting style context.
     sector_mappings : dict or pd.Series, optional
         Security identifier to sector mapping.
         Security ids as keys, sectors as values.
+    transactions : pd.DataFrame, optional
+        Daily transactions.
     estimate_intraday: boolean or str, optional
         Approximate returns for intraday strategies.
         See description in create_full_tear_sheet.
