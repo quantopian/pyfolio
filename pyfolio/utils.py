@@ -47,10 +47,10 @@ ANNUALIZATION_FACTORS = {
     MONTHLY: MONTHS_PER_YEAR
 }
 
-DEPRECATION_WARNING = ("""Data loaders have been moved to empyrical and will
-                       be removed from pyfolio in a future release. Please use
-                       e.g. empyrical.utils.get_symbol_rets() instead of
-                       pyfolio.utils.get_symbol_rets()""")
+DEPRECATION_WARNING = ("Data loaders have been moved to empyrical and will "
+                       "be removed from pyfolio in a future release. Please "
+                       "use e.g. empyrical.utils.get_symbol_rets() instead "
+                       "of pyfolio.utils.get_symbol_rets()")
 
 
 def one_dec_places(x, pos):
