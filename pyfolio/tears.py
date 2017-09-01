@@ -614,7 +614,8 @@ def create_position_tear_sheet(returns, positions,
         Security identifier to sector mapping.
         Security ids as keys, sectors as values.
     transactions : pd.DataFrame, optional
-        Daily transactions.
+        Prices and amounts of executed trades. One row per trade.
+         - See full explanation in create_full_tear_sheet.
     estimate_intraday: boolean or str, optional
         Approximate returns for intraday strategies.
         See description in create_full_tear_sheet.
