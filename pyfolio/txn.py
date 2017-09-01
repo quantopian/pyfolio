@@ -194,6 +194,7 @@ def get_turnover(positions, transactions, denominator='AGB'):
         raise Exception('Passed denominator must be either' +
                         'AGB or portfolio_value')
 
+    denom.index = denom.index.normalize()
     turnover = traded_value.div(denom, axis='index')
     turnover = turnover.fillna(0)
     return turnover
