@@ -377,7 +377,6 @@ def to_series(df):
     return df[df.columns[0]]
 
 
-<<<<<<< HEAD
 @deprecated(msg=DEPRECATION_WARNING)
 def default_returns_func(symbol, start=None, end=None):
     """

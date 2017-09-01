@@ -34,7 +34,8 @@ COLORS = [
 ]
 
 
-def perf_attrib(returns, positions, factor_returns, factor_loadings):
+def perf_attrib(returns, positions, factor_returns, factor_loadings,
+                pos_in_dollars=True):
     """
     Does performance attribution given risk info.
 
@@ -82,6 +83,10 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
                        TLT    -1.066978  0.185435
                        XOM    -1.798401  0.761549
 
+    pos_in_dollars : bool
+        Flag indicating whether `positions` are in dollars or percentages
+        If True, positions are in dollars.
+
     Returns
     -------
     tuple of (risk_exposures_portfolio, perf_attribution)
@@ -103,10 +108,13 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings):
             2017-01-01  0.249087  0.935925        1.185012          1.185012
             2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
     """
-    # convert holdings to percentages, and convert positions to long format
-    positions = get_percent_alloc(positions)
+    if pos_in_dollars:
+        # convert holdings to percentages, and convert positions to long format
+        positions = get_percent_alloc(positions)
+
     # remove cash after normalizing positions
     del positions['cash']
+
     positions = positions.stack()
     positions.index = positions.index.set_names(['dt', 'ticker'])
 
