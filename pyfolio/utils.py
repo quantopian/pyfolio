@@ -1,5 +1,5 @@
 #
-# Copyright 2016 Quantopian, Inc.
+# Copyright 2017 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@ from __future__ import division
 
 import warnings
 
-import empyrical
 import numpy as np
 import pandas as pd
 from IPython.display import display
+
+import empyrical.utils
+from os import environ
+from .deprecate import deprecated
 
 from . import pos
 from . import txn
@@ -43,6 +46,11 @@ ANNUALIZATION_FACTORS = {
     WEEKLY: WEEKS_PER_YEAR,
     MONTHLY: MONTHS_PER_YEAR
 }
+
+DEPRECATION_WARNING = ("Data loaders have been moved to empyrical and will "
+                       "be removed from pyfolio in a future release. Please "
+                       "use e.g. empyrical.utils.get_symbol_rets() instead "
+                       "of pyfolio.utils.get_symbol_rets()")
 
 
 def one_dec_places(x, pos):
@@ -156,64 +164,6 @@ def extract_rets_pos_txn_from_zipline(backtest):
         transactions.index = transactions.index.tz_localize('utc')
 
     return returns, positions, transactions
-
-
-# Settings dict to store functions/values that may
-# need to be overridden depending on the users environment
-SETTINGS = {
-    'returns_func': empyrical.utils.default_returns_func
-}
-
-
-def register_return_func(func):
-    """
-    Registers the 'returns_func' that will be called for
-    retrieving returns data.
-
-    Parameters
-    ----------
-    func : function
-        A function that returns a pandas Series of asset returns.
-        The signature of the function must be as follows
-
-        >>> func(symbol)
-
-        Where symbol is an asset identifier
-
-    Returns
-    -------
-    None
-    """
-
-    SETTINGS['returns_func'] = func
-
-
-def get_symbol_rets(symbol, start=None, end=None):
-    """
-    Calls the currently registered 'returns_func'
-
-    Parameters
-    ----------
-    symbol : object
-        An identifier for the asset whose return
-        series is desired.
-        e.g. ticker symbol or database ID
-    start : date, optional
-        Earliest date to fetch data for.
-        Defaults to earliest date available.
-    end : date, optional
-        Latest date to fetch data for.
-        Defaults to latest date available.
-
-    Returns
-    -------
-    pandas.Series
-        Returned by the current 'returns_func'
-    """
-
-    return SETTINGS['returns_func'](symbol,
-                                    start=start,
-                                    end=end)
 
 
 def print_table(table, name=None, fmt=None):
@@ -425,3 +375,226 @@ def to_series(df):
     """
 
     return df[df.columns[0]]
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def default_returns_func(symbol, start=None, end=None):
+    """
+    Gets returns for a symbol.
+    Queries Yahoo Finance. Attempts to cache SPY.
+    Parameters
+    ----------
+    symbol : str
+        Ticker symbol, e.g. APPL.
+    start : date, optional
+        Earliest date to fetch data for.
+        Defaults to earliest date available.
+    end : date, optional
+        Latest date to fetch data for.
+        Defaults to latest date available.
+    Returns
+    -------
+    pd.Series
+        Daily returns for the symbol.
+         - See full explanation in tears.create_full_tear_sheet (returns).
+    """
+    return empyrical.utils.default_returns_func(symbol, start=None, end=None)
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def get_fama_french():
+    """
+    Retrieve Fama-French factors via pandas-datareader
+    Returns
+    -------
+    pandas.DataFrame
+        Percent change of Fama-French factors
+    """
+    return empyrical.utils.get_fama_french()
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
+    """
+    Get returns from a cached file if the cache is recent enough,
+    otherwise, try to retrieve via a provided update function and
+    update the cache file.
+    Parameters
+    ----------
+    filepath : str
+        Path to cached csv file
+    update_func : function
+        Function to call in case cache is not up-to-date.
+    latest_dt : pd.Timestamp (tz=UTC)
+        Latest datetime required in csv file.
+    **kwargs : Keyword arguments
+        Optional keyword arguments will be passed to update_func()
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame containing returns
+    """
+    return empyrical.utils.get_returns_cached(filepath,
+                                              update_func,
+                                              latest_dt,
+                                              **kwargs)
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def get_symbol_returns_from_yahoo(symbol, start=None, end=None):
+    """
+    Wrapper for pandas.io.data.get_data_yahoo().
+    Retrieves prices for symbol from yahoo and computes returns
+    based on adjusted closing prices.
+    Parameters
+    ----------
+    symbol : str
+        Symbol name to load, e.g. 'SPY'
+    start : pandas.Timestamp compatible, optional
+        Start date of time period to retrieve
+    end : pandas.Timestamp compatible, optional
+        End date of time period to retrieve
+    Returns
+    -------
+    pandas.DataFrame
+        Returns of symbol in requested period.
+    """
+    return get_symbol_returns_from_yahoo(symbol, start=None, end=None)
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def get_treasury_yield(start=None, end=None, period='3MO'):
+    """
+    Load treasury yields from FRED.
+    Parameters
+    ----------
+    start : date, optional
+        Earliest date to fetch data for.
+        Defaults to earliest date available.
+    end : date, optional
+        Latest date to fetch data for.
+        Defaults to latest date available.
+    period : {'1MO', '3MO', '6MO', 1', '5', '10'}, optional
+        Which maturity to use.
+    Returns
+    -------
+    pd.Series
+        Annual treasury yield for every day.
+    """
+    return empyrical.utils.get_treasury_yield(start=None,
+                                              end=None,
+                                              period='3MO')
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def get_utc_timestamp(dt):
+    """
+    Returns the Timestamp/DatetimeIndex
+    with either localized or converted to UTC.
+    Parameters
+    ----------
+    dt : Timestamp/DatetimeIndex
+        the date(s) to be converted
+    Returns
+    -------
+    same type as input
+        date(s) converted to UTC
+    """
+    return empyrical.utils.get_utc_timestamp(dt)
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def cache_dir(environ=environ):
+    return empyrical.utils.cache_dir(environ=environ)
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def ensure_directory(path):
+    """
+    Ensure that a directory named "path" exists.
+    """
+    return empyrical.data_path(path)
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def data_path(name):
+    return empyrical.data_path(name)
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def _1_bday_ago():
+    return empyrical._1_bday_ago()
+
+
+@deprecated(msg=DEPRECATION_WARNING)
+def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
+    """
+    Load risk factors Mkt-Rf, SMB, HML, Rf, and UMD.
+    Data is stored in HDF5 file. If the data is more than 2
+    days old, redownload from Dartmouth.
+    Returns
+    -------
+    five_factors : pd.DataFrame
+        Risk factors timeseries.
+    """
+    return empyrical.utils.load_portfolio_risk_factors(filepath_prefix=None,
+                                                       start=None,
+                                                       end=None)
+
+
+# Settings dict to store functions/values that may
+# need to be overridden depending on the users environment
+SETTINGS = {
+    'returns_func': default_returns_func
+}
+
+
+def register_return_func(func):
+    """
+    Registers the 'returns_func' that will be called for
+    retrieving returns data.
+
+    Parameters
+    ----------
+    func : function
+        A function that returns a pandas Series of asset returns.
+        The signature of the function must be as follows
+
+        >>> func(symbol)
+
+        Where symbol is an asset identifier
+
+    Returns
+    -------
+    None
+    """
+
+    SETTINGS['returns_func'] = func
+
+
+def get_symbol_rets(symbol, start=None, end=None):
+    """
+    Calls the currently registered 'returns_func'
+
+    Parameters
+    ----------
+    symbol : object
+        An identifier for the asset whose return
+        series is desired.
+        e.g. ticker symbol or database ID
+    start : date, optional
+        Earliest date to fetch data for.
+        Defaults to earliest date available.
+    end : date, optional
+        Latest date to fetch data for.
+        Defaults to latest date available.
+
+    Returns
+    -------
+    pandas.Series
+        Returned by the current 'returns_func'
+    """
+
+    return SETTINGS['returns_func'](symbol,
+                                    start=start,
+                                    end=end)

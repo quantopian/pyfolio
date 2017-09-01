@@ -2,6 +2,38 @@
 
 These are new features and improvements of note in each release.
 
+## v0.8.0 (Aug 23rd, 2017)
+
+This is a major release from `0.7.0`, and all users are recommended to upgrade.
+
+### New features
+
+ - Risk tear sheet: added a new tear sheet to analyze risk exposures to common factors (e.g. mean reversion and momentum), sector (e.g. Morningstar sectors), market cap and illiquid stocks. By [George Ho](https://github.com/eigenfoo).
+ - Simple tear sheet: added a new tear sheet that presents only the most important plots in the full tear sheet, for a quick general overview of a portfolio's performance. By [George Ho](https://github.com/eigenfoo).
+ - Performance attribution: added new table to do performance attribution
+   analysis, such as the amount of returns attributable to common factors, and
+   summary statistics such as the multi-factor alpha and multi-factor Sharpe ratio. By [Vikram Narayan](https://github.com/vikram-narayan).
+ - Volatility plot: added a rolling annual volatility plot to the returns tear sheet. By [hkopp](https://github.com/hkopp).
+
+### Bugfixes
+
+ - Yahoo and pandas data-reader: fixed bug regarding Yahoo backend for market data and pandas data-reader. By [Thomas Wiecki](https://github.com/twiecki) and [Gus Gordon](https://github.com/gusgordon).
+ - `empyrical` compatibility: removed `information_ratio` to remain compatible with `empyrical`. By [Thomas Wiecki](https://github.com/twiecki).
+ - Fama-French rolling multivariate regression: fixed bug where the rolling Fama-French plot performed separate linear regressions instead of a multivariate regression. By [George Ho](https://github.com/eigenfoo).
+ - Other minor bugfixes. By [Scott Sanderson](https://github.com/ssanderson),
+   [Jonathan Ng](https://github.com/jonathanng),
+   [SylvainDe](https://github.com/SylvainDe) and
+   [mckelvin](https://github.com/mckelvin).
+
+### Maintenance
+
+ - Documentation: updated and improved `pyfolio` documentation and example
+   Jupyter notebooks. By [George Ho](https://github.com/eigenfoo).
+ - Data loader migration: all data loaders have been migrated from `pyfolio` to
+   `empyrical`. By [James Christopher](https://github.com/jameschristopher).
+ - Improved plotting style: fixed issues with formatting and presentation of
+   plots. By [George Ho](https://github.com/eigenfoo).
+
 ## v0.7.0 (Jan 28th, 2017)
 
 This is a major release from `0.6.0`, and all users are recommended to upgrade.
