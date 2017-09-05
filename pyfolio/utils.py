@@ -52,6 +52,18 @@ DEPRECATION_WARNING = ("Data loaders have been moved to empyrical and will "
                        "use e.g. empyrical.utils.get_symbol_rets() instead "
                        "of pyfolio.utils.get_symbol_rets()")
 
+# 31 visually distinct colors
+# http://phrogz.net/css/distinct-colors.html
+COLORS = [
+    '#f23d3d', '#828c23', '#698c83', '#594080', '#994d4d',
+    '#206380', '#dd39e6', '#cc9999', '#7c8060', '#66adcc',
+    '#6c7dd9', '#8a698c', '#7f6340', '#66cc7a', '#a3abd9',
+    '#d9c0a3', '#bfffcc', '#542699', '#b35986', '#d4e639',
+    '#b380ff', '#e0e6ac', '#a253a6', '#418020', '#ff409f',
+    '#ffa940', '#83ff40', '#3d58f2', '#e3ace6', '#d9a86c',
+    '#2db391'
+]
+
 
 def one_dec_places(x, pos):
     """
@@ -602,7 +614,7 @@ def get_symbol_rets(symbol, start=None, end=None):
 
 def set_legend_location(ax):
     """
-    Put legend in right of plot instead of overlapping with the it.
+    Put legend in right of plot instead of overlapping with it.
     """
     chartBox = ax.get_position()
     ax.set_position([chartBox.x0, chartBox.y0,

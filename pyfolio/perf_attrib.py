@@ -19,19 +19,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 from pyfolio.pos import get_percent_alloc
-from pyfolio.utils import print_table, set_legend_location
-
-# 31 visually distinct colors
-# http://phrogz.net/css/distinct-colors.html
-COLORS = [
-    '#f23d3d', '#828c23', '#698c83', '#594080', '#994d4d',
-    '#206380', '#dd39e6', '#cc9999', '#7c8060', '#66adcc',
-    '#6c7dd9', '#8a698c', '#7f6340', '#66cc7a', '#a3abd9',
-    '#d9c0a3', '#bfffcc', '#542699', '#b35986', '#d4e639',
-    '#b380ff', '#e0e6ac', '#a253a6', '#418020', '#ff409f',
-    '#ffa940', '#83ff40', '#3d58f2', '#e3ace6', '#d9a86c',
-    '#2db391'
-]
+from pyfolio.utils import print_table, set_legend_location, COLORS
 
 
 def perf_attrib(returns, positions, factor_returns, factor_loadings,
@@ -109,12 +97,13 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
             2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
     """
     if pos_in_dollars:
-        # convert holdings to percentages, and convert positions to long format
+        # convert holdings to percentages
         positions = get_percent_alloc(positions)
 
     # remove cash after normalizing positions
-    del positions['cash']
+    positions = positions.drop('cash', axis='columns')
 
+    # convert positions to long format
     positions = positions.stack()
     positions.index = positions.index.set_names(['dt', 'ticker'])
 
@@ -183,6 +172,15 @@ def plot_returns(returns, specific_returns, common_returns, ax=None):
 
     Parameters
     ----------
+    returns : pd.Series
+        total returns, indexed by datetime
+
+    specific_returns : pd.Series
+        specific returns, indexed by datetime
+
+    commons_returns : pd.Series
+        common returns, indexed by datetime
+
     ax :  matplotlib.axes.Axes
         axes on which plots are made. if None, current axes will be used
 
