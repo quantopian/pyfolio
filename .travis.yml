@@ -40,6 +40,6 @@ script:
 notifications:
   email: false
 
-branches:
-  only:
-    - master
+#branches:
+#  only:
+#    - master
