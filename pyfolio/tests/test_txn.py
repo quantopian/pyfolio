@@ -59,7 +59,8 @@ class TransactionsTestCase(TestCase):
 
         # Our portfolio value alternates between $20 and $50 so turnover
         # should alternate between 20/20 = 1.0 and 20/50 = 0.4.
-        expected = Series([0.4, 1.0] * ((len(dates) - 1) / 2 + 1), index=dates)
+        expected = Series([0.4, 1.0] * (int((len(dates) - 1) / 2) + 1),
+                          index=dates)
 
         assert_series_equal(result, expected)
 
