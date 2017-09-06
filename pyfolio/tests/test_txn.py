@@ -32,7 +32,6 @@ class TransactionsTestCase(TestCase):
         for idx in positions.iloc[::2, :].index:
             positions[0].loc[idx] = 40
 
-        print positions
         transactions = DataFrame(data=[],
                                  columns=['sid', 'amount', 'price', 'symbol'],
                                  index=dates)
