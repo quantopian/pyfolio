@@ -187,12 +187,18 @@ def get_turnover(positions, transactions, denominator='AGB'):
         # We want our denom to be avg(AGB previous, AGB current)
         AGB = positions.drop('cash', axis=1).abs().sum(axis=1)
         denom = AGB.rolling(2).mean()
-        denom.iloc[0] = AGB.iloc[0] / 2  # "day 0" AGB = 0
+
+        # Since the first value of pd.rolling returns NaN, we
+        # set our "day 0" AGB to 0.
+        denom.iloc[0] = AGB.iloc[0] / 2
     elif denominator == 'portfolio_value':
         denom = positions.sum(axis=1)
     else:
-        raise Exception('Passed denominator must be either' +
-                        'AGB or portfolio_value')
+        raise ValueError(
+            "Unexpected value for denominator '{}'. The "
+            "denominator parameter must be either 'AGB'"
+            " or 'portfolio_value'.".format(denominator)
+        )
 
     denom.index = denom.index.normalize()
     turnover = traded_value.div(denom, axis='index')

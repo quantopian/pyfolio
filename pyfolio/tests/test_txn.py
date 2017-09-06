@@ -24,9 +24,15 @@ class TransactionsTestCase(TestCase):
         """
         dates = date_range(start='2015-01-01', freq='D', periods=20)
 
+        # In this test, there is one sid (0) and a cash column
         positions = DataFrame([[10.0, 10.0]]*len(dates),
                               columns=[0, 'cash'], index=dates)
 
+        # Set every other non-cash position to 40
+        for idx in positions.iloc[::2, :].index:
+            positions[0].loc[idx] = 40
+
+        print positions
         transactions = DataFrame(data=[],
                                  columns=['sid', 'amount', 'price', 'symbol'],
                                  index=dates)
@@ -36,13 +42,27 @@ class TransactionsTestCase(TestCase):
         result = get_turnover(positions, transactions)
         assert_series_equal(result, expected)
 
-        transactions = DataFrame(data=[[1, 1, 10, 'A']]*len(dates) +
-                                 [[2, -1, 10, 'B']]*len(dates),
+        transactions = DataFrame(data=[[1, 1, 10, 0]]*len(dates) +
+                                 [[2, -1, 10, 0]]*len(dates),
                                  columns=['sid', 'amount', 'price', 'symbol'],
                                  index=dates.append(dates)).sort_index()
 
-        expected = Series([4.0] + [2.0] * (len(dates) - 1), index=dates)
+        # Turnover is more on day 1, because the day 0 AGB is set to zero
+        # in get_turnover. On most days, we get 0.8 because we have 20
+        # transacted and mean(10, 40) = 25, so 20/25.
+        expected = Series([1.0] + [0.8] * (len(dates) - 1), index=dates)
         result = get_turnover(positions, transactions)
+
+        assert_series_equal(result, expected)
+
+        # Test with denominator = 'portfolio_value'
+        result = get_turnover(positions, transactions,
+                              denominator='portfolio_value')
+
+        # Our portfolio value alternates between $20 and $50 so turnover
+        # should alternate between 20/20 = 1.0 and 20/50 = 0.4.
+        expected = Series([0.4, 1.0] * ((len(dates) - 1) / 2 + 1), index=dates)
+
         assert_series_equal(result, expected)
 
     def test_adjust_returns_for_slippage(self):
