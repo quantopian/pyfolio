@@ -573,9 +573,12 @@ def rolling_fama_french(returns, factor_returns=None,
         DataFrame containing rolling beta coefficients to SMB, HML and UMD
     """
 
+    # We need to drop NaNs to regress
+    ret_no_na = returns.dropna()
+
     if factor_returns is None:
         factor_returns = ep.utils.load_portfolio_risk_factors(
-            start=returns.index[0], end=returns.index[-1])
+            start=ret_no_na.index[0], end=ret_no_na.index[-1])
         factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
                                              axis='columns')
 
@@ -590,7 +593,7 @@ def rolling_fama_french(returns, factor_returns=None,
     for beg, end in zip(factor_returns.index[:-rolling_window],
                         factor_returns.index[rolling_window:]):
         coeffs = linear_model.LinearRegression().fit(factor_returns[beg:end],
-                                                     returns[beg:end]).coef_
+                                                     ret_no_na[beg:end]).coef_
         regression_coeffs = np.append(regression_coeffs, [coeffs], axis=0)
 
     rolling_fama_french = pd.DataFrame(data=regression_coeffs[:, :3],
@@ -688,7 +691,7 @@ STAT_FUNC_NAMES = {
 
 
 def perf_stats(returns, factor_returns=None, positions=None,
-               transactions=None):
+               transactions=None, turnover_denom='AGB'):
     """
     Calculates various performance metrics of a strategy, for use in
     plotting.show_perf_stats.
@@ -707,7 +710,10 @@ def perf_stats(returns, factor_returns=None, positions=None,
          - See full explanation in tears.create_full_tear_sheet.
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
-        - See full explanation in tears.create_full_tear_sheet
+        - See full explanation in tears.create_full_tear_sheet.
+    turnover_denom : str
+        Either AGB or portfolio_value, default AGB.
+        - See full explanation in txn.get_turnover.
 
     Returns
     -------
@@ -723,7 +729,8 @@ def perf_stats(returns, factor_returns=None, positions=None,
         stats['Gross leverage'] = gross_lev(positions).mean()
         if transactions is not None:
             stats['Daily turnover'] = get_turnover(positions,
-                                                   transactions).mean()
+                                                   transactions,
+                                                   turnover_denom).mean()
     if factor_returns is not None:
         for stat_func in FACTOR_STAT_FUNCS:
             res = stat_func(returns, factor_returns)

@@ -601,8 +601,8 @@ STAT_FUNCS_PCT = [
 
 
 def show_perf_stats(returns, factor_returns, positions=None,
-                    transactions=None, live_start_date=None,
-                    bootstrap=False):
+                    transactions=None, turnover_denom='AGB',
+                    live_start_date=None, bootstrap=False):
     """
     Prints some performance metrics of the strategy.
 
@@ -623,6 +623,12 @@ def show_perf_stats(returns, factor_returns, positions=None,
     positions : pd.DataFrame
         Daily net position values.
          - See full explanation in create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
+        - See full explanation in tears.create_full_tear_sheet
+    turnover_denom : str
+        Either AGB or portfolio_value, default AGB.
+        - See full explanation in txn.get_turnover.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
@@ -641,7 +647,8 @@ def show_perf_stats(returns, factor_returns, positions=None,
         returns,
         factor_returns=factor_returns,
         positions=positions,
-        transactions=transactions)
+        transactions=transactions,
+        turnover_denom=turnover_denom)
 
     if live_start_date is not None:
         live_start_date = ep.utils.get_utc_timestamp(live_start_date)
@@ -666,13 +673,15 @@ def show_perf_stats(returns, factor_returns, positions=None,
             returns_is,
             factor_returns=factor_returns,
             positions=positions_is,
-            transactions=transactions_is)
+            transactions=transactions_is,
+            turnover_denom=turnover_denom)
 
         perf_stats_oos = perf_func(
             returns_oos,
             factor_returns=factor_returns,
             positions=positions_oos,
-            transactions=transactions_oos)
+            transactions=transactions_oos,
+            turnover_denom=turnover_denom)
 
         print('In-sample months: ' +
               str(int(len(returns_is) / APPROX_BDAYS_PER_MONTH)))
@@ -1407,7 +1416,7 @@ def plot_turnover(returns, transactions, positions,
     return ax
 
 
-def plot_slippage_sweep(returns, transactions, positions,
+def plot_slippage_sweep(returns, positions, transactions,
                         slippage_params=(3, 8, 10, 12, 15, 20, 50),
                         ax=None, **kwargs):
     """
@@ -1418,11 +1427,11 @@ def plot_slippage_sweep(returns, transactions, positions,
     returns : pd.Series
         Timeseries of portfolio returns to be adjusted for various
         degrees of slippage.
-    transactions : pd.DataFrame
-        Prices and amounts of executed trades. One row per trade.
-         - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     slippage_params: tuple
         Slippage pameters to apply to the return time series (in
@@ -1441,12 +1450,10 @@ def plot_slippage_sweep(returns, transactions, positions,
     if ax is None:
         ax = plt.gca()
 
-    turnover = txn.get_turnover(positions, transactions,
-                                period=None, average=False)
-
     slippage_sweep = pd.DataFrame()
     for bps in slippage_params:
-        adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
+        adj_returns = txn.adjust_returns_for_slippage(returns, positions,
+                                                      transactions, bps)
         label = str(bps) + " bps"
         slippage_sweep[label] = ep.cum_returns(adj_returns, 1)
 
@@ -1460,7 +1467,7 @@ def plot_slippage_sweep(returns, transactions, positions,
     return ax
 
 
-def plot_slippage_sensitivity(returns, transactions, positions,
+def plot_slippage_sensitivity(returns, positions, transactions,
                               ax=None, **kwargs):
     """
     Plots curve relating per-dollar slippage to average annual returns.
@@ -1470,11 +1477,11 @@ def plot_slippage_sensitivity(returns, transactions, positions,
     returns : pd.Series
         Timeseries of portfolio returns to be adjusted for various
         degrees of slippage.
-    transactions : pd.DataFrame
-        Prices and amounts of executed trades. One row per trade.
-         - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -1490,11 +1497,10 @@ def plot_slippage_sensitivity(returns, transactions, positions,
     if ax is None:
         ax = plt.gca()
 
-    turnover = txn.get_turnover(positions, transactions,
-                                period=None, average=False)
     avg_returns_given_slippage = pd.Series()
     for bps in range(1, 100):
-        adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
+        adj_returns = txn.adjust_returns_for_slippage(returns, positions,
+                                                      transactions, bps)
         avg_returns = ep.annual_return(adj_returns)
         avg_returns_given_slippage.loc[bps] = avg_returns
 
@@ -1566,7 +1572,7 @@ def plot_daily_turnover_hist(transactions, positions,
 
     if ax is None:
         ax = plt.gca()
-    turnover = txn.get_turnover(positions, transactions, period=None)
+    turnover = txn.get_turnover(positions, transactions)
     sns.distplot(turnover, ax=ax, **kwargs)
     ax.set_title('Distribution of daily turnover rates')
     ax.set_xlabel('Turnover rate')

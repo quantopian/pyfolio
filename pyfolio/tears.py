@@ -75,6 +75,7 @@ def create_full_tear_sheet(returns,
                            shares_held=None,
                            volumes=None,
                            percentile=None,
+                           turnover_denom='AGB',
                            set_context=True):
     """
     Generate a number of tear sheets that are useful
@@ -152,6 +153,9 @@ def create_full_tear_sheet(returns,
     bootstrap : boolean (optional)
         Whether to perform bootstrap analysis for the performance
         metrics. Takes a few minutes longer.
+    turnover_denom : str
+        Either AGB or portfolio_value, default AGB.
+        - See full explanation in txn.get_turnover.
     set_context : boolean, optional
         If True, set default plotting style context.
          - See plotting.context().
@@ -162,10 +166,9 @@ def create_full_tear_sheet(returns,
 
     if (unadjusted_returns is None) and (slippage is not None) and\
        (transactions is not None):
-        turnover = txn.get_turnover(positions, transactions,
-                                    period=None, average=False)
         unadjusted_returns = returns.copy()
-        returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
+        returns = txn.adjust_returns_for_slippage(returns, positions,
+                                                  transactions, slippage)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -178,6 +181,7 @@ def create_full_tear_sheet(returns,
         cone_std=cone_std,
         benchmark_rets=benchmark_rets,
         bootstrap=bootstrap,
+        turnover_denom=turnover_denom,
         set_context=set_context)
 
     create_interesting_times_tear_sheet(returns,
@@ -227,7 +231,8 @@ def create_simple_tear_sheet(returns,
                              benchmark_rets=None,
                              slippage=None,
                              estimate_intraday='infer',
-                             live_start_date=None):
+                             live_start_date=None,
+                             turnover_denom='AGB'):
     """
     Simpler version of create_full_tear_sheet; generates summary performance
     statistics and important plots as a single image.
@@ -284,6 +289,9 @@ def create_simple_tear_sheet(returns,
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period. This datetime should be normalized.
+    turnover_denom : str
+        Either AGB or portfolio_value, default AGB.
+        - See full explanation in txn.get_turnover.
     """
 
     positions = utils.check_intraday(estimate_intraday, returns,
@@ -293,9 +301,8 @@ def create_simple_tear_sheet(returns,
         benchmark_rets = utils.get_symbol_rets('SPY')
 
     if (slippage is not None) and (transactions is not None):
-        turnover = txn.get_turnover(positions, transactions,
-                                    period=None, average=False)
-        returns = txn.adjust_returns_for_slippage(returns, turnover, slippage)
+        returns = txn.adjust_returns_for_slippage(returns, positions,
+                                                  transactions, slippage)
 
     if (positions is not None) and (transactions is not None):
         vertical_sections = 11
@@ -313,6 +320,7 @@ def create_simple_tear_sheet(returns,
                              benchmark_rets,
                              positions=positions,
                              transactions=transactions,
+                             turnover_denom=turnover_denom,
                              live_start_date=live_start_date)
 
     if returns.index[0] < benchmark_rets.index[0]:
@@ -400,6 +408,7 @@ def create_returns_tear_sheet(returns, positions=None,
                               cone_std=(1.0, 1.5, 2.0),
                               benchmark_rets=None,
                               bootstrap=False,
+                              turnover_denom='AGB',
                               return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's returns.
@@ -434,6 +443,9 @@ def create_returns_tear_sheet(returns, positions=None,
     bootstrap : boolean (optional)
         Whether to perform bootstrap analysis for the performance
         metrics. Takes a few minutes longer.
+    turnover_denom : str
+        Either AGB or portfolio_value, default AGB.
+        - See full explanation in txn.get_turnover.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
@@ -451,6 +463,7 @@ def create_returns_tear_sheet(returns, positions=None,
     plotting.show_perf_stats(returns, benchmark_rets,
                              positions=positions,
                              transactions=transactions,
+                             turnover_denom=turnover_denom,
                              bootstrap=bootstrap,
                              live_start_date=live_start_date)
 
@@ -740,14 +753,14 @@ def create_txn_tear_sheet(returns, positions, transactions,
     if unadjusted_returns is not None:
         ax_slippage_sweep = plt.subplot(gs[4, :])
         plotting.plot_slippage_sweep(unadjusted_returns,
-                                     transactions,
                                      positions,
+                                     transactions,
                                      ax=ax_slippage_sweep
                                      )
         ax_slippage_sensitivity = plt.subplot(gs[5, :])
         plotting.plot_slippage_sensitivity(unadjusted_returns,
-                                           transactions,
                                            positions,
+                                           transactions,
                                            ax=ax_slippage_sensitivity
                                            )
     for ax in fig.axes:
