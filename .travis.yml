@@ -26,15 +26,16 @@ before_install:
 install:
   - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib
   - source activate testenv
-  - pip install nose_parameterized
-  #- pip install --no-deps git+https://github.com/quantopian/zipline
+  - pip install nose_parameterized nose-timer
   - pip install -e .[bayesian]
 
 before_script:
-  - "flake8 pyfolio"
+  - flake8 pyfolio
+  - conda list
+  - pip freeze | sort
 
 script:
-  - nosetests $TESTCMD
+  - nosetests -sv --with-timer
 
 notifications:
   email: false
