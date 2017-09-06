@@ -29,8 +29,7 @@ class TransactionsTestCase(TestCase):
                               columns=[0, 'cash'], index=dates)
 
         # Set every other non-cash position to 40
-        for idx in positions.iloc[::2, :].index:
-            positions[0].loc[idx] = 40
+        positions[0][::2] = 40
 
         transactions = DataFrame(data=[],
                                  columns=['sid', 'amount', 'price', 'symbol'],
