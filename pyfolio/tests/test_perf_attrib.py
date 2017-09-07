@@ -8,7 +8,8 @@ from pyfolio.perf_attrib import (
 )
 
 
-def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
+def generate_toy_risk_model_output(start_date='2017-01-01', periods=10,
+                                   num_factors=2):
     """
     Generate toy risk model output.
 
@@ -35,14 +36,14 @@ def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
     dts = pd.date_range(start_date, periods=periods)
     np.random.seed(123)
     tickers = ['AAPL', 'TLT', 'XOM']
-    styles = ['factor1', 'factor2']
+    factors = ['factor{}'.format(n) for n in xrange(num_factors)]
 
     returns = pd.Series(index=dts,
                         data=np.random.randn(periods)) / 100
 
     factor_returns = pd.DataFrame(
-        columns=styles, index=dts,
-        data=np.random.randn(periods, len(styles))) / 100
+        columns=factors, index=dts,
+        data=np.random.randn(periods, len(factors))) / 100
 
     arrays = [dts, tickers]
     index = pd.MultiIndex.from_product(arrays, names=['dt', 'ticker'])
@@ -54,8 +55,8 @@ def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
     positions['cash'] = np.zeros(periods)
 
     factor_loadings = pd.DataFrame(
-        columns=styles, index=index,
-        data=np.random.randn(periods * len(tickers), len(styles))
+        columns=factors, index=index,
+        data=np.random.randn(periods * len(tickers), len(factors))
     )
 
     return returns, positions, factor_returns, factor_loadings
@@ -64,7 +65,6 @@ def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
 class PerfAttribTestCase(unittest.TestCase):
 
     def test_perf_attrib_simple(self):
-
         start_date = '2017-01-01'
         periods = 2
         dts = pd.date_range(start_date, periods=periods)
