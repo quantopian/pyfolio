@@ -166,20 +166,20 @@ def show_perf_attrib_stats(returns, positions, factor_returns,
     print_table(risk_exposures)
 
 
-def plot_returns(returns, specific_returns, common_returns, ax=None):
+def plot_returns(perf_attrib_data, ax=None):
     """
     Plot total, specific, and common returns.
 
     Parameters
     ----------
-    returns : pd.Series
-        total returns, indexed by datetime
-
-    specific_returns : pd.Series
-        specific returns, indexed by datetime
-
-    commons_returns : pd.Series
-        common returns, indexed by datetime
+    perf_attrib_data : pd.DataFrame
+        df with factors, common returns, and specific returns as columns,
+        and datetimes as index
+        - Example:
+                        momentum  reversal  common_returns  specific_returns
+            dt
+            2017-01-01  0.249087  0.935925        1.185012          1.185012
+            2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
 
     ax :  matplotlib.axes.Axes
         axes on which plots are made. if None, current axes will be used
@@ -190,6 +190,10 @@ def plot_returns(returns, specific_returns, common_returns, ax=None):
     """
     if ax is None:
         ax = plt.gca()
+
+    returns = perf_attrib_data['total_returns']
+    specific_returns = perf_attrib_data['specific_returns']
+    common_returns = perf_attrib_data['common_returns']
 
     ax.plot(ep.cum_returns(returns), color='g', label='Total returns')
     ax.plot(ep.cum_returns(specific_returns), color='b',
@@ -235,20 +239,12 @@ def plot_alpha_returns(alpha_returns, ax=None):
     return ax
 
 
-def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
+def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
     """
     Plot each factor's contribution to performance.
 
     Parameters
     ----------
-    exposures : pd.DataFrame
-        df indexed by datetime, with factors as columns
-        - Example:
-                        momentum  reversal
-            dt
-            2017-01-01 -0.238655  0.077123
-            2017-01-02  0.821872  1.520515
-
     perf_attrib_data : pd.DataFrame
         df with factors, common returns, and specific returns as columns,
         and datetimes as index
@@ -271,12 +267,8 @@ def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
     factors_and_specific = perf_attrib_data.drop(
         ['total_returns', 'common_returns'], axis='columns')
 
-    ax.stackplot(
-        factors_and_specific.index,
-        [factors_and_specific[s] for s in factors_and_specific],
-        labels=factors_and_specific.columns,
-        colors=COLORS
-    )
+    for s in factors_and_specific:
+        ax.plot(factors_and_specific[s])
 
     ax.axhline(0, color='k')
     set_legend_location(ax)
