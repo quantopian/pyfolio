@@ -151,15 +151,18 @@ def create_perf_attrib_stats(perf_attrib):
 
 
 def show_perf_attrib_stats(returns, positions, factor_returns,
-                           factor_loadings):
+                           factor_loadings, pos_in_dollars=True):
     """
     Calls `perf_attrib` using inputs, and displays outputs using
     `utils.print_table`.
     """
-    risk_exposures, perf_attrib_data = perf_attrib(returns,
-                                                   positions,
-                                                   factor_returns,
-                                                   factor_loadings)
+    risk_exposures, perf_attrib_data = perf_attrib(
+        returns,
+        positions,
+        factor_returns,
+        factor_loadings,
+        pos_in_dollars=pos_in_dollars
+    )
 
     perf_attrib_stats = create_perf_attrib_stats(perf_attrib_data)
     print_table(perf_attrib_stats)
@@ -201,7 +204,7 @@ def plot_returns(perf_attrib_data, ax=None):
     ax.plot(ep.cum_returns(common_returns), color='r',
             label='Cumulative common returns')
 
-    ax.set_title('Time Series of cumulative returns')
+    ax.set_title('Time series of cumulative returns')
     ax.set_ylabel('Returns')
 
     set_legend_location(ax)
@@ -301,10 +304,8 @@ def plot_risk_exposures(exposures, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    ax.stackplot(exposures.index,
-                 [exposures[s] for s in exposures],
-                 labels=exposures.columns,
-                 colors=COLORS)
+    for s in exposures:
+        ax.plot(exposures[s])
 
     set_legend_location(ax)
     ax.set_ylabel('Factor exposures')

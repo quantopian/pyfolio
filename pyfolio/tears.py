@@ -26,6 +26,7 @@ import scipy.stats
 
 from . import _seaborn as sns
 from . import capacity
+from . import perf_attrib
 from . import plotting
 from . import pos
 from . import risk
@@ -1428,6 +1429,68 @@ def create_risk_tear_sheet(positions,
 
     for ax in fig.axes:
         plt.setp(ax.get_xticklabels(), visible=True)
+
+    plt.show()
+    if return_fig:
+        return fig
+
+
+@plotting.customize
+def create_perf_attrib_tearsheet(returns,
+                                 positions,
+                                 factor_returns,
+                                 factor_loadings,
+                                 pos_in_dollars=True,
+                                 return_fig=False):
+    """
+    Generate plots and tables for analyzing a strategy's performance.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Returns for each day in the date range.
+
+    positions: pd.DataFrame
+        Daily holdings (in dollars or percentages), indexed by date.
+        Will be converted to percentages if positions are in dollars.
+        Short positions show up as cash in the 'cash' column.
+
+    factor_returns : pd.DataFrame
+        Returns by factor, with date as index and factors as columns
+
+    factor_loadings : pd.DataFrame
+        Factor loadings for all days in the date range, with date
+        and ticker as index, and factors as columns.
+
+    pos_in_dollars : boolean, optional
+        Flag indicating whether `positions` are in dollars or percentages
+        If True, positions are in dollars.
+
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
+    """
+    portfolio_exposures, perf_attrib_data = perf_attrib.perf_attrib(
+        returns, positions, factor_returns, factor_loadings,
+        pos_in_dollars=pos_in_dollars
+    )
+
+    # aggregate perf attrib stats and show summary table
+    perf_attrib.show_perf_attrib_stats(returns, positions, factor_returns,
+                                       factor_loadings)
+
+    vertical_sections = 3
+    fig = plt.figure(figsize=[14, vertical_sections * 6])
+    gs = gridspec.GridSpec(vertical_sections, 1, wspace=0.5, hspace=0.5)
+
+    perf_attrib.plot_returns(perf_attrib_data, ax=plt.subplot(gs[0]))
+
+    perf_attrib.plot_factor_contribution_to_perf(perf_attrib_data,
+                                                 ax=plt.subplot(gs[1]))
+
+    perf_attrib.plot_risk_exposures(portfolio_exposures,
+                                    ax=plt.subplot(gs[2]))
+
+    gs.tight_layout(fig)
 
     plt.show()
     if return_fig:
