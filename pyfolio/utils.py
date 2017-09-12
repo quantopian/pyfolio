@@ -623,5 +623,7 @@ def set_legend_location(ax, autofmt_xdate=True):
     ax.legend(frameon=True, framealpha=0.5, loc='upper left',
               bbox_to_anchor=(1.05, 1))
 
+    ax.set_prop_cycle('color', COLORS)
+
     if autofmt_xdate:
         ax.figure.autofmt_xdate()

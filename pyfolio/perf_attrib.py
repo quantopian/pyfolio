@@ -19,7 +19,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 from pyfolio.pos import get_percent_alloc
-from pyfolio.utils import print_table, set_legend_location, COLORS
+from pyfolio.utils import print_table, set_legend_location
 
 
 def perf_attrib(returns, positions, factor_returns, factor_loadings,
@@ -161,7 +161,7 @@ def show_perf_attrib_stats(returns, positions, factor_returns,
         positions,
         factor_returns,
         factor_loadings,
-        pos_in_dollars=pos_in_dollars
+        pos_in_dollars=pos_in_dollars,
     )
 
     perf_attrib_stats = create_perf_attrib_stats(perf_attrib_data)
@@ -270,8 +270,8 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
     factors_and_specific = perf_attrib_data.drop(
         ['total_returns', 'common_returns'], axis='columns')
 
-    for s in factors_and_specific:
-        ax.plot(factors_and_specific[s])
+    for col in factors_and_specific:
+        ax.plot(factors_and_specific[col])
 
     ax.axhline(0, color='k')
     set_legend_location(ax)
@@ -304,8 +304,8 @@ def plot_risk_exposures(exposures, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    for s in exposures:
-        ax.plot(exposures[s])
+    for col in exposures:
+        ax.plot(exposures[col])
 
     set_legend_location(ax)
     ax.set_ylabel('Factor exposures')
