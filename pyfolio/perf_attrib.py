@@ -19,7 +19,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 from pyfolio.pos import get_percent_alloc
-from pyfolio.utils import print_table, set_legend_location, COLORS
+from pyfolio.utils import print_table, set_legend_location
 
 
 def perf_attrib(returns, positions, factor_returns, factor_loadings,
@@ -151,35 +151,38 @@ def create_perf_attrib_stats(perf_attrib):
 
 
 def show_perf_attrib_stats(returns, positions, factor_returns,
-                           factor_loadings):
+                           factor_loadings, pos_in_dollars=True):
     """
     Calls `perf_attrib` using inputs, and displays outputs using
     `utils.print_table`.
     """
-    risk_exposures, perf_attrib_data = perf_attrib(returns,
-                                                   positions,
-                                                   factor_returns,
-                                                   factor_loadings)
+    risk_exposures, perf_attrib_data = perf_attrib(
+        returns,
+        positions,
+        factor_returns,
+        factor_loadings,
+        pos_in_dollars=pos_in_dollars,
+    )
 
     perf_attrib_stats = create_perf_attrib_stats(perf_attrib_data)
     print_table(perf_attrib_stats)
     print_table(risk_exposures)
 
 
-def plot_returns(returns, specific_returns, common_returns, ax=None):
+def plot_returns(perf_attrib_data, ax=None):
     """
     Plot total, specific, and common returns.
 
     Parameters
     ----------
-    returns : pd.Series
-        total returns, indexed by datetime
-
-    specific_returns : pd.Series
-        specific returns, indexed by datetime
-
-    commons_returns : pd.Series
-        common returns, indexed by datetime
+    perf_attrib_data : pd.DataFrame
+        df with factors, common returns, and specific returns as columns,
+        and datetimes as index
+        - Example:
+                        momentum  reversal  common_returns  specific_returns
+            dt
+            2017-01-01  0.249087  0.935925        1.185012          1.185012
+            2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
 
     ax :  matplotlib.axes.Axes
         axes on which plots are made. if None, current axes will be used
@@ -191,13 +194,17 @@ def plot_returns(returns, specific_returns, common_returns, ax=None):
     if ax is None:
         ax = plt.gca()
 
+    returns = perf_attrib_data['total_returns']
+    specific_returns = perf_attrib_data['specific_returns']
+    common_returns = perf_attrib_data['common_returns']
+
     ax.plot(ep.cum_returns(returns), color='g', label='Total returns')
     ax.plot(ep.cum_returns(specific_returns), color='b',
             label='Cumulative specific returns')
     ax.plot(ep.cum_returns(common_returns), color='r',
             label='Cumulative common returns')
 
-    ax.set_title('Time Series of cumulative returns')
+    ax.set_title('Time series of cumulative returns')
     ax.set_ylabel('Returns')
 
     set_legend_location(ax)
@@ -235,20 +242,12 @@ def plot_alpha_returns(alpha_returns, ax=None):
     return ax
 
 
-def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
+def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
     """
     Plot each factor's contribution to performance.
 
     Parameters
     ----------
-    exposures : pd.DataFrame
-        df indexed by datetime, with factors as columns
-        - Example:
-                        momentum  reversal
-            dt
-            2017-01-01 -0.238655  0.077123
-            2017-01-02  0.821872  1.520515
-
     perf_attrib_data : pd.DataFrame
         df with factors, common returns, and specific returns as columns,
         and datetimes as index
@@ -271,12 +270,8 @@ def plot_factor_contribution_to_perf(exposures, perf_attrib_data, ax=None):
     factors_and_specific = perf_attrib_data.drop(
         ['total_returns', 'common_returns'], axis='columns')
 
-    ax.stackplot(
-        factors_and_specific.index,
-        [factors_and_specific[s] for s in factors_and_specific],
-        labels=factors_and_specific.columns,
-        colors=COLORS
-    )
+    for col in factors_and_specific:
+        ax.plot(factors_and_specific[col])
 
     ax.axhline(0, color='k')
     set_legend_location(ax)
@@ -309,10 +304,8 @@ def plot_risk_exposures(exposures, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    ax.stackplot(exposures.index,
-                 [exposures[s] for s in exposures],
-                 labels=exposures.columns,
-                 colors=COLORS)
+    for col in exposures:
+        ax.plot(exposures[col])
 
     set_legend_location(ax)
     ax.set_ylabel('Factor exposures')

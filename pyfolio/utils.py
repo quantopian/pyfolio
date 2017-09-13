@@ -612,7 +612,7 @@ def get_symbol_rets(symbol, start=None, end=None):
                                     end=end)
 
 
-def set_legend_location(ax):
+def set_legend_location(ax, autofmt_xdate=True):
     """
     Put legend in right of plot instead of overlapping with it.
     """
@@ -622,3 +622,8 @@ def set_legend_location(ax):
 
     ax.legend(frameon=True, framealpha=0.5, loc='upper left',
               bbox_to_anchor=(1.05, 1))
+
+    ax.set_prop_cycle('color', COLORS)
+
+    if autofmt_xdate:
+        ax.figure.autofmt_xdate()
