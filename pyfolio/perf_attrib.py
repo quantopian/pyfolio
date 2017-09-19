@@ -14,10 +14,11 @@
 # limitations under the License.
 from __future__ import division
 
+from collections import OrderedDict
 import empyrical as ep
 import pandas as pd
-
 import matplotlib.pyplot as plt
+
 from pyfolio.pos import get_percent_alloc
 from pyfolio.utils import print_table, set_legend_location
 
@@ -124,12 +125,12 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
             pd.concat([perf_attrib_by_factor, returns_df], axis='columns'))
 
 
-def create_perf_attrib_stats(perf_attrib):
+def create_perf_attrib_stats(perf_attrib, risk_exposures):
     """
     Takes perf attribution data over a period of time and computes annualized
     multifactor alpha, multifactor sharpe, risk exposures.
     """
-    summary = {}
+    summary = OrderedDict()
     specific_returns = perf_attrib['specific_returns']
     common_returns = perf_attrib['common_returns']
 
@@ -139,6 +140,8 @@ def create_perf_attrib_stats(perf_attrib):
     summary['Multi-factor sharpe'] =\
         ep.sharpe_ratio(specific_returns)
 
+    # empty line between common/specific/total returns
+    summary[' '] = ' '
     summary['Cumulative specific returns'] =\
         ep.cum_returns_final(specific_returns)
     summary['Cumulative common returns'] =\
@@ -147,7 +150,9 @@ def create_perf_attrib_stats(perf_attrib):
         ep.cum_returns_final(perf_attrib['total_returns'])
 
     summary = pd.Series(summary)
-    return summary
+
+    risk_exposure_summary = risk_exposures.sum(axis='rows')
+    return summary, risk_exposure_summary
 
 
 def show_perf_attrib_stats(returns, positions, factor_returns,
@@ -164,9 +169,11 @@ def show_perf_attrib_stats(returns, positions, factor_returns,
         pos_in_dollars=pos_in_dollars,
     )
 
-    perf_attrib_stats = create_perf_attrib_stats(perf_attrib_data)
+    perf_attrib_stats, risk_exposure_stats =\
+        create_perf_attrib_stats(perf_attrib_data, risk_exposures)
+
     print_table(perf_attrib_stats)
-    print_table(risk_exposures)
+    print_table(risk_exposure_stats)
 
 
 def plot_returns(perf_attrib_data, ax=None):
