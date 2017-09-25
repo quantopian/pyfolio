@@ -128,7 +128,7 @@ def _groupby_consecutive(txn, max_delta=pd.Timedelta('8h')):
         t['order_sign'] = t.amount > 0
         t['block_dir'] = (t.order_sign.shift(
             1) != t.order_sign).astype(int).cumsum()
-        t['block_time'] = ((t.dt - t.dt.shift(1)) >
+        t['block_time'] = ((t.dt.sub(t.dt.shift(1))) >
                            max_delta).astype(int).cumsum()
         grouped_price = (t.groupby(('block_dir',
                                    'block_time'))
@@ -252,7 +252,7 @@ def extract_round_trips(transactions,
 
     roundtrips = pd.DataFrame(roundtrips)
 
-    roundtrips['duration'] = roundtrips['close_dt'] - roundtrips['open_dt']
+    roundtrips['duration'] = roundtrips['close_dt'].sub(roundtrips['open_dt'])
 
     if portfolio_value is not None:
         # Need to normalize so that we can join
