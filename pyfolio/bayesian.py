@@ -86,7 +86,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
                  mu=mu_reg,
                  sd=sigma,
                  observed=y)
-        trace = pm.sample(samples)
+        trace = pm.sample(samples, progressbar=False)
 
     return model, trace
 
@@ -125,7 +125,7 @@ def model_returns_normal(data, samples=500):
             returns.distribution.variance**.5 *
             np.sqrt(252))
 
-        trace = pm.sample(samples)
+        trace = pm.sample(samples, progressbar=False)
     return model, trace
 
 
@@ -167,7 +167,7 @@ def model_returns_t(data, samples=500):
                          returns.distribution.variance**.5 *
                          np.sqrt(252))
 
-        trace = pm.sample(samples)
+        trace = pm.sample(samples, progressbar=False)
     return model, trace
 
 
@@ -252,7 +252,7 @@ def model_best(y1, y2, samples=1000):
                          returns_group2.distribution.variance**.5 *
                          np.sqrt(252))
 
-        trace = pm.sample(samples)
+        trace = pm.sample(samples, progressbar=False)
     return model, trace
 
 
@@ -385,7 +385,7 @@ def model_stoch_vol(data, samples=2000):
                                               pm.math.exp(-2 * s))
         StudentT('r', nu, lam=volatility_process, observed=data)
 
-        trace = pm.sample(samples)
+        trace = pm.sample(samples, progressbar=False)
 
     return model, trace
 
@@ -577,7 +577,8 @@ def run_model(model, returns_train, returns_test=None,
 
     if ppc:
         ppc_samples = pm.sample_ppc(trace, samples=samples,
-                                    model=model, size=len(returns_test))
+                                    model=model, size=len(returns_test),
+                                    progressbar=False)
         return trace, ppc_samples['returns']
 
     return trace
