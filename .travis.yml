@@ -1,10 +1,20 @@
 language: python
 sudo: false
 
-python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
+python: 
+  - 2.7
+  - 3.5
+  - 3.6
+
+env:
+  - PANDAS_VERSION=0.18.1
+  - PANDAS_VERSION=0.19.2
+  - PANDAS_VERSION=0.20.3
+
+matrix:
+  exclude:
+  - python: 3.6
+    env: PANDAS_VERSION=0.18.1
 
 before_install:
   # We do this conditionally because it saves us some downloading if the
@@ -24,7 +34,7 @@ before_install:
   - cp pyfolio/tests/matplotlibrc .
 
 install:
-  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas=$PANDAS_VERSION Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib
   - source activate testenv
   - pip install nose_parameterized
   #- pip install --no-deps git+https://github.com/quantopian/zipline
