@@ -1065,7 +1065,8 @@ def create_capacity_tear_sheet(returns, positions, transactions,
 @plotting.customize
 def create_bayesian_tear_sheet(returns, benchmark_rets=None,
                                live_start_date=None, samples=2000,
-                               return_fig=False, stoch_vol=False):
+                               return_fig=False, stoch_vol=False,
+                               progressbar=True):
     """
     Generate a number of Bayesian distributions and a Bayesian
     cone plot of returns.
@@ -1134,14 +1135,16 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
 
     trace_t, ppc_t = bayesian.run_model('t', df_train,
                                         returns_test=df_test,
-                                        samples=samples, ppc=True)
+                                        samples=samples, ppc=True,
+                                        progressbar=progressbar)
     previous_time = timer("T model", previous_time)
 
     # Compute BEST model
     print("\nRunning BEST model")
     trace_best = bayesian.run_model('best', df_train,
                                     returns_test=df_test,
-                                    samples=samples)
+                                    samples=samples,
+                                    progressbar=progressbar)
     previous_time = timer("BEST model", previous_time)
 
     # Plot results
@@ -1213,7 +1216,8 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     benchmark_rets = benchmark_rets.loc[df_train.index]
     trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
                                           bmark=benchmark_rets,
-                                          samples=samples)
+                                          samples=samples,
+                                          progressbar=progressbar)
     previous_time = timer("running alpha beta model", previous_time)
 
     # Plot alpha and beta
