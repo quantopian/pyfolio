@@ -584,7 +584,7 @@ def rolling_correlation(returns, factor_returns=None,
     else:
         factor_returns = factor_returns.copy()
 
-    rolling_risk = pd.DataFrame(columns=['alpha'] + factor_returns.columns,
+    rolling_risk = pd.DataFrame(columns=['alpha'] + factor_returns.columns.tolist(),
                                 index=ret_no_na.index)
 
     rolling_risk.index.name = 'dt'
