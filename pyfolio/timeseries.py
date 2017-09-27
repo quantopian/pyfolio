@@ -584,22 +584,18 @@ def rolling_correlation(returns, factor_returns=None,
     else:
         factor_returns = factor_returns.copy()
 
-    # have NaNs when there is insufficient data to do a regression
-    regression_coeffs = np.empty((min(rolling_window, len(factor_returns)),
-                                  len(factor_returns.columns)))
-    regression_coeffs.fill(np.nan)
+    rolling_risk = pd.DataFrame(columns=['alpha'] + factor_returns.columns,
+                                index=ret_no_na.index)
+
+    rolling_risk.index.name = 'dt'
 
     for beg, end in zip(ret_no_na.index[:-rolling_window],
                         ret_no_na.index[rolling_window:]):
         returns_period = ret_no_na[beg:end]
-        coeffs = linear_model.LinearRegression().fit(factor_returns.loc[returns_period.index],
-                                                     returns_period).coef_
-        regression_coeffs = np.append(regression_coeffs, [coeffs], axis=0)
-
-    rolling_risk = pd.DataFrame(data=regression_coeffs,
-                                columns=factor_returns.columns,
-                                index=ret_no_na.index)
-    rolling_risk.index.name = 'dt'
+        reg = linear_model.LinearRegression().fit(factor_returns.loc[returns_period.index],
+                                                  returns_period)
+        rolling_risk.loc[end, factor_returns.columns] = reg.coef_
+        rolling_risk.loc[end, 'alpha'] = reg.intercept_
 
     return rolling_risk
 
