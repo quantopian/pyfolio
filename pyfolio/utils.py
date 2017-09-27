@@ -19,7 +19,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from IPython.display import display
+from IPython.display import display, HTML
 
 import empyrical.utils
 from os import environ
@@ -178,7 +178,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
     return returns, positions, transactions
 
 
-def print_table(table, name=None, fmt=None):
+def print_table(table, name=None, fmt=None, header_rows=None):
     """
     Pretty print a pandas DataFrame.
 
@@ -207,7 +207,21 @@ def print_table(table, name=None, fmt=None):
     if name is not None:
         table.columns.name = name
 
-    display(table)
+    html = table.to_html()
+    if header_rows is not None:
+        # Count the number of columns for the text to span
+        n_cols = html.split('<thead>')[1].split('</thead>')[0].count('<th>')
+
+        # Generate the HTML for the extra rows
+        rows = ''
+        for name, value in header_rows.items():
+            rows += ('\n    <tr style="text-align: right;"><th>%s</th>' +
+                     '<td colspan=%d>%s</td></tr>') % (name, n_cols, value)
+
+        # Inject the new HTML
+        html = html.replace('<thead>', '<thead>' + rows)
+
+    display(HTML(html))
 
     if fmt is not None:
         pd.set_option('display.float_format', prev_option)

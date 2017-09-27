@@ -602,7 +602,8 @@ STAT_FUNCS_PCT = [
 
 def show_perf_stats(returns, factor_returns, positions=None,
                     transactions=None, turnover_denom='AGB',
-                    live_start_date=None, bootstrap=False):
+                    live_start_date=None, bootstrap=False,
+                    header_rows=None):
     """
     Prints some performance metrics of the strategy.
 
@@ -620,22 +621,24 @@ def show_perf_stats(returns, factor_returns, positions=None,
     factor_returns : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
-    positions : pd.DataFrame
+    positions : pd.DataFrame, optional
         Daily net position values.
          - See full explanation in create_full_tear_sheet.
-    transactions : pd.DataFrame
+    transactions : pd.DataFrame, optional
         Prices and amounts of executed trades. One row per trade.
         - See full explanation in tears.create_full_tear_sheet
-    turnover_denom : str
+    turnover_denom : str, optional
         Either AGB or portfolio_value, default AGB.
         - See full explanation in txn.get_turnover.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
-    bootstrap : boolean (optional)
+    bootstrap : boolean, optional
         Whether to perform bootstrap analysis for the performance
         metrics.
          - For more information, see timeseries.perf_stats_bootstrap
+    header_rows : dict or OrderedDict, optional
+        Extra rows to display at the top of the displayed table.
     """
 
     if bootstrap:
@@ -649,6 +652,10 @@ def show_perf_stats(returns, factor_returns, positions=None,
         positions=positions,
         transactions=transactions,
         turnover_denom=turnover_denom)
+
+    date_rows = OrderedDict()
+    date_rows['Start date'] = returns.index[0].strftime('%Y-%m-%d')
+    date_rows['End date'] = returns.index[-1].strftime('%Y-%m-%d')
 
     if live_start_date is not None:
         live_start_date = ep.utils.get_utc_timestamp(live_start_date)
@@ -683,10 +690,10 @@ def show_perf_stats(returns, factor_returns, positions=None,
             transactions=transactions_oos,
             turnover_denom=turnover_denom)
 
-        print('In-sample months: ' +
-              str(int(len(returns_is) / APPROX_BDAYS_PER_MONTH)))
-        print('Out-of-sample months: ' +
-              str(int(len(returns_oos) / APPROX_BDAYS_PER_MONTH)))
+        date_rows['In-sample months'] = int(len(returns_is) /
+                                            APPROX_BDAYS_PER_MONTH)
+        date_rows['Out-of-sample months'] = int(len(returns_oos) /
+                                                APPROX_BDAYS_PER_MONTH)
 
         perf_stats = pd.concat(OrderedDict([
             ('In-sample', perf_stats_is),
@@ -694,8 +701,8 @@ def show_perf_stats(returns, factor_returns, positions=None,
             ('All', perf_stats_all),
         ]), axis=1)
     else:
-        print('Backtest months: ' +
-              str(int(len(returns) / APPROX_BDAYS_PER_MONTH)))
+        date_rows['Total months'] = int(len(returns) /
+                                        APPROX_BDAYS_PER_MONTH)
         perf_stats = pd.DataFrame(perf_stats_all, columns=['Backtest'])
 
     for column in perf_stats.columns:
@@ -703,8 +710,13 @@ def show_perf_stats(returns, factor_returns, positions=None,
             if stat in STAT_FUNCS_PCT:
                 perf_stats.loc[stat, column] = str(np.round(value * 100,
                                                             1)) + '%'
+    if header_rows is None:
+        header_rows = date_rows
+    else:
+        header_rows = OrderedDict(header_rows)
+        header_rows.update(date_rows)
 
-    utils.print_table(perf_stats, fmt='{0:.2f}')
+    utils.print_table(perf_stats, fmt='{0:.2f}', header_rows=header_rows)
 
 
 def plot_returns(returns,
