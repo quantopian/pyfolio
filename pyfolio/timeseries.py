@@ -589,8 +589,8 @@ def rolling_correlation(returns, factor_returns=None,
                                   len(factor_returns.columns)))
     regression_coeffs.fill(np.nan)
 
-    for beg, end in zip(factor_returns.index[:-rolling_window],
-                        factor_returns.index[rolling_window:]):
+    for beg, end in zip(ret_no_na.index[:-rolling_window],
+                        ret_no_na.index[rolling_window:]):
         returns_period = ret_no_na[beg:end]
         coeffs = linear_model.LinearRegression().fit(factor_returns.loc[returns_period],
                                                      returns_period).coef_
