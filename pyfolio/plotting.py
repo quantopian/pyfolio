@@ -184,7 +184,7 @@ def plot_rolling_fama_french(returns,
 
     ax.set_ylabel('Beta')
 
-    rolling_beta = timeseries.rolling_fama_french(
+    rolling_beta = timeseries.rolling_regression(
         returns,
         factor_returns=factor_returns,
         rolling_window=rolling_window)

@@ -1129,7 +1129,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
                                               'Fama-French'):
         fama_french = True
         rolling_window = utils.APPROX_BDAYS_PER_MONTH * 6
-        benchmark_rets = timeseries.rolling_fama_french(
+        benchmark_rets = timeseries.rolling_correlation(
             returns, rolling_window=rolling_window)
 
     live_start_date = ep.utils.get_utc_timestamp(live_start_date)

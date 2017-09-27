@@ -547,7 +547,7 @@ def rolling_beta(returns, factor_returns,
         return out
 
 
-def rolling_fama_french(returns, factor_returns=None,
+def rolling_correlation(returns, factor_returns=None,
                         rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """
     Computes rolling Fama-French single factor betas using a multivariate
@@ -562,8 +562,8 @@ def rolling_fama_french(returns, factor_returns=None,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.DataFrame, optional
-        Data set containing the Fama-French risk factors. See
-        utils.load_portfolio_risk_factors.
+        Data set containing the risk factors. If none, will load Fama-French.
+        See utils.load_portfolio_risk_factors.
     rolling_window : int, optional
         The days window over which to compute the beta. Defaults to 6 months.
 
@@ -581,9 +581,8 @@ def rolling_fama_french(returns, factor_returns=None,
             start=ret_no_na.index[0], end=ret_no_na.index[-1])
         factor_returns = factor_returns.drop(['Mkt-RF', 'RF'],
                                              axis='columns')
-
-    # add constant to regression
-    factor_returns['const'] = 1
+    else:
+        factor_returns = factor_returns.copy()
 
     # have NaNs when there is insufficient data to do a regression
     regression_coeffs = np.empty((min(rolling_window, len(factor_returns)),
@@ -592,16 +591,17 @@ def rolling_fama_french(returns, factor_returns=None,
 
     for beg, end in zip(factor_returns.index[:-rolling_window],
                         factor_returns.index[rolling_window:]):
-        coeffs = linear_model.LinearRegression().fit(factor_returns[beg:end],
-                                                     ret_no_na[beg:end]).coef_
+        returns_period = ret_no_na[beg:end]
+        coeffs = linear_model.LinearRegression().fit(factor_returns.loc[returns_period],
+                                                     returns_period).coef_
         regression_coeffs = np.append(regression_coeffs, [coeffs], axis=0)
 
-    rolling_fama_french = pd.DataFrame(data=regression_coeffs[:, :3],
-                                       columns=['SMB', 'HML', 'UMD'],
-                                       index=factor_returns.index)
-    rolling_fama_french.index.name = None
+    rolling_risk = pd.DataFrame(data=regression_coeffs,
+                                columns=factor_returns.columns,
+                                index=factor_returns.index)
+    rolling_risk.index.name = 'dt'
 
-    return rolling_fama_french
+    return rolling_risk
 
 
 def gross_lev(positions):
