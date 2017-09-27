@@ -598,7 +598,7 @@ def rolling_correlation(returns, factor_returns=None,
 
     rolling_risk = pd.DataFrame(data=regression_coeffs,
                                 columns=factor_returns.columns,
-                                index=factor_returns.index)
+                                index=ret_no_na.index)
     rolling_risk.index.name = 'dt'
 
     return rolling_risk
