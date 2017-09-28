@@ -654,8 +654,9 @@ def show_perf_stats(returns, factor_returns, positions=None,
         turnover_denom=turnover_denom)
 
     date_rows = OrderedDict()
-    date_rows['Start date'] = returns.index[0].strftime('%Y-%m-%d')
-    date_rows['End date'] = returns.index[-1].strftime('%Y-%m-%d')
+    if len(returns.index) > 0:
+        date_rows['Start date'] = returns.index[0].strftime('%Y-%m-%d')
+        date_rows['End date'] = returns.index[-1].strftime('%Y-%m-%d')
 
     if live_start_date is not None:
         live_start_date = ep.utils.get_utc_timestamp(live_start_date)
@@ -689,11 +690,11 @@ def show_perf_stats(returns, factor_returns, positions=None,
             positions=positions_oos,
             transactions=transactions_oos,
             turnover_denom=turnover_denom)
-
-        date_rows['In-sample months'] = int(len(returns_is) /
-                                            APPROX_BDAYS_PER_MONTH)
-        date_rows['Out-of-sample months'] = int(len(returns_oos) /
+        if len(returns.index) > 0:
+            date_rows['In-sample months'] = int(len(returns_is) /
                                                 APPROX_BDAYS_PER_MONTH)
+            date_rows['Out-of-sample months'] = int(len(returns_oos) /
+                                                    APPROX_BDAYS_PER_MONTH)
 
         perf_stats = pd.concat(OrderedDict([
             ('In-sample', perf_stats_is),
@@ -701,8 +702,9 @@ def show_perf_stats(returns, factor_returns, positions=None,
             ('All', perf_stats_all),
         ]), axis=1)
     else:
-        date_rows['Total months'] = int(len(returns) /
-                                        APPROX_BDAYS_PER_MONTH)
+        if len(returns.index) > 0:
+            date_rows['Total months'] = int(len(returns) /
+                                            APPROX_BDAYS_PER_MONTH)
         perf_stats = pd.DataFrame(perf_stats_all, columns=['Backtest'])
 
     for column in perf_stats.columns:
