@@ -33,9 +33,9 @@ before_install:
   - cp pyfolio/tests/matplotlibrc .
 
 install:
-  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas=$PANDAS_VERSION Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION pandas=$PANDAS_VERSION pytables networkx matplotlib-tests
   - source activate testenv
-  - pip install -r requirements.txt -c travis_constraints.txt
+  - pip install -r requirements_test.txt -c travis_constraints.txt
   - pip install nose_parameterized -c travis_constraints.txt
   #- pip install --no-deps git+https://github.com/quantopian/zipline
   - pip install -e .[bayesian] -c travis_constraints.txt
