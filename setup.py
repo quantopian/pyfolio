@@ -48,7 +48,7 @@ install_reqs = [
     'ipython>=3.2.3' if support_ipython_6 else 'ipython>=3.2.3, <6',
     'matplotlib>=1.4.0',
     'numpy>=1.9.1',
-    'pandas>=0.19.0',
+    'pandas>=0.18.1',
     'pytz>=2014.10',
     'scipy>=0.14.0',
     'scikit-learn>=0.18.2',

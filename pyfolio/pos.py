@@ -134,6 +134,10 @@ def extract_pos(positions, cash):
 
     values = values.join(cash).fillna(0)
 
+    # NOTE: Set name of DataFrame.columns to sid, to match the behavior
+    # of DataFrame.join in earlier versions of pandas.
+    values.columns.name = 'sid'
+
     return values
 
 
