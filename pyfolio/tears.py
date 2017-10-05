@@ -81,7 +81,7 @@ def create_full_tear_sheet(returns,
                            factor_returns=None,
                            factor_loadings=None,
                            pos_in_dollars=True,
-                           return_fig=False):
+                           header_rows=None):
     """
     Generate a number of tear sheets that are useful
     for analyzing a strategy's performance.
@@ -161,9 +161,6 @@ def create_full_tear_sheet(returns,
     turnover_denom : str
         Either AGB or portfolio_value, default AGB.
         - See full explanation in txn.get_turnover.
-    set_context : boolean, optional
-        If True, set default plotting style context.
-         - See plotting.context().
     factor_returns : pd.Dataframe, optional
         Returns by factor, with date as index and factors as columns
     factor_loadings : pd.Dataframe, optional
@@ -171,6 +168,11 @@ def create_full_tear_sheet(returns,
         ticker as index, and factors as columns.
     pos_in_dollars : boolean, optional
         indicates whether positions is in dollars
+    header_rows : dict or OrderedDict, optional
+        Extra rows to display at the top of the perf stats table.
+    set_context : boolean, optional
+        If True, set default plotting style context.
+         - See plotting.context().
     """
 
     if benchmark_rets is None:
@@ -194,6 +196,7 @@ def create_full_tear_sheet(returns,
         benchmark_rets=benchmark_rets,
         bootstrap=bootstrap,
         turnover_denom=turnover_denom,
+        header_rows=header_rows,
         set_context=set_context)
 
     create_interesting_times_tear_sheet(returns,
@@ -242,6 +245,7 @@ def create_full_tear_sheet(returns,
                                    set_context=set_context)
 
 
+@plotting.customize
 def create_simple_tear_sheet(returns,
                              positions=None,
                              transactions=None,
@@ -249,7 +253,8 @@ def create_simple_tear_sheet(returns,
                              slippage=None,
                              estimate_intraday='infer',
                              live_start_date=None,
-                             turnover_denom='AGB'):
+                             turnover_denom='AGB',
+                             header_rows=None):
     """
     Simpler version of create_full_tear_sheet; generates summary performance
     statistics and important plots as a single image.
@@ -306,9 +311,13 @@ def create_simple_tear_sheet(returns,
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period. This datetime should be normalized.
-    turnover_denom : str
+    turnover_denom : str, optional
         Either AGB or portfolio_value, default AGB.
         - See full explanation in txn.get_turnover.
+    header_rows : dict or OrderedDict, optional
+        Extra rows to display at the top of the perf stats table.
+    set_context : boolean, optional
+        If True, set default plotting style context.
     """
 
     positions = utils.check_intraday(estimate_intraday, returns,
@@ -331,14 +340,13 @@ def create_simple_tear_sheet(returns,
     # Plot simple returns tear sheet
     returns = returns[returns.index > benchmark_rets.index[0]]
 
-    print("Entire data start date: %s" % returns.index[0].strftime('%Y-%m-%d'))
-    print("Entire data end date: %s" % returns.index[-1].strftime('%Y-%m-%d'))
     plotting.show_perf_stats(returns,
                              benchmark_rets,
                              positions=positions,
                              transactions=transactions,
                              turnover_denom=turnover_denom,
-                             live_start_date=live_start_date)
+                             live_start_date=live_start_date,
+                             header_rows=header_rows)
 
     if returns.index[0] < benchmark_rets.index[0]:
         returns = returns[returns.index > benchmark_rets.index[0]]
@@ -426,6 +434,7 @@ def create_returns_tear_sheet(returns, positions=None,
                               benchmark_rets=None,
                               bootstrap=False,
                               turnover_denom='AGB',
+                              header_rows=None,
                               return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's returns.
@@ -457,12 +466,14 @@ def create_returns_tear_sheet(returns, positions=None,
     benchmark_rets : pd.Series, optional
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
-    bootstrap : boolean (optional)
+    bootstrap : boolean, optional
         Whether to perform bootstrap analysis for the performance
         metrics. Takes a few minutes longer.
-    turnover_denom : str
+    turnover_denom : str, optional
         Either AGB or portfolio_value, default AGB.
         - See full explanation in txn.get_turnover.
+    header_rows : dict or OrderedDict, optional
+        Extra rows to display at the top of the perf stats table.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     set_context : boolean, optional
@@ -474,15 +485,13 @@ def create_returns_tear_sheet(returns, positions=None,
 
     returns = returns[returns.index > benchmark_rets.index[0]]
 
-    print("Entire data start date: %s" % returns.index[0].strftime('%Y-%m-%d'))
-    print("Entire data end date: %s" % returns.index[-1].strftime('%Y-%m-%d'))
-
     plotting.show_perf_stats(returns, benchmark_rets,
                              positions=positions,
                              transactions=transactions,
                              turnover_denom=turnover_denom,
                              bootstrap=bootstrap,
-                             live_start_date=live_start_date)
+                             live_start_date=live_start_date,
+                             header_rows=header_rows)
 
     plotting.show_worst_drawdown_periods(returns)
 
