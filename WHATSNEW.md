@@ -2,6 +2,18 @@
 
 These are new features and improvements of note in each release.
 
+## v0.8.1 (Oct 9th, 2017)
+
+This is a minor release from `0.8.0`, and all users are recommended to upgrade.
+
+### New features
+ - Performance attribution tearsheet: Generate plots and tables for analyzing a strategy's performance. By [Vikram Narayan](https://github.com/vikram-narayan).
+ - Users can now pass in extra rows (as a dict or OrderedDict) to display in the perf_stats table. By [Gus Gordon](https://github.com/gusgordon).
+ - Improved implementation of `get_turnover`. By [Gus Gordon](https://github.com/gusgordon).
+
+### Bugfixes
+ - Various fixes to support pandas versions >= 0.18.1. By [Andrew Daniels](https://github.com/yankees714).
+
 ## v0.8.0 (Aug 23rd, 2017)
 
 This is a major release from `0.7.0`, and all users are recommended to upgrade.
