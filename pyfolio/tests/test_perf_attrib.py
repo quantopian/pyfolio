@@ -152,3 +152,78 @@ class PerfAttribTestCase(unittest.TestCase):
 
         pd.util.testing.assert_frame_equal(expected_exposures_portfolio,
                                            exposures_portfolio)
+
+    def test_perf_attrib_regression(self):
+
+        positions = pd.read_csv('pyfolio/tests/test_data/positions.csv',
+                                index_col=0, parse_dates=True)
+
+        positions.columns = [int(col) if col != 'cash' else col
+                             for col in positions.columns]
+
+        returns = pd.read_csv('pyfolio/tests/test_data/returns.csv',
+                              index_col=0, parse_dates=True,
+                              header=None, squeeze=True)
+
+        factor_loadings = pd.read_csv(
+            'pyfolio/tests/test_data/factor_loadings.csv',
+            index_col=[0, 1], parse_dates=True
+        )
+
+        factor_returns = pd.read_csv(
+            'pyfolio/tests/test_data/factor_returns.csv',
+            index_col=0, parse_dates=True
+        )
+
+        residuals = pd.read_csv('pyfolio/tests/test_data/residuals.csv',
+                                index_col=0, parse_dates=True)
+
+        residuals.columns = [int(col) for col in residuals.columns]
+
+        intercepts = pd.read_csv('pyfolio/tests/test_data/intercepts.csv',
+                                 index_col=0, header=None, squeeze=True)
+
+        risk_exposures_portfolio, perf_attrib_output = perf_attrib(
+            returns,
+            positions,
+            factor_returns,
+            factor_loadings,
+        )
+
+        specific_returns = perf_attrib_output['specific_returns']
+        common_returns = perf_attrib_output['common_returns']
+        combined_returns = specific_returns + common_returns
+
+        # since all returns are factor returns, common returns should be
+        # equivalent to total returns, and specific returns should be 0
+        pd.util.testing.assert_series_equal(returns,
+                                            common_returns,
+                                            check_names=False)
+
+        self.assertTrue(np.isclose(specific_returns, 0).all())
+
+        # specific and common returns combined should equal total returns
+        pd.util.testing.assert_series_equal(returns,
+                                            combined_returns,
+                                            check_names=False)
+
+        # check that residuals + intercepts = specific returns
+        self.assertTrue(np.isclose((residuals + intercepts), 0).all())
+
+        # check that exposure * factor returns = common returns
+        expected_common_returns = risk_exposures_portfolio.multiply(
+            factor_returns, axis='rows'
+        ).sum(axis='columns')
+
+        pd.util.testing.assert_series_equal(expected_common_returns,
+                                            common_returns,
+                                            check_names=False)
+
+        # since factor loadings are ones, portfolio risk exposures
+        # should be ones
+        pd.util.testing.assert_frame_equal(
+            risk_exposures_portfolio,
+            pd.DataFrame(np.ones(risk_exposures_portfolio.shape),
+                         index=risk_exposures_portfolio.index,
+                         columns=risk_exposures_portfolio.columns)
+        )
