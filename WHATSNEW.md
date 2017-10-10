@@ -2,7 +2,7 @@
 
 These are new features and improvements of note in each release.
 
-## v0.8.1 (Oct 9th, 2017)
+## v0.8.1 (Oct 10th, 2017)
 
 This is a minor release from `0.8.0` focused on restoring support for older versions of pandas (>= 0.18.1), and all users are recommended to upgrade.
 
