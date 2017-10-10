@@ -7,12 +7,12 @@ These are new features and improvements of note in each release.
 This is a minor release from `0.8.0`, and all users are recommended to upgrade.
 
 ### New features
- - Performance attribution tearsheet: Generate plots and tables for analyzing a strategy's performance. By [Vikram Narayan](https://github.com/vikram-narayan).
- - Users can now pass in extra rows (as a dict or OrderedDict) to display in the perf_stats table. By [Gus Gordon](https://github.com/gusgordon).
- - Improved implementation of `get_turnover`. By [Gus Gordon](https://github.com/gusgordon).
+ - Performance attribution tearsheet: Generate plots and tables for analyzing a strategy's performance [PR441](https://github.com/quantopian/pyfolio/pull/441), [PR433](https://github.com/quantopian/pyfolio/pull/433), [PR442](https://github.com/quantopian/pyfolio/pull/442). By [Vikram Narayan](https://github.com/vikram-narayan).
+  - Improved implementation of `get_turnover` [PR332](https://github.com/quantopian/pyfolio/pull/432). By [Gus Gordon](https://github.com/gusgordon).
+ - Users can now pass in extra rows (as a dict or OrderedDict) to display in the perf_stats table [PR445](https://github.com/quantopian/pyfolio/pull/445). By [Gus Gordon](https://github.com/gusgordon).
 
 ### Bugfixes
- - Various fixes to support pandas versions >= 0.18.1. By [Andrew Daniels](https://github.com/yankees714).
+ - Various fixes to support pandas versions >= 0.18.1 [PR443](https://github.com/quantopian/pyfolio/pull/443). By [Andrew Daniels](https://github.com/yankees714).
 
 ## v0.8.0 (Aug 23rd, 2017)
 
