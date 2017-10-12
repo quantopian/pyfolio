@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import unittest
+import warnings
 
 from pyfolio.perf_attrib import perf_attrib
 
@@ -227,3 +228,64 @@ class PerfAttribTestCase(unittest.TestCase):
                          index=risk_exposures_portfolio.index,
                          columns=risk_exposures_portfolio.columns)
         )
+
+    def test_missing_stocks_and_dates(self):
+
+        (returns, positions,
+         factor_returns, factor_loadings) = generate_toy_risk_model_output()
+
+        # factor loadings missing a stock should raise a warning
+        factor_loadings_missing_stocks = factor_loadings.drop('TLT',
+                                                              level='ticker')
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+
+            perf_attrib(returns,
+                        positions,
+                        factor_returns,
+                        factor_loadings_missing_stocks)
+
+            self.assertEquals(len(w), 1)
+            self.assertIn("Could not find factor loadings for the following "
+                          "stocks: ['TLT']", str(w[-1].message))
+            self.assertIn("Coverage ratio: 2/3", str(w[-1].message))
+
+            # missing dates should raise a warning
+            missing_dates = ['2017-01-01', '2017-01-05']
+            factor_loadings_missing_dates = factor_loadings.drop(missing_dates)
+
+            exposures, perf_attrib_data =\
+                perf_attrib(returns,
+                            positions,
+                            factor_returns,
+                            factor_loadings_missing_dates)
+
+            self.assertEquals(len(w), 2)
+            self.assertIn("Could not find factor loadings for "
+                          "the dates", str(w[-1].message))
+
+            for date in missing_dates:
+                self.assertNotIn(date, exposures.index)
+                self.assertNotIn(date, perf_attrib_data.index)
+
+            # test missing stocks and dates
+            factor_loadings_missing_both =\
+                factor_loadings_missing_dates.drop('TLT', level='ticker')
+
+            exposures, perf_attrib_data =\
+                perf_attrib(returns,
+                            positions,
+                            factor_returns,
+                            factor_loadings_missing_both)
+
+            self.assertEquals(len(w), 4)
+            self.assertIn("Could not find factor loadings for the following "
+                          "stocks: ['TLT']", str(w[-2].message))
+            self.assertIn("Coverage ratio: 2/3", str(w[-2].message))
+
+            self.assertIn("Could not find factor loadings for "
+                          "the dates", str(w[-1].message))
+            for date in missing_dates:
+                self.assertNotIn(date, exposures.index)
+                self.assertNotIn(date, perf_attrib_data.index)
