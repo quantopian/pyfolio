@@ -223,7 +223,7 @@ class PerfAttribTestCase(unittest.TestCase):
         # should be ones
         pd.util.testing.assert_frame_equal(
             risk_exposures_portfolio,
-            pd.DataFrame(np.ones(risk_exposures_portfolio.shape),
+            pd.DataFrame(np.ones_like(risk_exposures_portfolio),
                          index=risk_exposures_portfolio.index,
                          columns=risk_exposures_portfolio.columns)
         )
