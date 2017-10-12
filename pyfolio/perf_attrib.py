@@ -110,10 +110,12 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
 
         warnings.warn("Could not find factor loadings for the following "
                       "stocks: {}. Ignoring for exposure calculation and "
-                      "performance attribution. Coverage ratio: {}/{}."
+                      "performance attribution. Coverage ratio: {}/{}. "
+                      "Average allocation of missing stocks: {} "
                       .format(list(missing_stocks),
                               num_stocks - len(missing_stocks),
-                              num_stocks))
+                              num_stocks,
+                              positions[missing_stocks].mean()))
 
         positions = positions.drop(missing_stocks, axis='columns')
 
