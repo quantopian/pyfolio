@@ -246,7 +246,7 @@ class PerfAttribTestCase(unittest.TestCase):
                         factor_returns,
                         factor_loadings_missing_stocks)
 
-            self.assertEquals(len(w), 1)
+            self.assertEqual(len(w), 1)
             self.assertIn("Could not find factor loadings for the following "
                           "stocks: ['TLT']", str(w[-1].message))
             self.assertIn("Coverage ratio: 2/3", str(w[-1].message))
@@ -261,7 +261,7 @@ class PerfAttribTestCase(unittest.TestCase):
                             factor_returns,
                             factor_loadings_missing_dates)
 
-            self.assertEquals(len(w), 2)
+            self.assertEqual(len(w), 2)
             self.assertIn("Could not find factor loadings for "
                           "the dates", str(w[-1].message))
 
@@ -279,7 +279,7 @@ class PerfAttribTestCase(unittest.TestCase):
                             factor_returns,
                             factor_loadings_missing_both)
 
-            self.assertEquals(len(w), 4)
+            self.assertEqual(len(w), 4)
             self.assertIn("Could not find factor loadings for the following "
                           "stocks: ['TLT']", str(w[-2].message))
             self.assertIn("Coverage ratio: 2/3", str(w[-2].message))
