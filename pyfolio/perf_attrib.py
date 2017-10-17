@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import division
+import warnings
 
 from collections import OrderedDict
 import empyrical as ep
@@ -97,6 +98,41 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
             2017-01-01  0.249087  0.935925        1.185012          1.185012
             2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
     """
+    missing_stocks = positions.columns.difference(
+        factor_loadings.index.get_level_values(1).unique()
+    )
+
+    # cash will not be in factor_loadings
+    num_stocks = len(positions.columns) - 1
+    missing_stocks = missing_stocks.drop('cash')
+
+    if len(missing_stocks) > 0:
+
+        warnings.warn("Could not find factor loadings for the following "
+                      "stocks: {}. Ignoring for exposure calculation and "
+                      "performance attribution. Coverage ratio: {}/{}. "
+                      "Average allocation of missing stocks: {} "
+                      .format(list(missing_stocks),
+                              num_stocks - len(missing_stocks),
+                              num_stocks,
+                              positions[missing_stocks].mean()))
+
+        positions = positions.drop(missing_stocks, axis='columns')
+
+    missing_factor_loadings_index = positions.index.difference(
+        factor_loadings.index.get_level_values(0).unique()
+    )
+
+    if len(missing_factor_loadings_index) > 0:
+
+        warnings.warn("Could not find factor loadings for the dates: {}. "
+                      "Truncating date range for performance attribution. "
+                      .format(list(missing_factor_loadings_index)))
+
+        positions = positions.drop(missing_factor_loadings_index)
+        returns = returns.drop(missing_factor_loadings_index)
+        factor_returns = factor_returns.drop(missing_factor_loadings_index)
+
     if pos_in_dollars:
         # convert holdings to percentages
         positions = get_percent_alloc(positions)
