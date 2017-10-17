@@ -167,6 +167,7 @@ def create_perf_attrib_stats(perf_attrib, risk_exposures):
     multifactor alpha, multifactor sharpe, risk exposures.
     """
     summary = OrderedDict()
+    total_returns = perf_attrib['total_returns']
     specific_returns = perf_attrib['specific_returns']
     common_returns = perf_attrib['common_returns']
 
@@ -183,11 +184,18 @@ def create_perf_attrib_stats(perf_attrib, risk_exposures):
     summary['Cumulative common returns'] =\
         ep.cum_returns_final(common_returns)
     summary['Total returns'] =\
-        ep.cum_returns_final(perf_attrib['total_returns'])
+        ep.cum_returns_final(total_returns)
 
     summary = pd.Series(summary)
 
-    risk_exposure_summary = risk_exposures.sum(axis='rows')
+    risk_exposure_summary = pd.DataFrame(
+        data={'Annualized Return': ep.annual_return(total_returns),
+              'Cumulative Return': ep.cum_returns(total_returns),
+              'Average Risk Factor Exposure':
+              risk_exposures.mean(axis='rows')},
+        index=risk_exposures.columns,
+    )
+
     return summary, risk_exposure_summary
 
 
