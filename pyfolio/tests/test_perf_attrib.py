@@ -3,7 +3,8 @@ import pandas as pd
 import unittest
 import warnings
 
-from pyfolio.perf_attrib import perf_attrib
+import empyrical as ep
+from pyfolio.perf_attrib import perf_attrib, create_perf_attrib_stats
 
 
 def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
@@ -227,6 +228,33 @@ class PerfAttribTestCase(unittest.TestCase):
             pd.DataFrame(np.ones_like(risk_exposures_portfolio),
                          index=risk_exposures_portfolio.index,
                          columns=risk_exposures_portfolio.columns)
+        )
+
+        perf_attrib_summary, exposures_summary = create_perf_attrib_stats(
+            perf_attrib_output, risk_exposures_portfolio
+        )
+
+        self.assertEqual(ep.annual_return(specific_returns),
+                         perf_attrib_summary['Annual multi-factor alpha'])
+
+        self.assertEqual(ep.sharpe_ratio(specific_returns),
+                         perf_attrib_summary['Multi-factor sharpe'])
+
+        self.assertEqual(ep.cum_returns_final(specific_returns),
+                         perf_attrib_summary['Cumulative specific returns'])
+
+        self.assertEqual(ep.cum_returns_final(common_returns),
+                         perf_attrib_summary['Cumulative common returns'])
+
+        self.assertEqual(ep.cum_returns_final(combined_returns),
+                         perf_attrib_summary['Total returns'])
+
+        avg_factor_exposure = risk_exposures_portfolio.mean().rename(
+            'Average Risk Factor Exposure'
+        )
+        pd.util.testing.assert_series_equal(
+            avg_factor_exposure,
+            exposures_summary['Average Risk Factor Exposure']
         )
 
     def test_missing_stocks_and_dates(self):
