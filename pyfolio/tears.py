@@ -234,9 +234,9 @@ def create_full_tear_sheet(returns,
                                    caps, shares_held, volumes, percentile)
 
         if factor_returns is not None and factor_loadings is not None:
-            create_perf_attrib_tearsheet(returns, positions, factor_returns,
-                                         factor_loadings,
-                                         pos_in_dollars=pos_in_dollars)
+            create_perf_attrib_tear_sheet(returns, positions, factor_returns,
+                                          factor_loadings,
+                                          pos_in_dollars=pos_in_dollars)
 
     if bayesian:
         create_bayesian_tear_sheet(returns,
@@ -1465,12 +1465,12 @@ def create_risk_tear_sheet(positions,
 
 
 @plotting.customize
-def create_perf_attrib_tearsheet(returns,
-                                 positions,
-                                 factor_returns,
-                                 factor_loadings,
-                                 pos_in_dollars=True,
-                                 return_fig=False):
+def create_perf_attrib_tear_sheet(returns,
+                                  positions,
+                                  factor_returns,
+                                  factor_loadings,
+                                  pos_in_dollars=True,
+                                  return_fig=False):
     """
     Generate plots and tables for analyzing a strategy's performance.
 
