@@ -235,19 +235,25 @@ class PerfAttribTestCase(unittest.TestCase):
         )
 
         self.assertEqual(ep.annual_return(specific_returns),
-                         perf_attrib_summary['Annual multi-factor alpha'])
+                         perf_attrib_summary['Annualized Specific Return'])
+
+        self.assertEqual(ep.annual_return(common_returns),
+                         perf_attrib_summary['Annualized Common Return'])
+
+        self.assertEqual(ep.annual_return(combined_returns),
+                         perf_attrib_summary['Total Annualized Return'])
 
         self.assertEqual(ep.sharpe_ratio(specific_returns),
-                         perf_attrib_summary['Multi-factor sharpe'])
+                         perf_attrib_summary['Specific Sharpe Ratio'])
 
         self.assertEqual(ep.cum_returns_final(specific_returns),
-                         perf_attrib_summary['Cumulative specific returns'])
+                         perf_attrib_summary['Cumulative Specific Return'])
 
         self.assertEqual(ep.cum_returns_final(common_returns),
-                         perf_attrib_summary['Cumulative common returns'])
+                         perf_attrib_summary['Cumulative Common Return'])
 
         self.assertEqual(ep.cum_returns_final(combined_returns),
-                         perf_attrib_summary['Total returns'])
+                         perf_attrib_summary['Total Returns'])
 
         avg_factor_exposure = risk_exposures_portfolio.mean().rename(
             'Average Risk Factor Exposure'
@@ -255,6 +261,30 @@ class PerfAttribTestCase(unittest.TestCase):
         pd.util.testing.assert_series_equal(
             avg_factor_exposure,
             exposures_summary['Average Risk Factor Exposure']
+        )
+
+        cumulative_returns_by_factor = pd.Series(
+            [ep.cum_returns_final(perf_attrib_output[c])
+             for c in risk_exposures_portfolio.columns],
+             name='Cumulative Return',
+             index=risk_exposures_portfolio.columns
+        )
+
+        pd.util.testing.assert_series_equal(
+            cumulative_returns_by_factor,
+            exposures_summary['Cumulative Return']
+        )
+
+        annualized_returns_by_factor = pd.Series(
+            [ep.annual_return(perf_attrib_output[c])
+             for c in risk_exposures_portfolio.columns],
+            name='Annualized Return',
+            index=risk_exposures_portfolio.columns
+        )
+
+        pd.util.testing.assert_series_equal(
+            annualized_returns_by_factor,
+            exposures_summary['Annualized Return']
         )
 
     def test_missing_stocks_and_dates(self):

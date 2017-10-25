@@ -190,9 +190,14 @@ def create_perf_attrib_stats(perf_attrib, risk_exposures):
 
     summary = pd.Series(summary, name='Summary Statistics')
 
+    annualized_returns_by_factor = [ep.annual_return(perf_attrib[c])
+                                    for c in risk_exposures.columns]
+    cumulative_returns_by_factor = [ep.cum_returns_final(perf_attrib[c])
+                                    for c in risk_exposures.columns]
+
     risk_exposure_summary = pd.DataFrame(
-        data={'Annualized Return': ep.annual_return(total_returns),
-              'Cumulative Return': ep.cum_returns(total_returns),
+        data={'Annualized Return': annualized_returns_by_factor,
+              'Cumulative Return': cumulative_returns_by_factor,
               'Average Risk Factor Exposure':
               risk_exposures.mean(axis='rows')},
         index=risk_exposures.columns,
