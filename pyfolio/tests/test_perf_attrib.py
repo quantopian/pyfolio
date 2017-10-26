@@ -297,6 +297,22 @@ class PerfAttribTestCase(unittest.TestCase):
                 self.assertNotIn(date, exposures.index)
                 self.assertNotIn(date, perf_attrib_data.index)
 
+            # perf attrib should work if factor_returns already missing dates
+            exposures, perf_attrib_data = perf_attrib(
+                returns,
+                positions,
+                factor_returns.drop(pd.DatetimeIndex(missing_dates)),
+                factor_loadings_missing_dates
+            )
+
+            self.assertEqual(len(w), 3)
+            self.assertIn("Could not find factor loadings for "
+                          "the dates", str(w[-1].message))
+
+            for date in missing_dates:
+                self.assertNotIn(date, exposures.index)
+                self.assertNotIn(date, perf_attrib_data.index)
+
             # test missing stocks and dates
             factor_loadings_missing_both =\
                 factor_loadings_missing_dates.drop('TLT', level='ticker')
@@ -307,7 +323,7 @@ class PerfAttribTestCase(unittest.TestCase):
                             factor_returns,
                             factor_loadings_missing_both)
 
-            self.assertEqual(len(w), 4)
+            self.assertEqual(len(w), 5)
             self.assertIn("Could not find factor loadings for the following "
                           "stocks: ['TLT']", str(w[-2].message))
             self.assertIn("Coverage ratio: 2/3", str(w[-2].message))

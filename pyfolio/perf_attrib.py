@@ -117,7 +117,8 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
                               num_stocks,
                               positions[missing_stocks].mean()))
 
-        positions = positions.drop(missing_stocks, axis='columns')
+        positions = positions.drop(missing_stocks, axis='columns',
+                                   errors='ignore')
 
     missing_factor_loadings_index = positions.index.difference(
         factor_loadings.index.get_level_values(0).unique()
@@ -129,9 +130,11 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
                       "Truncating date range for performance attribution. "
                       .format(list(missing_factor_loadings_index)))
 
-        positions = positions.drop(missing_factor_loadings_index)
-        returns = returns.drop(missing_factor_loadings_index)
-        factor_returns = factor_returns.drop(missing_factor_loadings_index)
+        positions = positions.drop(missing_factor_loadings_index,
+                                   errors='ignore')
+        returns = returns.drop(missing_factor_loadings_index, errors='ignore')
+        factor_returns = factor_returns.drop(missing_factor_loadings_index,
+                                             errors='ignore')
 
     if pos_in_dollars:
         # convert holdings to percentages
