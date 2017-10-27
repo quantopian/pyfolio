@@ -155,6 +155,24 @@ class PerfAttribTestCase(unittest.TestCase):
         pd.util.testing.assert_frame_equal(expected_exposures_portfolio,
                                            exposures_portfolio)
 
+        perf_attrib_summary, exposures_summary = create_perf_attrib_stats(
+            perf_attrib_output, exposures_portfolio
+        )
+
+        self.assertEqual(perf_attrib_summary['Annualized Specific Return'],
+                         perf_attrib_summary['Total Annualized Return'])
+
+        self.assertEqual(perf_attrib_summary['Cumulative Specific Return'],
+                         perf_attrib_summary['Total Returns'])
+
+        pd.util.testing.assert_frame_equal(
+            exposures_summary,
+            pd.DataFrame(0.0, index=['risk_factor1', 'risk_factor2'],
+                         columns=['Annualized Return',
+                                  'Average Risk Factor Exposure',
+                                  'Cumulative Return'])
+        )
+
     def test_perf_attrib_regression(self):
 
         positions = pd.read_csv('pyfolio/tests/test_data/positions.csv',
