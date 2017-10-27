@@ -547,8 +547,8 @@ def rolling_beta(returns, factor_returns,
         return out
 
 
-def rolling_correlation(returns, factor_returns=None,
-                        rolling_window=APPROX_BDAYS_PER_MONTH * 6):
+def rolling_regression(returns, factor_returns=None,
+                       rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """
     Computes rolling Fama-French single factor betas using a multivariate
     linear regression (separate linear regressions is problematic because
