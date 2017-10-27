@@ -266,8 +266,8 @@ class PerfAttribTestCase(unittest.TestCase):
         cumulative_returns_by_factor = pd.Series(
             [ep.cum_returns_final(perf_attrib_output[c])
              for c in risk_exposures_portfolio.columns],
-             name='Cumulative Return',
-             index=risk_exposures_portfolio.columns
+            name='Cumulative Return',
+            index=risk_exposures_portfolio.columns
         )
 
         pd.util.testing.assert_series_equal(
