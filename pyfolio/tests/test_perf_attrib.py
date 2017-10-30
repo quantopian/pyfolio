@@ -333,3 +333,17 @@ class PerfAttribTestCase(unittest.TestCase):
             for date in missing_dates:
                 self.assertNotIn(date, exposures.index)
                 self.assertNotIn(date, perf_attrib_data.index)
+
+            # raise exception if all stocks are filtered out
+            empty_factor_loadings = factor_loadings.drop(
+                ['AAPL', 'TLT', 'XOM'], level='ticker'
+            )
+
+            with self.assertRaisesRegexp(ValueError,
+                                         "No factor loadings were available"):
+
+                exposures, perf_attrib_data =\
+                    perf_attrib(returns,
+                                positions,
+                                factor_returns,
+                                empty_factor_loadings)

@@ -105,6 +105,12 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
     # cash will not be in factor_loadings
     num_stocks = len(positions.columns) - 1
     missing_stocks = missing_stocks.drop('cash')
+    num_stocks_covered = num_stocks - len(missing_stocks)
+
+    if num_stocks_covered == 0:
+        raise ValueError("Could not perform performance attribution. "
+                         "No factor loadings were available for this "
+                         "algorithm's positions.")
 
     if len(missing_stocks) > 0:
 
@@ -113,7 +119,7 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
                       "performance attribution. Coverage ratio: {}/{}. "
                       "Average allocation of missing stocks: {} "
                       .format(list(missing_stocks),
-                              num_stocks - len(missing_stocks),
+                              num_stocks_covered,
                               num_stocks,
                               positions[missing_stocks].mean()))
 
