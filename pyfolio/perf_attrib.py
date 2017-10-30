@@ -174,26 +174,33 @@ def create_perf_attrib_stats(perf_attrib, risk_exposures):
     specific_returns = perf_attrib['specific_returns']
     common_returns = perf_attrib['common_returns']
 
-    summary['Annual multi-factor alpha'] =\
+    summary['Annualized Specific Return'] =\
         ep.annual_return(specific_returns)
+    summary['Annualized Common Return'] =\
+        ep.annual_return(common_returns)
+    summary['Total Annualized Return'] =\
+        ep.annual_return(total_returns)
 
-    summary['Multi-factor sharpe'] =\
+    summary['Specific Sharpe Ratio'] =\
         ep.sharpe_ratio(specific_returns)
 
-    # empty line between common/specific/total returns
-    summary[' '] = ' '
-    summary['Cumulative specific returns'] =\
+    summary['Cumulative Specific Return'] =\
         ep.cum_returns_final(specific_returns)
-    summary['Cumulative common returns'] =\
+    summary['Cumulative Common Return'] =\
         ep.cum_returns_final(common_returns)
-    summary['Total returns'] =\
+    summary['Total Returns'] =\
         ep.cum_returns_final(total_returns)
 
-    summary = pd.Series(summary)
+    summary = pd.Series(summary, name='')
+
+    annualized_returns_by_factor = [ep.annual_return(perf_attrib[c])
+                                    for c in risk_exposures.columns]
+    cumulative_returns_by_factor = [ep.cum_returns_final(perf_attrib[c])
+                                    for c in risk_exposures.columns]
 
     risk_exposure_summary = pd.DataFrame(
-        data={'Annualized Return': ep.annual_return(total_returns),
-              'Cumulative Return': ep.cum_returns(total_returns),
+        data={'Annualized Return': annualized_returns_by_factor,
+              'Cumulative Return': cumulative_returns_by_factor,
               'Average Risk Factor Exposure':
               risk_exposures.mean(axis='rows')},
         index=risk_exposures.columns,
@@ -219,8 +226,13 @@ def show_perf_attrib_stats(returns, positions, factor_returns,
     perf_attrib_stats, risk_exposure_stats =\
         create_perf_attrib_stats(perf_attrib_data, risk_exposures)
 
-    print_table(perf_attrib_stats)
-    print_table(risk_exposure_stats)
+    print_table(perf_attrib_stats.loc[['Annualized Specific Return',
+                                       'Annualized Common Return',
+                                       'Total Annualized Return']],
+                name='Summary Statistics')
+
+    print_table(perf_attrib_stats[['Specific Sharpe Ratio']])
+    print_table(risk_exposure_stats, name='Exposures Summary')
 
 
 def plot_returns(perf_attrib_data, cost=None, ax=None):
