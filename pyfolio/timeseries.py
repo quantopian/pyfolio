@@ -604,7 +604,7 @@ def rolling_regression(returns, factor_returns=None,
             factor_returns_period_dnan = factor_returns_period.dropna()
             reg = linear_model.LinearRegression(fit_intercept=True).fit(
                 factor_returns_period_dnan,
-                returns_period.loc[factor_returns_period_dnan].index)
+                returns_period.loc[factor_returns_period_dnan.index])
             rolling_risk.loc[end, factor_returns.columns] = reg.coef_
             rolling_risk.loc[end, 'alpha'] = reg.intercept_
 
