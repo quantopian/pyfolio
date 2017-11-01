@@ -593,11 +593,12 @@ def rolling_regression(returns, factor_returns=None,
     for beg, end in zip(ret_no_na.index[:-rolling_window],
                         ret_no_na.index[rolling_window:]):
         returns_period = ret_no_na[beg:end]
-        reg = linear_model.LinearRegression(fit_intercept=True).fit(
-            factor_returns.loc[returns_period.index],
-            returns_period)
-        rolling_risk.loc[end, factor_returns.columns] = reg.coef_
-        rolling_risk.loc[end, 'alpha'] = reg.intercept_
+        if ~np.any(factor_returns.loc[returns_period.index].isnull()):
+            reg = linear_model.LinearRegression(fit_intercept=True).fit(
+                factor_returns.loc[returns_period.index],
+                returns_period)
+            rolling_risk.loc[end, factor_returns.columns] = reg.coef_
+            rolling_risk.loc[end, 'alpha'] = reg.intercept_
 
     return rolling_risk
 
