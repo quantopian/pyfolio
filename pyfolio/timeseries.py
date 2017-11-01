@@ -599,8 +599,7 @@ def rolling_regression(returns, factor_returns=None,
         returns_period = ret_no_na[beg:end]
         factor_returns_period = factor_returns.loc[returns_period.index]
 
-        if np.all(factor_returns_period.isnull().sum() /
-                  len(factor_returns_period)) < nan_threshold:
+        if np.all(factor_returns_period.isnull().mean()) < nan_threshold:
             factor_returns_period_dnan = factor_returns_period.dropna()
             reg = linear_model.LinearRegression(fit_intercept=True).fit(
                 factor_returns_period_dnan,
