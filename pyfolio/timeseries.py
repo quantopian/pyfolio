@@ -548,7 +548,8 @@ def rolling_beta(returns, factor_returns,
 
 
 def rolling_regression(returns, factor_returns=None,
-                       rolling_window=APPROX_BDAYS_PER_MONTH * 6):
+                       rolling_window=APPROX_BDAYS_PER_MONTH * 6,
+                       nan_threshold=0.1):
     """
     Computes rolling Fama-French single factor betas using a multivariate
     linear regression (separate linear regressions is problematic because
@@ -566,6 +567,9 @@ def rolling_regression(returns, factor_returns=None,
         See utils.load_portfolio_risk_factors.
     rolling_window : int, optional
         The days window over which to compute the beta. Defaults to 6 months.
+    nan_threshold : float, optional
+        If there are more than this fraction of NaNs, the rolling regression
+        for the given date will be skipped.
 
     Returns
     -------
@@ -593,9 +597,11 @@ def rolling_regression(returns, factor_returns=None,
     for beg, end in zip(ret_no_na.index[:-rolling_window],
                         ret_no_na.index[rolling_window:]):
         returns_period = ret_no_na[beg:end]
-        if ~np.any(factor_returns.loc[returns_period.index].isnull()):
+        factor_returns_period = factor_returns.loc[returns_period.index]
+        if np.all(factor_returns_period.isnull().sum() /
+                  len(factor_returns_period)) < nan_threshold:
             reg = linear_model.LinearRegression(fit_intercept=True).fit(
-                factor_returns.loc[returns_period.index],
+                factor_returns_period,
                 returns_period)
             rolling_risk.loc[end, factor_returns.columns] = reg.coef_
             rolling_risk.loc[end, 'alpha'] = reg.intercept_
