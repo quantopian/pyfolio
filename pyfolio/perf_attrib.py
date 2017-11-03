@@ -127,6 +127,7 @@ def perf_attrib(returns,
     num_stocks = len(positions.columns) - 1
     missing_stocks = missing_stocks.drop('cash')
     num_stocks_covered = num_stocks - len(missing_stocks)
+    coverage_ratio = (num_stocks - len(missing_stocks)) / num_stocks
 
     if num_stocks_covered == 0:
         raise ValueError("Could not perform performance attribution. "
@@ -135,14 +136,24 @@ def perf_attrib(returns,
 
     if len(missing_stocks) > 0:
 
-        warnings.warn("Could not find factor loadings for the following "
-                      "stocks: {}. Ignoring for exposure calculation and "
-                      "performance attribution. Coverage ratio: {}/{}. "
-                      "Average allocation of missing stocks: {} "
-                      .format(list(missing_stocks),
-                              num_stocks_covered,
-                              num_stocks,
-                              positions[missing_stocks].mean()))
+        missing_stocks_warning_msg = (
+            "Could not determine risk exposures for some of this algorithm's "
+            "positions. PnL from the missing assets will not be properly "
+            "accounted for in performance attribution.\n"
+            "\n"
+            "The following assets were missing factor loadings: {}. "
+            "Ignoring for exposure calculation and performance attribution. "
+            "Ratio of assets missing: {}. Average allocation of missing "
+            "assets:\n"
+            "\n"
+            "{}.\n"
+        ).format(
+            list(missing_stocks),
+            coverage_ratio,
+            positions[missing_stocks].mean(),
+        )
+
+        warnings.warn(missing_stocks_warning_msg)
 
         positions = positions.drop(missing_stocks, axis='columns',
                                    errors='ignore')
