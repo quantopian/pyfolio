@@ -82,7 +82,10 @@ def perf_attrib(returns,
                        XOM    -1.798401  0.761549
 
     transactions : pd.DataFrame, optional
-        Executed trade volumes and fill prices.
+        Executed trade volumes and fill prices. Used to check the turnover of
+        the algorithm. Default is None, in which case the turnover check is
+        skipped.
+
         - One row per trade.
         - Trades on different names that occur at the
           same time will have identical indicies.
@@ -91,8 +94,6 @@ def perf_attrib(returns,
             2004-01-09 12:18:01    483      324.12   'AAPL'
             2004-01-09 12:18:01    122      83.10    'MSFT'
             2004-01-13 14:12:23    -75      340.43   'AAPL'
-        - Used to check the turnover of the algorithm.
-        - Default is None, in which case the turnover check is skipped.
 
     pos_in_dollars : bool
         Flag indicating whether `positions` are in dollars or percentages
