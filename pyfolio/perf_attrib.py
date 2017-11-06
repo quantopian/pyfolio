@@ -128,7 +128,7 @@ def perf_attrib(returns,
     num_stocks = len(positions.columns) - 1
     missing_stocks = missing_stocks.drop('cash')
     num_stocks_covered = num_stocks - len(missing_stocks)
-    missing_ratio = len(missing_stocks) / num_stocks
+    missing_ratio = round(len(missing_stocks) / num_stocks, ndigits=3)
 
     if num_stocks_covered == 0:
         raise ValueError("Could not perform performance attribution. "
