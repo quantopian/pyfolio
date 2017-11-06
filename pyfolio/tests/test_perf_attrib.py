@@ -323,9 +323,9 @@ class PerfAttribTestCase(unittest.TestCase):
                         factor_loadings_missing_stocks)
 
             self.assertEqual(len(w), 1)
-            self.assertIn("Could not find factor loadings for the following "
-                          "stocks: ['TLT']", str(w[-1].message))
-            self.assertIn("Coverage ratio: 2/3", str(w[-1].message))
+            self.assertIn("The following assets were missing factor loadings: "
+                          "['TLT']", str(w[-1].message))
+            self.assertIn("Ratio of assets missing: 0.333", str(w[-1].message))
 
             # missing dates should raise a warning
             missing_dates = ['2017-01-01', '2017-01-05']
@@ -372,9 +372,9 @@ class PerfAttribTestCase(unittest.TestCase):
                             factor_loadings_missing_both)
 
             self.assertEqual(len(w), 5)
-            self.assertIn("Could not find factor loadings for the following "
-                          "stocks: ['TLT']", str(w[-2].message))
-            self.assertIn("Coverage ratio: 2/3", str(w[-2].message))
+            self.assertIn("The following assets were missing factor loadings: "
+                          "['TLT']", str(w[-2].message))
+            self.assertIn("Ratio of assets missing: 0.333", str(w[-2].message))
 
             self.assertIn("Could not find factor loadings for "
                           "the dates", str(w[-1].message))
