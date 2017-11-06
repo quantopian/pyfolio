@@ -168,8 +168,8 @@ class PerfAttribTestCase(unittest.TestCase):
         pd.util.testing.assert_frame_equal(
             exposures_summary,
             pd.DataFrame(0.0, index=['risk_factor1', 'risk_factor2'],
-                         columns=['Annualized Return',
-                                  'Average Risk Factor Exposure',
+                         columns=['Average Risk Factor Exposure',
+                                  'Annualized Return',
                                   'Cumulative Return'])
         )
 

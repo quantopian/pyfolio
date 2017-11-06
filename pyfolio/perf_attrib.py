@@ -205,10 +205,14 @@ def create_perf_attrib_stats(perf_attrib, risk_exposures):
                                     for c in risk_exposures.columns]
 
     risk_exposure_summary = pd.DataFrame(
-        data={'Annualized Return': annualized_returns_by_factor,
-              'Cumulative Return': cumulative_returns_by_factor,
-              'Average Risk Factor Exposure':
-              risk_exposures.mean(axis='rows')},
+        data=OrderedDict([
+            (
+                'Average Risk Factor Exposure',
+                risk_exposures.mean(axis='rows')
+            ),
+            ('Annualized Return', annualized_returns_by_factor),
+            ('Cumulative Return', cumulative_returns_by_factor),
+        ]),
         index=risk_exposures.columns,
     )
 
