@@ -234,10 +234,10 @@ def show_perf_attrib_stats(returns, positions, factor_returns,
 
     print_table(perf_attrib_stats.loc[['Annualized Specific Return',
                                        'Annualized Common Return',
-                                       'Total Annualized Return']],
+                                       'Total Annualized Return',
+                                       'Specific Sharpe Ratio']],
                 name='Summary Statistics')
 
-    print_table(perf_attrib_stats[['Specific Sharpe Ratio']])
     print_table(risk_exposure_stats, name='Exposures Summary')
 
 
