@@ -235,7 +235,7 @@ def create_full_tear_sheet(returns,
 
         if factor_returns is not None and factor_loadings is not None:
             create_perf_attrib_tear_sheet(returns, positions, factor_returns,
-                                          factor_loadings,
+                                          factor_loadings, transactions,
                                           pos_in_dollars=pos_in_dollars)
 
     if bayesian:
@@ -1469,6 +1469,7 @@ def create_perf_attrib_tear_sheet(returns,
                                   positions,
                                   factor_returns,
                                   factor_loadings,
+                                  transactions=None,
                                   pos_in_dollars=True,
                                   return_fig=False):
     """
@@ -1491,6 +1492,11 @@ def create_perf_attrib_tear_sheet(returns,
         Factor loadings for all days in the date range, with date
         and ticker as index, and factors as columns.
 
+    transactions : pd.DataFrame, optional
+        Prices and amounts of executed trades. One row per trade.
+         - See full explanation in create_full_tear_sheet.
+         - Default is None.
+
     pos_in_dollars : boolean, optional
         Flag indicating whether `positions` are in dollars or percentages
         If True, positions are in dollars.
@@ -1499,13 +1505,13 @@ def create_perf_attrib_tear_sheet(returns,
         If True, returns the figure that was plotted on.
     """
     portfolio_exposures, perf_attrib_data = perf_attrib.perf_attrib(
-        returns, positions, factor_returns, factor_loadings,
+        returns, positions, factor_returns, factor_loadings, transactions,
         pos_in_dollars=pos_in_dollars
     )
 
     # aggregate perf attrib stats and show summary table
     perf_attrib.show_perf_attrib_stats(returns, positions, factor_returns,
-                                       factor_loadings)
+                                       factor_loadings, transactions)
 
     vertical_sections = 3
     fig = plt.figure(figsize=[14, vertical_sections * 6])

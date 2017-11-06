@@ -21,10 +21,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from pyfolio.pos import get_percent_alloc
+from pyfolio.txn import get_turnover
 from pyfolio.utils import print_table, set_legend_location
 
 
-def perf_attrib(returns, positions, factor_returns, factor_loadings,
+PERF_ATTRIB_TURNOVER_THRESHOLD = 0.25
+
+
+def perf_attrib(returns,
+                positions,
+                factor_returns,
+                factor_loadings,
+                transactions=None,
                 pos_in_dollars=True):
     """
     Does performance attribution given risk info.
@@ -73,6 +81,20 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
                        TLT    -1.066978  0.185435
                        XOM    -1.798401  0.761549
 
+    transactions : pd.DataFrame, optional
+        Executed trade volumes and fill prices. Used to check the turnover of
+        the algorithm. Default is None, in which case the turnover check is
+        skipped.
+
+        - One row per trade.
+        - Trades on different names that occur at the
+          same time will have identical indicies.
+        - Example:
+            index                  amount   price    symbol
+            2004-01-09 12:18:01    483      324.12   'AAPL'
+            2004-01-09 12:18:01    122      83.10    'MSFT'
+            2004-01-13 14:12:23    -75      340.43   'AAPL'
+
     pos_in_dollars : bool
         Flag indicating whether `positions` are in dollars or percentages
         If True, positions are in dollars.
@@ -106,6 +128,7 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
     num_stocks = len(positions.columns) - 1
     missing_stocks = missing_stocks.drop('cash')
     num_stocks_covered = num_stocks - len(missing_stocks)
+    missing_ratio = round(len(missing_stocks) / num_stocks, ndigits=3)
 
     if num_stocks_covered == 0:
         raise ValueError("Could not perform performance attribution. "
@@ -114,14 +137,24 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
 
     if len(missing_stocks) > 0:
 
-        warnings.warn("Could not find factor loadings for the following "
-                      "stocks: {}. Ignoring for exposure calculation and "
-                      "performance attribution. Coverage ratio: {}/{}. "
-                      "Average allocation of missing stocks: {} "
-                      .format(list(missing_stocks),
-                              num_stocks_covered,
-                              num_stocks,
-                              positions[missing_stocks].mean()))
+        missing_stocks_warning_msg = (
+            "Could not determine risk exposures for some of this algorithm's "
+            "positions. Returns from the missing assets will not be properly "
+            "accounted for in performance attribution.\n"
+            "\n"
+            "The following assets were missing factor loadings: {}. "
+            "Ignoring for exposure calculation and performance attribution. "
+            "Ratio of assets missing: {}. Average allocation of missing "
+            "assets:\n"
+            "\n"
+            "{}.\n"
+        ).format(
+            list(missing_stocks),
+            missing_ratio,
+            positions[missing_stocks].mean(),
+        )
+
+        warnings.warn(missing_stocks_warning_msg)
 
         positions = positions.drop(missing_stocks, axis='columns',
                                    errors='ignore')
@@ -145,6 +178,22 @@ def perf_attrib(returns, positions, factor_returns, factor_loadings,
     if pos_in_dollars:
         # convert holdings to percentages
         positions = get_percent_alloc(positions)
+
+    if transactions is not None:
+        turnover = get_turnover(positions, transactions).mean()
+        if turnover > PERF_ATTRIB_TURNOVER_THRESHOLD:
+            warning_msg = (
+                "This algorithm has relatively high turnover of its "
+                "positions. As a result, performance attribution might not be "
+                "fully accurate.\n"
+                "\n"
+                "Performance attribution is calculated based "
+                "on end-of-day holdings and does not account for intraday "
+                "activity. Algorithms that derive a high percentage of "
+                "returns from buying and selling within the same day may "
+                "receive inaccurate performance attribution.\n"
+            )
+            warnings.warn(warning_msg)
 
     # remove cash after normalizing positions
     positions = positions.drop('cash', axis='columns')
@@ -215,8 +264,12 @@ def create_perf_attrib_stats(perf_attrib, risk_exposures):
     return summary, risk_exposure_summary
 
 
-def show_perf_attrib_stats(returns, positions, factor_returns,
-                           factor_loadings, pos_in_dollars=True):
+def show_perf_attrib_stats(returns,
+                           positions,
+                           factor_returns,
+                           factor_loadings,
+                           transactions=None,
+                           pos_in_dollars=True):
     """
     Calls `perf_attrib` using inputs, and displays outputs using
     `utils.print_table`.
@@ -226,6 +279,7 @@ def show_perf_attrib_stats(returns, positions, factor_returns,
         positions,
         factor_returns,
         factor_loadings,
+        transactions,
         pos_in_dollars=pos_in_dollars,
     )
 
