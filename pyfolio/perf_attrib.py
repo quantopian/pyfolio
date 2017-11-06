@@ -139,7 +139,7 @@ def perf_attrib(returns,
 
         missing_stocks_warning_msg = (
             "Could not determine risk exposures for some of this algorithm's "
-            "positions. PnL from the missing assets will not be properly "
+            "positions. Returns from the missing assets will not be properly "
             "accounted for in performance attribution.\n"
             "\n"
             "The following assets were missing factor loadings: {}. "
