@@ -634,7 +634,20 @@ def set_legend_location(ax, autofmt_xdate=True):
     ax.set_position([chartBox.x0, chartBox.y0,
                      chartBox.width * 0.75, chartBox.height])
 
-    ax.legend(frameon=True, framealpha=0.5, loc='upper left',
+    # make legend order match graph lines
+    handles, labels = ax.get_legend_handles_labels()
+    handles_and_labels_sorted = sorted(zip(handles, labels),
+                                       key=lambda x : x[0].get_ydata()[-1],
+                                       reverse=True)
+
+    handles_sorted = [h[0] for h in handles_and_labels_sorted]
+    labels_sorted = [h[1] for h in handles_and_labels_sorted]
+
+    ax.legend(handles=handles_sorted,
+              labels=labels_sorted,
+              frameon=True,
+              framealpha=0.5,
+              loc='upper left',
               bbox_to_anchor=(1.05, 1))
 
     ax.set_prop_cycle('color', COLORS)
