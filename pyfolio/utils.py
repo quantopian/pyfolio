@@ -53,6 +53,8 @@ DEPRECATION_WARNING = ("Data loaders have been moved to empyrical and will "
                        "use e.g. empyrical.utils.get_symbol_rets() instead "
                        "of pyfolio.utils.get_symbol_rets()")
 
+COLORMAP = 'tab20'
+
 
 def one_dec_places(x, pos):
     """
@@ -615,9 +617,12 @@ def get_symbol_rets(symbol, start=None, end=None):
                                     end=end)
 
 
-def set_legend_location(ax, autofmt_xdate=True, change_colors=False):
+def configure_legend(ax, autofmt_xdate=True, change_colors=False):
     """
-    Put legend in right of plot instead of overlapping with it.
+    Format legend for perf attribution plots:
+    - put legend to the right of plot instead of overlapping with it
+    - make legend order match up with graph lines
+    - set colors according to colormap
     """
     chartBox = ax.get_position()
     ax.set_position([chartBox.x0, chartBox.y0,
@@ -634,7 +639,7 @@ def set_legend_location(ax, autofmt_xdate=True, change_colors=False):
 
     if change_colors:
         for handle, color in zip(handles_sorted,
-                                 sample_colormap('tab20', len(handles))):
+                                 sample_colormap(COLORMAP, len(handles))):
 
             handle.set_color(color)
 

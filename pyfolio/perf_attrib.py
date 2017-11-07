@@ -21,9 +21,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from pyfolio.pos import get_percent_alloc
-from pyfolio.txn import get_turnover
-from pyfolio.utils import print_table, set_legend_location
 
+from pyfolio.txn import get_turnover
+from pyfolio.utils import print_table, configure_legend
 
 PERF_ATTRIB_TURNOVER_THRESHOLD = 0.25
 
@@ -352,7 +352,7 @@ def plot_returns(perf_attrib_data, cost=None, ax=None):
     ax.set_title('Time series of cumulative returns')
     ax.set_ylabel('Returns')
 
-    set_legend_location(ax)
+    configure_legend(ax)
 
     return ax
 
@@ -382,7 +382,7 @@ def plot_alpha_returns(alpha_returns, ax=None):
 
     avg = alpha_returns.mean()
     ax.axvline(avg, color='b', label='Mean = {: 0.5f}'.format(avg))
-    set_legend_location(ax)
+    configure_legend(ax)
 
     return ax
 
@@ -419,7 +419,7 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
         ax.plot(factors_and_specific[col])
 
     ax.axhline(0, color='k')
-    set_legend_location(ax, change_colors=True)
+    configure_legend(ax, change_colors=True)
 
     ax.set_ylabel('Contribution to returns by factor')
     ax.set_title('Returns attribution')
@@ -452,7 +452,7 @@ def plot_risk_exposures(exposures, ax=None):
     for col in exposures:
         ax.plot(exposures[col])
 
-    set_legend_location(ax)
+    configure_legend(ax)
     ax.set_ylabel('Factor exposures')
     ax.set_title('Risk factor exposures')
 
