@@ -419,7 +419,7 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
         ax.plot(factors_and_specific[col])
 
     ax.axhline(0, color='k')
-    set_legend_location(ax)
+    set_legend_location(ax, change_colors=True)
 
     ax.set_ylabel('Contribution to returns by factor')
     ax.set_title('Returns attribution')
