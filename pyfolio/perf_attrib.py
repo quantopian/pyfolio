@@ -137,6 +137,11 @@ def perf_attrib(returns,
 
     if len(missing_stocks) > 0:
 
+        if len(missing_stocks) > 5:
+            missing_stocks_displayed = list(missing_stocks[:5])
+        else:
+            missing_stocks_displayed = list(missing_stocks)
+
         missing_stocks_warning_msg = (
             "Could not determine risk exposures for some of this algorithm's "
             "positions. Returns from the missing assets will not be properly "
@@ -149,9 +154,9 @@ def perf_attrib(returns,
             "\n"
             "{}.\n"
         ).format(
-            list(missing_stocks),
+            missing_stocks_displayed,
             missing_ratio,
-            positions[missing_stocks].mean(),
+            positions[missing_stocks[:5]].mean(),
         )
 
         warnings.warn(missing_stocks_warning_msg)
@@ -165,9 +170,17 @@ def perf_attrib(returns,
 
     if len(missing_factor_loadings_index) > 0:
 
+        if len(missing_factor_loadings_index) > 5:
+            missing_dates_displayed = "{}..{}".format(
+                missing_factor_loadings_index[0],
+                missing_factor_loadings_index[-1]
+            )
+        else:
+            missing_dates_displayed = list(missing_factor_loadings_index)
+
         warnings.warn("Could not find factor loadings for the dates: {}. "
                       "Truncating date range for performance attribution. "
-                      .format(list(missing_factor_loadings_index)))
+                      .format(missing_dates_displayed))
 
         positions = positions.drop(missing_factor_loadings_index,
                                    errors='ignore')
