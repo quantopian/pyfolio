@@ -15,7 +15,6 @@
 
 from __future__ import division
 
-from cycler import cycler
 import warnings
 
 from matplotlib.pyplot import cm
@@ -624,11 +623,10 @@ def set_legend_location(ax, autofmt_xdate=True, change_colors=False):
     ax.set_position([chartBox.x0, chartBox.y0,
                      chartBox.width * 0.75, chartBox.height])
 
-
     # make legend order match graph lines
     handles, labels = ax.get_legend_handles_labels()
     handles_and_labels_sorted = sorted(zip(handles, labels),
-                                       key=lambda x : x[0].get_ydata()[-1],
+                                       key=lambda x: x[0].get_ydata()[-1],
                                        reverse=True)
 
     handles_sorted = [h[0] for h in handles_and_labels_sorted]
