@@ -261,7 +261,7 @@ def create_perf_attrib_stats(perf_attrib, risk_exposures):
         ep.annual_return(specific_returns)
     summary['Annualized Common Return'] =\
         ep.annual_return(common_returns)
-    summary['Total Annualized Return'] =\
+    summary['Annualized Total Return'] =\
         ep.annual_return(total_returns)
 
     summary['Specific Sharpe Ratio'] =\
@@ -320,7 +320,7 @@ def show_perf_attrib_stats(returns,
 
     print_table(perf_attrib_stats.loc[['Annualized Specific Return',
                                        'Annualized Common Return',
-                                       'Total Annualized Return',
+                                       'Annualized Total Return',
                                        'Specific Sharpe Ratio']],
                 name='Summary Statistics')
 
