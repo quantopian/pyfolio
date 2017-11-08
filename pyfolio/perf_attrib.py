@@ -137,21 +137,36 @@ def perf_attrib(returns,
 
     if len(missing_stocks) > 0:
 
+        if len(missing_stocks) > 5:
+
+            missing_stocks_displayed = (
+                " {} assets were missing factor loadings, including: {}..{}"
+            ).format(len(missing_stocks),
+                     ', '.join(missing_stocks[:5].map(str)),
+                     missing_stocks[-1])
+            avg_allocation_msg = "selected missing assets"
+
+        else:
+            missing_stocks_displayed = (
+                "The following assets were missing factor loadings: {}."
+            ).format(list(missing_stocks))
+            avg_allocation_msg = "missing assets"
+
         missing_stocks_warning_msg = (
             "Could not determine risk exposures for some of this algorithm's "
             "positions. Returns from the missing assets will not be properly "
             "accounted for in performance attribution.\n"
             "\n"
-            "The following assets were missing factor loadings: {}. "
+            "{}. "
             "Ignoring for exposure calculation and performance attribution. "
-            "Ratio of assets missing: {}. Average allocation of missing "
-            "assets:\n"
+            "Ratio of assets missing: {}. Average allocation of {}:\n"
             "\n"
             "{}.\n"
         ).format(
-            list(missing_stocks),
+            missing_stocks_displayed,
             missing_ratio,
-            positions[missing_stocks].mean(),
+            avg_allocation_msg,
+            positions[missing_stocks[:5].union(missing_stocks[[-1]])].mean(),
         )
 
         warnings.warn(missing_stocks_warning_msg)
@@ -165,9 +180,22 @@ def perf_attrib(returns,
 
     if len(missing_factor_loadings_index) > 0:
 
-        warnings.warn("Could not find factor loadings for the dates: {}. "
-                      "Truncating date range for performance attribution. "
-                      .format(list(missing_factor_loadings_index)))
+        if len(missing_factor_loadings_index) > 5:
+            missing_dates_displayed = (
+                "(first missing is {}, last missing is {})"
+            ).format(
+                missing_factor_loadings_index[0],
+                missing_factor_loadings_index[-1]
+            )
+        else:
+            missing_dates_displayed = list(missing_factor_loadings_index)
+
+        warning_msg = (
+            "Could not find factor loadings for {} dates: {}. "
+            "Truncating date range for performance attribution. "
+        ).format(len(missing_factor_loadings_index), missing_dates_displayed)
+
+        warnings.warn(warning_msg)
 
         positions = positions.drop(missing_factor_loadings_index,
                                    errors='ignore')

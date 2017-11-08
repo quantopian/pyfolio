@@ -339,7 +339,8 @@ class PerfAttribTestCase(unittest.TestCase):
 
             self.assertEqual(len(w), 2)
             self.assertIn("Could not find factor loadings for "
-                          "the dates", str(w[-1].message))
+                          "{} dates".format(len(missing_dates)),
+                          str(w[-1].message))
 
             for date in missing_dates:
                 self.assertNotIn(date, exposures.index)
@@ -355,7 +356,8 @@ class PerfAttribTestCase(unittest.TestCase):
 
             self.assertEqual(len(w), 3)
             self.assertIn("Could not find factor loadings for "
-                          "the dates", str(w[-1].message))
+                          "{} dates".format(len(missing_dates)),
+                          str(w[-1].message))
 
             for date in missing_dates:
                 self.assertNotIn(date, exposures.index)
@@ -377,7 +379,8 @@ class PerfAttribTestCase(unittest.TestCase):
             self.assertIn("Ratio of assets missing: 0.333", str(w[-2].message))
 
             self.assertIn("Could not find factor loadings for "
-                          "the dates", str(w[-1].message))
+                          "{} dates".format(len(missing_dates)),
+                          str(w[-1].message))
             for date in missing_dates:
                 self.assertNotIn(date, exposures.index)
                 self.assertNotIn(date, perf_attrib_data.index)
