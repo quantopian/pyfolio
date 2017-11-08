@@ -17,6 +17,7 @@ from __future__ import division
 
 import warnings
 
+from matplotlib.pyplot import cm
 import numpy as np
 import pandas as pd
 from IPython.display import display, HTML
@@ -52,17 +53,7 @@ DEPRECATION_WARNING = ("Data loaders have been moved to empyrical and will "
                        "use e.g. empyrical.utils.get_symbol_rets() instead "
                        "of pyfolio.utils.get_symbol_rets()")
 
-# 31 visually distinct colors
-# http://phrogz.net/css/distinct-colors.html
-COLORS = [
-    '#f23d3d', '#828c23', '#698c83', '#594080', '#994d4d',
-    '#206380', '#dd39e6', '#cc9999', '#7c8060', '#66adcc',
-    '#6c7dd9', '#8a698c', '#7f6340', '#66cc7a', '#a3abd9',
-    '#d9c0a3', '#bfffcc', '#542699', '#b35986', '#d4e639',
-    '#b380ff', '#e0e6ac', '#a253a6', '#418020', '#ff409f',
-    '#ffa940', '#83ff40', '#3d58f2', '#e3ace6', '#d9a86c',
-    '#2db391'
-]
+COLORMAP = 'tab20'
 
 
 def one_dec_places(x, pos):
@@ -626,18 +617,50 @@ def get_symbol_rets(symbol, start=None, end=None):
                                     end=end)
 
 
-def set_legend_location(ax, autofmt_xdate=True):
+def configure_legend(ax, autofmt_xdate=True, change_colors=False):
     """
-    Put legend in right of plot instead of overlapping with it.
+    Format legend for perf attribution plots:
+    - put legend to the right of plot instead of overlapping with it
+    - make legend order match up with graph lines
+    - set colors according to colormap
     """
     chartBox = ax.get_position()
     ax.set_position([chartBox.x0, chartBox.y0,
                      chartBox.width * 0.75, chartBox.height])
 
-    ax.legend(frameon=True, framealpha=0.5, loc='upper left',
-              bbox_to_anchor=(1.05, 1))
+    # make legend order match graph lines
+    handles, labels = ax.get_legend_handles_labels()
+    handles_and_labels_sorted = sorted(zip(handles, labels),
+                                       key=lambda x: x[0].get_ydata()[-1],
+                                       reverse=True)
 
-    ax.set_prop_cycle('color', COLORS)
+    handles_sorted = [h[0] for h in handles_and_labels_sorted]
+    labels_sorted = [h[1] for h in handles_and_labels_sorted]
+
+    if change_colors:
+        for handle, color in zip(handles_sorted,
+                                 sample_colormap(COLORMAP, len(handles))):
+
+            handle.set_color(color)
+
+    ax.legend(handles=handles_sorted,
+              labels=labels_sorted,
+              frameon=True,
+              framealpha=0.5,
+              loc='upper left',
+              bbox_to_anchor=(1.05, 1))
 
     if autofmt_xdate:
         ax.figure.autofmt_xdate()
+
+
+def sample_colormap(cmap_name, n_samples):
+    """
+    Sample a colormap from matplotlib
+    """
+    colors = []
+    colormap = cm.cmap_d[cmap_name]
+    for i in np.linspace(0, 1, n_samples):
+        colors.append(colormap(i))
+
+    return colors
