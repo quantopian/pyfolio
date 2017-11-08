@@ -160,7 +160,7 @@ class PerfAttribTestCase(unittest.TestCase):
         )
 
         self.assertEqual(perf_attrib_summary['Annualized Specific Return'],
-                         perf_attrib_summary['Total Annualized Return'])
+                         perf_attrib_summary['Annualized Total Return'])
 
         self.assertEqual(perf_attrib_summary['Cumulative Specific Return'],
                          perf_attrib_summary['Total Returns'])
@@ -259,7 +259,7 @@ class PerfAttribTestCase(unittest.TestCase):
                          perf_attrib_summary['Annualized Common Return'])
 
         self.assertEqual(ep.annual_return(combined_returns),
-                         perf_attrib_summary['Total Annualized Return'])
+                         perf_attrib_summary['Annualized Total Return'])
 
         self.assertEqual(ep.sharpe_ratio(specific_returns),
                          perf_attrib_summary['Specific Sharpe Ratio'])
