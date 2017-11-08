@@ -138,10 +138,12 @@ def perf_attrib(returns,
     if len(missing_stocks) > 0:
 
         if len(missing_stocks) > 5:
+
             missing_stocks_displayed = (
-                " {} assets were missing factor loadings, including: {}"
+                " {} assets were missing factor loadings, including: {}..{}"
             ).format(len(missing_stocks),
-                     list(missing_stocks[:5]))
+                     ', '.join(missing_stocks[:5].map(str)),
+                     missing_stocks[-1])
             avg_allocation_msg = "selected missing assets"
 
         else:
@@ -164,7 +166,7 @@ def perf_attrib(returns,
             missing_stocks_displayed,
             missing_ratio,
             avg_allocation_msg,
-            positions[missing_stocks[:5]].mean(),
+            positions[missing_stocks[:5].union(missing_stocks[[-1]])].mean(),
         )
 
         warnings.warn(missing_stocks_warning_msg)
