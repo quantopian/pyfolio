@@ -482,7 +482,7 @@ def plot_risk_exposures(exposures, ax=None):
     for col in exposures:
         ax.plot(exposures[col])
 
-    configure_legend(ax)
+    configure_legend(ax, change_colors=True)
     ax.set_ylabel('Factor exposures')
     ax.set_title('Daily risk factor exposures')
 
