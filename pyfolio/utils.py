@@ -654,7 +654,8 @@ def configure_legend(ax, autofmt_xdate=True, change_colors=False):
               frameon=True,
               framealpha=0.5,
               loc='upper left',
-              bbox_to_anchor=(1.05, 1))
+              bbox_to_anchor=(1.05, 1),
+              fontsize='medium')
 
     if autofmt_xdate:
         ax.figure.autofmt_xdate()
