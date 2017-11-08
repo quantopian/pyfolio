@@ -203,11 +203,7 @@ def perf_attrib(returns,
         factor_returns = factor_returns.drop(missing_factor_loadings_index,
                                              errors='ignore')
 
-    if pos_in_dollars:
-        # convert holdings to percentages
-        positions = get_percent_alloc(positions)
-
-    if transactions is not None:
+    if transactions is not None and pos_in_dollars:
         turnover = get_turnover(positions, transactions).mean()
         if turnover > PERF_ATTRIB_TURNOVER_THRESHOLD:
             warning_msg = (
@@ -222,6 +218,12 @@ def perf_attrib(returns,
                 "receive inaccurate performance attribution.\n"
             )
             warnings.warn(warning_msg)
+
+    # Note that we convert positions to percentages *after* the checks
+    # above, since get_turnover() expects positions in dollars.
+    if pos_in_dollars:
+        # convert holdings to percentages
+        positions = get_percent_alloc(positions)
 
     # remove cash after normalizing positions
     positions = positions.drop('cash', axis='columns')
