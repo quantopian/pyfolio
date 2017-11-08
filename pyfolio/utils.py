@@ -17,6 +17,7 @@ from __future__ import division
 
 import warnings
 
+from itertools import cycle
 from matplotlib.pyplot import cm
 import numpy as np
 import pandas as pd
@@ -53,7 +54,12 @@ DEPRECATION_WARNING = ("Data loaders have been moved to empyrical and will "
                        "use e.g. empyrical.utils.get_symbol_rets() instead "
                        "of pyfolio.utils.get_symbol_rets()")
 
-COLORMAP = 'tab20'
+COLORMAP = 'Paired'
+COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231',
+          '#911eb4', '#46f0f0', '#f032e6', '#d2f53c', '#fabebe',
+          '#008080', '#e6beff', '#aa6e28', '#fffac8', '#800000',
+          '#aaffc3', '#808000', '#ffd8b1', '#000080', '#808080',
+          '#FFFFFF', '#000000']
 
 
 def one_dec_places(x, pos):
@@ -639,7 +645,7 @@ def configure_legend(ax, autofmt_xdate=True, change_colors=False):
 
     if change_colors:
         for handle, color in zip(handles_sorted,
-                                 sample_colormap(COLORMAP, len(handles))):
+                                 cycle(COLORS)):
 
             handle.set_color(color)
 
