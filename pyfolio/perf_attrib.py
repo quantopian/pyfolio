@@ -422,7 +422,7 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
     set_legend_location(ax)
 
     ax.set_ylabel('Contribution to returns by factor')
-    ax.set_title('Returns attribution')
+    ax.set_title('Daily returns attribution')
 
     return ax
 
@@ -454,6 +454,6 @@ def plot_risk_exposures(exposures, ax=None):
 
     set_legend_location(ax)
     ax.set_ylabel('Factor exposures')
-    ax.set_title('Risk factor exposures')
+    ax.set_title('Daily risk factor exposures')
 
     return ax
