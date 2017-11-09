@@ -189,6 +189,7 @@ def plot_rolling_fama_french(returns,
         factor_returns=factor_returns,
         rolling_window=rolling_window)
 
+    rolling_beta = rolling_beta[['SMB', 'HML', 'Mom']]
     rolling_beta.plot(alpha=0.7, ax=ax, **kwargs)
 
     ax.axhline(0.0, color='black')
