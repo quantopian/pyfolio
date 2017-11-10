@@ -175,7 +175,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
     return returns, positions, transactions
 
 
-def print_table(table, name=None, fmt=None, header_rows=None):
+def print_table(table, name=None, fmt=None, formatters=None, header_rows=None):
     """
     Pretty print a pandas DataFrame.
 
@@ -192,6 +192,11 @@ def print_table(table, name=None, fmt=None, header_rows=None):
         Formatter to use for displaying table elements.
         E.g. '{0:.2f}%' for displaying 100 as '100.00%'.
         Restores original setting after displaying.
+    formatters : list or dict, optional
+        Formatters to use by column, passed as the `formatters` arg to
+        pd.Dataframe.to_html.
+    header_rows : dict, optional
+        Extra rows to display at the top of the table.
     """
 
     if isinstance(table, pd.Series):
@@ -204,7 +209,8 @@ def print_table(table, name=None, fmt=None, header_rows=None):
     if name is not None:
         table.columns.name = name
 
-    html = table.to_html()
+    html = table.to_html(formatters=formatters)
+
     if header_rows is not None:
         # Count the number of columns for the text to span
         n_cols = html.split('<thead>')[1].split('</thead>')[0].count('<th>')
