@@ -927,7 +927,7 @@ def create_interesting_times_tear_sheet(
                       .describe().transpose()
                       .loc[:, ['mean', 'min', 'max']] * 100,
                       name='Stress Events',
-                      fmt='{0:.2f}%')
+                      float_format='{0:.2f}%'.format)
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')

@@ -718,7 +718,11 @@ def show_perf_stats(returns, factor_returns, positions=None,
         header_rows = OrderedDict(header_rows)
         header_rows.update(date_rows)
 
-    utils.print_table(perf_stats, fmt='{0:.2f}', header_rows=header_rows)
+    utils.print_table(
+        perf_stats,
+        float_format='{0:.2f}'.format,
+        header_rows=header_rows,
+    )
 
 
 def plot_returns(returns,
@@ -1191,21 +1195,21 @@ def show_and_plot_top_positions(returns, positions_alloc,
 
     if show_and_plot == 1 or show_and_plot == 2:
         utils.print_table(pd.DataFrame(df_top_long * 100, columns=['max']),
-                          fmt='{0:.2f}%',
+                          float_format='{0:.2f}%'.format,
                           name='Top 10 long positions of all time')
 
         utils.print_table(pd.DataFrame(df_top_short * 100, columns=['max']),
-                          fmt='{0:.2f}%',
+                          float_format='{0:.2f}%'.format,
                           name='Top 10 short positions of all time')
 
         utils.print_table(pd.DataFrame(df_top_abs * 100, columns=['max']),
-                          fmt='{0:.2f}%',
+                          float_format='{0:.2f}%'.format,
                           name='Top 10 positions of all time')
 
         _, _, df_top_abs_all = pos.get_top_long_short_abs(
             positions_alloc, top=9999)
         utils.print_table(pd.DataFrame(df_top_abs_all * 100, columns=['max']),
-                          fmt='{0:.2f}%',
+                          float_format='{0:.2f}%'.format,
                           name='All positions ever held')
 
     if show_and_plot == 0 or show_and_plot == 2:
@@ -1706,9 +1710,11 @@ def show_worst_drawdown_periods(returns, top=5):
     """
 
     drawdown_df = timeseries.gen_drawdown_table(returns, top=top)
-    utils.print_table(drawdown_df.sort_values('Net drawdown in %',
-                                              ascending=False),
-                      name='Worst drawdown periods', fmt='{0:.2f}')
+    utils.print_table(
+        drawdown_df.sort_values('Net drawdown in %', ascending=False),
+        name='Worst drawdown periods',
+        float_format='{0:.2f}'.format,
+    )
 
 
 def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
@@ -1842,11 +1848,14 @@ def show_profit_attribution(round_trips):
     pnl_attribution.name = ''
 
     pnl_attribution.index = pnl_attribution.index.map(utils.format_asset)
-    utils.print_table(pnl_attribution.sort_values(
-        inplace=False,
-        ascending=False),
+    utils.print_table(
+        pnl_attribution.sort_values(
+            inplace=False,
+            ascending=False,
+        ),
         name='Profitability (PnL / PnL total) per name',
-        fmt='{:.2%}')
+        float_format='{:.2%}'.format,
+    )
 
 
 def plot_prob_profit_trade(round_trips, ax=None):
