@@ -320,13 +320,40 @@ def show_perf_attrib_stats(returns,
     perf_attrib_stats, risk_exposure_stats =\
         create_perf_attrib_stats(perf_attrib_data, risk_exposures)
 
-    print_table(perf_attrib_stats.loc[['Annualized Specific Return',
-                                       'Annualized Common Return',
-                                       'Annualized Total Return',
-                                       'Specific Sharpe Ratio']],
-                name='Summary Statistics')
+    percentage_formatter = '{:.2%}'.format
+    float_formatter = '{:.2f}'.format
 
-    print_table(risk_exposure_stats, name='Exposures Summary')
+    summary_stats = perf_attrib_stats.loc[['Annualized Specific Return',
+                                           'Annualized Common Return',
+                                           'Annualized Total Return',
+                                           'Specific Sharpe Ratio']]
+
+    # Format return rows in summary stats table as percentages.
+    for col_name in (
+        'Annualized Specific Return',
+        'Annualized Common Return',
+        'Annualized Total Return',
+    ):
+        summary_stats[col_name] = percentage_formatter(summary_stats[col_name])
+
+    # Display sharpe to two decimal places.
+    summary_stats['Specific Sharpe Ratio'] = float_formatter(
+        summary_stats['Specific Sharpe Ratio']
+    )
+
+    print_table(summary_stats, name='Summary Statistics')
+
+    print_table(
+        risk_exposure_stats,
+        name='Exposures Summary',
+        # In exposures table, format exposure column to 2 decimal places, and
+        # return columns  as percentages.
+        formatters={
+            'Average Risk Factor Exposure': float_formatter,
+            'Annualized Return': percentage_formatter,
+            'Cumulative Return': percentage_formatter,
+        },
+    )
 
 
 def plot_returns(perf_attrib_data, cost=None, ax=None):

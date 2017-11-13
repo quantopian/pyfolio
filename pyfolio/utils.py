@@ -175,7 +175,11 @@ def extract_rets_pos_txn_from_zipline(backtest):
     return returns, positions, transactions
 
 
-def print_table(table, name=None, fmt=None, header_rows=None):
+def print_table(table,
+                name=None,
+                float_format=None,
+                formatters=None,
+                header_rows=None):
     """
     Pretty print a pandas DataFrame.
 
@@ -188,23 +192,25 @@ def print_table(table, name=None, fmt=None, header_rows=None):
         Table to pretty-print.
     name : str, optional
         Table name to display in upper left corner.
-    fmt : str, optional
-        Formatter to use for displaying table elements.
-        E.g. '{0:.2f}%' for displaying 100 as '100.00%'.
-        Restores original setting after displaying.
+    float_format : function, optional
+        Formatter to use for displaying table elements, passed as the
+        `float_format` arg to pd.Dataframe.to_html.
+        E.g. `'{0:.2%}'.format` for displaying 100 as '100.00%'.
+    formatters : list or dict, optional
+        Formatters to use by column, passed as the `formatters` arg to
+        pd.Dataframe.to_html.
+    header_rows : dict, optional
+        Extra rows to display at the top of the table.
     """
 
     if isinstance(table, pd.Series):
         table = pd.DataFrame(table)
 
-    if fmt is not None:
-        prev_option = pd.get_option('display.float_format')
-        pd.set_option('display.float_format', lambda x: fmt.format(x))
-
     if name is not None:
         table.columns.name = name
 
-    html = table.to_html()
+    html = table.to_html(float_format=float_format, formatters=formatters)
+
     if header_rows is not None:
         # Count the number of columns for the text to span
         n_cols = html.split('<thead>')[1].split('</thead>')[0].count('<th>')
@@ -219,9 +225,6 @@ def print_table(table, name=None, fmt=None, header_rows=None):
         html = html.replace('<thead>', '<thead>' + rows)
 
     display(HTML(html))
-
-    if fmt is not None:
-        pd.set_option('display.float_format', prev_option)
 
 
 def standardize_data(x):
