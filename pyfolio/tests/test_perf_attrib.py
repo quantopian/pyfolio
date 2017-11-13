@@ -53,6 +53,25 @@ def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
     return returns, positions, factor_returns, factor_loadings
 
 
+def mock_transactions_from_positions(positions):
+    # Compute the day-to-day diff of the positions frame, then collapse
+    # that into a frame with one row per day per asset.
+    transactions = pd.melt(
+        positions.diff().dropna().reset_index(),
+        id_vars=['index'],
+        var_name='symbol',
+        value_name='amount',
+    ).sort_values(['index', 'symbol']).set_index('index')
+
+    # Filter out positions that didn't actually change.
+    transactions = transactions[transactions.amount != 0]
+
+    # Tack on a price column.
+    transactions['price'] = 100.0
+
+    return transactions
+
+
 class PerfAttribTestCase(unittest.TestCase):
 
     def test_perf_attrib_simple(self):
@@ -398,3 +417,32 @@ class PerfAttribTestCase(unittest.TestCase):
                                 positions,
                                 factor_returns,
                                 empty_factor_loadings)
+
+    def test_high_turnover_warning(self):
+        (returns,
+         positions,
+         factor_returns,
+         factor_loadings) = generate_toy_risk_model_output()
+
+        # Mock the positions data to turn over the whole portfolio from
+        # one asset to another every day (cycling every 3 days).
+        positions.iloc[::3, :] = [100.0, 0.0, 0.0, 0.0]
+        positions.iloc[1::3, :] = [0.0, 100.0, 0.0, 0.0]
+        positions.iloc[2::3, :] = [0.0, 0.0, 100.0, 0.0]
+
+        transactions = mock_transactions_from_positions(positions)
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+
+            perf_attrib(returns,
+                        positions,
+                        factor_returns,
+                        factor_loadings,
+                        transactions=transactions)
+
+        self.assertEqual(len(w), 1)
+        self.assertIn(
+            "This algorithm has relatively high turnover of its positions.",
+            str(w[-1].message),
+        )
