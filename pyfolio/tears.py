@@ -1537,13 +1537,15 @@ def create_perf_attrib_tear_sheet(returns,
 
         perf_attrib.plot_factor_contribution_to_perf(
             perf_attrib_data.drop(styles, axis='columns', errors='ignore'),
-            ax=plt.subplot(gs[1, 0])
+            ax=plt.subplot(gs[1, 0]),
+            title='Cumulative sector returns attribution'
         )
 
         perf_attrib.plot_factor_contribution_to_perf(
             perf_attrib_data[perf_attrib_data.columns.
                              intersection(styles + ['specific_returns'])],
-            ax=plt.subplot(gs[1, 1])
+            ax=plt.subplot(gs[1, 1]),
+            title='Cumulative style returns attribution'
         )
 
         perf_attrib.plot_risk_exposures(
