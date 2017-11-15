@@ -446,8 +446,10 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
         ['total_returns', 'common_returns'], axis='columns', errors='ignore'
     )
 
-    for col in factors_and_specific:
-        ax.plot(factors_and_specific[col])
+    factors_and_specific_cumulative = ep.cum_returns(factors_and_specific)
+
+    for col in factors_and_specific_cumulative:
+        ax.plot(factors_and_specific_cumulative[col])
 
     ax.axhline(0, color='k')
     configure_legend(ax, change_colors=True)
