@@ -44,6 +44,8 @@ except ImportError:
         ImportWarning)
     have_bayesian = False
 
+STYLES = ['momentum', 'size', 'value', 'reversal_short_term', 'volatility']
+
 
 def timer(msg_body, previous_time):
     current_time = time()
@@ -1471,7 +1473,8 @@ def create_perf_attrib_tear_sheet(returns,
                                   factor_loadings,
                                   transactions=None,
                                   pos_in_dollars=True,
-                                  return_fig=False):
+                                  return_fig=False,
+                                  styles=STYLES):
     """
     Generate plots and tables for analyzing a strategy's performance.
 
@@ -1503,6 +1506,10 @@ def create_perf_attrib_tear_sheet(returns,
 
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
+
+    styles : list, optional
+        list of styles to show in separate plots. If None, style factors
+        and sectors will be shown in the same plot
     """
     portfolio_exposures, perf_attrib_data = perf_attrib.perf_attrib(
         returns, positions, factor_returns, factor_loadings, transactions,
@@ -1514,18 +1521,51 @@ def create_perf_attrib_tear_sheet(returns,
                                        factor_loadings, transactions)
 
     vertical_sections = 3
+    horizontal_sections = 1
+
+    if styles is not None:
+        horizontal_sections = 2
+
     fig = plt.figure(figsize=[14, vertical_sections * 6])
-    gs = gridspec.GridSpec(vertical_sections, 1, wspace=0.5, hspace=0.5)
+    gs = gridspec.GridSpec(vertical_sections, horizontal_sections,
+                           wspace=0.5, hspace=0.5)
 
-    perf_attrib.plot_returns(perf_attrib_data, ax=plt.subplot(gs[0]))
+    perf_attrib.plot_returns(perf_attrib_data, ax=plt.subplot(gs[0, :]))
 
-    perf_attrib.plot_factor_contribution_to_perf(perf_attrib_data,
-                                                 ax=plt.subplot(gs[1]))
+    # plot style and sector attributed factor returns
+    if styles is not None:
 
-    perf_attrib.plot_risk_exposures(portfolio_exposures,
-                                    ax=plt.subplot(gs[2]))
+        perf_attrib.plot_factor_contribution_to_perf(
+            perf_attrib_data.drop(styles, axis='columns', errors='ignore'),
+            ax=plt.subplot(gs[1, 0])
+        )
 
-    gs.tight_layout(fig)
+        perf_attrib.plot_factor_contribution_to_perf(
+            perf_attrib_data[perf_attrib_data.columns.
+                             intersection(styles + ['specific_returns'])],
+            ax=plt.subplot(gs[1, 1])
+        )
+
+        perf_attrib.plot_risk_exposures(
+            portfolio_exposures.drop(styles, axis='columns', errors='ignore'),
+            ax=plt.subplot(gs[2, 0])
+        )
+
+        perf_attrib.plot_risk_exposures(
+            portfolio_exposures[portfolio_exposures.columns
+                                .intersection(styles)],
+            ax=plt.subplot(gs[2, 1])
+        )
+
+    else:
+
+        perf_attrib.plot_factor_contribution_to_perf(perf_attrib_data,
+                                                     ax=plt.subplot(gs[1, :]))
+
+        perf_attrib.plot_risk_exposures(portfolio_exposures,
+                                        ax=plt.subplot(gs[2, :]))
+
+    gs.tight_layout(fig, w_pad=14)
 
     plt.show()
     if return_fig:

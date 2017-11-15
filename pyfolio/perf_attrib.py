@@ -443,7 +443,8 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
         ax = plt.gca()
 
     factors_and_specific = perf_attrib_data.drop(
-        ['total_returns', 'common_returns'], axis='columns')
+        ['total_returns', 'common_returns'], axis='columns', errors='ignore'
+    )
 
     for col in factors_and_specific:
         ax.plot(factors_and_specific[col])

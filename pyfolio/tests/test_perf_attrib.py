@@ -7,7 +7,8 @@ import empyrical as ep
 from pyfolio.perf_attrib import perf_attrib, create_perf_attrib_stats
 
 
-def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
+def generate_toy_risk_model_output(start_date='2017-01-01', periods=10,
+                                   num_styles=2):
     """
     Generate toy risk model output.
 
@@ -27,7 +28,7 @@ def generate_toy_risk_model_output(start_date='2017-01-01', periods=10):
     dts = pd.date_range(start_date, periods=periods)
     np.random.seed(123)
     tickers = ['AAPL', 'TLT', 'XOM']
-    styles = ['factor1', 'factor2']
+    styles = ['factor{}'.format(i) for i in xrange(num_styles)]
 
     returns = pd.Series(index=dts,
                         data=np.random.randn(periods)) / 100
