@@ -1530,6 +1530,8 @@ def create_perf_attrib_tear_sheet(returns,
     perf_attrib.show_perf_attrib_stats(returns, positions, factor_returns,
                                        factor_loadings, transactions)
 
+    # one section for the returns plot, and for each factor grouping
+    # one section for factor returns, and one for risk exposures 
     vertical_sections = 1 + 2 * len(factor_partitions)
     current_section = 0
 
