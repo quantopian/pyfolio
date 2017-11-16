@@ -464,7 +464,8 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None,
     return ax
 
 
-def plot_risk_exposures(exposures, ax=None):
+def plot_risk_exposures(exposures, ax=None,
+                        title='Daily risk factor exposures'):
     """
     Parameters
     ----------
@@ -491,6 +492,6 @@ def plot_risk_exposures(exposures, ax=None):
 
     configure_legend(ax, change_colors=True)
     ax.set_ylabel('Factor exposures')
-    ax.set_title('Daily risk factor exposures')
+    ax.set_title(title)
 
     return ax

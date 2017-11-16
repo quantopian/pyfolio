@@ -44,7 +44,14 @@ except ImportError:
         ImportWarning)
     have_bayesian = False
 
-STYLES = ['momentum', 'size', 'value', 'reversal_short_term', 'volatility']
+FACTOR_PARTITIONS = {
+    'style': ['momentum', 'size', 'value', 'reversal_short_term',
+              'volatility'],
+    'sector': ['basic_materials', 'consumer_cyclical', 'financial_services',
+               'real_estate', 'consumer_defensive', 'health_care',
+               'utilities', 'communication_services', 'energy', 'industrials',
+               'technology']
+}
 
 
 def timer(msg_body, previous_time):
@@ -1474,7 +1481,7 @@ def create_perf_attrib_tear_sheet(returns,
                                   transactions=None,
                                   pos_in_dollars=True,
                                   return_fig=False,
-                                  styles=STYLES):
+                                  factor_partitions=FACTOR_PARTITIONS):
     """
     Generate plots and tables for analyzing a strategy's performance.
 
@@ -1507,9 +1514,12 @@ def create_perf_attrib_tear_sheet(returns,
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
 
-    styles : list, optional
-        list of styles to show in separate plots. If None, style factors
-        and sectors will be shown in the same plot
+    factor_partitions : dict
+        dict specifying how factors should be separated in factor returns
+        and risk exposures plots
+        - Example:
+          {'style': ['momentum', 'size', 'value', ...],
+           'sector': ['technology', 'materials', ... ]}
     """
     portfolio_exposures, perf_attrib_data = perf_attrib.perf_attrib(
         returns, positions, factor_returns, factor_loadings, transactions,
@@ -1520,52 +1530,54 @@ def create_perf_attrib_tear_sheet(returns,
     perf_attrib.show_perf_attrib_stats(returns, positions, factor_returns,
                                        factor_loadings, transactions)
 
-    vertical_sections = 3
-    horizontal_sections = 1
-
-    if styles is not None:
-        horizontal_sections = 2
+    vertical_sections = 1 + 2 * len(factor_partitions)
+    current_section = 0
 
     fig = plt.figure(figsize=[14, vertical_sections * 6])
-    gs = gridspec.GridSpec(vertical_sections, horizontal_sections,
+    gs = gridspec.GridSpec(vertical_sections, 1,
                            wspace=0.5, hspace=0.5)
 
-    perf_attrib.plot_returns(perf_attrib_data, ax=plt.subplot(gs[0, :]))
+    perf_attrib.plot_returns(perf_attrib_data,
+                             ax=plt.subplot(gs[current_section]))
+    current_section += 1
 
-    # plot style and sector attributed factor returns
-    if styles is not None:
+    if factor_partitions is not None:
 
-        perf_attrib.plot_factor_contribution_to_perf(
-            perf_attrib_data.drop(styles, axis='columns', errors='ignore'),
-            ax=plt.subplot(gs[1, 0]),
-            title='Cumulative sector returns attribution'
-        )
+        for factor_type, partitions in factor_partitions.iteritems():
 
-        perf_attrib.plot_factor_contribution_to_perf(
-            perf_attrib_data[perf_attrib_data.columns.
-                             intersection(styles + ['specific_returns'])],
-            ax=plt.subplot(gs[1, 1]),
-            title='Cumulative style returns attribution'
-        )
+            columns_to_select = perf_attrib_data.columns.intersection(
+                partitions + ['specific_returns']
+            )
 
-        perf_attrib.plot_risk_exposures(
-            portfolio_exposures.drop(styles, axis='columns', errors='ignore'),
-            ax=plt.subplot(gs[2, 0])
-        )
+            perf_attrib.plot_factor_contribution_to_perf(
+                perf_attrib_data[columns_to_select],
+                ax=plt.subplot(gs[current_section]),
+                title='Cumulative {} returns attribution'.format(factor_type)
+            )
+            current_section += 1
 
-        perf_attrib.plot_risk_exposures(
-            portfolio_exposures[portfolio_exposures.columns
-                                .intersection(styles)],
-            ax=plt.subplot(gs[2, 1])
-        )
+        for factor_type, partitions in factor_partitions.iteritems():
+
+            perf_attrib.plot_risk_exposures(
+                portfolio_exposures[portfolio_exposures.columns
+                                    .intersection(partitions)],
+                ax=plt.subplot(gs[current_section]),
+                title='Daily {} factor exposures'.format(factor_type)
+            )
+            current_section += 1
 
     else:
 
-        perf_attrib.plot_factor_contribution_to_perf(perf_attrib_data,
-                                                     ax=plt.subplot(gs[1, :]))
+        perf_attrib.plot_factor_contribution_to_perf(
+            perf_attrib_data,
+            ax=plt.subplot(gs[current_section])
+        )
+        current_section += 1
 
-        perf_attrib.plot_risk_exposures(portfolio_exposures,
-                                        ax=plt.subplot(gs[2, :]))
+        perf_attrib.plot_risk_exposures(
+            portfolio_exposures,
+            ax=plt.subplot(gs[current_section])
+        )
 
     gs.tight_layout(fig, w_pad=14)
 
