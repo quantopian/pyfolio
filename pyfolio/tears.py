@@ -44,6 +44,15 @@ except ImportError:
         ImportWarning)
     have_bayesian = False
 
+FACTOR_PARTITIONS = {
+    'style': ['momentum', 'size', 'value', 'reversal_short_term',
+              'volatility'],
+    'sector': ['basic_materials', 'consumer_cyclical', 'financial_services',
+               'real_estate', 'consumer_defensive', 'health_care',
+               'utilities', 'communication_services', 'energy', 'industrials',
+               'technology']
+}
+
 
 def timer(msg_body, previous_time):
     current_time = time()
@@ -1471,7 +1480,8 @@ def create_perf_attrib_tear_sheet(returns,
                                   factor_loadings,
                                   transactions=None,
                                   pos_in_dollars=True,
-                                  return_fig=False):
+                                  return_fig=False,
+                                  factor_partitions=FACTOR_PARTITIONS):
     """
     Generate plots and tables for analyzing a strategy's performance.
 
@@ -1503,6 +1513,13 @@ def create_perf_attrib_tear_sheet(returns,
 
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
+
+    factor_partitions : dict
+        dict specifying how factors should be separated in factor returns
+        and risk exposures plots
+        - Example:
+          {'style': ['momentum', 'size', 'value', ...],
+           'sector': ['technology', 'materials', ... ]}
     """
     portfolio_exposures, perf_attrib_data = perf_attrib.perf_attrib(
         returns, positions, factor_returns, factor_loadings, transactions,
@@ -1513,17 +1530,56 @@ def create_perf_attrib_tear_sheet(returns,
     perf_attrib.show_perf_attrib_stats(returns, positions, factor_returns,
                                        factor_loadings, transactions)
 
-    vertical_sections = 3
+    # one section for the returns plot, and for each factor grouping
+    # one section for factor returns, and one for risk exposures
+    vertical_sections = 1 + 2 * len(factor_partitions)
+    current_section = 0
+
     fig = plt.figure(figsize=[14, vertical_sections * 6])
-    gs = gridspec.GridSpec(vertical_sections, 1, wspace=0.5, hspace=0.5)
+    gs = gridspec.GridSpec(vertical_sections, 1,
+                           wspace=0.5, hspace=0.5)
 
-    perf_attrib.plot_returns(perf_attrib_data, ax=plt.subplot(gs[0]))
+    perf_attrib.plot_returns(perf_attrib_data,
+                             ax=plt.subplot(gs[current_section]))
+    current_section += 1
 
-    perf_attrib.plot_factor_contribution_to_perf(perf_attrib_data,
-                                                 ax=plt.subplot(gs[1]))
+    if factor_partitions is not None:
 
-    perf_attrib.plot_risk_exposures(portfolio_exposures,
-                                    ax=plt.subplot(gs[2]))
+        for factor_type, partitions in factor_partitions.iteritems():
+
+            columns_to_select = perf_attrib_data.columns.intersection(
+                partitions + ['specific_returns']
+            )
+
+            perf_attrib.plot_factor_contribution_to_perf(
+                perf_attrib_data[columns_to_select],
+                ax=plt.subplot(gs[current_section]),
+                title='Cumulative {} returns attribution'.format(factor_type)
+            )
+            current_section += 1
+
+        for factor_type, partitions in factor_partitions.iteritems():
+
+            perf_attrib.plot_risk_exposures(
+                portfolio_exposures[portfolio_exposures.columns
+                                    .intersection(partitions)],
+                ax=plt.subplot(gs[current_section]),
+                title='Daily {} factor exposures'.format(factor_type)
+            )
+            current_section += 1
+
+    else:
+
+        perf_attrib.plot_factor_contribution_to_perf(
+            perf_attrib_data,
+            ax=plt.subplot(gs[current_section])
+        )
+        current_section += 1
+
+        perf_attrib.plot_risk_exposures(
+            portfolio_exposures,
+            ax=plt.subplot(gs[current_section])
+        )
 
     gs.tight_layout(fig)
 

@@ -57,9 +57,8 @@ DEPRECATION_WARNING = ("Data loaders have been moved to empyrical and will "
 COLORMAP = 'Paired'
 COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231',
           '#911eb4', '#46f0f0', '#f032e6', '#d2f53c', '#fabebe',
-          '#008080', '#e6beff', '#aa6e28', '#fffac8', '#800000',
-          '#aaffc3', '#808000', '#ffd8b1', '#000080', '#808080',
-          '#FFFFFF', '#000000']
+          '#008080', '#e6beff', '#aa6e28', '#800000', '#aaffc3',
+          '#808000', '#ffd8b1', '#000080', '#808080']
 
 
 def one_dec_places(x, pos):
@@ -626,7 +625,8 @@ def get_symbol_rets(symbol, start=None, end=None):
                                     end=end)
 
 
-def configure_legend(ax, autofmt_xdate=True, change_colors=False):
+def configure_legend(ax, autofmt_xdate=True, change_colors=False,
+                     rotation=30, ha='right'):
     """
     Format legend for perf attribution plots:
     - put legend to the right of plot instead of overlapping with it
@@ -660,8 +660,12 @@ def configure_legend(ax, autofmt_xdate=True, change_colors=False):
               bbox_to_anchor=(1.05, 1),
               fontsize='large')
 
+    # manually rotate xticklabels instead of using matplotlib's autofmt_xdate
+    # because it disables xticklabels for all but the last plot
     if autofmt_xdate:
-        ax.figure.autofmt_xdate()
+        for label in ax.get_xticklabels():
+            label.set_ha(ha)
+            label.set_rotation(rotation)
 
 
 def sample_colormap(cmap_name, n_samples):

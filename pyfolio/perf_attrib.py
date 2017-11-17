@@ -444,7 +444,8 @@ def plot_alpha_returns(alpha_returns, ax=None):
     return ax
 
 
-def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
+def plot_factor_contribution_to_perf(perf_attrib_data, ax=None,
+                                     title='Cumulative returns attribution'):
     """
     Plot each factor's contribution to performance.
 
@@ -462,6 +463,9 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
     ax :  matplotlib.axes.Axes
         axes on which plots are made. if None, current axes will be used
 
+    title : str, optional
+        title of plot
+
     Returns
     -------
     ax :  matplotlib.axes.Axes
@@ -470,21 +474,25 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None):
         ax = plt.gca()
 
     factors_and_specific = perf_attrib_data.drop(
-        ['total_returns', 'common_returns'], axis='columns')
+        ['total_returns', 'common_returns'], axis='columns', errors='ignore'
+    )
 
-    for col in factors_and_specific:
-        ax.plot(factors_and_specific[col])
+    factors_and_specific_cumulative = ep.cum_returns(factors_and_specific)
+
+    for col in factors_and_specific_cumulative:
+        ax.plot(factors_and_specific_cumulative[col])
 
     ax.axhline(0, color='k')
     configure_legend(ax, change_colors=True)
 
-    ax.set_ylabel('Contribution to returns by factor')
-    ax.set_title('Daily returns attribution')
+    ax.set_ylabel('Cumulative returns by factor')
+    ax.set_title(title)
 
     return ax
 
 
-def plot_risk_exposures(exposures, ax=None):
+def plot_risk_exposures(exposures, ax=None,
+                        title='Daily risk factor exposures'):
     """
     Parameters
     ----------
@@ -511,6 +519,6 @@ def plot_risk_exposures(exposures, ax=None):
 
     configure_legend(ax, change_colors=True)
     ax.set_ylabel('Factor exposures')
-    ax.set_title('Daily risk factor exposures')
+    ax.set_title(title)
 
     return ax
