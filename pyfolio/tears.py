@@ -1581,7 +1581,7 @@ def create_perf_attrib_tear_sheet(returns,
             ax=plt.subplot(gs[current_section])
         )
 
-    gs.tight_layout(fig, w_pad=14)
+    gs.tight_layout(fig)
 
     plt.show()
     if return_fig:
