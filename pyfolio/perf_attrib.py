@@ -444,8 +444,11 @@ def plot_alpha_returns(alpha_returns, ax=None):
     return ax
 
 
-def plot_factor_contribution_to_perf(perf_attrib_data, ax=None,
-                                     title='Cumulative returns attribution'):
+def plot_factor_contribution_to_perf(
+        perf_attrib_data,
+        ax=None,
+        title='Cumulative common returns attribution'
+):
     """
     Plot each factor's contribution to performance.
 
