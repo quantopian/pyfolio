@@ -120,122 +120,23 @@ def perf_attrib(returns,
             2017-01-01  0.249087  0.935925        1.185012          1.185012
             2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
     """
-    missing_stocks = positions.columns.difference(
-        factor_loadings.index.get_level_values(1).unique()
-    )
-
-    # cash will not be in factor_loadings
-    num_stocks = len(positions.columns) - 1
-    missing_stocks = missing_stocks.drop('cash')
-    num_stocks_covered = num_stocks - len(missing_stocks)
-    missing_ratio = round(len(missing_stocks) / num_stocks, ndigits=3)
-
-    if num_stocks_covered == 0:
-        raise ValueError("Could not perform performance attribution. "
-                         "No factor loadings were available for this "
-                         "algorithm's positions.")
-
-    if len(missing_stocks) > 0:
-
-        if len(missing_stocks) > 5:
-
-            missing_stocks_displayed = (
-                " {} assets were missing factor loadings, including: {}..{}"
-            ).format(len(missing_stocks),
-                     ', '.join(missing_stocks[:5].map(str)),
-                     missing_stocks[-1])
-            avg_allocation_msg = "selected missing assets"
-
-        else:
-            missing_stocks_displayed = (
-                "The following assets were missing factor loadings: {}."
-            ).format(list(missing_stocks))
-            avg_allocation_msg = "missing assets"
-
-        missing_stocks_warning_msg = (
-            "Could not determine risk exposures for some of this algorithm's "
-            "positions. Returns from the missing assets will not be properly "
-            "accounted for in performance attribution.\n"
-            "\n"
-            "{}. "
-            "Ignoring for exposure calculation and performance attribution. "
-            "Ratio of assets missing: {}. Average allocation of {}:\n"
-            "\n"
-            "{}.\n"
-        ).format(
-            missing_stocks_displayed,
-            missing_ratio,
-            avg_allocation_msg,
-            positions[missing_stocks[:5].union(missing_stocks[[-1]])].mean(),
-        )
-
-        warnings.warn(missing_stocks_warning_msg)
-
-        positions = positions.drop(missing_stocks, axis='columns',
-                                   errors='ignore')
-
-    missing_factor_loadings_index = positions.index.difference(
-        factor_loadings.index.get_level_values(0).unique()
-    )
-
-    if len(missing_factor_loadings_index) > 0:
-
-        if len(missing_factor_loadings_index) > 5:
-            missing_dates_displayed = (
-                "(first missing is {}, last missing is {})"
-            ).format(
-                missing_factor_loadings_index[0],
-                missing_factor_loadings_index[-1]
-            )
-        else:
-            missing_dates_displayed = list(missing_factor_loadings_index)
-
-        warning_msg = (
-            "Could not find factor loadings for {} dates: {}. "
-            "Truncating date range for performance attribution. "
-        ).format(len(missing_factor_loadings_index), missing_dates_displayed)
-
-        warnings.warn(warning_msg)
-
-        positions = positions.drop(missing_factor_loadings_index,
-                                   errors='ignore')
-        returns = returns.drop(missing_factor_loadings_index, errors='ignore')
-        factor_returns = factor_returns.drop(missing_factor_loadings_index,
-                                             errors='ignore')
-
-    if transactions is not None and pos_in_dollars:
-        turnover = get_turnover(positions, transactions).mean()
-        if turnover > PERF_ATTRIB_TURNOVER_THRESHOLD:
-            warning_msg = (
-                "This algorithm has relatively high turnover of its "
-                "positions. As a result, performance attribution might not be "
-                "fully accurate.\n"
-                "\n"
-                "Performance attribution is calculated based "
-                "on end-of-day holdings and does not account for intraday "
-                "activity. Algorithms that derive a high percentage of "
-                "returns from buying and selling within the same day may "
-                "receive inaccurate performance attribution.\n"
-            )
-            warnings.warn(warning_msg)
+    (returns,
+     positions,
+     factor_returns,
+     factor_loadings) = _truncate_and_warn(returns,
+                                           positions,
+                                           factor_returns,
+                                           factor_loadings,
+                                           transactions=transactions,
+                                           pos_in_dollars=pos_in_dollars)
 
     # Note that we convert positions to percentages *after* the checks
     # above, since get_turnover() expects positions in dollars.
-    if pos_in_dollars:
-        # convert holdings to percentages
-        positions = get_percent_alloc(positions)
+    positions = _stack_positions(positions, pos_in_dollars=pos_in_dollars)
 
-    # remove cash after normalizing positions
-    positions = positions.drop('cash', axis='columns')
+    risk_exposures_portfolio = compute_exposures(positions, factor_loadings,
+                                                 stack_positions=False)
 
-    # convert positions to long format
-    positions = positions.stack()
-    positions.index = positions.index.set_names(['dt', 'ticker'])
-
-    risk_exposures = factor_loadings.multiply(positions,
-                                              axis='rows')
-
-    risk_exposures_portfolio = risk_exposures.groupby(level='dt').sum()
     perf_attrib_by_factor = risk_exposures_portfolio.multiply(factor_returns)
 
     common_returns = perf_attrib_by_factor.sum(axis='columns')
@@ -247,6 +148,74 @@ def perf_attrib(returns,
 
     return (risk_exposures_portfolio,
             pd.concat([perf_attrib_by_factor, returns_df], axis='columns'))
+
+
+def compute_exposures(positions, factor_loadings, stack_positions=True,
+                      pos_in_dollars=True):
+    """
+    Compute daily risk factor exposures.
+
+    Parameters
+    ----------
+    positions: pd.DataFrame or pd.Series
+        Daily holdings (in dollars or percentages), indexed by date, OR
+        a series of holdings indexed by date and ticker.
+        - Examples:
+                        AAPL  TLT  XOM  cash
+            2017-01-01    34   58   10     0
+            2017-01-02    22   77   18     0
+            2017-01-03   -15   27   30    15
+
+                            AAPL       TLT       XOM  cash
+            2017-01-01  0.333333  0.568627  0.098039   0.0
+            2017-01-02  0.188034  0.658120  0.153846   0.0
+            2017-01-03  0.208333  0.375000  0.416667   0.0
+
+            dt          ticker
+            2017-01-01  AAPL      0.417582
+                        TLT       0.010989
+                        XOM       0.571429
+            2017-01-02  AAPL      0.202381
+                        TLT       0.535714
+                        XOM       0.261905
+
+    factor_loadings : pd.DataFrame
+        Factor loadings for all days in the date range, with date and ticker as
+        index, and factors as columns.
+        - Example:
+                               momentum  reversal
+            dt         ticker
+            2017-01-01 AAPL   -1.592914  0.852830
+                       TLT     0.184864  0.895534
+                       XOM     0.993160  1.149353
+            2017-01-02 AAPL   -0.140009 -0.524952
+                       TLT    -1.066978  0.185435
+                       XOM    -1.798401  0.761549
+
+    stack_positions : bool
+        Flag indicating whether `positions` should be converted to long format.
+
+    pos_in_dollars : bool
+        Flag indicating whether `positions` are in dollars or percentages
+        If True, positions are in dollars.
+
+    Returns
+    -------
+    risk_exposures_portfolio : pd.DataFrame
+        df indexed by datetime, with factors as columns
+        - Example:
+                        momentum  reversal
+            dt
+            2017-01-01 -0.238655  0.077123
+            2017-01-02  0.821872  1.520515
+    """
+    if stack_positions:
+        positions = _stack_positions(positions, pos_in_dollars=pos_in_dollars)
+
+    risk_exposures = factor_loadings.multiply(positions,
+                                              axis='rows')
+
+    return risk_exposures.groupby(level='dt').sum()
 
 
 def create_perf_attrib_stats(perf_attrib, risk_exposures):
@@ -522,3 +491,149 @@ def plot_risk_exposures(exposures, ax=None,
     ax.set_title(title)
 
     return ax
+
+
+def _truncate_and_warn(returns,
+                       positions,
+                       factor_returns,
+                       factor_loadings,
+                       transactions=None,
+                       pos_in_dollars=True):
+    """
+    Make sure that all inputs have matching dates and tickers,
+    and raise warnings if necessary.
+    """
+    missing_stocks = positions.columns.difference(
+        factor_loadings.index.get_level_values(1).unique()
+    )
+
+    # cash will not be in factor_loadings
+    num_stocks = len(positions.columns) - 1
+    missing_stocks = missing_stocks.drop('cash')
+    num_stocks_covered = num_stocks - len(missing_stocks)
+    missing_ratio = round(len(missing_stocks) / num_stocks, ndigits=3)
+
+    if num_stocks_covered == 0:
+        raise ValueError("Could not perform performance attribution. "
+                         "No factor loadings were available for this "
+                         "algorithm's positions.")
+
+    if len(missing_stocks) > 0:
+
+        if len(missing_stocks) > 5:
+
+            missing_stocks_displayed = (
+                " {} assets were missing factor loadings, including: {}..{}"
+            ).format(len(missing_stocks),
+                     ', '.join(missing_stocks[:5].map(str)),
+                     missing_stocks[-1])
+            avg_allocation_msg = "selected missing assets"
+
+        else:
+            missing_stocks_displayed = (
+                "The following assets were missing factor loadings: {}."
+            ).format(list(missing_stocks))
+            avg_allocation_msg = "missing assets"
+
+        missing_stocks_warning_msg = (
+            "Could not determine risk exposures for some of this algorithm's "
+            "positions. Returns from the missing assets will not be properly "
+            "accounted for in performance attribution.\n"
+            "\n"
+            "{}. "
+            "Ignoring for exposure calculation and performance attribution. "
+            "Ratio of assets missing: {}. Average allocation of {}:\n"
+            "\n"
+            "{}.\n"
+        ).format(
+            missing_stocks_displayed,
+            missing_ratio,
+            avg_allocation_msg,
+            positions[missing_stocks[:5].union(missing_stocks[[-1]])].mean(),
+        )
+
+        warnings.warn(missing_stocks_warning_msg)
+
+        positions = positions.drop(missing_stocks, axis='columns',
+                                   errors='ignore')
+
+    missing_factor_loadings_index = positions.index.difference(
+        factor_loadings.index.get_level_values(0).unique()
+    )
+
+    missing_factor_loadings_index = positions.index.difference(
+        factor_loadings.index.get_level_values(0).unique()
+    )
+
+    if len(missing_factor_loadings_index) > 0:
+
+        if len(missing_factor_loadings_index) > 5:
+            missing_dates_displayed = (
+                "(first missing is {}, last missing is {})"
+            ).format(
+                missing_factor_loadings_index[0],
+                missing_factor_loadings_index[-1]
+            )
+        else:
+            missing_dates_displayed = list(missing_factor_loadings_index)
+
+        warning_msg = (
+            "Could not find factor loadings for {} dates: {}. "
+            "Truncating date range for performance attribution. "
+        ).format(len(missing_factor_loadings_index), missing_dates_displayed)
+
+        warnings.warn(warning_msg)
+
+        positions = positions.drop(missing_factor_loadings_index,
+                                   errors='ignore')
+        returns = returns.drop(missing_factor_loadings_index, errors='ignore')
+        factor_returns = factor_returns.drop(missing_factor_loadings_index,
+                                             errors='ignore')
+
+    if transactions is not None and pos_in_dollars:
+        turnover = get_turnover(positions, transactions).mean()
+        if turnover > PERF_ATTRIB_TURNOVER_THRESHOLD:
+            warning_msg = (
+                "This algorithm has relatively high turnover of its "
+                "positions. As a result, performance attribution might not be "
+                "fully accurate.\n"
+                "\n"
+                "Performance attribution is calculated based "
+                "on end-of-day holdings and does not account for intraday "
+                "activity. Algorithms that derive a high percentage of "
+                "returns from buying and selling within the same day may "
+                "receive inaccurate performance attribution.\n"
+            )
+            warnings.warn(warning_msg)
+
+    return (returns, positions, factor_returns, factor_loadings)
+
+
+def _stack_positions(positions, pos_in_dollars=True):
+    """
+    Convert positions to percentages if necessary, and change them
+    to long format.
+
+    Parameters
+    ----------
+    positions: pd.DataFrame
+        Daily holdings (in dollars or percentages), indexed by date.
+        Will be converted to percentages if positions are in dollars.
+        Short positions show up as cash in the 'cash' column.
+
+    pos_in_dollars : bool
+        Flag indicating whether `positions` are in dollars or percentages
+        If True, positions are in dollars.
+    """
+    if pos_in_dollars:
+        # convert holdings to percentages
+        positions = get_percent_alloc(positions)
+
+    # remove cash after normalizing positions
+    positions = positions.drop('cash', axis='columns')
+
+    # convert positions to long format
+    positions = positions.stack()
+    positions.index = positions.index.set_names(['dt', 'ticker'])
+
+    return positions
