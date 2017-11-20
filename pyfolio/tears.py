@@ -45,7 +45,7 @@ except ImportError:
     have_bayesian = False
 
 FACTOR_PARTITIONS = {
-    'style': ['momentum', 'size', 'value', 'reversal_short_term',
+    'style': ['momentum', 'size', 'value', 'short_term_reversal',
               'volatility'],
     'sector': ['basic_materials', 'consumer_cyclical', 'financial_services',
                'real_estate', 'consumer_defensive', 'health_care',
