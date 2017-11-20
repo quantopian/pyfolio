@@ -473,14 +473,14 @@ def plot_factor_contribution_to_perf(perf_attrib_data, ax=None,
     if ax is None:
         ax = plt.gca()
 
-    factors_and_specific = perf_attrib_data.drop(
+    factors_to_plot = perf_attrib_data.drop(
         ['total_returns', 'common_returns'], axis='columns', errors='ignore'
     )
 
-    factors_and_specific_cumulative = ep.cum_returns(factors_and_specific)
+    factors_cumulative = ep.cum_returns(factors_to_plot)
 
-    for col in factors_and_specific_cumulative:
-        ax.plot(factors_and_specific_cumulative[col])
+    for col in factors_cumulative:
+        ax.plot(factors_cumulative[col])
 
     ax.axhline(0, color='k')
     configure_legend(ax, change_colors=True)
