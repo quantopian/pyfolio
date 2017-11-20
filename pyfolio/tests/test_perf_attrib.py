@@ -28,7 +28,7 @@ def generate_toy_risk_model_output(start_date='2017-01-01', periods=10,
     dts = pd.date_range(start_date, periods=periods)
     np.random.seed(123)
     tickers = ['AAPL', 'TLT', 'XOM']
-    styles = ['factor{}'.format(i) for i in xrange(num_styles)]
+    styles = ['factor{}'.format(i) for i in range(num_styles)]
 
     returns = pd.Series(index=dts,
                         data=np.random.randn(periods)) / 100
