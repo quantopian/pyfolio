@@ -90,7 +90,8 @@ def create_full_tear_sheet(returns,
                            factor_returns=None,
                            factor_loadings=None,
                            pos_in_dollars=True,
-                           header_rows=None):
+                           header_rows=None,
+                           factor_partitions=FACTOR_PARTITIONS):
     """
     Generate a number of tear sheets that are useful
     for analyzing a strategy's performance.
@@ -182,6 +183,10 @@ def create_full_tear_sheet(returns,
     set_context : boolean, optional
         If True, set default plotting style context.
          - See plotting.context().
+    factor_partitions : dict, optional
+        dict specifying how factors should be separated in perf attrib
+        factor returns and risk exposures plots
+        - See create_perf_attrib_tear_sheet().
     """
 
     if benchmark_rets is None:
@@ -245,7 +250,8 @@ def create_full_tear_sheet(returns,
         if factor_returns is not None and factor_loadings is not None:
             create_perf_attrib_tear_sheet(returns, positions, factor_returns,
                                           factor_loadings, transactions,
-                                          pos_in_dollars=pos_in_dollars)
+                                          pos_in_dollars=pos_in_dollars,
+                                          factor_partitions=factor_partitions)
 
     if bayesian:
         create_bayesian_tear_sheet(returns,
