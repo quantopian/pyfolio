@@ -1548,13 +1548,15 @@ def create_perf_attrib_tear_sheet(returns,
         for factor_type, partitions in factor_partitions.iteritems():
 
             columns_to_select = perf_attrib_data.columns.intersection(
-                partitions + ['specific_returns']
+                partitions
             )
 
             perf_attrib.plot_factor_contribution_to_perf(
                 perf_attrib_data[columns_to_select],
                 ax=plt.subplot(gs[current_section]),
-                title='Cumulative {} returns attribution'.format(factor_type)
+                title=(
+                    'Cumulative common {} returns attribution'
+                ).format(factor_type)
             )
             current_section += 1
 
