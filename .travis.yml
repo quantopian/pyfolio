@@ -20,25 +20,25 @@ before_install:
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+      wget https://repo.continuum.io/miniconda/Miniconda2-4.3.27.1-Linux-x86_64.sh -O miniconda.sh;
     else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      wget https://repo.continuum.io/miniconda/Miniconda3-4.3.27.1-Linux-x86_64.sh -O miniconda.sh;
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
   - cp pyfolio/tests/matplotlibrc .
 
 install:
-  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas=$PANDAS_VERSION Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION pandas=$PANDAS_VERSION pytables networkx matplotlib-tests
   - source activate testenv
-  - pip install nose_parameterized
+  - pip install -r requirements_test.txt -c travis_constraints.txt
+  - pip install nose_parameterized -c travis_constraints.txt
   #- pip install --no-deps git+https://github.com/quantopian/zipline
-  - pip install -e .[bayesian]
+  - pip install -e .[bayesian] -c travis_constraints.txt
 
 before_script:
   - "flake8 pyfolio"
