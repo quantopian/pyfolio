@@ -94,7 +94,7 @@ def format_asset(asset):
 
     try:
         import zipline.assets
-    except:
+    except ImportError:
         return asset
 
     if isinstance(asset, zipline.assets.Asset):
