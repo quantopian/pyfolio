@@ -45,7 +45,7 @@ except ImportError:
     have_bayesian = False
 
 FACTOR_PARTITIONS = {
-    'style': ['momentum', 'size', 'value', 'reversal_short_term',
+    'style': ['momentum', 'size', 'value', 'short_term_reversal',
               'volatility'],
     'sector': ['basic_materials', 'consumer_cyclical', 'financial_services',
                'real_estate', 'consumer_defensive', 'health_care',
@@ -1536,9 +1536,15 @@ def create_perf_attrib_tear_sheet(returns,
     perf_attrib.show_perf_attrib_stats(returns, positions, factor_returns,
                                        factor_loadings, transactions)
 
-    # one section for the returns plot, and for each factor grouping
-    # one section for factor returns, and one for risk exposures
-    vertical_sections = 1 + 2 * len(factor_partitions)
+    # only plot partitions for which there are data in perf_attrib_data
+    num_partitions = 0
+    for partitions in factor_partitions.values():
+        if len(perf_attrib_data.columns.intersection(partitions)) > 0:
+            num_partitions += 1
+
+    # one section for the returns plot, and for each factor partition,
+    # one section for factor returns, and one for exposures
+    vertical_sections = 1 + 2 * max(num_partitions, 1)
     current_section = 0
 
     fig = plt.figure(figsize=[14, vertical_sections * 6])
@@ -1557,6 +1563,9 @@ def create_perf_attrib_tear_sheet(returns,
                 partitions
             )
 
+            if len(columns_to_select) == 0:
+                continue
+
             perf_attrib.plot_factor_contribution_to_perf(
                 perf_attrib_data[columns_to_select],
                 ax=plt.subplot(gs[current_section]),
@@ -1567,10 +1576,13 @@ def create_perf_attrib_tear_sheet(returns,
             current_section += 1
 
         for factor_type, partitions in factor_partitions.iteritems():
+            columns_to_select = portfolio_exposures.columns.intersection(partitions)
+
+            if len(columns_to_select) == 0:
+                continue
 
             perf_attrib.plot_risk_exposures(
-                portfolio_exposures[portfolio_exposures.columns
-                                    .intersection(partitions)],
+                portfolio_exposures[columns_to_select],
                 ax=plt.subplot(gs[current_section]),
                 title='Daily {} factor exposures'.format(factor_type)
             )
