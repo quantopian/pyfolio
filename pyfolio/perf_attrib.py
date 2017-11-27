@@ -123,18 +123,19 @@ def perf_attrib(returns,
     (returns,
      positions,
      factor_returns,
-     factor_loadings) = _truncate_and_warn(returns,
-                                           positions,
-                                           factor_returns,
-                                           factor_loadings,
-                                           transactions=transactions,
-                                           pos_in_dollars=pos_in_dollars)
+     factor_loadings) = _align_and_warn(returns,
+                                        positions,
+                                        factor_returns,
+                                        factor_loadings,
+                                        transactions=transactions,
+                                        pos_in_dollars=pos_in_dollars)
 
     # Note that we convert positions to percentages *after* the checks
     # above, since get_turnover() expects positions in dollars.
     positions = _stack_positions(positions, pos_in_dollars=pos_in_dollars)
 
-    risk_exposures_portfolio = compute_exposures(positions, factor_loadings,
+    risk_exposures_portfolio = compute_exposures(positions,
+                                                 factor_loadings,
                                                  stack_positions=False)
 
     perf_attrib_by_factor = risk_exposures_portfolio.multiply(factor_returns)
@@ -493,12 +494,12 @@ def plot_risk_exposures(exposures, ax=None,
     return ax
 
 
-def _truncate_and_warn(returns,
-                       positions,
-                       factor_returns,
-                       factor_loadings,
-                       transactions=None,
-                       pos_in_dollars=True):
+def _align_and_warn(returns,
+                    positions,
+                    factor_returns,
+                    factor_loadings,
+                    transactions=None,
+                    pos_in_dollars=True):
     """
     Make sure that all inputs have matching dates and tickers,
     and raise warnings if necessary.
