@@ -18,6 +18,7 @@ import warnings
 from time import time
 
 import empyrical as ep
+from IPython.display import display, Markdown
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
@@ -1532,16 +1533,19 @@ def create_perf_attrib_tear_sheet(returns,
         pos_in_dollars=pos_in_dollars
     )
 
+    display(Markdown("## Performance Relative to Common Risk Factors"))
+
     # aggregate perf attrib stats and show summary table
     perf_attrib.show_perf_attrib_stats(returns, positions, factor_returns,
                                        factor_loadings, transactions)
 
     # one section for the returns plot, and for each factor grouping
     # one section for factor returns, and one for risk exposures
-    vertical_sections = 1 + 2 * len(factor_partitions)
+    vertical_sections = 1 + 2 * max(len(factor_partitions), 1)
     current_section = 0
 
     fig = plt.figure(figsize=[14, vertical_sections * 6])
+
     gs = gridspec.GridSpec(vertical_sections, 1,
                            wspace=0.5, hspace=0.5)
 
