@@ -361,8 +361,10 @@ def plot_returns(perf_attrib_data, cost=None, ax=None):
     total_returns_label = 'Total returns'
 
     if cost is not None:
-        cost = ep.cum_returns(cost)
-        returns = returns - cost
+        cumulative_returns_less_costs = _cumulative_returns_less_costs(
+            returns,
+            cost
+        )
         total_returns_label += ' (adjusted)'
 
     specific_returns = perf_attrib_data['specific_returns']
@@ -375,7 +377,8 @@ def plot_returns(perf_attrib_data, cost=None, ax=None):
             label='Cumulative common returns')
 
     if cost is not None:
-        ax.plot(-cost, color='k', label='Cumulative cost spent')
+        ax.plot(-ep.cum_returns(cost), color='k',
+                label='Cumulative cost spent')
 
     ax.set_title('Time series of cumulative returns')
     ax.set_ylabel('Returns')
@@ -642,3 +645,10 @@ def _stack_positions(positions, pos_in_dollars=True):
     positions.index = positions.index.set_names(['dt', 'ticker'])
 
     return positions
+
+
+def _cumulative_returns_less_costs(returns, costs):
+    """
+    Compute cumulative returns, less costs.
+    """
+    return ep.cum_returns(returns - costs)
