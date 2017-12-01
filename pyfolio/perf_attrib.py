@@ -370,7 +370,8 @@ def plot_returns(perf_attrib_data, cost=None, ax=None):
     specific_returns = perf_attrib_data['specific_returns']
     common_returns = perf_attrib_data['common_returns']
 
-    ax.plot(ep.cum_returns(returns), color='b', label=total_returns_label)
+    ax.plot(cumulative_returns_less_costs, color='b',
+            label=total_returns_label)
     ax.plot(ep.cum_returns(specific_returns), color='g',
             label='Cumulative specific returns')
     ax.plot(ep.cum_returns(common_returns), color='r',
