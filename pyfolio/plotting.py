@@ -1429,7 +1429,7 @@ def plot_turnover(returns, transactions, positions,
               loc=legend_loc, frameon=True, framealpha=0.5)
     ax.set_title('Daily turnover')
     ax.set_xlim((returns.index[0], returns.index[-1]))
-    ax.set_ylim((0, 1))
+    ax.set_ylim((0, 2))
     ax.set_ylabel('Turnover')
     ax.set_xlabel('')
     return ax
