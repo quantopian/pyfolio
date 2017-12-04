@@ -360,7 +360,6 @@ def plot_returns(perf_attrib_data, cost=None, ax=None):
     returns = perf_attrib_data['total_returns']
     total_returns_label = 'Total returns'
 
-
     cumulative_returns_less_costs = _cumulative_returns_less_costs(
         returns,
         cost
@@ -654,5 +653,5 @@ def _cumulative_returns_less_costs(returns, costs):
     Compute cumulative returns, less costs.
     """
     if costs is None:
-        costs = 0
+        return ep.cum_returns(returns)
     return ep.cum_returns(returns - costs)

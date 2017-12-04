@@ -4,7 +4,11 @@ import unittest
 import warnings
 
 import empyrical as ep
-from pyfolio.perf_attrib import perf_attrib, create_perf_attrib_stats
+from pyfolio.perf_attrib import (
+    perf_attrib,
+    create_perf_attrib_stats,
+    _cumulative_returns_less_costs
+)
 
 
 def generate_toy_risk_model_output(start_date='2017-01-01', periods=10,
@@ -446,4 +450,19 @@ class PerfAttribTestCase(unittest.TestCase):
         self.assertIn(
             "This algorithm has relatively high turnover of its positions.",
             str(w[-1].message),
+        )
+
+    def test_cumulative_returns_less_costs(self):
+
+        returns = generate_toy_risk_model_output()[0]
+        cost = pd.Series([0.001] * len(returns), index=returns.index)
+
+        pd.util.testing.assert_series_equal(
+            ep.cum_returns(returns),
+            _cumulative_returns_less_costs(returns, None)
+        )
+
+        pd.util.testing.assert_series_equal(
+            ep.cum_returns(returns - cost),
+            _cumulative_returns_less_costs(returns, cost)
         )
