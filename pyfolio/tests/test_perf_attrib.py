@@ -454,15 +454,22 @@ class PerfAttribTestCase(unittest.TestCase):
 
     def test_cumulative_returns_less_costs(self):
 
-        returns = generate_toy_risk_model_output()[0]
+        returns = pd.Series(
+            [0.1] * 3,
+            index=pd.date_range('2017-01-01', periods=3)
+        )
         cost = pd.Series([0.001] * len(returns), index=returns.index)
 
+        expected_returns = pd.Series([0.1, 0.21, 0.331],
+                                     index=returns.index)
         pd.util.testing.assert_series_equal(
-            ep.cum_returns(returns),
+            expected_returns,
             _cumulative_returns_less_costs(returns, None)
         )
 
+        expected_returns = pd.Series([0.099000, 0.207801, 0.327373],
+                                     index=returns.index)
         pd.util.testing.assert_series_equal(
-            ep.cum_returns(returns - cost),
+            expected_returns,
             _cumulative_returns_less_costs(returns, cost)
         )
