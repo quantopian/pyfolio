@@ -440,6 +440,7 @@ def create_simple_tear_sheet(returns,
         plt.setp(ax.get_xticklabels(), visible=True)
 
     plt.show()
+    plt.close(fig)
 
 
 @plotting.customize
@@ -634,6 +635,8 @@ def create_returns_tear_sheet(returns, positions=None,
     plt.show()
     if return_fig:
         return fig
+    else:
+        plt.close(fig)
 
 
 @plotting.customize
@@ -730,6 +733,8 @@ def create_position_tear_sheet(returns, positions,
     plt.show()
     if return_fig:
         return fig
+    else:
+        plt.close(fig)
 
 
 @plotting.customize
@@ -811,6 +816,8 @@ def create_txn_tear_sheet(returns, positions, transactions,
     plt.show()
     if return_fig:
         return fig
+    else:
+        plt.close(fig)
 
 
 @plotting.customize
@@ -902,6 +909,8 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
     plt.show()
     if return_fig:
         return fig
+    else:
+        plt.close(fig)
 
 
 @plotting.customize
@@ -979,6 +988,8 @@ def create_interesting_times_tear_sheet(
     plt.show()
     if return_fig:
         return fig
+    else:
+        plt.close(fig)
 
 
 @plotting.customize
@@ -1297,6 +1308,8 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     plt.show()
     if return_fig:
         return fig
+    else:
+        plt.close(fig)
 
 
 @plotting.customize
@@ -1478,6 +1491,8 @@ def create_risk_tear_sheet(positions,
     plt.show()
     if return_fig:
         return fig
+    else:
+        plt.close(fig)
 
 
 @plotting.customize
@@ -1598,3 +1613,5 @@ def create_perf_attrib_tear_sheet(returns,
     plt.show()
     if return_fig:
         return fig
+    else:
+        plt.close(fig)
