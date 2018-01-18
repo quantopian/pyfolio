@@ -65,7 +65,7 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000, progressbar=True):
         of the posterior.
     """
 
-    data_bmark = pd.concat([data, bmark], axis='columns').dropna()
+    data_bmark = pd.concat([data, bmark], axis=1).dropna()
 
     with pm.Model() as model:
         sigma = pm.HalfCauchy(
