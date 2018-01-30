@@ -8,22 +8,21 @@
         <meta name="author" content="Quantopian Inc.">
         
         <link rel="shortcut icon" href="../img/favicon.ico">
-
-	<title>Releases - pyfolio</title>
-
+        <title>Releases - pyfolio</title>
         <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../css/highlight.css">
         <link href="../extra.css" rel="stylesheet">
-
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
             <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
 
-        
+        <script src="../js/jquery-1.10.2.min.js"></script>
+        <script src="../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../js/highlight.pack.js"></script> 
     </head>
 
     <body>
@@ -33,7 +32,6 @@
 
         <!-- Collapsed navigation -->
         <div class="navbar-header">
-            
             <!-- Expander button -->
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>
@@ -41,77 +39,49 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            
-
-            <!-- Main title -->
             <a class="navbar-brand" href="..">pyfolio</a>
         </div>
 
         <!-- Expanded navigation -->
         <div class="navbar-collapse collapse">
-            
                 <!-- Main navigation -->
                 <ul class="nav navbar-nav">
-                
-                
                     <li >
                         <a href="..">Overview</a>
                     </li>
-                
-                
-                
                     <li class="active">
                         <a href="./">Releases</a>
                     </li>
-                
-                
-                
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorial <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                        
                             
 <li >
     <a href="../notebooks/single_stock_example/">Single stock</a>
 </li>
-
-                        
                             
 <li >
     <a href="../notebooks/zipline_algo_example/">Zipline algorithm</a>
 </li>
-
-                        
                             
 <li >
     <a href="../notebooks/bayesian/">Bayesian analysis</a>
 </li>
-
-                        
                             
 <li >
-    <a href="../notebooks/sector_mapping_example/">Sector analysis</a>
+    <a href="../notebooks/sector_mappings_example/">Sector analysis</a>
 </li>
-
-                        
                             
 <li >
-    <a href="../notebooks/round_trip_example/">Round trip analysis</a>
+    <a href="../notebooks/round_trip_tear_sheet_example/">Round trip analysis</a>
 </li>
-
-                        
                             
 <li >
     <a href="../notebooks/slippage_example/">Slippage analysis</a>
 </li>
-
-                        
                         </ul>
                     </li>
-                
-                
                 </ul>
-            
 
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -119,7 +89,6 @@
                         <i class="fa fa-search"></i> Search
                     </a>
                 </li>
-                
                     <li >
                         <a rel="next" href="..">
                             <i class="fa fa-arrow-left"></i> Previous
@@ -130,79 +99,110 @@
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
-                
-                
                     <li>
-                        <a href="https://github.com/quantopian/pyfolio">
-                            
-                                <i class="fa fa-github"></i>
-                            
-                            GitHub
-                        </a>
+                        <a href="https://github.com/quantopian/pyfolio/edit/master/docs/whatsnew.md"><i class="fa fa-github"></i> Edit on GitHub</a>
                     </li>
-                
             </ul>
         </div>
     </div>
 </div>
 
         <div class="container">
-            
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-    
         <li class="main active"><a href="#whats-new">What's New</a></li>
-        
-            <li><a href="#v060-oct-17-2016">v0.6.0 (Oct, 17, 2016)</a></li>
-        
-            <li><a href="#v051-june-10-2016">v0.5.1 (June, 10, 2016)</a></li>
-        
+            <li><a href="#v080-aug-23rd-2017">v0.8.0 (Aug 23rd, 2017)</a></li>
+            <li><a href="#v070-jan-28th-2017">v0.7.0 (Jan 28th, 2017)</a></li>
+            <li><a href="#v060-oct-17-2016">v0.6.0 (Oct 17, 2016)</a></li>
+            <li><a href="#v051-june-10-2016">v0.5.1 (June 10, 2016)</a></li>
             <li><a href="#v050-april-21-2016-olympia">v0.5.0 (April 21, 2016) -- Olympia</a></li>
-        
             <li><a href="#v040-dec-10-2015">v0.4.0 (Dec 10, 2015)</a></li>
-        
             <li><a href="#v031-nov-12-2015">v0.3.1 (Nov 12, 2015)</a></li>
-        
             <li><a href="#v03-oct-23-2015">v0.3 (Oct 23, 2015)</a></li>
-        
             <li><a href="#v02-oct-16-2015">v0.2 (Oct 16, 2015)</a></li>
-        
-    
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
 
 <h1 id="whats-new">What's New</h1>
 <p>These are new features and improvements of note in each release.</p>
-<h2 id="v060-oct-17-2016">v0.6.0 (Oct, 17, 2016)</h2>
-<p>This is a major new release from <code>0.5.1</code>. All users are recommended to upgrade.</p>
+<h2 id="v080-aug-23rd-2017">v0.8.0 (Aug 23rd, 2017)</h2>
+<p>This is a major release from <code>0.7.0</code>, and all users are recommended to upgrade.</p>
 <h3 id="new-features">New features</h3>
 <ul>
-<li>Computation of performance and risk measures has been split off into <a href="https://github.com/quantopian/empyrical"><code>empyrical</code></a>. This allows <a href="https://zipline.io"><code>Zipline</code></a> and <code>pyfolio</code> to use the same code to calculate its risk statistics. By <a href="https://github.com/ahgnaw">Ana Ruelas</a> and <a href="https://github.com/abhijeetkalyan">Abhi Kalyan</a>. </li>
-<li>New multistrike cone which redraws the cone when it crossed its initial bounds <a href="https://github.com/quantopian/pyfolio/pull/310">PR310</a>. By <a href="https://github.com/ahgnaw">Ana Ruelas</a> and <a href="https://github.com/abhijeetkalyan">Abhi Kalyan</a>.</li>
+<li>Risk tear sheet: added a new tear sheet to analyze risk exposures to common factors (e.g. mean reversion and momentum), sector (e.g. Morningstar sectors), market cap and illiquid stocks. By <a href="https://github.com/eigenfoo">George Ho</a>.</li>
+<li>Simple tear sheet: added a new tear sheet that presents only the most important plots in the full tear sheet, for a quick general overview of a portfolio's performance. By <a href="https://github.com/eigenfoo">George Ho</a>.</li>
+<li>Performance attribution: added new table to do performance attribution
+   analysis, such as the amount of returns attributable to common factors, and
+   summary statistics such as the multi-factor alpha and multi-factor Sharpe ratio. By <a href="https://github.com/vikram-narayan">Vikram Narayan</a>.</li>
+<li>Volatility plot: added a rolling annual volatility plot to the returns tear sheet. By <a href="https://github.com/hkopp">hkopp</a>.</li>
 </ul>
 <h3 id="bugfixes">Bugfixes</h3>
+<ul>
+<li>Yahoo and pandas data-reader: fixed bug regarding Yahoo backend for market data and pandas data-reader. By <a href="https://github.com/twiecki">Thomas Wiecki</a> and <a href="https://github.com/gusgordon">Gus Gordon</a>.</li>
+<li><code>empyrical</code> compatibility: removed <code>information_ratio</code> to remain compatible with <code>empyrical</code>. By <a href="https://github.com/twiecki">Thomas Wiecki</a>.</li>
+<li>Fama-French rolling multivariate regression: fixed bug where the rolling Fama-French plot performed separate linear regressions instead of a multivariate regression. By <a href="https://github.com/eigenfoo">George Ho</a>.</li>
+<li>Other minor bugfixes. By <a href="https://github.com/ssanderson">Scott Sanderson</a>,
+   <a href="https://github.com/jonathanng">Jonathan Ng</a>,
+   <a href="https://github.com/SylvainDe">SylvainDe</a> and
+   <a href="https://github.com/mckelvin">mckelvin</a>.</li>
+</ul>
+<h3 id="maintenance">Maintenance</h3>
+<ul>
+<li>Documentation: updated and improved <code>pyfolio</code> documentation and example
+   Jupyter notebooks. By <a href="https://github.com/eigenfoo">George Ho</a>.</li>
+<li>Data loader migration: all data loaders have been migrated from <code>pyfolio</code> to
+   <code>empyrical</code>. By <a href="https://github.com/jameschristopher">James Christopher</a>.</li>
+<li>Improved plotting style: fixed issues with formatting and presentation of
+   plots. By <a href="https://github.com/eigenfoo">George Ho</a>.</li>
+</ul>
+<h2 id="v070-jan-28th-2017">v0.7.0 (Jan 28th, 2017)</h2>
+<p>This is a major release from <code>0.6.0</code>, and all users are recommended to upgrade.</p>
+<h3 id="new-features_1">New features</h3>
+<ul>
+<li>Adds a transaction timing plot, which gives insight into the strategies' trade times.</li>
+<li>Adds a plot showing the number of longs and shorts held over time.</li>
+<li>New round trips plot selects a sample of held positions (16 by default) and shows their round trips. This replaces the old round trip plot, which became unreadable for strategies that traded many positions.</li>
+<li>Adds basic capability for analyzing intraday strategies. If a strategy makes a large amount of transactions relative to its end-of-day positions, then pyfolio will attempt to reconstruct the intraday positions, take the point of peak exposure to the market during each day, and plot that data with the positions tear sheet. By default pyfolio will automatically detect this, but the behavior can be changed by passing either <code>estimate_intraday=True</code> or <code>estimate_intraday=False</code> to the tear sheet functions (<a href="https://github.com/quantopian/pyfolio/blob/master/pyfolio/tears.py#L131">see here</a>).</li>
+<li>Now formats <a href="https://github.com/quantopian/zipline">zipline</a> assets, displaying their ticker symbol.</li>
+<li>Gross leverage is no longer required to be passed, and will now be calculated from the passed positions DataFrame.</li>
+</ul>
+<h3 id="bugfixes_1">Bugfixes</h3>
+<ul>
+<li>Cone plotting location is now correct.</li>
+<li>Adjust scaling of beta and Fama-French plots.</li>
+<li>Removed multiple dependencies, some of which were previously unused.</li>
+<li>Various text fixes.</li>
+</ul>
+<h2 id="v060-oct-17-2016">v0.6.0 (Oct 17, 2016)</h2>
+<p>This is a major new release from <code>0.5.1</code>. All users are recommended to upgrade.</p>
+<h3 id="new-features_2">New features</h3>
+<ul>
+<li>Computation of performance and risk measures has been split off into <a href="https://github.com/quantopian/empyrical"><code>empyrical</code></a>. This allows <a href="https://zipline.io"><code>Zipline</code></a> and <code>pyfolio</code> to use the same code to calculate its risk statistics. By <a href="https://github.com/ahgnaw">Ana Ruelas</a> and <a href="https://github.com/abhijeetkalyan">Abhi Kalyan</a>.</li>
+<li>New multistrike cone which redraws the cone when it crossed its initial bounds <a href="https://github.com/quantopian/pyfolio/pull/310">PR310</a>. By <a href="https://github.com/ahgnaw">Ana Ruelas</a> and <a href="https://github.com/abhijeetkalyan">Abhi Kalyan</a>.</li>
+</ul>
+<h3 id="bugfixes_2">Bugfixes</h3>
 <ul>
 <li>Can use most recent PyMC3 now.</li>
 <li>Depends on seaborn 0.7.0 or later now <a href="https://github.com/quantopian/pyfolio/pull/331">PR331</a>.</li>
 <li>Disable buggy computation of round trips per day and per month <a href="https://github.com/quantopian/pyfolio/pull/339">PR339</a>.</li>
 </ul>
-<h2 id="v051-june-10-2016">v0.5.1 (June, 10, 2016)</h2>
+<h2 id="v051-june-10-2016">v0.5.1 (June 10, 2016)</h2>
 <p>This is a bugfix release from <code>0.5.0</code> with limited new functionality. All users are recommended to upgrade.</p>
-<h3 id="new-features_1">New features</h3>
+<h3 id="new-features_3">New features</h3>
 <ul>
 <li>OOS data is now overlaid on top of box plot <a href="https://github.com/quantopian/pyfolio/pull/306">PR306</a> by <a href="https://github.com/ahgnaw">Ana Ruelas</a></li>
 <li>New logo <a href="https://github.com/quantopian/pyfolio/pull/298">PR298</a> by <a href="https://github.com/tasopetridis">Taso Petridis</a> and <a href="https://github.com/richafrank">Richard Frank</a></li>
 <li>Raw returns plot and cumulative log returns plot <a href="https://github.com/quantopian/pyfolio/pull/294">PR294</a> by <a href="https://github.com/twiecki">Thomas Wiecki</a></li>
 <li>Net exposure line to the long/short exposure plot <a href="https://github.com/quantopian/pyfolio/pull/301">PR301</a> by <a href="https://github.com/ahgnaw">Ana Ruelas</a></li>
 </ul>
-<h3 id="bugfixes_1">Bugfixes</h3>
+<h3 id="bugfixes_3">Bugfixes</h3>
 <ul>
 <li>Fix drawdown behavior and pandas exception in tear-sheet creation <a href="https://github.com/quantopian/pyfolio/pull/297">PR297</a> by <a href="https://github.com/flaviodrt">Flavio Duarte</a></li>
 </ul>
 <h2 id="v050-april-21-2016-olympia">v0.5.0 (April 21, 2016) -- Olympia</h2>
 <p>This is a major release from <code>0.4.0</code> that includes many new analyses and features. We recommend that all users upgrade to this new version. Also update your dependencies, specifically, <code>pandas&gt;=0.18.0</code>, <code>seaborn&gt;=0.6.0</code> and <code>zipline&gt;=0.8.4</code>.</p>
-<h3 id="new-features_2">New features</h3>
+<h3 id="new-features_4">New features</h3>
 <ul>
 <li>New capacity tear-sheet to assess how much capital can be traded on a strategy <a href="https://github.com/quantopian/pyfolio/pull/284">PR284</a>. <a href="https://github.com/a-campbell">Andrew Campbell</a>.</li>
 <li>Bootstrap analysis to assess uncertainty in performance metrics <a href="https://github.com/quantopian/pyfolio/pull/261">PR261</a>. <a href="https://github.com/twiecki">Thomas Wiecki</a></li>
@@ -218,7 +218,7 @@
 </ul>
 <h2 id="v040-dec-10-2015">v0.4.0 (Dec 10, 2015)</h2>
 <p>This is a major release from 0.3.1 that includes new features and quite a few bug fixes. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_3">New features</h3>
+<h3 id="new-features_5">New features</h3>
 <ul>
 <li>Round-trip analysis <a href="https://github.com/quantopian/pyfolio/pull/210">PR210</a> Andrew, Thomas</li>
 <li>Improved cone to forecast returns that uses a bootstrap instead of linear forecasting <a href="https://github.com/quantopian/pyfolio/pull/233">PR233</a> Andrew, Thomas</li>
@@ -235,7 +235,7 @@
 </ul>
 <h2 id="v031-nov-12-2015">v0.3.1 (Nov 12, 2015)</h2>
 <p>This is a minor release from 0.3 that includes mostly bugfixes but also some new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_4">New features</h3>
+<h3 id="new-features_6">New features</h3>
 <ul>
 <li>Add Information Ratio <a href="https://github.com/quantopian/pyfolio/pull/194">PR194</a> by @MridulS</li>
 <li>Bayesian tear-sheet now accepts 'Fama-French' option to do Bayesian multivariate regression against Fama-French risk factors <a href="https://github.com/quantopian/pyfolio/pull/200">PR200</a> by Shane Bussman</li>
@@ -248,7 +248,7 @@
 <li>Sector map was not being passed from <code>create_returns_tearsheet</code> <a href="https://github.com/quantopian/pyfolio/commit/894b753e365f9cb4861ffca2ef214c5a64b2bef4">commit</a></li>
 <li>New sector mapping feature was not Python 3 compatible <a href="https://github.com/quantopian/pyfolio/pull/201">PR201</a></li>
 </ul>
-<h3 id="maintenance">Maintenance</h3>
+<h3 id="maintenance_1">Maintenance</h3>
 <ul>
 <li>We now depend on pandas-datareader as the yahoo finance loaders from pandas will be deprecated <a href="https://github.com/quantopian/pyfolio/pull/181">PR181</a> by @tswrightsandpointe</li>
 </ul>
@@ -264,7 +264,7 @@
 </ul>
 <h2 id="v03-oct-23-2015">v0.3 (Oct 23, 2015)</h2>
 <p>This is a major release from 0.2 that includes many exciting new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_5">New features</h3>
+<h3 id="new-features_7">New features</h3>
 <ul>
 <li>Sector exposures: sum positions by sector given a dictionary or series of symbol to sector mappings <a href="https://github.com/quantopian/pyfolio/pull/166">PR166</a></li>
 <li>Ability to make cones with multiple shades stdev regions <a href="https://github.com/quantopian/pyfolio/pull/168">PR168</a></li>
@@ -278,7 +278,7 @@
 </ul>
 <h2 id="v02-oct-16-2015">v0.2 (Oct 16, 2015)</h2>
 <p>This is a major release from 0.1 that includes mainly bugfixes and refactorings but also some new features. We recommend that all users upgrade to this new version.</p>
-<h3 id="new-features_6">New features</h3>
+<h3 id="new-features_8">New features</h3>
 <ul>
 <li>Volatility matched cumulative returns plot <a href="https://github.com/quantopian/pyfolio/pull/126">PR126</a>.</li>
 <li>Allow for different periodicity (annualization factors) in the annual_() methods <a href="https://github.com/quantopian/pyfolio/pull/164">PR164</a>.</li>
@@ -291,46 +291,81 @@
 <li>Monthly returns distribution should not stack by year <a href="https://github.com/quantopian/pyfolio/pull/162">PR162</a>.</li>
 <li>Fix gross leverage <a href="https://github.com/quantopian/pyfolio/pull/147">PR147</a></li>
 </ul></div>
-            
         </div>
 
         <footer class="col-md-12">
             <hr>
-            
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
-
-        <script src="../js/jquery-1.10.2.min.js"></script>
-        <script src="../js/bootstrap-3.0.3.min.js"></script>
-        <script src="../js/highlight.pack.js"></script>
         <script>var base_url = '..';</script>
-        <script data-main="../mkdocs/js/search.js" src="../mkdocs/js/require.js"></script>
         <script src="../js/base.js"></script>
+        <script src="../search/require.js"></script>
+        <script src="../search/search.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
                     </div>
-                    <div class="modal-body">
-                        <p>
-                            From here you can search these documents. Enter
-                            your search terms below.
-                        </p>
-                        <form role="form">
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
-                            </div>
-                        </form>
-                        <div id="mkdocs-search-results"></div>
-                    </div>
-                    <div class="modal-footer">
-                    </div>
-                </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
             </div>
         </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&rarr;</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
 
     </body>
 </html>

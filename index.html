@@ -4,26 +4,25 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
+        <meta name="description" content="None">
         <meta name="author" content="Quantopian Inc.">
         
         <link rel="shortcut icon" href="./img/favicon.ico">
-
-	<title>pyfolio</title>
-
+        <title>pyfolio</title>
         <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="./css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="./css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="./css/highlight.css">
         <link href="./extra.css" rel="stylesheet">
-
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
             <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
 
-        
+        <script src="./js/jquery-1.10.2.min.js"></script>
+        <script src="./js/bootstrap-3.0.3.min.js"></script>
+        <script src="./js/highlight.pack.js"></script> 
     </head>
 
     <body class="homepage">
@@ -33,7 +32,6 @@
 
         <!-- Collapsed navigation -->
         <div class="navbar-header">
-            
             <!-- Expander button -->
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>
@@ -41,77 +39,49 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            
-
-            <!-- Main title -->
             <a class="navbar-brand" href=".">pyfolio</a>
         </div>
 
         <!-- Expanded navigation -->
         <div class="navbar-collapse collapse">
-            
                 <!-- Main navigation -->
                 <ul class="nav navbar-nav">
-                
-                
                     <li class="active">
                         <a href=".">Overview</a>
                     </li>
-                
-                
-                
                     <li >
                         <a href="whatsnew/">Releases</a>
                     </li>
-                
-                
-                
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorial <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                        
                             
 <li >
     <a href="notebooks/single_stock_example/">Single stock</a>
 </li>
-
-                        
                             
 <li >
     <a href="notebooks/zipline_algo_example/">Zipline algorithm</a>
 </li>
-
-                        
                             
 <li >
     <a href="notebooks/bayesian/">Bayesian analysis</a>
 </li>
-
-                        
                             
 <li >
-    <a href="notebooks/sector_mapping_example/">Sector analysis</a>
+    <a href="notebooks/sector_mappings_example/">Sector analysis</a>
 </li>
-
-                        
                             
 <li >
-    <a href="notebooks/round_trip_example/">Round trip analysis</a>
+    <a href="notebooks/round_trip_tear_sheet_example/">Round trip analysis</a>
 </li>
-
-                        
                             
 <li >
     <a href="notebooks/slippage_example/">Slippage analysis</a>
 </li>
-
-                        
                         </ul>
                     </li>
-                
-                
                 </ul>
-            
 
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -119,7 +89,6 @@
                         <i class="fa fa-search"></i> Search
                     </a>
                 </li>
-                
                     <li class="disabled">
                         <a rel="next" >
                             <i class="fa fa-arrow-left"></i> Previous
@@ -130,40 +99,22 @@
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
-                
-                
                     <li>
-                        <a href="https://github.com/quantopian/pyfolio">
-                            
-                                <i class="fa fa-github"></i>
-                            
-                            GitHub
-                        </a>
+                        <a href="https://github.com/quantopian/pyfolio/edit/master/docs/index.md"><i class="fa fa-github"></i> Edit on GitHub</a>
                     </li>
-                
             </ul>
         </div>
     </div>
 </div>
 
         <div class="container">
-            
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-    
         <li class="main active"><a href="#pyfolio">pyfolio</a></li>
-        
             <li><a href="#installation">Installation</a></li>
-        
             <li><a href="#usage">Usage</a></li>
-        
             <li><a href="#questions">Questions?</a></li>
-        
-            <li><a href="#contribute">Contribute</a></li>
-        
-            <li><a href="#credits">Credits</a></li>
-        
-    
+            <li><a href="#contributing">Contributing</a></li>
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -178,121 +129,134 @@ financial portfolios developed by
 <a href="http://zipline.io">Zipline</a> open source backtesting library.</p>
 <p>At the core of pyfolio is a so-called tear sheet that consists of
 various individual plots that provide a comprehensive image of the
-performance of a trading algorithm. Here is an example of a tear sheet of a the Zipline algo included as one of our example notebooks:
-<img alt="example tear 0" src="https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_0.png" title="Example tear sheet created from a Zipline algo" />
-<img alt="example tear 1" src="https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_1.png" title="Example tear sheet created from a Zipline algo" />
-<img alt="example tear 2" src="https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_2.png" />
-<img alt="example tear 3" src="https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_3.png" />
-<img alt="example tear 4" src="https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_4.png" />
-<img alt="example tear 6" src="https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_6.png" />
-<img alt="example tear 7" src="https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_7.png" />
-<img alt="example tear 5" src="https://github.com/quantopian/pyfolio/raw/master/docs/example_tear_5.png" /></p>
-<p>See also <a href="http://nbviewer.ipython.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/overview_slides.ipynb#/">slides of a recent talk about pyfolio.</a></p>
+performance of a trading algorithm. Here's an example of a simple tear
+sheet analyzing a strategy:</p>
+<p><img alt="simple tear 0" src="https://github.com/quantopian/pyfolio/raw/master/docs/simple_tear_0.png" title="Example tear sheet created from a Zipline algo" />
+<img alt="simple tear 1" src="https://github.com/quantopian/pyfolio/raw/master/docs/simple_tear_1.png" title="Example tear sheet created from a Zipline algo" /></p>
+<p>Also see <a href="http://nbviewer.jupyter.org/format/slides/github/quantopian/pyfolio/blob/master/pyfolio/examples/pyfolio_talk_slides.ipynb#/">slides of a talk about
+pyfolio</a>.</p>
 <h2 id="installation">Installation</h2>
-<h3 id="optional-virtual-environment">(Optional) Virtual Environment</h3>
-<p>For development on pyfolio itself, you might want to use a <a href="http://docs.python-guide.org/en/latest/dev/virtualenvs/">virtual environment</a> to avoid dependency conflicts between <code>pyfolio</code> and other python projects you have. To get set up with a virtual env, run:</p>
-<pre><code class="bash">
-mkvirtualenv pyfolio
-</code></pre>
-
-<p>before running the install commands below.</p>
-<p>To install <code>pyfolio</code> via <code>pip</code> issue the following command:</p>
+<p>To install pyfolio, run:</p>
 <pre><code class="bash">pip install pyfolio
 </code></pre>
 
-<p>For development, clone the git repo and run <code>python setup.py develop</code>
-and edit the library files directly. Make sure to reload or restart
-the IPython kernel when you make changes.</p>
-<p><code>pyfolio</code> has the following dependencies:
- - numpy
- - scipy
- - pandas
- - matplotlib
- - <a href="https://github.com/mwaskom/seaborn">seaborn</a>
- - <a href="https://github.com/pymc-devs/pymc3">pymc3</a> (optional)
- - <a href="https://github.com/quantopian/zipline">zipline</a> (optional; requires master, <em>not</em> 0.7.0)</p>
-<p>Some of Pyfolio's functionality, such as the <a href="https://github.com/quantopian/pyfolio/blob/master/pyfolio/examples/bayesian.ipynb">Bayesian tearsheet</a>, requires PyMC3 and Theano. To get set up, you can run:</p>
+<h4 id="development">Development</h4>
+<p>For development, you may want to use a <a href="http://docs.python-guide.org/en/latest/dev/virtualenvs/">virtual environment</a> to avoid dependency conflicts between pyfolio and other Python projects you have. To get set up with a virtual env, run:</p>
+<pre><code class="bash">mkvirtualenv pyfolio
+</code></pre>
+
+<p>Next, clone this git repository and run <code>python setup.py develop</code>
+and edit the library files directly.</p>
+<h4 id="bayesian-tear-sheet">Bayesian tear sheet</h4>
+<p>Generating a <a href="https://github.com/quantopian/pyfolio/blob/master/pyfolio/examples/bayesian.ipynb">Bayesian tearsheet</a> requires PyMC3 and Theano. You can install these packages with the following commands:</p>
 <pre><code class="bash">pip install theano
 </code></pre>
 
-<pre><code class="bash">pip install git+https://github.com/pymc-devs/pymc3
+<pre><code class="bash">pip install pymc3
 </code></pre>
 
-<p>If you are on OSX and using a non-framework build of python you may need to set your backend:</p>
+<h4 id="matplotlib-on-osx">Matplotlib on OSX</h4>
+<p>If you are on OSX and using a non-framework build of Python, you may need to set your backend:</p>
 <pre><code class="bash">echo &quot;backend: TkAgg&quot; &gt; ~/.matplotlib/matplotlibrc
 </code></pre>
 
 <h2 id="usage">Usage</h2>
-<p>A good way to get started is to run the examples in a <a href="http://jupyter.org/">Jupyter notebook</a>.</p>
-<p>To get set up with an example, you can:</p>
-<p>Run a Jupyter notebook server via:</p>
+<p>A good way to get started is to run the pyfolio examples in
+a <a href="http://jupyter.org/">Jupyter notebook</a>. To do this, you first want to
+start a Jupyter notebook server:</p>
 <pre><code class="bash">jupyter notebook
 </code></pre>
 
-<p>From the notebook list page(usually found at <code>http://localhost:8888/</code>), navigate over to the examples directory, and open any file with a .ipynb extension.</p>
-<p>Execute the code in a notebook cell by clicking on it and hitting Shift+Enter.</p>
+<p>From the notebook list page, navigate to the pyfolio examples directory
+and open a notebook. Execute the code in a notebook cell by clicking on it
+and hitting Shift+Enter.</p>
 <h2 id="questions">Questions?</h2>
-<p>If you find a bug, feel free to open an issue on our github tracker.</p>
-<p>You can also join our <a href="https://groups.google.com/forum/#!forum/pyfolio">mailing list</a>.</p>
-<h2 id="contribute">Contribute</h2>
-<p>If you want to contribute, a great place to start would be the <a href="https://github.com/quantopian/pyfolio/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22">help-wanted issues</a>.</p>
-<h2 id="credits">Credits</h2>
-<ul>
-<li>Gus Gordon (gus@quantopian.com)</li>
-<li>Justin Lent (justin@quantopian.com)</li>
-<li>Sepideh Sadeghi (sp.sadeghi@gmail.com)</li>
-<li>Thomas Wiecki (thomas@quantopian.com)</li>
-<li>Jessica Stauth (jstauth@quantopian.com)</li>
-<li>Karen Rubin (karen@quantopian.com)</li>
-<li>David Edwards (dedwards@quantopian.com)</li>
-<li>Andrew Campbell (andrew@quantopian.com)</li>
-</ul>
-<p>For a full list of contributors, see https://github.com/quantopian/pyfolio/graphs/contributors.</p></div>
-            
+<p>If you find a bug, feel free to <a href="https://github.com/quantopian/pyfolio/issues">open an issue</a> in this repository.</p>
+<p>You can also join our <a href="https://groups.google.com/forum/#!forum/pyfolio">mailing list</a> or
+our <a href="https://gitter.im/quantopian/pyfolio">Gitter channel</a>.</p>
+<h2 id="contributing">Contributing</h2>
+<p>If you'd like to contribute, a great place to look is the <a href="https://github.com/quantopian/pyfolio/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22">issues marked with help-wanted</a>.</p>
+<p>For a list of core developers and outside collaborators, see <a href="https://github.com/quantopian/pyfolio/graphs/contributors">the GitHub contributors list</a>.</p></div>
         </div>
 
         <footer class="col-md-12">
             <hr>
-            
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
-
-        <script src="./js/jquery-1.10.2.min.js"></script>
-        <script src="./js/bootstrap-3.0.3.min.js"></script>
-        <script src="./js/highlight.pack.js"></script>
         <script>var base_url = '.';</script>
-        <script data-main="./mkdocs/js/search.js" src="./mkdocs/js/require.js"></script>
         <script src="./js/base.js"></script>
+        <script src="./search/require.js"></script>
+        <script src="./search/search.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
                     </div>
-                    <div class="modal-body">
-                        <p>
-                            From here you can search these documents. Enter
-                            your search terms below.
-                        </p>
-                        <form role="form">
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
-                            </div>
-                        </form>
-                        <div id="mkdocs-search-results"></div>
-                    </div>
-                    <div class="modal-footer">
-                    </div>
-                </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
             </div>
         </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&rarr;</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
 
     </body>
 </html>
 
 <!--
-MkDocs version : 0.15.3
-Build Date UTC : 2016-10-17 10:25:19.131506
+MkDocs version : 0.17.2
+Build Date UTC : 2018-01-30 11:14:36
 -->

@@ -8,22 +8,21 @@
         <meta name="author" content="Quantopian Inc.">
         
         <link rel="shortcut icon" href="../../img/favicon.ico">
-
-	<title>Zipline algorithm - pyfolio</title>
-
+        <title>Zipline algorithm - pyfolio</title>
         <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
         <link href="../../css/font-awesome-4.5.0.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="../../css/highlight.css">
         <link href="../../extra.css" rel="stylesheet">
-
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
             <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
         <![endif]-->
 
-        
+        <script src="../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script> 
     </head>
 
     <body>
@@ -33,7 +32,6 @@
 
         <!-- Collapsed navigation -->
         <div class="navbar-header">
-            
             <!-- Expander button -->
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="sr-only">Toggle navigation</span>
@@ -41,77 +39,49 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            
-
-            <!-- Main title -->
             <a class="navbar-brand" href="../..">pyfolio</a>
         </div>
 
         <!-- Expanded navigation -->
         <div class="navbar-collapse collapse">
-            
                 <!-- Main navigation -->
                 <ul class="nav navbar-nav">
-                
-                
                     <li >
                         <a href="../..">Overview</a>
                     </li>
-                
-                
-                
                     <li >
                         <a href="../../whatsnew/">Releases</a>
                     </li>
-                
-                
-                
                     <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorial <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                        
                             
 <li >
     <a href="../single_stock_example/">Single stock</a>
 </li>
-
-                        
                             
 <li class="active">
     <a href="./">Zipline algorithm</a>
 </li>
-
-                        
                             
 <li >
     <a href="../bayesian/">Bayesian analysis</a>
 </li>
-
-                        
                             
 <li >
-    <a href="../sector_mapping_example/">Sector analysis</a>
+    <a href="../sector_mappings_example/">Sector analysis</a>
 </li>
-
-                        
                             
 <li >
-    <a href="../round_trip_example/">Round trip analysis</a>
+    <a href="../round_trip_tear_sheet_example/">Round trip analysis</a>
 </li>
-
-                        
                             
 <li >
     <a href="../slippage_example/">Slippage analysis</a>
 </li>
-
-                        
                         </ul>
                     </li>
-                
-                
                 </ul>
-            
 
             <ul class="nav navbar-nav navbar-right">
                 <li>
@@ -119,7 +89,6 @@
                         <i class="fa fa-search"></i> Search
                     </a>
                 </li>
-                
                     <li >
                         <a rel="next" href="../single_stock_example/">
                             <i class="fa fa-arrow-left"></i> Previous
@@ -130,42 +99,24 @@
                             Next <i class="fa fa-arrow-right"></i>
                         </a>
                     </li>
-                
-                
                     <li>
-                        <a href="https://github.com/quantopian/pyfolio">
-                            
-                                <i class="fa fa-github"></i>
-                            
-                            GitHub
-                        </a>
+                        <a href="https://github.com/quantopian/pyfolio/edit/master/docs/notebooks/zipline_algo_example.md"><i class="fa fa-github"></i> Edit on GitHub</a>
                     </li>
-                
             </ul>
         </div>
     </div>
 </div>
 
         <div class="container">
-            
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-    
         <li class="main active"><a href="#zipline-algorithm-analysis-example-in-pyfolio">Zipline algorithm analysis example in pyfolio</a></li>
-        
             <li><a href="#imports">Imports</a></li>
-        
             <li><a href="#run-our-zipline-algorithm">Run our zipline algorithm</a></li>
-        
             <li><a href="#extract-metrics">Extract metrics</a></li>
-        
             <li><a href="#single-plot-example">Single plot example</a></li>
-        
             <li><a href="#full-tear-sheet-example">Full tear sheet example</a></li>
-        
             <li><a href="#suppressing-symbol-output">Suppressing symbol output</a></li>
-        
-    
     </ul>
 </div></div>
                 <div class="col-md-9" role="main">
@@ -173,32 +124,35 @@
 <h1 id="zipline-algorithm-analysis-example-in-pyfolio">Zipline algorithm analysis example in pyfolio</h1>
 <p>Here's an example where we run an algorithm with zipline, then produce tear sheets for that algorithm.</p>
 <h2 id="imports">Imports</h2>
-<p>Import pyfolio, along with the necessary modules for running our zipline backtest.</p>
-<pre><code class="python">%matplotlib inline
-import pyfolio as pf
-</code></pre>
-
+<p>Import pyfolio and zipline, and ingest the pricing data for backtesting.</p>
 <pre><code class="python">import sys
-import logbook
-import numpy as np
-from datetime import datetime
-import pytz
-
-from zipline.algorithm import TradingAlgorithm
-from zipline.utils.factory import load_from_yahoo
-from zipline.finance import commission
+sys.path.append('/Users/george/Desktop/pyfolio/')
 </code></pre>
 
+<pre><code class="python">import pyfolio as pf
+%matplotlib inline
+
+# silence warnings
+import warnings
+warnings.filterwarnings('ignore')
+
+import zipline
+%load_ext zipline
+!zipline ingest
+</code></pre>
+
+<pre><code>[?25lDownloading Bundle: quantopian-quandl  [------------------------------------]    0%
+</code></pre>
 <h2 id="run-our-zipline-algorithm">Run our zipline algorithm</h2>
 <p>This algorithm can also be adjusted to execute a modified, or completely different, trading strategy.</p>
-<pre><code class="python"># Zipline trading algorithm
+<pre><code class="python">%%zipline --start 2004-1-1 --end 2010-1-1 -o results.pickle
+
+# Zipline trading algorithm
 # Taken from zipline.examples.olmar
-zipline_logging = logbook.NestedSetup([
-    logbook.NullHandler(level=logbook.DEBUG),
-    logbook.StreamHandler(sys.stdout, level=logbook.INFO),
-    logbook.StreamHandler(sys.stderr, level=logbook.ERROR),
-])
-zipline_logging.push_application()
+
+import numpy as np
+
+from zipline.finance import commission, slippage
 
 STOCKS = ['AMD', 'CERN', 'COST', 'DELL', 'GPS', 'INTC', 'MMM']
 
@@ -213,25 +167,14 @@ def initialize(algo, eps=1, window_length=5):
     algo.m = len(algo.stocks)
     algo.price = {}
     algo.b_t = np.ones(algo.m) / algo.m
-    algo.last_desired_port = np.ones(algo.m) / algo.m
     algo.eps = eps
-    algo.init = True
-    algo.days = 0
     algo.window_length = window_length
 
     algo.set_commission(commission.PerShare(cost=0))
+    algo.set_slippage(slippage.FixedSlippage(spread=0))
 
 
 def handle_data(algo, data):
-    algo.days += 1
-    if algo.days &lt; algo.window_length:
-        return
-
-    if algo.init:
-        rebalance_portfolio(algo, data, algo.b_t)
-        algo.init = False
-        return
-
     m = algo.m
 
     x_tilde = np.zeros(m)
@@ -274,27 +217,8 @@ def handle_data(algo, data):
 
 def rebalance_portfolio(algo, data, desired_port):
     # rebalance portfolio
-    desired_amount = np.zeros_like(desired_port)
-    current_amount = np.zeros_like(desired_port)
-    prices = np.zeros_like(desired_port)
-
-    if algo.init:
-        positions_value = algo.portfolio.starting_cash
-    else:
-        positions_value = algo.portfolio.positions_value + \
-            algo.portfolio.cash
-
     for i, sid in enumerate(algo.sids):
-        current_amount[i] = algo.portfolio.positions[sid].amount
-        prices[i] = data.current(sid, &quot;price&quot;)
-
-    desired_amount = np.round(desired_port * positions_value / prices)
-
-    algo.last_desired_port = desired_port
-    diff_amount = desired_amount - current_amount
-
-    for i, sid in enumerate(algo.sids):
-        algo.order(sid, diff_amount[i])
+        algo.order_target_percent(sid, desired_port[i])
 
 
 def simplex_projection(v, b=1):
@@ -329,34 +253,1512 @@ def simplex_projection(v, b=1):
     w = (v - theta)
     w[w &lt; 0] = 0
     return w
-
-
-start = datetime(2004, 1, 1, 0, 0, 0, 0, pytz.utc)
-end = datetime(2010, 1, 1, 0, 0, 0, 0, pytz.utc)
-
-# Load price data from yahoo.
-data = load_from_yahoo(stocks=STOCKS, indexes={}, start=start, end=end)
-data = data.dropna()
-
-# Create and run the algorithm.
-olmar = TradingAlgorithm(handle_data=handle_data, initialize=initialize)
-results = olmar.run(data)
 </code></pre>
 
-<pre><code>[2016-04-21 09:37:33.915336] INFO: Loader: Loading stock: AMD
-[2016-04-21 09:37:33.926626] INFO: Loader: Loading stock: CERN
-[2016-04-21 09:37:33.936490] INFO: Loader: Loading stock: COST
-[2016-04-21 09:37:33.951613] INFO: Loader: Loading stock: DELL
-[2016-04-21 09:37:33.965023] INFO: Loader: Loading stock: GPS
-[2016-04-21 09:37:33.976631] INFO: Loader: Loading stock: INTC
-[2016-04-21 09:37:33.987218] INFO: Loader: Loading stock: MMM
-[2016-04-21 09:37:50.955240] INFO: Performance: Simulated 1511 trading days out of 1511.
-[2016-04-21 09:37:50.956092] INFO: Performance: first open: 2004-01-02 14:31:00+00:00
-[2016-04-21 09:37:50.956915] INFO: Performance: last close: 2009-12-31 21:00:00+00:00
-</code></pre>
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>algo_volatility</th>
+      <th>algorithm_period_return</th>
+      <th>alpha</th>
+      <th>benchmark_period_return</th>
+      <th>benchmark_volatility</th>
+      <th>beta</th>
+      <th>capital_used</th>
+      <th>ending_cash</th>
+      <th>ending_exposure</th>
+      <th>ending_value</th>
+      <th>...</th>
+      <th>short_exposure</th>
+      <th>short_value</th>
+      <th>shorts_count</th>
+      <th>sortino</th>
+      <th>starting_cash</th>
+      <th>starting_exposure</th>
+      <th>starting_value</th>
+      <th>trading_days</th>
+      <th>transactions</th>
+      <th>treasury_period_return</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2004-01-02 21:00:00+00:00</th>
+      <td>NaN</td>
+      <td>0.000000e+00</td>
+      <td>NaN</td>
+      <td>-0.000449</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>0.000000e+00</td>
+      <td>1.000000e+07</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>NaN</td>
+      <td>1.000000e+07</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>[]</td>
+      <td>0.0438</td>
+    </tr>
+    <tr>
+      <th>2004-01-05 21:00:00+00:00</th>
+      <td>0.000008</td>
+      <td>-7.000000e-07</td>
+      <td>-0.000007</td>
+      <td>0.010424</td>
+      <td>0.127153</td>
+      <td>-0.000062</td>
+      <td>-1.012625e+07</td>
+      <td>-1.262475e+05</td>
+      <td>10126240.51</td>
+      <td>10126240.51</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-11.224972</td>
+      <td>1.000000e+07</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>2</td>
+      <td>[{u'commission': None, u'amount': 39332, u'sid...</td>
+      <td>0.0441</td>
+    </tr>
+    <tr>
+      <th>2004-01-06 21:00:00+00:00</th>
+      <td>0.072177</td>
+      <td>7.874142e-03</td>
+      <td>0.941443</td>
+      <td>0.011413</td>
+      <td>0.097935</td>
+      <td>-0.292225</td>
+      <td>1.098407e+05</td>
+      <td>-1.640676e+04</td>
+      <td>10095148.18</td>
+      <td>10095148.18</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>103096.791454</td>
+      <td>-1.262475e+05</td>
+      <td>10126240.51</td>
+      <td>10126240.51</td>
+      <td>3</td>
+      <td>[{u'commission': None, u'amount': 22673, u'sid...</td>
+      <td>0.0429</td>
+    </tr>
+    <tr>
+      <th>2004-01-07 21:00:00+00:00</th>
+      <td>0.064694</td>
+      <td>1.390826e-02</td>
+      <td>1.158059</td>
+      <td>0.014827</td>
+      <td>0.080035</td>
+      <td>-0.305795</td>
+      <td>3.809134e+04</td>
+      <td>2.168458e+04</td>
+      <td>10117398.03</td>
+      <td>10117398.03</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>157170.375195</td>
+      <td>-1.640676e+04</td>
+      <td>10095148.18</td>
+      <td>10095148.18</td>
+      <td>4</td>
+      <td>[{u'commission': None, u'amount': 4882, u'sid'...</td>
+      <td>0.0427</td>
+    </tr>
+    <tr>
+      <th>2004-01-08 21:00:00+00:00</th>
+      <td>0.202046</td>
+      <td>-1.030250e-02</td>
+      <td>-0.137563</td>
+      <td>0.018871</td>
+      <td>0.069343</td>
+      <td>-0.388318</td>
+      <td>1.594916e+04</td>
+      <td>3.763374e+04</td>
+      <td>9859341.24</td>
+      <td>9859341.24</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-2.978283</td>
+      <td>2.168458e+04</td>
+      <td>10117398.03</td>
+      <td>10117398.03</td>
+      <td>5</td>
+      <td>[{u'commission': None, u'amount': 7020, u'sid'...</td>
+      <td>0.0427</td>
+    </tr>
+    <tr>
+      <th>2004-01-09 21:00:00+00:00</th>
+      <td>0.181404</td>
+      <td>-9.874269e-03</td>
+      <td>-0.290170</td>
+      <td>0.009975</td>
+      <td>0.101951</td>
+      <td>-0.266625</td>
+      <td>-3.549779e+04</td>
+      <td>2.135950e+03</td>
+      <td>9899121.36</td>
+      <td>9899121.36</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-2.601355</td>
+      <td>3.763374e+04</td>
+      <td>9859341.24</td>
+      <td>9859341.24</td>
+      <td>6</td>
+      <td>[{u'commission': None, u'amount': 12007, u'sid...</td>
+      <td>0.0411</td>
+    </tr>
+    <tr>
+      <th>2004-01-12 21:00:00+00:00</th>
+      <td>0.169355</td>
+      <td>-5.602480e-03</td>
+      <td>-0.118894</td>
+      <td>0.017344</td>
+      <td>0.098995</td>
+      <td>-0.113533</td>
+      <td>-3.387390e+03</td>
+      <td>-1.251440e+03</td>
+      <td>9945226.64</td>
+      <td>9945226.64</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-1.324308</td>
+      <td>2.135950e+03</td>
+      <td>9899121.36</td>
+      <td>9899121.36</td>
+      <td>7</td>
+      <td>[{u'commission': None, u'amount': 879, u'sid':...</td>
+      <td>0.0411</td>
+    </tr>
+    <tr>
+      <th>2004-01-13 21:00:00+00:00</th>
+      <td>0.162138</td>
+      <td>-1.366743e-02</td>
+      <td>-0.454475</td>
+      <td>0.011503</td>
+      <td>0.102602</td>
+      <td>0.090323</td>
+      <td>-5.892000e+02</td>
+      <td>-1.840640e+03</td>
+      <td>9865166.35</td>
+      <td>9865166.35</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-2.977973</td>
+      <td>-1.251440e+03</td>
+      <td>9945226.64</td>
+      <td>9945226.64</td>
+      <td>8</td>
+      <td>[{u'commission': None, u'amount': 478, u'sid':...</td>
+      <td>0.0405</td>
+    </tr>
+    <tr>
+      <th>2004-01-14 21:00:00+00:00</th>
+      <td>0.156543</td>
+      <td>-8.090471e-03</td>
+      <td>-0.338686</td>
+      <td>0.020219</td>
+      <td>0.103200</td>
+      <td>0.216209</td>
+      <td>2.099000e+02</td>
+      <td>-1.630740e+03</td>
+      <td>9920726.03</td>
+      <td>9920726.03</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-1.621248</td>
+      <td>-1.840640e+03</td>
+      <td>9865166.35</td>
+      <td>9865166.35</td>
+      <td>9</td>
+      <td>[{u'commission': None, u'amount': -958, u'sid'...</td>
+      <td>0.0401</td>
+    </tr>
+    <tr>
+      <th>2004-01-15 21:00:00+00:00</th>
+      <td>0.147732</td>
+      <td>-1.021672e-02</td>
+      <td>-0.370917</td>
+      <td>0.022466</td>
+      <td>0.097298</td>
+      <td>0.216356</td>
+      <td>-2.985980e+03</td>
+      <td>-4.616720e+03</td>
+      <td>9902449.48</td>
+      <td>9902449.48</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-1.957694</td>
+      <td>-1.630740e+03</td>
+      <td>9920726.03</td>
+      <td>9920726.03</td>
+      <td>10</td>
+      <td>[{u'commission': None, u'amount': -12547, u'si...</td>
+      <td>0.0399</td>
+    </tr>
+    <tr>
+      <th>2004-01-16 21:00:00+00:00</th>
+      <td>0.150072</td>
+      <td>-9.720000e-05</td>
+      <td>-0.152516</td>
+      <td>0.026510</td>
+      <td>0.092669</td>
+      <td>0.265920</td>
+      <td>4.211040e+03</td>
+      <td>-4.056800e+02</td>
+      <td>9999433.68</td>
+      <td>9999433.68</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.066906</td>
+      <td>-4.616720e+03</td>
+      <td>9902449.48</td>
+      <td>9902449.48</td>
+      <td>11</td>
+      <td>[{u'commission': None, u'amount': 29, u'sid': ...</td>
+      <td>0.0404</td>
+    </tr>
+    <tr>
+      <th>2004-01-20 21:00:00+00:00</th>
+      <td>0.174603</td>
+      <td>-2.189795e-02</td>
+      <td>-0.677508</td>
+      <td>0.026240</td>
+      <td>0.089193</td>
+      <td>0.414247</td>
+      <td>-6.349190e+03</td>
+      <td>-6.754870e+03</td>
+      <td>9787775.37</td>
+      <td>9787775.37</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-2.942390</td>
+      <td>-4.056800e+02</td>
+      <td>9999433.68</td>
+      <td>9999433.68</td>
+      <td>12</td>
+      <td>[{u'commission': None, u'amount': -8204, u'sid...</td>
+      <td>0.0408</td>
+    </tr>
+    <tr>
+      <th>2004-01-21 21:00:00+00:00</th>
+      <td>0.167345</td>
+      <td>-2.194580e-02</td>
+      <td>-0.682346</td>
+      <td>0.033879</td>
+      <td>0.088489</td>
+      <td>0.408461</td>
+      <td>3.967860e+03</td>
+      <td>-2.787010e+03</td>
+      <td>9783328.99</td>
+      <td>9783328.99</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-2.833401</td>
+      <td>-6.754870e+03</td>
+      <td>9787775.37</td>
+      <td>9787775.37</td>
+      <td>13</td>
+      <td>[{u'commission': None, u'amount': 18, u'sid': ...</td>
+      <td>0.0405</td>
+    </tr>
+    <tr>
+      <th>2004-01-22 21:00:00+00:00</th>
+      <td>0.160815</td>
+      <td>-2.278829e-02</td>
+      <td>-0.620203</td>
+      <td>0.031991</td>
+      <td>0.087048</td>
+      <td>0.381335</td>
+      <td>3.202510e+03</td>
+      <td>4.155000e+02</td>
+      <td>9771701.58</td>
+      <td>9771701.58</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-2.838791</td>
+      <td>-2.787010e+03</td>
+      <td>9783328.99</td>
+      <td>9783328.99</td>
+      <td>14</td>
+      <td>[{u'commission': None, u'amount': 1177, u'sid'...</td>
+      <td>0.0399</td>
+    </tr>
+    <tr>
+      <th>2004-01-23 21:00:00+00:00</th>
+      <td>0.156057</td>
+      <td>-1.995549e-02</td>
+      <td>-0.466320</td>
+      <td>0.028307</td>
+      <td>0.087226</td>
+      <td>0.294719</td>
+      <td>-5.584200e+02</td>
+      <td>-1.429200e+02</td>
+      <td>9800588.06</td>
+      <td>9800588.06</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-2.386967</td>
+      <td>4.155000e+02</td>
+      <td>9771701.58</td>
+      <td>9771701.58</td>
+      <td>15</td>
+      <td>[{u'commission': None, u'amount': -1437, u'sid...</td>
+      <td>0.0409</td>
+    </tr>
+    <tr>
+      <th>2004-01-26 21:00:00+00:00</th>
+      <td>0.151899</td>
+      <td>-1.665361e-02</td>
+      <td>-0.460877</td>
+      <td>0.041247</td>
+      <td>0.094376</td>
+      <td>0.323325</td>
+      <td>-5.684500e+02</td>
+      <td>-7.113700e+02</td>
+      <td>9834175.24</td>
+      <td>9834175.24</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-1.911049</td>
+      <td>-1.429200e+02</td>
+      <td>9800588.06</td>
+      <td>9800588.06</td>
+      <td>16</td>
+      <td>[{u'commission': None, u'amount': 1760, u'sid'...</td>
+      <td>0.0416</td>
+    </tr>
+    <tr>
+      <th>2004-01-27 21:00:00+00:00</th>
+      <td>0.149383</td>
+      <td>-2.432286e-02</td>
+      <td>-0.521233</td>
+      <td>0.030554</td>
+      <td>0.103850</td>
+      <td>0.369999</td>
+      <td>4.884130e+03</td>
+      <td>4.172760e+03</td>
+      <td>9752598.61</td>
+      <td>9752598.61</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-2.680537</td>
+      <td>-7.113700e+02</td>
+      <td>9834175.24</td>
+      <td>9834175.24</td>
+      <td>17</td>
+      <td>[{u'commission': None, u'amount': 27757, u'sid...</td>
+      <td>0.0411</td>
+    </tr>
+    <tr>
+      <th>2004-01-28 21:00:00+00:00</th>
+      <td>0.159088</td>
+      <td>-4.280630e-02</td>
+      <td>-0.745407</td>
+      <td>0.018422</td>
+      <td>0.112811</td>
+      <td>0.556821</td>
+      <td>-3.171400e+03</td>
+      <td>1.001360e+03</td>
+      <td>9570935.67</td>
+      <td>9570935.67</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-4.088941</td>
+      <td>4.172760e+03</td>
+      <td>9752598.61</td>
+      <td>9752598.61</td>
+      <td>18</td>
+      <td>[{u'commission': None, u'amount': 3192, u'sid'...</td>
+      <td>0.0422</td>
+    </tr>
+    <tr>
+      <th>2004-01-29 21:00:00+00:00</th>
+      <td>0.154753</td>
+      <td>-4.330959e-02</td>
+      <td>-0.723066</td>
+      <td>0.019770</td>
+      <td>0.109637</td>
+      <td>0.557354</td>
+      <td>-1.023840e+03</td>
+      <td>-2.248000e+01</td>
+      <td>9566926.58</td>
+      <td>9566926.58</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-4.028374</td>
+      <td>1.001360e+03</td>
+      <td>9570935.67</td>
+      <td>9570935.67</td>
+      <td>19</td>
+      <td>[{u'commission': None, u'amount': 740, u'sid':...</td>
+      <td>0.0422</td>
+    </tr>
+    <tr>
+      <th>2004-01-30 21:00:00+00:00</th>
+      <td>0.151981</td>
+      <td>-4.003614e-02</td>
+      <td>-0.641952</td>
+      <td>0.019770</td>
+      <td>0.106778</td>
+      <td>0.550030</td>
+      <td>-3.302200e+02</td>
+      <td>-3.527000e+02</td>
+      <td>9599991.28</td>
+      <td>9599991.28</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-3.616538</td>
+      <td>-2.248000e+01</td>
+      <td>9566926.58</td>
+      <td>9566926.58</td>
+      <td>20</td>
+      <td>[{u'commission': None, u'amount': 202, u'sid':...</td>
+      <td>0.0416</td>
+    </tr>
+    <tr>
+      <th>2004-02-02 21:00:00+00:00</th>
+      <td>0.148849</td>
+      <td>-3.791101e-02</td>
+      <td>-0.611549</td>
+      <td>0.023544</td>
+      <td>0.104494</td>
+      <td>0.558118</td>
+      <td>7.507400e+02</td>
+      <td>3.980400e+02</td>
+      <td>9620491.88</td>
+      <td>9620491.88</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-3.333751</td>
+      <td>-3.527000e+02</td>
+      <td>9599991.28</td>
+      <td>9599991.28</td>
+      <td>21</td>
+      <td>[{u'commission': None, u'amount': -774, u'sid'...</td>
+      <td>0.0418</td>
+    </tr>
+    <tr>
+      <th>2004-02-03 21:00:00+00:00</th>
+      <td>0.149505</td>
+      <td>-2.958549e-02</td>
+      <td>-0.470647</td>
+      <td>0.022466</td>
+      <td>0.102243</td>
+      <td>0.530207</td>
+      <td>-3.759100e+02</td>
+      <td>2.213000e+01</td>
+      <td>9704122.98</td>
+      <td>9704122.98</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-2.509972</td>
+      <td>3.980400e+02</td>
+      <td>9620491.88</td>
+      <td>9620491.88</td>
+      <td>22</td>
+      <td>[{u'commission': None, u'amount': -1805, u'sid...</td>
+      <td>0.0413</td>
+    </tr>
+    <tr>
+      <th>2004-02-04 21:00:00+00:00</th>
+      <td>0.148908</td>
+      <td>-3.935433e-02</td>
+      <td>-0.518102</td>
+      <td>0.014019</td>
+      <td>0.104520</td>
+      <td>0.565794</td>
+      <td>2.243250e+04</td>
+      <td>2.245463e+04</td>
+      <td>9584002.02</td>
+      <td>9584002.02</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-3.200968</td>
+      <td>2.213000e+01</td>
+      <td>9704122.98</td>
+      <td>9704122.98</td>
+      <td>23</td>
+      <td>[{u'commission': None, u'amount': -115293, u's...</td>
+      <td>0.0415</td>
+    </tr>
+    <tr>
+      <th>2004-02-05 21:00:00+00:00</th>
+      <td>0.157685</td>
+      <td>-2.306599e-02</td>
+      <td>-0.343928</td>
+      <td>0.017074</td>
+      <td>0.102515</td>
+      <td>0.607067</td>
+      <td>-2.537802e+04</td>
+      <td>-2.923390e+03</td>
+      <td>9772263.47</td>
+      <td>9772263.47</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-1.776034</td>
+      <td>2.245463e+04</td>
+      <td>9584002.02</td>
+      <td>9584002.02</td>
+      <td>24</td>
+      <td>[{u'commission': None, u'amount': 28, u'sid': ...</td>
+      <td>0.0420</td>
+    </tr>
+    <tr>
+      <th>2004-02-06 21:00:00+00:00</th>
+      <td>0.169544</td>
+      <td>-2.392913e-03</td>
+      <td>-0.228447</td>
+      <td>0.028487</td>
+      <td>0.105744</td>
+      <td>0.755742</td>
+      <td>-7.073620e+03</td>
+      <td>-9.997010e+03</td>
+      <td>9986067.88</td>
+      <td>9986067.88</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-0.080130</td>
+      <td>-2.923390e+03</td>
+      <td>9772263.47</td>
+      <td>9772263.47</td>
+      <td>25</td>
+      <td>[{u'commission': None, u'amount': -5231, u'sid...</td>
+      <td>0.0412</td>
+    </tr>
+    <tr>
+      <th>2004-02-09 21:00:00+00:00</th>
+      <td>0.166124</td>
+      <td>-2.006309e-03</td>
+      <td>-0.220937</td>
+      <td>0.029206</td>
+      <td>0.103617</td>
+      <td>0.755433</td>
+      <td>4.991920e+03</td>
+      <td>-5.005090e+03</td>
+      <td>9984942.00</td>
+      <td>9984942.00</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>-0.048764</td>
+      <td>-9.997010e+03</td>
+      <td>9986067.88</td>
+      <td>9986067.88</td>
+      <td>26</td>
+      <td>[{u'commission': None, u'amount': 3350, u'sid'...</td>
+      <td>0.0409</td>
+    </tr>
+    <tr>
+      <th>2004-02-10 21:00:00+00:00</th>
+      <td>0.179042</td>
+      <td>2.224008e-02</td>
+      <td>-0.016088</td>
+      <td>0.032081</td>
+      <td>0.101732</td>
+      <td>0.790076</td>
+      <td>3.909423e+04</td>
+      <td>3.408914e+04</td>
+      <td>10188311.63</td>
+      <td>10188311.63</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1.786071</td>
+      <td>-5.005090e+03</td>
+      <td>9984942.00</td>
+      <td>9984942.00</td>
+      <td>27</td>
+      <td>[{u'commission': None, u'amount': 20374, u'sid...</td>
+      <td>0.0413</td>
+    </tr>
+    <tr>
+      <th>2004-02-11 21:00:00+00:00</th>
+      <td>0.175854</td>
+      <td>2.568422e-02</td>
+      <td>-0.045677</td>
+      <td>0.043045</td>
+      <td>0.103763</td>
+      <td>0.750971</td>
+      <td>-9.027760e+04</td>
+      <td>-5.618846e+04</td>
+      <td>10313030.69</td>
+      <td>10313030.69</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2.003630</td>
+      <td>3.408914e+04</td>
+      <td>10188311.63</td>
+      <td>10188311.63</td>
+      <td>28</td>
+      <td>[{u'commission': None, u'amount': 86138, u'sid...</td>
+      <td>0.0405</td>
+    </tr>
+    <tr>
+      <th>2004-02-12 21:00:00+00:00</th>
+      <td>0.174331</td>
+      <td>1.835900e-02</td>
+      <td>-0.088628</td>
+      <td>0.039270</td>
+      <td>0.103016</td>
+      <td>0.768848</td>
+      <td>6.841798e+04</td>
+      <td>1.222952e+04</td>
+      <td>10171360.46</td>
+      <td>10171360.46</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1.426563</td>
+      <td>-5.618846e+04</td>
+      <td>10313030.69</td>
+      <td>10313030.69</td>
+      <td>29</td>
+      <td>[{u'commission': None, u'amount': 60959, u'sid...</td>
+      <td>0.0410</td>
+    </tr>
+    <tr>
+      <th>2004-02-13 21:00:00+00:00</th>
+      <td>0.174263</td>
+      <td>7.811894e-03</td>
+      <td>-0.152515</td>
+      <td>0.034597</td>
+      <td>0.102633</td>
+      <td>0.799374</td>
+      <td>-8.834620e+03</td>
+      <td>3.394900e+03</td>
+      <td>10074724.04</td>
+      <td>10074724.04</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.651812</td>
+      <td>1.222952e+04</td>
+      <td>10171360.46</td>
+      <td>10171360.46</td>
+      <td>30</td>
+      <td>[{u'commission': None, u'amount': -2990, u'sid...</td>
+      <td>0.0405</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2009-11-18 21:00:00+00:00</th>
+      <td>0.257581</td>
+      <td>6.008698e-01</td>
+      <td>0.099259</td>
+      <td>-0.000090</td>
+      <td>0.683428</td>
+      <td>0.080995</td>
+      <td>-2.965000e+02</td>
+      <td>-1.613460e+02</td>
+      <td>16008859.05</td>
+      <td>16008859.05</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.642225</td>
+      <td>1.351540e+02</td>
+      <td>16099119.48</td>
+      <td>16099119.48</td>
+      <td>1482</td>
+      <td>[{u'commission': None, u'amount': 126, u'sid':...</td>
+      <td>0.0336</td>
+    </tr>
+    <tr>
+      <th>2009-11-19 21:00:00+00:00</th>
+      <td>0.257584</td>
+      <td>5.751349e-01</td>
+      <td>0.096627</td>
+      <td>-0.013120</td>
+      <td>0.683220</td>
+      <td>0.081072</td>
+      <td>6.384500e+02</td>
+      <td>4.771040e+02</td>
+      <td>15750871.82</td>
+      <td>15750871.82</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.626050</td>
+      <td>-1.613460e+02</td>
+      <td>16008859.05</td>
+      <td>16008859.05</td>
+      <td>1483</td>
+      <td>[{u'commission': None, u'amount': -2169, u'sid...</td>
+      <td>0.0335</td>
+    </tr>
+    <tr>
+      <th>2009-11-20 21:00:00+00:00</th>
+      <td>0.257497</td>
+      <td>5.760543e-01</td>
+      <td>0.096710</td>
+      <td>-0.016625</td>
+      <td>0.682992</td>
+      <td>0.081071</td>
+      <td>-9.618800e+02</td>
+      <td>-4.847760e+02</td>
+      <td>15761027.55</td>
+      <td>15761027.55</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.626402</td>
+      <td>4.771040e+02</td>
+      <td>15750871.82</td>
+      <td>15750871.82</td>
+      <td>1484</td>
+      <td>[{u'commission': None, u'amount': 1554, u'sid'...</td>
+      <td>0.0336</td>
+    </tr>
+    <tr>
+      <th>2009-11-23 21:00:00+00:00</th>
+      <td>0.257412</td>
+      <td>5.801855e-01</td>
+      <td>0.096914</td>
+      <td>-0.004134</td>
+      <td>0.682780</td>
+      <td>0.081077</td>
+      <td>2.498000e+01</td>
+      <td>-4.597960e+02</td>
+      <td>15802314.57</td>
+      <td>15802314.57</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.628718</td>
+      <td>-4.847760e+02</td>
+      <td>15761027.55</td>
+      <td>15761027.55</td>
+      <td>1485</td>
+      <td>[{u'commission': None, u'amount': -1472, u'sid...</td>
+      <td>0.0337</td>
+    </tr>
+    <tr>
+      <th>2009-11-24 21:00:00+00:00</th>
+      <td>0.257339</td>
+      <td>5.910314e-01</td>
+      <td>0.097991</td>
+      <td>-0.002606</td>
+      <td>0.682550</td>
+      <td>0.081079</td>
+      <td>-7.668800e+02</td>
+      <td>-1.226676e+03</td>
+      <td>15911540.99</td>
+      <td>15911540.99</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.635119</td>
+      <td>-4.597960e+02</td>
+      <td>15802314.57</td>
+      <td>15802314.57</td>
+      <td>1486</td>
+      <td>[{u'commission': None, u'amount': 3775, u'sid'...</td>
+      <td>0.0332</td>
+    </tr>
+    <tr>
+      <th>2009-11-25 21:00:00+00:00</th>
+      <td>0.257277</td>
+      <td>6.056737e-01</td>
+      <td>0.099435</td>
+      <td>0.000899</td>
+      <td>0.682322</td>
+      <td>0.081087</td>
+      <td>7.561600e+02</td>
+      <td>-4.705160e+02</td>
+      <td>16057207.89</td>
+      <td>16057207.89</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.643769</td>
+      <td>-1.226676e+03</td>
+      <td>15911540.99</td>
+      <td>15911540.99</td>
+      <td>1487</td>
+      <td>[{u'commission': None, u'amount': -18139, u'si...</td>
+      <td>0.0328</td>
+    </tr>
+    <tr>
+      <th>2009-11-27 18:00:00+00:00</th>
+      <td>0.257296</td>
+      <td>5.777323e-01</td>
+      <td>0.096627</td>
+      <td>-0.015367</td>
+      <td>0.682128</td>
+      <td>0.081189</td>
+      <td>-9.221030e+03</td>
+      <td>-9.691546e+03</td>
+      <td>15787014.39</td>
+      <td>15787014.39</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.626279</td>
+      <td>-4.705160e+02</td>
+      <td>16057207.89</td>
+      <td>16057207.89</td>
+      <td>1488</td>
+      <td>[{u'commission': None, u'amount': -108386, u's...</td>
+      <td>0.0321</td>
+    </tr>
+    <tr>
+      <th>2009-11-30 21:00:00+00:00</th>
+      <td>0.257262</td>
+      <td>5.583863e-01</td>
+      <td>0.094443</td>
+      <td>-0.012042</td>
+      <td>0.681899</td>
+      <td>0.081176</td>
+      <td>9.661970e+03</td>
+      <td>-2.957600e+01</td>
+      <td>15583892.62</td>
+      <td>15583892.62</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.614025</td>
+      <td>-9.691546e+03</td>
+      <td>15787014.39</td>
+      <td>15787014.39</td>
+      <td>1489</td>
+      <td>[{u'commission': None, u'amount': -2, u'sid': ...</td>
+      <td>0.0321</td>
+    </tr>
+    <tr>
+      <th>2009-12-01 21:00:00+00:00</th>
+      <td>0.257202</td>
+      <td>5.728593e-01</td>
+      <td>0.095775</td>
+      <td>0.000180</td>
+      <td>0.681687</td>
+      <td>0.081210</td>
+      <td>-2.880110e+03</td>
+      <td>-2.909686e+03</td>
+      <td>15731503.04</td>
+      <td>15731503.04</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.622743</td>
+      <td>-2.957600e+01</td>
+      <td>15583892.62</td>
+      <td>15583892.62</td>
+      <td>1490</td>
+      <td>[{u'commission': None, u'amount': 4666, u'sid'...</td>
+      <td>0.0328</td>
+    </tr>
+    <tr>
+      <th>2009-12-02 21:00:00+00:00</th>
+      <td>0.257128</td>
+      <td>5.637940e-01</td>
+      <td>0.094742</td>
+      <td>-0.000270</td>
+      <td>0.681459</td>
+      <td>0.081212</td>
+      <td>3.608900e+03</td>
+      <td>6.992140e+02</td>
+      <td>15637240.49</td>
+      <td>15637240.49</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.616942</td>
+      <td>-2.909686e+03</td>
+      <td>15731503.04</td>
+      <td>15731503.04</td>
+      <td>1491</td>
+      <td>[{u'commission': None, u'amount': -4907, u'sid...</td>
+      <td>0.0332</td>
+    </tr>
+    <tr>
+      <th>2009-12-03 21:00:00+00:00</th>
+      <td>0.257153</td>
+      <td>5.356815e-01</td>
+      <td>0.091740</td>
+      <td>-0.008088</td>
+      <td>0.681239</td>
+      <td>0.081267</td>
+      <td>-1.671090e+03</td>
+      <td>-9.718760e+02</td>
+      <td>15357787.00</td>
+      <td>15357787.00</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.598945</td>
+      <td>6.992140e+02</td>
+      <td>15637240.49</td>
+      <td>15637240.49</td>
+      <td>1492</td>
+      <td>[{u'commission': None, u'amount': 1667, u'sid'...</td>
+      <td>0.0339</td>
+    </tr>
+    <tr>
+      <th>2009-12-04 21:00:00+00:00</th>
+      <td>0.257089</td>
+      <td>5.489262e-01</td>
+      <td>0.093054</td>
+      <td>-0.002426</td>
+      <td>0.681014</td>
+      <td>0.081282</td>
+      <td>1.217390e+03</td>
+      <td>2.455140e+02</td>
+      <td>15489016.40</td>
+      <td>15489016.40</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.607016</td>
+      <td>-9.718760e+02</td>
+      <td>15357787.00</td>
+      <td>15357787.00</td>
+      <td>1493</td>
+      <td>[{u'commission': None, u'amount': -1387, u'sid...</td>
+      <td>0.0348</td>
+    </tr>
+    <tr>
+      <th>2009-12-07 21:00:00+00:00</th>
+      <td>0.257030</td>
+      <td>5.354856e-01</td>
+      <td>0.091548</td>
+      <td>-0.003954</td>
+      <td>0.680786</td>
+      <td>0.081289</td>
+      <td>-2.795400e+02</td>
+      <td>-3.402600e+01</td>
+      <td>15354889.76</td>
+      <td>15354889.76</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.598371</td>
+      <td>2.455140e+02</td>
+      <td>15489016.40</td>
+      <td>15489016.40</td>
+      <td>1494</td>
+      <td>[{u'commission': None, u'amount': -1961, u'sid...</td>
+      <td>0.0344</td>
+    </tr>
+    <tr>
+      <th>2009-12-08 21:00:00+00:00</th>
+      <td>0.257055</td>
+      <td>5.078036e-01</td>
+      <td>0.088587</td>
+      <td>-0.015007</td>
+      <td>0.680576</td>
+      <td>0.081364</td>
+      <td>1.316500e+02</td>
+      <td>9.762400e+01</td>
+      <td>15077938.34</td>
+      <td>15077938.34</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.580382</td>
+      <td>-3.402600e+01</td>
+      <td>15354889.76</td>
+      <td>15354889.76</td>
+      <td>1495</td>
+      <td>[{u'commission': None, u'amount': -795, u'sid'...</td>
+      <td>0.0340</td>
+    </tr>
+    <tr>
+      <th>2009-12-09 21:00:00+00:00</th>
+      <td>0.256971</td>
+      <td>5.048394e-01</td>
+      <td>0.088146</td>
+      <td>-0.011323</td>
+      <td>0.680349</td>
+      <td>0.081361</td>
+      <td>-2.696890e+03</td>
+      <td>-2.599266e+03</td>
+      <td>15050993.27</td>
+      <td>15050993.27</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.578300</td>
+      <td>9.762400e+01</td>
+      <td>15077938.34</td>
+      <td>15077938.34</td>
+      <td>1496</td>
+      <td>[{u'commission': None, u'amount': -1367, u'sid...</td>
+      <td>0.0345</td>
+    </tr>
+    <tr>
+      <th>2009-12-10 21:00:00+00:00</th>
+      <td>0.256909</td>
+      <td>5.181698e-01</td>
+      <td>0.089499</td>
+      <td>-0.005751</td>
+      <td>0.680125</td>
+      <td>0.081375</td>
+      <td>2.364150e+03</td>
+      <td>-2.351160e+02</td>
+      <td>15181933.08</td>
+      <td>15181933.08</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.586582</td>
+      <td>-2.599266e+03</td>
+      <td>15050993.27</td>
+      <td>15050993.27</td>
+      <td>1497</td>
+      <td>[{u'commission': None, u'amount': 5379, u'sid'...</td>
+      <td>0.0349</td>
+    </tr>
+    <tr>
+      <th>2009-12-11 21:00:00+00:00</th>
+      <td>0.256836</td>
+      <td>5.283234e-01</td>
+      <td>0.090504</td>
+      <td>-0.001528</td>
+      <td>0.679899</td>
+      <td>0.081383</td>
+      <td>2.523800e+02</td>
+      <td>1.726400e+01</td>
+      <td>15283216.38</td>
+      <td>15283216.38</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.592783</td>
+      <td>-2.351160e+02</td>
+      <td>15181933.08</td>
+      <td>15181933.08</td>
+      <td>1498</td>
+      <td>[{u'commission': None, u'amount': -483, u'sid'...</td>
+      <td>0.0355</td>
+    </tr>
+    <tr>
+      <th>2009-12-14 21:00:00+00:00</th>
+      <td>0.256789</td>
+      <td>5.454956e-01</td>
+      <td>0.092235</td>
+      <td>0.005302</td>
+      <td>0.679677</td>
+      <td>0.081406</td>
+      <td>6.313700e+03</td>
+      <td>6.330964e+03</td>
+      <td>15448625.06</td>
+      <td>15448625.06</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.603328</td>
+      <td>1.726400e+01</td>
+      <td>15283216.38</td>
+      <td>15283216.38</td>
+      <td>1499</td>
+      <td>[{u'commission': None, u'amount': -21110, u'si...</td>
+      <td>0.0356</td>
+    </tr>
+    <tr>
+      <th>2009-12-15 21:00:00+00:00</th>
+      <td>0.256712</td>
+      <td>5.540960e-01</td>
+      <td>0.093174</td>
+      <td>0.000629</td>
+      <td>0.679454</td>
+      <td>0.081395</td>
+      <td>-2.764129e+04</td>
+      <td>-2.131033e+04</td>
+      <td>15562270.30</td>
+      <td>15562270.30</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.608445</td>
+      <td>6.330964e+03</td>
+      <td>15448625.06</td>
+      <td>15448625.06</td>
+      <td>1500</td>
+      <td>[{u'commission': None, u'amount': -273861, u's...</td>
+      <td>0.0360</td>
+    </tr>
+    <tr>
+      <th>2009-12-16 21:00:00+00:00</th>
+      <td>0.256629</td>
+      <td>5.591566e-01</td>
+      <td>0.093638</td>
+      <td>0.002157</td>
+      <td>0.679227</td>
+      <td>0.081396</td>
+      <td>1.440453e+05</td>
+      <td>1.227349e+05</td>
+      <td>15468831.23</td>
+      <td>15468831.23</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.611354</td>
+      <td>-2.131033e+04</td>
+      <td>15562270.30</td>
+      <td>15562270.30</td>
+      <td>1501</td>
+      <td>[{u'commission': None, u'amount': 108105, u'si...</td>
+      <td>0.0361</td>
+    </tr>
+    <tr>
+      <th>2009-12-17 21:00:00+00:00</th>
+      <td>0.256583</td>
+      <td>5.426112e-01</td>
+      <td>0.091951</td>
+      <td>-0.009885</td>
+      <td>0.679021</td>
+      <td>0.081442</td>
+      <td>-1.195010e+05</td>
+      <td>3.233914e+03</td>
+      <td>15422877.79</td>
+      <td>15422877.79</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.600831</td>
+      <td>1.227349e+05</td>
+      <td>15468831.23</td>
+      <td>15468831.23</td>
+      <td>1502</td>
+      <td>[{u'commission': None, u'amount': 9112, u'sid'...</td>
+      <td>0.0350</td>
+    </tr>
+    <tr>
+      <th>2009-12-18 21:00:00+00:00</th>
+      <td>0.256572</td>
+      <td>5.665010e-01</td>
+      <td>0.094483</td>
+      <td>-0.009615</td>
+      <td>0.678795</td>
+      <td>0.081440</td>
+      <td>-4.617290e+03</td>
+      <td>-1.383376e+03</td>
+      <td>15666393.17</td>
+      <td>15666393.17</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.615413</td>
+      <td>3.233914e+03</td>
+      <td>15422877.79</td>
+      <td>15422877.79</td>
+      <td>1503</td>
+      <td>[{u'commission': None, u'amount': 2044, u'sid'...</td>
+      <td>0.0355</td>
+    </tr>
+    <tr>
+      <th>2009-12-21 21:00:00+00:00</th>
+      <td>0.256673</td>
+      <td>6.045817e-01</td>
+      <td>0.098342</td>
+      <td>0.000449</td>
+      <td>0.678580</td>
+      <td>0.081520</td>
+      <td>4.766944e+04</td>
+      <td>4.628606e+04</td>
+      <td>15999531.04</td>
+      <td>15999531.04</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.638404</td>
+      <td>-1.383376e+03</td>
+      <td>15666393.17</td>
+      <td>15666393.17</td>
+      <td>1504</td>
+      <td>[{u'commission': None, u'amount': 64288, u'sid...</td>
+      <td>0.0369</td>
+    </tr>
+    <tr>
+      <th>2009-12-22 21:00:00+00:00</th>
+      <td>0.256588</td>
+      <td>6.030770e-01</td>
+      <td>0.098071</td>
+      <td>0.004044</td>
+      <td>0.678355</td>
+      <td>0.081518</td>
+      <td>-4.947564e+04</td>
+      <td>-3.189576e+03</td>
+      <td>16033959.57</td>
+      <td>16033959.57</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.637296</td>
+      <td>4.628606e+04</td>
+      <td>15999531.04</td>
+      <td>15999531.04</td>
+      <td>1505</td>
+      <td>[{u'commission': None, u'amount': 162944, u'si...</td>
+      <td>0.0376</td>
+    </tr>
+    <tr>
+      <th>2009-12-23 21:00:00+00:00</th>
+      <td>0.256510</td>
+      <td>6.113661e-01</td>
+      <td>0.098843</td>
+      <td>0.006021</td>
+      <td>0.678130</td>
+      <td>0.081521</td>
+      <td>1.820101e+04</td>
+      <td>1.501143e+04</td>
+      <td>16098649.18</td>
+      <td>16098649.18</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.642015</td>
+      <td>-3.189576e+03</td>
+      <td>16033959.57</td>
+      <td>16033959.57</td>
+      <td>1506</td>
+      <td>[{u'commission': None, u'amount': 100740, u'si...</td>
+      <td>0.0377</td>
+    </tr>
+    <tr>
+      <th>2009-12-24 18:00:00+00:00</th>
+      <td>0.256425</td>
+      <td>6.129331e-01</td>
+      <td>0.098876</td>
+      <td>0.010784</td>
+      <td>0.677907</td>
+      <td>0.081521</td>
+      <td>1.411030e+04</td>
+      <td>2.912173e+04</td>
+      <td>16100208.93</td>
+      <td>16100208.93</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.642729</td>
+      <td>1.501143e+04</td>
+      <td>16098649.18</td>
+      <td>16098649.18</td>
+      <td>1507</td>
+      <td>[{u'commission': None, u'amount': 61067, u'sid...</td>
+      <td>0.0382</td>
+    </tr>
+    <tr>
+      <th>2009-12-28 21:00:00+00:00</th>
+      <td>0.256359</td>
+      <td>6.261147e-01</td>
+      <td>0.100146</td>
+      <td>0.012940</td>
+      <td>0.677682</td>
+      <td>0.081525</td>
+      <td>-3.452828e+04</td>
+      <td>-5.406546e+03</td>
+      <td>16266553.28</td>
+      <td>16266553.28</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.650304</td>
+      <td>2.912173e+04</td>
+      <td>16100208.93</td>
+      <td>16100208.93</td>
+      <td>1508</td>
+      <td>[{u'commission': None, u'amount': 20274, u'sid...</td>
+      <td>0.0385</td>
+    </tr>
+    <tr>
+      <th>2009-12-29 21:00:00+00:00</th>
+      <td>0.256290</td>
+      <td>6.382284e-01</td>
+      <td>0.101344</td>
+      <td>0.011503</td>
+      <td>0.677458</td>
+      <td>0.081519</td>
+      <td>-6.974254e+03</td>
+      <td>-1.238080e+04</td>
+      <td>16394664.33</td>
+      <td>16394664.33</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.657185</td>
+      <td>-5.406546e+03</td>
+      <td>16266553.28</td>
+      <td>16266553.28</td>
+      <td>1509</td>
+      <td>[{u'commission': None, u'amount': 69484, u'sid...</td>
+      <td>0.0382</td>
+    </tr>
+    <tr>
+      <th>2009-12-30 21:00:00+00:00</th>
+      <td>0.256206</td>
+      <td>6.422355e-01</td>
+      <td>0.101690</td>
+      <td>0.011143</td>
+      <td>0.677234</td>
+      <td>0.081519</td>
+      <td>-1.493927e+05</td>
+      <td>-1.617735e+05</td>
+      <td>16584128.61</td>
+      <td>16584128.61</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.659296</td>
+      <td>-1.238080e+04</td>
+      <td>16394664.33</td>
+      <td>16394664.33</td>
+      <td>1510</td>
+      <td>[{u'commission': None, u'amount': -244304, u's...</td>
+      <td>0.0380</td>
+    </tr>
+    <tr>
+      <th>2009-12-31 21:00:00+00:00</th>
+      <td>0.256245</td>
+      <td>6.110285e-01</td>
+      <td>0.098572</td>
+      <td>0.001438</td>
+      <td>0.677023</td>
+      <td>0.081588</td>
+      <td>6.987978e+04</td>
+      <td>-9.189371e+04</td>
+      <td>16202178.41</td>
+      <td>16202178.41</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.640360</td>
+      <td>-1.617735e+05</td>
+      <td>16584128.61</td>
+      <td>16584128.61</td>
+      <td>1511</td>
+      <td>[{u'commission': None, u'amount': -116692, u's...</td>
+      <td>0.0385</td>
+    </tr>
+  </tbody>
+</table>
+<p>1511 rows × 37 columns</p>
+</div>
+
 <h2 id="extract-metrics">Extract metrics</h2>
 <p>Get the returns, positions, and transactions from the zipline backtest object.</p>
-<pre><code class="python">returns, positions, transactions, gross_lev = pf.utils.extract_rets_pos_txn_from_zipline(results)
+<pre><code class="python">import pandas as pd
+
+results = pd.read_pickle('results.pickle')
+returns, positions, transactions = pf.utils.extract_rets_pos_txn_from_zipline(results)
 </code></pre>
 
 <h2 id="single-plot-example">Single plot example</h2>
@@ -364,122 +1766,136 @@ results = olmar.run(data)
 <pre><code class="python">pf.plot_drawdown_periods(returns, top=5).set_xlabel('Date')
 </code></pre>
 
-<pre><code>&lt;matplotlib.text.Text at 0x7fd6ff3d9198&gt;
+<pre><code>&lt;matplotlib.text.Text at 0x1207c8050&gt;
 </code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_10_1.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_9_1.png" /></p>
 <h2 id="full-tear-sheet-example">Full tear sheet example</h2>
 <p>Create a full tear sheet for our algorithm. As an example, set the live start date to something arbitrary.</p>
 <pre><code class="python">pf.create_full_tear_sheet(returns, positions=positions, transactions=transactions,
-                          gross_lev=gross_lev, live_start_date='2009-10-22', round_trips=True)
+                          live_start_date='2009-10-22', round_trips=True)
 </code></pre>
 
-<pre><code>Entire data start date: 2004-01-02
+<pre><code>/Users/georgeho/pyfolio/pyfolio/utils.py:251: UserWarning: Yahoo Finance read failed: HTTPConnectionPool(host='ichart.finance.yahoo.com', port=80): Max retries exceeded with url: /table.csv?a=0&amp;ignore=.csv&amp;s=SPY&amp;b=1&amp;e=13&amp;d=7&amp;g=d&amp;f=2017&amp;c=1970 (Caused by NewConnectionError('&lt;requests.packages.urllib3.connection.HTTPConnection object at 0x12372a750&gt;: Failed to establish a new connection: [Errno 8] nodename nor servname provided, or not known',)), falling back to Google
+  UserWarning)
+
+
+Entire data start date: 2004-01-02
 Entire data end date: 2009-12-31
-
-
-Out-of-Sample Months: 2
-Backtest Months: 69
+In-sample months: 69
+Out-of-sample months: 2
 </code></pre>
 <div>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>Performance statistics</th>
-      <th>All history</th>
-      <th>Backtest</th>
-      <th>Out of sample</th>
+      <th></th>
+      <th>All</th>
+      <th>In-sample</th>
+      <th>Out-of-sample</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>annual_return</th>
-      <td>0.08</td>
-      <td>0.08</td>
-      <td>0.03</td>
+      <th>Annual return</th>
+      <td>8.3%</td>
+      <td>8.1%</td>
+      <td>14.9%</td>
     </tr>
     <tr>
-      <th>annual_volatility</th>
-      <td>0.25</td>
-      <td>0.26</td>
-      <td>0.22</td>
+      <th>Cumulative returns</th>
+      <td>61.1%</td>
+      <td>56.8%</td>
+      <td>2.7%</td>
     </tr>
     <tr>
-      <th>sharpe_ratio</th>
+      <th>Annual volatility</th>
+      <td>25.6%</td>
+      <td>25.7%</td>
+      <td>22.0%</td>
+    </tr>
+    <tr>
+      <th>Sharpe ratio</th>
       <td>0.44</td>
       <td>0.43</td>
-      <td>0.25</td>
+      <td>0.74</td>
     </tr>
     <tr>
-      <th>calmar_ratio</th>
+      <th>Calmar ratio</th>
       <td>0.14</td>
-      <td>0.14</td>
-      <td>0.42</td>
+      <td>0.13</td>
+      <td>2.03</td>
     </tr>
     <tr>
-      <th>stability_of_timeseries</th>
-      <td>-0.01</td>
-      <td>-0.09</td>
-      <td>0.22</td>
+      <th>Stability</th>
+      <td>0.00</td>
+      <td>0.01</td>
+      <td>0.04</td>
     </tr>
     <tr>
-      <th>max_drawdown</th>
-      <td>-0.60</td>
-      <td>-0.60</td>
-      <td>-0.07</td>
+      <th>Max drawdown</th>
+      <td>-60.3%</td>
+      <td>-60.3%</td>
+      <td>-7.3%</td>
     </tr>
     <tr>
-      <th>omega_ratio</th>
+      <th>Omega ratio</th>
       <td>1.08</td>
       <td>1.08</td>
+      <td>1.13</td>
+    </tr>
+    <tr>
+      <th>Sortino ratio</th>
+      <td>0.64</td>
+      <td>0.63</td>
       <td>1.04</td>
     </tr>
     <tr>
-      <th>sortino_ratio</th>
-      <td>0.65</td>
-      <td>0.64</td>
-      <td>0.34</td>
+      <th>Skew</th>
+      <td>0.21</td>
+      <td>0.22</td>
+      <td>-0.29</td>
     </tr>
     <tr>
-      <th>skew</th>
-      <td>0.27</td>
-      <td>0.28</td>
-      <td>-0.28</td>
+      <th>Kurtosis</th>
+      <td>4.19</td>
+      <td>4.24</td>
+      <td>0.36</td>
     </tr>
     <tr>
-      <th>kurtosis</th>
-      <td>4.05</td>
-      <td>4.10</td>
-      <td>0.47</td>
-    </tr>
-    <tr>
-      <th>tail_ratio</th>
+      <th>Tail ratio</th>
       <td>0.97</td>
       <td>0.99</td>
-      <td>1.24</td>
+      <td>1.23</td>
     </tr>
     <tr>
-      <th>common_sense_ratio</th>
-      <td>1.05</td>
-      <td>1.07</td>
-      <td>1.27</td>
+      <th>Daily value at risk</th>
+      <td>-3.2%</td>
+      <td>-3.2%</td>
+      <td>-2.7%</td>
     </tr>
     <tr>
-      <th>information_ratio</th>
-      <td>0.02</td>
-      <td>0.02</td>
-      <td>-0.05</td>
+      <th>Gross leverage</th>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
     </tr>
     <tr>
-      <th>alpha</th>
-      <td>0.08</td>
-      <td>0.08</td>
-      <td>-0.11</td>
+      <th>Daily turnover</th>
+      <td>7.6%</td>
+      <td>7.5%</td>
+      <td>9.6%</td>
     </tr>
     <tr>
-      <th>beta</th>
-      <td>0.81</td>
-      <td>0.81</td>
-      <td>1.18</td>
+      <th>Alpha</th>
+      <td>0.09</td>
+      <td>0.10</td>
+      <td>-0.03</td>
+    </tr>
+    <tr>
+      <th>Beta</th>
+      <td>0.83</td>
+      <td>0.82</td>
+      <td>1.19</td>
     </tr>
   </tbody>
 </table>
@@ -489,18 +1905,18 @@ Backtest Months: 69
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>Worst Drawdown Periods</th>
-      <th>net drawdown in %</th>
-      <th>peak date</th>
-      <th>valley date</th>
-      <th>recovery date</th>
-      <th>duration</th>
+      <th>Worst drawdown periods</th>
+      <th>Net drawdown in %</th>
+      <th>Peak date</th>
+      <th>Valley date</th>
+      <th>Recovery date</th>
+      <th>Duration</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>59.91</td>
+      <td>60.30</td>
       <td>2007-11-06</td>
       <td>2008-11-20</td>
       <td>NaT</td>
@@ -508,43 +1924,44 @@ Backtest Months: 69
     </tr>
     <tr>
       <th>1</th>
-      <td>22.79</td>
-      <td>2006-02-16</td>
-      <td>2006-08-31</td>
+      <td>23.25</td>
+      <td>2006-04-06</td>
+      <td>2006-09-07</td>
       <td>2007-05-22</td>
-      <td>329</td>
+      <td>294</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>12.70</td>
-      <td>2005-07-28</td>
+      <td>12.52</td>
+      <td>2004-11-15</td>
       <td>2005-10-12</td>
       <td>2006-01-11</td>
-      <td>120</td>
+      <td>303</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>11.65</td>
-      <td>2004-11-15</td>
-      <td>2005-04-28</td>
-      <td>2005-07-28</td>
-      <td>184</td>
+      <td>10.90</td>
+      <td>2004-06-25</td>
+      <td>2004-08-12</td>
+      <td>2004-11-04</td>
+      <td>95</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>9.50</td>
+      <td>9.47</td>
       <td>2007-07-16</td>
       <td>2007-08-06</td>
-      <td>2007-09-13</td>
-      <td>44</td>
+      <td>2007-09-04</td>
+      <td>37</td>
     </tr>
   </tbody>
 </table>
 </div>
 
-<pre><code>[-0.032 -0.069]
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_11_4.png" /></p>
+<pre><code>/Users/georgeho/anaconda/lib/python2.7/site-packages/numpy/lib/function_base.py:4269: RuntimeWarning: Invalid value encountered in percentile
+  interpolation=interpolation)
 </code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_4.png" /></p>
 <div>
 <table border="1" class="dataframe">
   <thead>
@@ -558,63 +1975,63 @@ Backtest Months: 69
   <tbody>
     <tr>
       <th>Lehmann</th>
-      <td>-0.26%</td>
-      <td>-4.45%</td>
-      <td>4.41%</td>
+      <td>-0.28%</td>
+      <td>-7.41%</td>
+      <td>4.40%</td>
     </tr>
     <tr>
       <th>Aug07</th>
-      <td>0.34%</td>
+      <td>0.35%</td>
       <td>-2.96%</td>
-      <td>3.02%</td>
+      <td>3.03%</td>
     </tr>
     <tr>
       <th>Mar08</th>
-      <td>-0.44%</td>
+      <td>-0.43%</td>
       <td>-3.10%</td>
-      <td>3.33%</td>
+      <td>3.34%</td>
     </tr>
     <tr>
       <th>Sept08</th>
-      <td>-0.64%</td>
-      <td>-4.35%</td>
+      <td>-0.68%</td>
+      <td>-7.41%</td>
       <td>3.99%</td>
     </tr>
     <tr>
       <th>2009Q1</th>
-      <td>-0.36%</td>
-      <td>-4.99%</td>
-      <td>3.35%</td>
+      <td>-0.35%</td>
+      <td>-4.98%</td>
+      <td>3.36%</td>
     </tr>
     <tr>
       <th>2009Q2</th>
       <td>0.71%</td>
       <td>-3.78%</td>
-      <td>6.15%</td>
+      <td>6.17%</td>
     </tr>
     <tr>
       <th>Low Volatility Bull Market</th>
       <td>0.01%</td>
-      <td>-6.13%</td>
-      <td>6.40%</td>
+      <td>-6.11%</td>
+      <td>6.45%</td>
     </tr>
     <tr>
       <th>GFC Crash</th>
       <td>-0.08%</td>
-      <td>-7.59%</td>
-      <td>9.70%</td>
+      <td>-7.58%</td>
+      <td>9.71%</td>
     </tr>
     <tr>
       <th>Recovery</th>
       <td>0.32%</td>
       <td>-3.78%</td>
-      <td>6.15%</td>
+      <td>6.17%</td>
     </tr>
   </tbody>
 </table>
 </div>
 
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_6.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_11_7.png" /></p>
 <div>
 <table border="1" class="dataframe">
   <thead>
@@ -622,39 +2039,35 @@ Backtest Months: 69
       <th>Top 10 long positions of all time</th>
       <th>max</th>
     </tr>
-    <tr>
-      <th>sid</th>
-      <th></th>
-    </tr>
   </thead>
   <tbody>
     <tr>
-      <th>Equity(3 [COST])</th>
-      <td>100.76%</td>
+      <th>COST</th>
+      <td>100.74%</td>
     </tr>
     <tr>
-      <th>Equity(7 [MMM])</th>
-      <td>92.38%</td>
+      <th>MMM</th>
+      <td>92.35%</td>
     </tr>
     <tr>
-      <th>Equity(2 [CERN])</th>
-      <td>84.49%</td>
+      <th>CERN</th>
+      <td>84.47%</td>
     </tr>
     <tr>
-      <th>Equity(4 [DELL])</th>
-      <td>71.71%</td>
+      <th>DELL</th>
+      <td>72.76%</td>
     </tr>
     <tr>
-      <th>Equity(1 [AMD])</th>
+      <th>AMD</th>
       <td>71.05%</td>
     </tr>
     <tr>
-      <th>Equity(6 [INTC])</th>
-      <td>66.55%</td>
+      <th>INTC</th>
+      <td>69.19%</td>
     </tr>
     <tr>
-      <th>Equity(5 [GPS])</th>
-      <td>62.13%</td>
+      <th>GPS</th>
+      <td>62.11%</td>
     </tr>
   </tbody>
 </table>
@@ -666,10 +2079,6 @@ Backtest Months: 69
     <tr style="text-align: right;">
       <th>Top 10 short positions of all time</th>
       <th>max</th>
-    </tr>
-    <tr>
-      <th>sid</th>
-      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -684,39 +2093,35 @@ Backtest Months: 69
       <th>Top 10 positions of all time</th>
       <th>max</th>
     </tr>
-    <tr>
-      <th>sid</th>
-      <th></th>
-    </tr>
   </thead>
   <tbody>
     <tr>
-      <th>Equity(3 [COST])</th>
-      <td>100.76%</td>
+      <th>COST</th>
+      <td>100.74%</td>
     </tr>
     <tr>
-      <th>Equity(7 [MMM])</th>
-      <td>92.38%</td>
+      <th>MMM</th>
+      <td>92.35%</td>
     </tr>
     <tr>
-      <th>Equity(2 [CERN])</th>
-      <td>84.49%</td>
+      <th>CERN</th>
+      <td>84.47%</td>
     </tr>
     <tr>
-      <th>Equity(4 [DELL])</th>
-      <td>71.71%</td>
+      <th>DELL</th>
+      <td>72.76%</td>
     </tr>
     <tr>
-      <th>Equity(1 [AMD])</th>
+      <th>AMD</th>
       <td>71.05%</td>
     </tr>
     <tr>
-      <th>Equity(6 [INTC])</th>
-      <td>66.55%</td>
+      <th>INTC</th>
+      <td>69.19%</td>
     </tr>
     <tr>
-      <th>Equity(5 [GPS])</th>
-      <td>62.13%</td>
+      <th>GPS</th>
+      <td>62.11%</td>
     </tr>
   </tbody>
 </table>
@@ -729,80 +2134,82 @@ Backtest Months: 69
       <th>All positions ever held</th>
       <th>max</th>
     </tr>
-    <tr>
-      <th>sid</th>
-      <th></th>
-    </tr>
   </thead>
   <tbody>
     <tr>
-      <th>Equity(3 [COST])</th>
-      <td>100.76%</td>
+      <th>COST</th>
+      <td>100.74%</td>
     </tr>
     <tr>
-      <th>Equity(7 [MMM])</th>
-      <td>92.38%</td>
+      <th>MMM</th>
+      <td>92.35%</td>
     </tr>
     <tr>
-      <th>Equity(2 [CERN])</th>
-      <td>84.49%</td>
+      <th>CERN</th>
+      <td>84.47%</td>
     </tr>
     <tr>
-      <th>Equity(4 [DELL])</th>
-      <td>71.71%</td>
+      <th>DELL</th>
+      <td>72.76%</td>
     </tr>
     <tr>
-      <th>Equity(1 [AMD])</th>
+      <th>AMD</th>
       <td>71.05%</td>
     </tr>
     <tr>
-      <th>Equity(6 [INTC])</th>
-      <td>66.55%</td>
+      <th>INTC</th>
+      <td>69.19%</td>
     </tr>
     <tr>
-      <th>Equity(5 [GPS])</th>
-      <td>62.13%</td>
+      <th>GPS</th>
+      <td>62.11%</td>
     </tr>
   </tbody>
 </table>
 </div>
 
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_11.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_12.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_11_12.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_11_13.png" /></p>
 <div>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
       <th>Summary stats</th>
       <th>All trades</th>
+      <th>Short trades</th>
       <th>Long trades</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>Total number of round_trips</th>
-      <td>3729.00</td>
-      <td>3729.00</td>
+      <td>3986.00</td>
+      <td>3.00</td>
+      <td>3983.00</td>
     </tr>
     <tr>
       <th>Percent profitable</th>
-      <td>0.43</td>
-      <td>0.43</td>
+      <td>0.49</td>
+      <td>0.33</td>
+      <td>0.49</td>
     </tr>
     <tr>
       <th>Winning round_trips</th>
-      <td>1616.00</td>
-      <td>1616.00</td>
+      <td>1938.00</td>
+      <td>1.00</td>
+      <td>1937.00</td>
     </tr>
     <tr>
       <th>Losing round_trips</th>
-      <td>2113.00</td>
-      <td>2113.00</td>
+      <td>2039.00</td>
+      <td>0.00</td>
+      <td>2039.00</td>
     </tr>
     <tr>
       <th>Even round_trips</th>
-      <td>0.00</td>
-      <td>0.00</td>
+      <td>9.00</td>
+      <td>2.00</td>
+      <td>7.00</td>
     </tr>
   </tbody>
 </table>
@@ -814,59 +2221,70 @@ Backtest Months: 69
     <tr style="text-align: right;">
       <th>PnL stats</th>
       <th>All trades</th>
+      <th>Short trades</th>
       <th>Long trades</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>Total profit</th>
-      <td>$61673.54</td>
-      <td>$61673.54</td>
+      <td>$6118150.70</td>
+      <td>$0.00</td>
+      <td>$6118150.70</td>
     </tr>
     <tr>
       <th>Gross profit</th>
-      <td>$376899.39</td>
-      <td>$376899.39</td>
+      <td>$37872903.48</td>
+      <td>$0.00</td>
+      <td>$37872903.48</td>
     </tr>
     <tr>
       <th>Gross loss</th>
-      <td>$-315225.85</td>
-      <td>$-315225.85</td>
+      <td>$-31754752.78</td>
+      <td>$0.00</td>
+      <td>$-31754752.78</td>
     </tr>
     <tr>
       <th>Profit factor</th>
-      <td>$1.20</td>
-      <td>$1.20</td>
+      <td>$1.19</td>
+      <td>$nan</td>
+      <td>$1.19</td>
     </tr>
     <tr>
       <th>Avg. trade net profit</th>
-      <td>$16.54</td>
-      <td>$16.54</td>
+      <td>$1534.91</td>
+      <td>$0.00</td>
+      <td>$1536.07</td>
     </tr>
     <tr>
       <th>Avg. winning trade</th>
-      <td>$233.23</td>
-      <td>$233.23</td>
+      <td>$19542.26</td>
+      <td>$0.00</td>
+      <td>$19552.35</td>
     </tr>
     <tr>
       <th>Avg. losing trade</th>
-      <td>$-149.18</td>
-      <td>$-149.18</td>
+      <td>$-15573.69</td>
+      <td>$nan</td>
+      <td>$-15573.69</td>
     </tr>
     <tr>
       <th>Ratio Avg. Win:Avg. Loss</th>
-      <td>$1.56</td>
-      <td>$1.56</td>
+      <td>$1.25</td>
+      <td>$nan</td>
+      <td>$1.26</td>
     </tr>
     <tr>
       <th>Largest winning trade</th>
-      <td>$15541.78</td>
-      <td>$15541.78</td>
+      <td>$1553000.44</td>
+      <td>$0.00</td>
+      <td>$1553000.44</td>
     </tr>
     <tr>
       <th>Largest losing trade</th>
-      <td>$-12468.25</td>
-      <td>$-12468.25</td>
+      <td>$-1251993.38</td>
+      <td>$0.00</td>
+      <td>$-1251993.38</td>
     </tr>
   </tbody>
 </table>
@@ -878,29 +2296,34 @@ Backtest Months: 69
     <tr style="text-align: right;">
       <th>Duration stats</th>
       <th>All trades</th>
+      <th>Short trades</th>
       <th>Long trades</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>Avg duration</th>
-      <td>22 days 05:36:44.023330</td>
-      <td>22 days 05:36:44.023330</td>
+      <td>21 days 18:52:41.966884</td>
+      <td>20:59:59</td>
+      <td>21 days 19:15:22.822746</td>
     </tr>
     <tr>
       <th>Median duration</th>
-      <td>18 days 00:00:00</td>
+      <td>17 days 23:00:00</td>
+      <td>20:59:59</td>
       <td>18 days 00:00:00</td>
     </tr>
     <tr>
-      <th>Avg # round_trips per day</th>
-      <td>34.53</td>
-      <td>34.53</td>
+      <th>Longest duration</th>
+      <td>109 days 01:00:00</td>
+      <td>20:59:59</td>
+      <td>109 days 01:00:00</td>
     </tr>
     <tr>
-      <th>Avg # round_trips per month</th>
-      <td>725.08</td>
-      <td>725.08</td>
+      <th>Shortest duration</th>
+      <td>0 days 03:00:01</td>
+      <td>20:59:59</td>
+      <td>0 days 03:00:01</td>
     </tr>
   </tbody>
 </table>
@@ -912,6 +2335,7 @@ Backtest Months: 69
     <tr style="text-align: right;">
       <th>Return stats</th>
       <th>All trades</th>
+      <th>Short trades</th>
       <th>Long trades</th>
     </tr>
   </thead>
@@ -919,42 +2343,50 @@ Backtest Months: 69
     <tr>
       <th>Avg returns all round_trips</th>
       <td>0.01%</td>
+      <td>0.00%</td>
       <td>0.01%</td>
     </tr>
     <tr>
       <th>Avg returns winning</th>
-      <td>0.19%</td>
-      <td>0.19%</td>
+      <td>0.16%</td>
+      <td>0.00%</td>
+      <td>0.16%</td>
     </tr>
     <tr>
       <th>Avg returns losing</th>
       <td>-0.13%</td>
+      <td>nan%</td>
       <td>-0.13%</td>
     </tr>
     <tr>
       <th>Median returns all round_trips</th>
       <td>-0.00%</td>
+      <td>0.00%</td>
       <td>-0.00%</td>
     </tr>
     <tr>
       <th>Median returns winning</th>
-      <td>0.03%</td>
-      <td>0.03%</td>
+      <td>0.02%</td>
+      <td>0.00%</td>
+      <td>0.02%</td>
     </tr>
     <tr>
       <th>Median returns losing</th>
       <td>-0.01%</td>
+      <td>nan%</td>
       <td>-0.01%</td>
     </tr>
     <tr>
       <th>Largest winning trade</th>
-      <td>12.12%</td>
-      <td>12.12%</td>
+      <td>12.13%</td>
+      <td>0.00%</td>
+      <td>12.13%</td>
     </tr>
     <tr>
       <th>Largest losing trade</th>
-      <td>-9.15%</td>
-      <td>-9.15%</td>
+      <td>-9.14%</td>
+      <td>0.00%</td>
+      <td>-9.14%</td>
     </tr>
   </tbody>
 </table>
@@ -965,50 +2397,50 @@ Backtest Months: 69
   <thead>
     <tr style="text-align: right;">
       <th>Symbol stats</th>
-      <th>Equity(1 [AMD])</th>
-      <th>Equity(2 [CERN])</th>
-      <th>Equity(3 [COST])</th>
-      <th>Equity(4 [DELL])</th>
-      <th>Equity(5 [GPS])</th>
-      <th>Equity(6 [INTC])</th>
-      <th>Equity(7 [MMM])</th>
+      <th>CERN</th>
+      <th>COST</th>
+      <th>GPS</th>
+      <th>INTC</th>
+      <th>MMM</th>
+      <th>AMD</th>
+      <th>DELL</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>Avg returns all round_trips</th>
-      <td>-0.00%</td>
       <td>0.03%</td>
       <td>0.03%</td>
-      <td>-0.04%</td>
       <td>-0.01%</td>
       <td>0.04%</td>
       <td>0.01%</td>
+      <td>-0.00%</td>
+      <td>-0.03%</td>
     </tr>
     <tr>
       <th>Avg returns winning</th>
-      <td>0.41%</td>
-      <td>0.22%</td>
-      <td>0.15%</td>
-      <td>0.15%</td>
-      <td>0.15%</td>
       <td>0.19%</td>
       <td>0.12%</td>
+      <td>0.13%</td>
+      <td>0.15%</td>
+      <td>0.10%</td>
+      <td>0.36%</td>
+      <td>0.13%</td>
     </tr>
     <tr>
       <th>Avg returns losing</th>
-      <td>-0.34%</td>
-      <td>-0.15%</td>
+      <td>-0.16%</td>
       <td>-0.06%</td>
-      <td>-0.18%</td>
-      <td>-0.10%</td>
-      <td>-0.07%</td>
+      <td>-0.11%</td>
+      <td>-0.06%</td>
       <td>-0.08%</td>
+      <td>-0.34%</td>
+      <td>-0.19%</td>
     </tr>
     <tr>
       <th>Median returns all round_trips</th>
-      <td>-0.00%</td>
-      <td>-0.00%</td>
+      <td>0.00%</td>
+      <td>0.00%</td>
       <td>-0.00%</td>
       <td>-0.00%</td>
       <td>-0.00%</td>
@@ -1017,43 +2449,43 @@ Backtest Months: 69
     </tr>
     <tr>
       <th>Median returns winning</th>
-      <td>0.10%</td>
-      <td>0.03%</td>
-      <td>0.03%</td>
       <td>0.02%</td>
-      <td>0.04%</td>
-      <td>0.06%</td>
+      <td>0.01%</td>
       <td>0.02%</td>
+      <td>0.03%</td>
+      <td>0.01%</td>
+      <td>0.07%</td>
+      <td>0.01%</td>
     </tr>
     <tr>
       <th>Median returns losing</th>
-      <td>-0.02%</td>
-      <td>-0.01%</td>
       <td>-0.01%</td>
       <td>-0.01%</td>
       <td>-0.01%</td>
       <td>-0.00%</td>
       <td>-0.01%</td>
+      <td>-0.02%</td>
+      <td>-0.01%</td>
     </tr>
     <tr>
       <th>Largest winning trade</th>
-      <td>12.12%</td>
-      <td>5.91%</td>
+      <td>5.94%</td>
       <td>2.95%</td>
-      <td>2.48%</td>
-      <td>3.52%</td>
-      <td>2.32%</td>
-      <td>2.23%</td>
+      <td>3.54%</td>
+      <td>2.33%</td>
+      <td>2.22%</td>
+      <td>12.13%</td>
+      <td>3.36%</td>
     </tr>
     <tr>
       <th>Largest losing trade</th>
-      <td>-9.15%</td>
-      <td>-4.68%</td>
-      <td>-3.41%</td>
-      <td>-5.87%</td>
-      <td>-8.27%</td>
-      <td>-4.61%</td>
-      <td>-3.84%</td>
+      <td>-4.67%</td>
+      <td>-3.47%</td>
+      <td>-8.30%</td>
+      <td>-4.60%</td>
+      <td>-4.02%</td>
+      <td>-9.14%</td>
+      <td>-6.60%</td>
     </tr>
   </tbody>
 </table>
@@ -1064,163 +2496,166 @@ Backtest Months: 69
   <thead>
     <tr style="text-align: right;">
       <th>Profitability (PnL / PnL total) per name</th>
-      <th>pnl</th>
-    </tr>
-    <tr>
-      <th>symbol</th>
       <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>Equity(6 [INTC])</th>
-      <td>0.44%</td>
+      <th>INTC</th>
+      <td>45.09%</td>
     </tr>
     <tr>
-      <th>Equity(3 [COST])</th>
-      <td>0.40%</td>
+      <th>COST</th>
+      <td>42.42%</td>
     </tr>
     <tr>
-      <th>Equity(2 [CERN])</th>
-      <td>0.34%</td>
+      <th>CERN</th>
+      <td>35.52%</td>
     </tr>
     <tr>
-      <th>Equity(7 [MMM])</th>
-      <td>0.18%</td>
+      <th>MMM</th>
+      <td>13.51%</td>
     </tr>
     <tr>
-      <th>Equity(5 [GPS])</th>
-      <td>0.02%</td>
+      <th>GPS</th>
+      <td>-2.49%</td>
     </tr>
     <tr>
-      <th>Equity(1 [AMD])</th>
-      <td>-0.06%</td>
+      <th>AMD</th>
+      <td>-7.15%</td>
     </tr>
     <tr>
-      <th>Equity(4 [DELL])</th>
-      <td>-0.32%</td>
+      <th>DELL</th>
+      <td>-26.91%</td>
     </tr>
   </tbody>
 </table>
 </div>
 
-<pre><code>&lt;matplotlib.figure.Figure at 0x7fd6f7c5a6a0&gt;
-</code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_12_20.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_11_20.png" /></p>
 <h2 id="suppressing-symbol-output">Suppressing symbol output</h2>
 <p>When sharing tear sheets it might be undesirable to display which symbols where used by a strategy. To suppress these in the tear sheet you can pass <code>hide_positions=True</code>.</p>
 <pre><code class="python">pf.create_full_tear_sheet(returns, positions=positions, transactions=transactions,
-                          gross_lev=gross_lev, live_start_date='2009-10-22',
-                          hide_positions=True)
+                          live_start_date='2009-10-22', hide_positions=True)
 </code></pre>
 
 <pre><code>Entire data start date: 2004-01-02
 Entire data end date: 2009-12-31
-
-
-Out-of-Sample Months: 2
-Backtest Months: 69
+In-sample months: 69
+Out-of-sample months: 2
 </code></pre>
 <div>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>Performance statistics</th>
-      <th>All history</th>
-      <th>Backtest</th>
-      <th>Out of sample</th>
+      <th></th>
+      <th>All</th>
+      <th>In-sample</th>
+      <th>Out-of-sample</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>annual_return</th>
-      <td>0.08</td>
-      <td>0.08</td>
-      <td>0.03</td>
+      <th>Annual return</th>
+      <td>8.3%</td>
+      <td>8.1%</td>
+      <td>14.9%</td>
     </tr>
     <tr>
-      <th>annual_volatility</th>
-      <td>0.25</td>
-      <td>0.26</td>
-      <td>0.22</td>
+      <th>Cumulative returns</th>
+      <td>61.1%</td>
+      <td>56.8%</td>
+      <td>2.7%</td>
     </tr>
     <tr>
-      <th>sharpe_ratio</th>
+      <th>Annual volatility</th>
+      <td>25.6%</td>
+      <td>25.7%</td>
+      <td>22.0%</td>
+    </tr>
+    <tr>
+      <th>Sharpe ratio</th>
       <td>0.44</td>
       <td>0.43</td>
-      <td>0.25</td>
+      <td>0.74</td>
     </tr>
     <tr>
-      <th>calmar_ratio</th>
+      <th>Calmar ratio</th>
       <td>0.14</td>
-      <td>0.14</td>
-      <td>0.42</td>
+      <td>0.13</td>
+      <td>2.03</td>
     </tr>
     <tr>
-      <th>stability_of_timeseries</th>
-      <td>-0.01</td>
-      <td>-0.09</td>
-      <td>0.22</td>
+      <th>Stability</th>
+      <td>0.00</td>
+      <td>0.01</td>
+      <td>0.04</td>
     </tr>
     <tr>
-      <th>max_drawdown</th>
-      <td>-0.60</td>
-      <td>-0.60</td>
-      <td>-0.07</td>
+      <th>Max drawdown</th>
+      <td>-60.3%</td>
+      <td>-60.3%</td>
+      <td>-7.3%</td>
     </tr>
     <tr>
-      <th>omega_ratio</th>
+      <th>Omega ratio</th>
       <td>1.08</td>
       <td>1.08</td>
+      <td>1.13</td>
+    </tr>
+    <tr>
+      <th>Sortino ratio</th>
+      <td>0.64</td>
+      <td>0.63</td>
       <td>1.04</td>
     </tr>
     <tr>
-      <th>sortino_ratio</th>
-      <td>0.65</td>
-      <td>0.64</td>
-      <td>0.34</td>
+      <th>Skew</th>
+      <td>0.21</td>
+      <td>0.22</td>
+      <td>-0.29</td>
     </tr>
     <tr>
-      <th>skew</th>
-      <td>0.27</td>
-      <td>0.28</td>
-      <td>-0.28</td>
+      <th>Kurtosis</th>
+      <td>4.19</td>
+      <td>4.24</td>
+      <td>0.36</td>
     </tr>
     <tr>
-      <th>kurtosis</th>
-      <td>4.05</td>
-      <td>4.10</td>
-      <td>0.47</td>
-    </tr>
-    <tr>
-      <th>tail_ratio</th>
+      <th>Tail ratio</th>
       <td>0.97</td>
       <td>0.99</td>
-      <td>1.24</td>
+      <td>1.23</td>
     </tr>
     <tr>
-      <th>common_sense_ratio</th>
-      <td>1.05</td>
-      <td>1.07</td>
-      <td>1.27</td>
+      <th>Daily value at risk</th>
+      <td>-3.2%</td>
+      <td>-3.2%</td>
+      <td>-2.7%</td>
     </tr>
     <tr>
-      <th>information_ratio</th>
-      <td>0.02</td>
-      <td>0.02</td>
-      <td>-0.05</td>
+      <th>Gross leverage</th>
+      <td>1.00</td>
+      <td>1.00</td>
+      <td>1.00</td>
     </tr>
     <tr>
-      <th>alpha</th>
-      <td>0.08</td>
-      <td>0.08</td>
-      <td>-0.11</td>
+      <th>Daily turnover</th>
+      <td>7.6%</td>
+      <td>7.5%</td>
+      <td>9.6%</td>
     </tr>
     <tr>
-      <th>beta</th>
-      <td>0.81</td>
-      <td>0.81</td>
-      <td>1.18</td>
+      <th>Alpha</th>
+      <td>0.09</td>
+      <td>0.10</td>
+      <td>-0.03</td>
+    </tr>
+    <tr>
+      <th>Beta</th>
+      <td>0.83</td>
+      <td>0.82</td>
+      <td>1.19</td>
     </tr>
   </tbody>
 </table>
@@ -1230,18 +2665,18 @@ Backtest Months: 69
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
-      <th>Worst Drawdown Periods</th>
-      <th>net drawdown in %</th>
-      <th>peak date</th>
-      <th>valley date</th>
-      <th>recovery date</th>
-      <th>duration</th>
+      <th>Worst drawdown periods</th>
+      <th>Net drawdown in %</th>
+      <th>Peak date</th>
+      <th>Valley date</th>
+      <th>Recovery date</th>
+      <th>Duration</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>59.91</td>
+      <td>60.30</td>
       <td>2007-11-06</td>
       <td>2008-11-20</td>
       <td>NaT</td>
@@ -1249,43 +2684,41 @@ Backtest Months: 69
     </tr>
     <tr>
       <th>1</th>
-      <td>22.79</td>
-      <td>2006-02-16</td>
-      <td>2006-08-31</td>
+      <td>23.25</td>
+      <td>2006-04-06</td>
+      <td>2006-09-07</td>
       <td>2007-05-22</td>
-      <td>329</td>
+      <td>294</td>
     </tr>
     <tr>
       <th>2</th>
-      <td>12.70</td>
-      <td>2005-07-28</td>
+      <td>12.52</td>
+      <td>2004-11-15</td>
       <td>2005-10-12</td>
       <td>2006-01-11</td>
-      <td>120</td>
+      <td>303</td>
     </tr>
     <tr>
       <th>3</th>
-      <td>11.65</td>
-      <td>2004-11-15</td>
-      <td>2005-04-28</td>
-      <td>2005-07-28</td>
-      <td>184</td>
+      <td>10.90</td>
+      <td>2004-06-25</td>
+      <td>2004-08-12</td>
+      <td>2004-11-04</td>
+      <td>95</td>
     </tr>
     <tr>
       <th>4</th>
-      <td>9.50</td>
+      <td>9.47</td>
       <td>2007-07-16</td>
       <td>2007-08-06</td>
-      <td>2007-09-13</td>
-      <td>44</td>
+      <td>2007-09-04</td>
+      <td>37</td>
     </tr>
   </tbody>
 </table>
 </div>
 
-<pre><code>[-0.032 -0.069]
-</code></pre>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_4.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_13_3.png" /></p>
 <div>
 <table border="1" class="dataframe">
   <thead>
@@ -1299,105 +2732,140 @@ Backtest Months: 69
   <tbody>
     <tr>
       <th>Lehmann</th>
-      <td>-0.26%</td>
-      <td>-4.45%</td>
-      <td>4.41%</td>
+      <td>-0.28%</td>
+      <td>-7.41%</td>
+      <td>4.40%</td>
     </tr>
     <tr>
       <th>Aug07</th>
-      <td>0.34%</td>
+      <td>0.35%</td>
       <td>-2.96%</td>
-      <td>3.02%</td>
+      <td>3.03%</td>
     </tr>
     <tr>
       <th>Mar08</th>
-      <td>-0.44%</td>
+      <td>-0.43%</td>
       <td>-3.10%</td>
-      <td>3.33%</td>
+      <td>3.34%</td>
     </tr>
     <tr>
       <th>Sept08</th>
-      <td>-0.64%</td>
-      <td>-4.35%</td>
+      <td>-0.68%</td>
+      <td>-7.41%</td>
       <td>3.99%</td>
     </tr>
     <tr>
       <th>2009Q1</th>
-      <td>-0.36%</td>
-      <td>-4.99%</td>
-      <td>3.35%</td>
+      <td>-0.35%</td>
+      <td>-4.98%</td>
+      <td>3.36%</td>
     </tr>
     <tr>
       <th>2009Q2</th>
       <td>0.71%</td>
       <td>-3.78%</td>
-      <td>6.15%</td>
+      <td>6.17%</td>
     </tr>
     <tr>
       <th>Low Volatility Bull Market</th>
       <td>0.01%</td>
-      <td>-6.13%</td>
-      <td>6.40%</td>
+      <td>-6.11%</td>
+      <td>6.45%</td>
     </tr>
     <tr>
       <th>GFC Crash</th>
       <td>-0.08%</td>
-      <td>-7.59%</td>
-      <td>9.70%</td>
+      <td>-7.58%</td>
+      <td>9.71%</td>
     </tr>
     <tr>
       <th>Recovery</th>
       <td>0.32%</td>
       <td>-3.78%</td>
-      <td>6.15%</td>
+      <td>6.17%</td>
     </tr>
   </tbody>
 </table>
 </div>
 
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_6.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_7.png" /></p>
-<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_14_8.png" /></p></div>
-            
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_13_5.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_13_6.png" /></p>
+<p><img alt="png" src="../zipline_algo_example_files/zipline_algo_example_13_7.png" /></p></div>
         </div>
 
         <footer class="col-md-12">
             <hr>
-            
             <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
-
-        <script src="../../js/jquery-1.10.2.min.js"></script>
-        <script src="../../js/bootstrap-3.0.3.min.js"></script>
-        <script src="../../js/highlight.pack.js"></script>
         <script>var base_url = '../..';</script>
-        <script data-main="../../mkdocs/js/search.js" src="../../mkdocs/js/require.js"></script>
         <script src="../../js/base.js"></script>
+        <script src="../../search/require.js"></script>
+        <script src="../../search/search.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
                     </div>
-                    <div class="modal-body">
-                        <p>
-                            From here you can search these documents. Enter
-                            your search terms below.
-                        </p>
-                        <form role="form">
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
-                            </div>
-                        </form>
-                        <div id="mkdocs-search-results"></div>
-                    </div>
-                    <div class="modal-footer">
-                    </div>
-                </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
             </div>
         </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&rarr;</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
 
     </body>
 </html>

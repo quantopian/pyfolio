@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="Quantopian Inc.">
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Sector analysis - pyfolio</title>
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome-4.5.0.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../css/highlight.css">
+        <link href="../../extra.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../js/jquery-1.10.2.min.js"></script>
+        <script src="../../js/bootstrap-3.0.3.min.js"></script>
+        <script src="../../js/highlight.pack.js"></script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../..">pyfolio</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                    <li >
+                        <a href="../..">Overview</a>
+                    </li>
+                    <li >
+                        <a href="../../whatsnew/">Releases</a>
+                    </li>
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tutorial <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            
+<li >
+    <a href="../single_stock_example/">Single stock</a>
+</li>
+                            
+<li >
+    <a href="../zipline_algo_example/">Zipline algorithm</a>
+</li>
+                            
+<li >
+    <a href="../bayesian/">Bayesian analysis</a>
+</li>
+                            
+<li class="active">
+    <a href="./">Sector analysis</a>
+</li>
+                            
+<li >
+    <a href="../round_trip_tear_sheet_example/">Round trip analysis</a>
+</li>
+                            
+<li >
+    <a href="../slippage_example/">Slippage analysis</a>
+</li>
+                        </ul>
+                    </li>
+                </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                    <li >
+                        <a rel="next" href="../bayesian/">
+                            <i class="fa fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="prev" href="../round_trip_tear_sheet_example/">
+                            Next <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/quantopian/pyfolio/edit/master/docs/notebooks/sector_mappings_example.md"><i class="fa fa-github"></i> Edit on GitHub</a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#sector-mappings">Sector Mappings</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="sector-mappings">Sector Mappings</h1>
+<p>To generate sector allocation plots in the positions tearsheet and PnL by sector in the round trips tearsheet, you must pass pyfolio a dictionary (or dict-like data structure) of symbol-sector mappings, where symbols are keys and sectors are values. <code>create_full_tearsheet</code> will also take symbol-sector mappings as the keyword argument <code>sector_mappings</code>.</p>
+<p>In this notebook, we generate the positions tear sheet and round-trip tear sheet with sector mappings.</p>
+<pre><code class="python">import pyfolio as pf
+import pandas as pd
+%matplotlib inline
+import gzip
+import os
+
+# silence warnings
+import warnings
+warnings.filterwarnings('ignore')
+</code></pre>
+
+<pre><code class="python">returns = pd.read_csv(gzip.open('../tests/test_data/test_returns.csv.gz'),
+                      index_col=0, parse_dates=True, header=None)[1]
+positions = pd.read_csv(gzip.open('../tests/test_data/test_pos.csv.gz'),
+                        index_col=0, parse_dates=True)
+transactions = pd.read_csv(gzip.open('../tests/test_data/test_txn.csv.gz'),
+                           index_col=0, parse_dates=True)
+
+returns.index = returns.index.tz_localize('UTC')
+positions.index = positions.index.tz_localize('UTC')
+transactions.index = transactions.index.tz_localize('UTC')
+</code></pre>
+
+<pre><code class="python">positions.head()
+</code></pre>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>AMD</th>
+      <th>CERN</th>
+      <th>COST</th>
+      <th>DELL</th>
+      <th>GPS</th>
+      <th>INTC</th>
+      <th>MMM</th>
+      <th>cash</th>
+    </tr>
+    <tr>
+      <th>index</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2004-01-09 00:00:00+00:00</th>
+      <td>6961.92</td>
+      <td>21017.07875</td>
+      <td>7282.266152</td>
+      <td>21264.55188</td>
+      <td>7091.080020</td>
+      <td>21259.333890</td>
+      <td>21316.129606</td>
+      <td>-6192.360298</td>
+    </tr>
+    <tr>
+      <th>2004-01-12 00:00:00+00:00</th>
+      <td>18198.58</td>
+      <td>18071.25000</td>
+      <td>17675.836401</td>
+      <td>10804.31924</td>
+      <td>10685.411865</td>
+      <td>17872.477480</td>
+      <td>10882.026400</td>
+      <td>-3329.289887</td>
+    </tr>
+    <tr>
+      <th>2004-01-13 00:00:00+00:00</th>
+      <td>12060.86</td>
+      <td>11942.24625</td>
+      <td>12838.477446</td>
+      <td>16078.90380</td>
+      <td>16272.139000</td>
+      <td>12465.392511</td>
+      <td>12579.135758</td>
+      <td>4708.039735</td>
+    </tr>
+    <tr>
+      <th>2004-01-14 00:00:00+00:00</th>
+      <td>13102.40</td>
+      <td>15534.28125</td>
+      <td>14447.422640</td>
+      <td>15414.45080</td>
+      <td>15666.440185</td>
+      <td>14884.069620</td>
+      <td>13454.542620</td>
+      <td>-2749.470030</td>
+    </tr>
+    <tr>
+      <th>2004-01-15 00:00:00+00:00</th>
+      <td>15518.40</td>
+      <td>14547.05000</td>
+      <td>14164.039680</td>
+      <td>14407.48813</td>
+      <td>14926.122619</td>
+      <td>14422.385864</td>
+      <td>13929.159049</td>
+      <td>-2462.919316</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<pre><code class="python"># define our sector mappings
+sect_map = {'COST': 'Consumer Goods',
+            'INTC': 'Technology', 
+            'CERN': 'Healthcare', 
+            'GPS': 'Technology',
+            'MMM': 'Construction', 
+            'DELL': 'Technology', 
+            'AMD': 'Technology'}
+</code></pre>
+
+<pre><code class="python">pf.create_position_tear_sheet(returns, positions, sector_mappings=sect_map)
+</code></pre>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Top 10 long positions of all time</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>COST</th>
+      <td>90.01%</td>
+    </tr>
+    <tr>
+      <th>DELL</th>
+      <td>85.73%</td>
+    </tr>
+    <tr>
+      <th>CERN</th>
+      <td>83.53%</td>
+    </tr>
+    <tr>
+      <th>MMM</th>
+      <td>82.09%</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>78.59%</td>
+    </tr>
+    <tr>
+      <th>AMD</th>
+      <td>75.76%</td>
+    </tr>
+    <tr>
+      <th>GPS</th>
+      <td>62.24%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Top 10 short positions of all time</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>AMD</th>
+      <td>-30.12%</td>
+    </tr>
+    <tr>
+      <th>DELL</th>
+      <td>-26.58%</td>
+    </tr>
+    <tr>
+      <th>CERN</th>
+      <td>-25.51%</td>
+    </tr>
+    <tr>
+      <th>MMM</th>
+      <td>-22.62%</td>
+    </tr>
+    <tr>
+      <th>GPS</th>
+      <td>-20.09%</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>-18.47%</td>
+    </tr>
+    <tr>
+      <th>COST</th>
+      <td>-16.44%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Top 10 positions of all time</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>COST</th>
+      <td>90.01%</td>
+    </tr>
+    <tr>
+      <th>DELL</th>
+      <td>85.73%</td>
+    </tr>
+    <tr>
+      <th>CERN</th>
+      <td>83.53%</td>
+    </tr>
+    <tr>
+      <th>MMM</th>
+      <td>82.09%</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>78.59%</td>
+    </tr>
+    <tr>
+      <th>AMD</th>
+      <td>75.76%</td>
+    </tr>
+    <tr>
+      <th>GPS</th>
+      <td>62.24%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>All positions ever held</th>
+      <th>max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>COST</th>
+      <td>90.01%</td>
+    </tr>
+    <tr>
+      <th>DELL</th>
+      <td>85.73%</td>
+    </tr>
+    <tr>
+      <th>CERN</th>
+      <td>83.53%</td>
+    </tr>
+    <tr>
+      <th>MMM</th>
+      <td>82.09%</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>78.59%</td>
+    </tr>
+    <tr>
+      <th>AMD</th>
+      <td>75.76%</td>
+    </tr>
+    <tr>
+      <th>GPS</th>
+      <td>62.24%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><img alt="png" src="../sector_mappings_example_files/sector_mappings_example_6_4.png" /></p>
+<pre><code class="python">pf.create_round_trip_tear_sheet(returns, positions, transactions, sector_mappings=sect_map)
+</code></pre>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Summary stats</th>
+      <th>All trades</th>
+      <th>Short trades</th>
+      <th>Long trades</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Total number of round_trips</th>
+      <td>5822.00</td>
+      <td>1155.00</td>
+      <td>4667.00</td>
+    </tr>
+    <tr>
+      <th>Percent profitable</th>
+      <td>0.50</td>
+      <td>0.52</td>
+      <td>0.49</td>
+    </tr>
+    <tr>
+      <th>Winning round_trips</th>
+      <td>2887.00</td>
+      <td>596.00</td>
+      <td>2291.00</td>
+    </tr>
+    <tr>
+      <th>Losing round_trips</th>
+      <td>2917.00</td>
+      <td>553.00</td>
+      <td>2364.00</td>
+    </tr>
+    <tr>
+      <th>Even round_trips</th>
+      <td>18.00</td>
+      <td>6.00</td>
+      <td>12.00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>PnL stats</th>
+      <th>All trades</th>
+      <th>Short trades</th>
+      <th>Long trades</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Total profit</th>
+      <td>$65404.25</td>
+      <td>$3560.10</td>
+      <td>$61844.15</td>
+    </tr>
+    <tr>
+      <th>Gross profit</th>
+      <td>$448803.34</td>
+      <td>$20608.45</td>
+      <td>$428194.89</td>
+    </tr>
+    <tr>
+      <th>Gross loss</th>
+      <td>$-383399.09</td>
+      <td>$-17048.35</td>
+      <td>$-366350.75</td>
+    </tr>
+    <tr>
+      <th>Profit factor</th>
+      <td>$1.17</td>
+      <td>$1.21</td>
+      <td>$1.17</td>
+    </tr>
+    <tr>
+      <th>Avg. trade net profit</th>
+      <td>$11.23</td>
+      <td>$3.08</td>
+      <td>$13.25</td>
+    </tr>
+    <tr>
+      <th>Avg. winning trade</th>
+      <td>$155.46</td>
+      <td>$34.58</td>
+      <td>$186.90</td>
+    </tr>
+    <tr>
+      <th>Avg. losing trade</th>
+      <td>$-131.44</td>
+      <td>$-30.83</td>
+      <td>$-154.97</td>
+    </tr>
+    <tr>
+      <th>Ratio Avg. Win:Avg. Loss</th>
+      <td>$1.18</td>
+      <td>$1.12</td>
+      <td>$1.21</td>
+    </tr>
+    <tr>
+      <th>Largest winning trade</th>
+      <td>$9500.14</td>
+      <td>$1623.24</td>
+      <td>$9500.14</td>
+    </tr>
+    <tr>
+      <th>Largest losing trade</th>
+      <td>$-22902.83</td>
+      <td>$-661.29</td>
+      <td>$-22902.83</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Duration stats</th>
+      <th>All trades</th>
+      <th>Short trades</th>
+      <th>Long trades</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Avg duration</th>
+      <td>13 days 03:21:49.653555</td>
+      <td>2 days 10:39:35.064935</td>
+      <td>15 days 18:53:36.628026</td>
+    </tr>
+    <tr>
+      <th>Median duration</th>
+      <td>8 days 00:00:00</td>
+      <td>2 days 00:00:00</td>
+      <td>12 days 00:00:00</td>
+    </tr>
+    <tr>
+      <th>Longest duration</th>
+      <td>84 days 00:00:00</td>
+      <td>13 days 00:00:00</td>
+      <td>84 days 00:00:00</td>
+    </tr>
+    <tr>
+      <th>Shortest duration</th>
+      <td>0 days 00:00:01</td>
+      <td>1 days 00:00:00</td>
+      <td>0 days 00:00:01</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Return stats</th>
+      <th>All trades</th>
+      <th>Short trades</th>
+      <th>Long trades</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Avg returns all round_trips</th>
+      <td>0.01%</td>
+      <td>0.00%</td>
+      <td>0.01%</td>
+    </tr>
+    <tr>
+      <th>Avg returns winning</th>
+      <td>0.13%</td>
+      <td>0.03%</td>
+      <td>0.15%</td>
+    </tr>
+    <tr>
+      <th>Avg returns losing</th>
+      <td>-0.11%</td>
+      <td>-0.03%</td>
+      <td>-0.13%</td>
+    </tr>
+    <tr>
+      <th>Median returns all round_trips</th>
+      <td>-0.00%</td>
+      <td>0.00%</td>
+      <td>-0.00%</td>
+    </tr>
+    <tr>
+      <th>Median returns winning</th>
+      <td>0.02%</td>
+      <td>0.01%</td>
+      <td>0.03%</td>
+    </tr>
+    <tr>
+      <th>Median returns losing</th>
+      <td>-0.01%</td>
+      <td>-0.00%</td>
+      <td>-0.02%</td>
+    </tr>
+    <tr>
+      <th>Largest winning trade</th>
+      <td>6.78%</td>
+      <td>1.37%</td>
+      <td>6.78%</td>
+    </tr>
+    <tr>
+      <th>Largest losing trade</th>
+      <td>-17.23%</td>
+      <td>-0.72%</td>
+      <td>-17.23%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Symbol stats</th>
+      <th>AMD</th>
+      <th>CERN</th>
+      <th>COST</th>
+      <th>DELL</th>
+      <th>GPS</th>
+      <th>INTC</th>
+      <th>MMM</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Avg returns all round_trips</th>
+      <td>-0.00%</td>
+      <td>0.02%</td>
+      <td>0.02%</td>
+      <td>-0.03%</td>
+      <td>0.00%</td>
+      <td>0.02%</td>
+      <td>0.01%</td>
+    </tr>
+    <tr>
+      <th>Avg returns winning</th>
+      <td>0.20%</td>
+      <td>0.15%</td>
+      <td>0.10%</td>
+      <td>0.11%</td>
+      <td>0.10%</td>
+      <td>0.11%</td>
+      <td>0.10%</td>
+    </tr>
+    <tr>
+      <th>Avg returns losing</th>
+      <td>-0.19%</td>
+      <td>-0.13%</td>
+      <td>-0.07%</td>
+      <td>-0.15%</td>
+      <td>-0.09%</td>
+      <td>-0.06%</td>
+      <td>-0.09%</td>
+    </tr>
+    <tr>
+      <th>Median returns all round_trips</th>
+      <td>-0.00%</td>
+      <td>0.00%</td>
+      <td>0.00%</td>
+      <td>-0.00%</td>
+      <td>-0.00%</td>
+      <td>-0.00%</td>
+      <td>0.00%</td>
+    </tr>
+    <tr>
+      <th>Median returns winning</th>
+      <td>0.03%</td>
+      <td>0.02%</td>
+      <td>0.02%</td>
+      <td>0.02%</td>
+      <td>0.02%</td>
+      <td>0.01%</td>
+      <td>0.02%</td>
+    </tr>
+    <tr>
+      <th>Median returns losing</th>
+      <td>-0.02%</td>
+      <td>-0.01%</td>
+      <td>-0.01%</td>
+      <td>-0.02%</td>
+      <td>-0.01%</td>
+      <td>-0.01%</td>
+      <td>-0.01%</td>
+    </tr>
+    <tr>
+      <th>Largest winning trade</th>
+      <td>6.78%</td>
+      <td>6.14%</td>
+      <td>3.96%</td>
+      <td>2.78%</td>
+      <td>1.80%</td>
+      <td>2.40%</td>
+      <td>2.45%</td>
+    </tr>
+    <tr>
+      <th>Largest losing trade</th>
+      <td>-17.23%</td>
+      <td>-3.92%</td>
+      <td>-2.32%</td>
+      <td>-6.39%</td>
+      <td>-6.86%</td>
+      <td>-4.45%</td>
+      <td>-1.79%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Profitability (PnL / PnL total) per name</th>
+      <th></th>
+    </tr>
+    <tr>
+      <th>symbol</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>COST</th>
+      <td>39.90%</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>38.27%</td>
+    </tr>
+    <tr>
+      <th>CERN</th>
+      <td>32.31%</td>
+    </tr>
+    <tr>
+      <th>MMM</th>
+      <td>22.15%</td>
+    </tr>
+    <tr>
+      <th>GPS</th>
+      <td>4.94%</td>
+    </tr>
+    <tr>
+      <th>AMD</th>
+      <td>-6.41%</td>
+    </tr>
+    <tr>
+      <th>DELL</th>
+      <td>-31.15%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div>
+<style>
+    .dataframe thead tr:only-child th {
+        text-align: right;
+    }
+
+    .dataframe thead th {
+        text-align: left;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Profitability (PnL / PnL total) per name</th>
+      <th></th>
+    </tr>
+    <tr>
+      <th>symbol</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Consumer Goods</th>
+      <td>39.90%</td>
+    </tr>
+    <tr>
+      <th>Healthcare</th>
+      <td>32.31%</td>
+    </tr>
+    <tr>
+      <th>Construction</th>
+      <td>22.15%</td>
+    </tr>
+    <tr>
+      <th>Technology</th>
+      <td>5.65%</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p><img alt="png" src="../sector_mappings_example_files/sector_mappings_example_7_7.png" /></p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>var base_url = '../..';</script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/require.js"></script>
+        <script src="../../search/search.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&rarr;</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    </body>
+</html>
