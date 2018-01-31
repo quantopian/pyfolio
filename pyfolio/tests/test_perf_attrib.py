@@ -335,7 +335,7 @@ class PerfAttribTestCase(unittest.TestCase):
                                                               level='ticker')
 
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
+            warnings.simplefilter("always", UserWarning)
 
             perf_attrib(returns,
                         positions,
@@ -434,7 +434,7 @@ class PerfAttribTestCase(unittest.TestCase):
         transactions = mock_transactions_from_positions(positions)
 
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
+            warnings.simplefilter("always", UserWarning)
 
             perf_attrib(returns,
                         positions,

@@ -54,7 +54,7 @@ install_reqs = [
     'scikit-learn>=0.16.1',
     'seaborn>=0.7.1',
     'pandas-datareader>=0.2',
-    'empyrical>=0.3.3'
+    'empyrical>=0.3.4'
 ]
 
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
