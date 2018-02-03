@@ -21,7 +21,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from pyfolio.pos import get_percent_alloc
-
 from pyfolio.txn import get_turnover
 from pyfolio.utils import print_table, configure_legend
 
@@ -35,7 +34,18 @@ def perf_attrib(returns,
                 transactions=None,
                 pos_in_dollars=True):
     """
-    Does performance attribution given risk info.
+    Attributes the performance of a returns stream to a set of risk factors.
+
+    Preprocesses inputs, and then calls empyrical.perf_attrib. See
+    empyrical.perf_attrib for more info.
+
+    Performance attribution determines how much each risk factor, e.g.,
+    momentum, the technology sector, etc., contributed to total returns, as
+    well as the daily exposure to each of the risk factors. The returns that
+    can be attributed to one of the given risk factors are the
+    `common_returns`, and the returns that _cannot_ be attributed to a risk
+    factor are the `specific_returns`, or the alpha. The common_returns and
+    specific_returns summed together will always equal the total returns.
 
     Parameters
     ----------
@@ -80,6 +90,7 @@ def perf_attrib(returns,
             2017-01-02 AAPL   -0.140009 -0.524952
                        TLT    -1.066978  0.185435
                        XOM    -1.798401  0.761549
+
 
     transactions : pd.DataFrame, optional
         Executed trade volumes and fill prices. Used to check the turnover of
@@ -134,27 +145,16 @@ def perf_attrib(returns,
     # above, since get_turnover() expects positions in dollars.
     positions = _stack_positions(positions, pos_in_dollars=pos_in_dollars)
 
-    risk_exposures_portfolio = compute_exposures(positions,
-                                                 factor_loadings,
-                                                 stack_positions=False)
-
-    perf_attrib_by_factor = risk_exposures_portfolio.multiply(factor_returns)
-
-    common_returns = perf_attrib_by_factor.sum(axis='columns')
-    specific_returns = returns - common_returns
-
-    returns_df = pd.DataFrame({'total_returns': returns,
-                               'common_returns': common_returns,
-                               'specific_returns': specific_returns})
-
-    return (risk_exposures_portfolio,
-            pd.concat([perf_attrib_by_factor, returns_df], axis='columns'))
+    return ep.perf_attrib(returns, positions, factor_returns, factor_loadings)
 
 
 def compute_exposures(positions, factor_loadings, stack_positions=True,
                       pos_in_dollars=True):
     """
     Compute daily risk factor exposures.
+
+    Normalizes positions (if necessary) and calls ep.compute_exposures.
+    See empyrical.compute_exposures for more info.
 
     Parameters
     ----------
@@ -203,7 +203,7 @@ def compute_exposures(positions, factor_loadings, stack_positions=True,
     Returns
     -------
     risk_exposures_portfolio : pd.DataFrame
-        df indexed by datetime, with factors as columns
+        df indexed by datetime, with factors as columns.
         - Example:
                         momentum  reversal
             dt
@@ -213,10 +213,7 @@ def compute_exposures(positions, factor_loadings, stack_positions=True,
     if stack_positions:
         positions = _stack_positions(positions, pos_in_dollars=pos_in_dollars)
 
-    risk_exposures = factor_loadings.multiply(positions,
-                                              axis='rows')
-
-    return risk_exposures.groupby(level='dt').sum()
+    return ep.compute_exposures(positions, factor_loadings)
 
 
 def create_perf_attrib_stats(perf_attrib, risk_exposures):
