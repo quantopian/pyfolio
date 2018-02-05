@@ -103,6 +103,11 @@ def get_txn_vol(transactions):
     amounts = txn_norm.amount.abs()
     prices = txn_norm.price
     values = amounts * prices
+    txn_day_amounts = amounts.groupby(amounts.index).sum()
+    start = txn_day_amounts.index[0]
+    end = txn_day_amounts.index[-1]
+    filled_index = pd.date_range(start, end)
+    daily_amounts = txn_day_amounts.reindex(filled_index).fillna(0) 
     daily_amounts = amounts.groupby(amounts.index).sum()
     daily_values = values.groupby(values.index).sum()
     daily_amounts.name = "txn_shares"
