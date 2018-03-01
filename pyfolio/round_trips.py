@@ -19,8 +19,9 @@ from collections import deque, OrderedDict
 
 import pandas as pd
 import numpy as np
+import pytz
 
-from .utils import print_table, format_asset
+from pyfolio.utils import print_table, format_asset
 
 PNL_STATS = OrderedDict(
     [('Total profit', lambda x: x.sum()),
@@ -122,22 +123,13 @@ def _groupby_consecutive(txn, max_delta=pd.Timedelta('8h')):
     out = []
     for sym, t in txn.groupby('symbol'):
         t = t.sort_index()
-        t.index.name = 'dt'
-        t = t.reset_index()
 
         t['order_sign'] = t.amount > 0
-        t['block_dir'] = (t.order_sign.shift(
-            1) != t.order_sign).astype(int).cumsum()
-        t['block_time'] = ((t.dt.sub(t.dt.shift(1))) >
-                           max_delta).astype(int).cumsum()
-        grouped_price = (t.groupby(('block_dir',
-                                   'block_time'))
-                          .apply(vwap))
+        t['block_dir'] = (t.order_sign.shift(1) != t.order_sign).astype(int).cumsum()
+        t['block_time'] = ((t.dt.sub(t.dt.shift(1))) > max_delta).astype(int).cumsum()
+        grouped_price = (t.groupby(('block_dir', 'block_time')).apply(vwap))
         grouped_price.name = 'price'
-        grouped_rest = t.groupby(('block_dir', 'block_time')).agg({
-            'amount': 'sum',
-            'symbol': 'first',
-            'dt': 'first'})
+        grouped_rest = t.groupby(('block_dir', 'block_time')).agg({ 'amount': 'sum', 'symbol': 'first', 'dt': 'first'})
 
         grouped = grouped_rest.join(grouped_price)
 
@@ -260,15 +252,21 @@ def extract_round_trips(transactions,
                           columns=['portfolio_value'])\
             .assign(date=portfolio_value.index)
 
-        roundtrips['date'] = roundtrips.close_dt.apply(lambda x:
-                                                       x.replace(hour=0,
-                                                                 minute=0,
-                                                                 second=0))
+        roundtrips['date'] = roundtrips.close_dt.apply(
+            lambda x:
+            x.replace(hour=0,
+                      minute=0,
+                      second=0,
+                      tzinfo=pytz.UTC
+                      )
+        )
 
-        tmp = roundtrips.join(pv, on='date', lsuffix='_')
-
-        roundtrips['returns'] = tmp.pnl / tmp.portfolio_value
-        roundtrips = roundtrips.drop('date', axis='columns')
+        tpv = pv.set_index('date')
+        roundtrips = roundtrips.set_index('date')
+        
+        roundtrips = roundtrips.join(tpv, lsuffix='_')
+        
+        roundtrips['returns'] = roundtrips.pnl / roundtrips.portfolio_value
 
     return roundtrips
 
@@ -410,3 +408,4 @@ def print_round_trip_stats(round_trips, hide_pos=False):
         stats['symbols'].columns = stats['symbols'].columns.map(format_asset)
         print_table(stats['symbols'] * 100,
                     float_format='{:.2f}%'.format, name='Symbol stats')
+
