@@ -21,7 +21,7 @@ import pandas as pd
 import numpy as np
 import pytz
 
-from pyfolio.utils import print_table, format_asset
+from utils import print_table, format_asset
 
 PNL_STATS = OrderedDict(
     [('Total profit', lambda x: x.sum()),
