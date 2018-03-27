@@ -240,7 +240,8 @@ def create_full_tear_sheet(returns,
 
             if market_data is not None:
                 create_capacity_tear_sheet(returns, positions, transactions,
-                                           market_data, daily_vol_limit=0.2,
+                                           market_data,
+                                           liquidation_daily_vol_limit=0.2,
                                            last_n_days=125,
                                            estimate_intraday=False)
 
