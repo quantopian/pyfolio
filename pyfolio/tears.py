@@ -1553,7 +1553,7 @@ def create_perf_attrib_tear_sheet(returns,
 
     # aggregate perf attrib stats and show summary table
     perf_attrib.show_perf_attrib_stats(returns, positions, factor_returns,
-                                       factor_loadings, transactions)
+                                       factor_loadings, transactions, pos_in_dollars)
 
     # one section for the returns plot, and for each factor grouping
     # one section for factor returns, and one for risk exposures
