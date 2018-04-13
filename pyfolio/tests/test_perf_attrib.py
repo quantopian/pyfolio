@@ -473,3 +473,79 @@ class PerfAttribTestCase(unittest.TestCase):
             expected_returns,
             _cumulative_returns_less_costs(returns, cost)
         )
+
+    def test_factor_loadings_index_formatted_differently(self):
+        start_date = '2017-01-01'
+        periods = 2
+        dts = pd.date_range(start_date, periods=periods)
+        dts.name = 'dt'
+
+        tickers = ['stock1', 'stock2']
+        styles = ['risk_factor1', 'risk_factor2']
+
+        returns = pd.Series(data=[0.1, 0.1], index=dts)
+
+        factor_returns = pd.DataFrame(
+            columns=styles,
+            index=dts,
+            data={'risk_factor1': [.1, .1],
+                  'risk_factor2': [.1, .1]}
+        )
+
+        # since positions has no stock2 column, it will not multiply with
+        # factor_loadings unless the index names match
+        positions = pd.DataFrame(
+            index=dts,
+            data={'stock1': [20, 20],
+                  'cash': [0, 0]}
+        )
+
+        index = pd.MultiIndex.from_product(
+            [dts, tickers], names=['dt', 'ticker'])
+
+        factor_loadings = pd.DataFrame(
+            columns=styles,
+            index=index,
+            data={'risk_factor1': [0.25, 0.25, 0.25, 0.25],
+                  'risk_factor2': [0.25, 0.25, 0.25, 0.25]}
+        )
+        factor_loadings.index =\
+            factor_loadings.index.set_names(['dates', 'asset'])
+
+        # computing factor exposures should fail on its own, but should
+        # pass within perf_attrib because perf_attrib makes index names
+        # match
+        with self.assertRaisesRegexp(
+            ValueError,
+            "cannot join with no level specified and no overlapping names"
+        ):
+            factor_loadings.multiply(positions, axis='rows')
+
+        expected_perf_attrib_output = pd.DataFrame(
+            index=dts,
+            columns=['risk_factor1', 'risk_factor2', 'common_returns',
+                     'specific_returns', 'total_returns'],
+            data={'risk_factor1': [0.025, 0.025],
+                  'risk_factor2': [0.025, 0.025],
+                  'common_returns': [0.05, 0.05],
+                  'specific_returns': [0.05, 0.05],
+                  'total_returns': returns}
+        )
+
+        expected_exposures_portfolio = pd.DataFrame(
+            index=dts,
+            columns=['risk_factor1', 'risk_factor2'],
+            data={'risk_factor1': [0.25, 0.25],
+                  'risk_factor2': [0.25, 0.25]}
+        )
+
+        exposures_portfolio, perf_attrib_output = perf_attrib(returns,
+                                                              positions,
+                                                              factor_returns,
+                                                              factor_loadings)
+
+        pd.util.testing.assert_frame_equal(expected_perf_attrib_output,
+                                           perf_attrib_output)
+
+        pd.util.testing.assert_frame_equal(expected_exposures_portfolio,
+                                           exposures_portfolio)

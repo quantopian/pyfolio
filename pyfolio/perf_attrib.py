@@ -612,6 +612,8 @@ def _align_and_warn(returns,
             )
             warnings.warn(warning_msg)
 
+    factor_loadings.index = factor_loadings.index.set_names(['dt', 'ticker'])
+
     return (returns, positions, factor_returns, factor_loadings)
 
 
