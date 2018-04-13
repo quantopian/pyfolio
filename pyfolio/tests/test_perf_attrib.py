@@ -544,6 +544,9 @@ class PerfAttribTestCase(unittest.TestCase):
                                                               factor_returns,
                                                               factor_loadings)
 
+        # make sure perf_attrib doesn't change the factor_loadings input
+        self.assertEqual(factor_loadings.index.names, ['dates', 'asset'])
+
         pd.util.testing.assert_frame_equal(expected_perf_attrib_output,
                                            perf_attrib_output)
 
