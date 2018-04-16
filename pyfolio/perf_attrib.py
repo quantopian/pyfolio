@@ -567,10 +567,6 @@ def _align_and_warn(returns,
         factor_loadings.index.get_level_values(0).unique()
     )
 
-    missing_factor_loadings_index = positions.index.difference(
-        factor_loadings.index.get_level_values(0).unique()
-    )
-
     if len(missing_factor_loadings_index) > 0:
 
         if len(missing_factor_loadings_index) > 5:
@@ -612,7 +608,7 @@ def _align_and_warn(returns,
             )
             warnings.warn(warning_msg)
 
-    factor_loadings = factor_loadings.copy()
+    factor_loadings = factor_loadings.copy(deep=False)
     factor_loadings.index = factor_loadings.index.set_names(['dt', 'ticker'])
 
     return (returns, positions, factor_returns, factor_loadings)

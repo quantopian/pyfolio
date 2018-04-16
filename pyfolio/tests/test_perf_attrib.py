@@ -483,13 +483,12 @@ class PerfAttribTestCase(unittest.TestCase):
         tickers = ['stock1', 'stock2']
         styles = ['risk_factor1', 'risk_factor2']
 
-        returns = pd.Series(data=[0.1, 0.1], index=dts)
+        returns = pd.Series(data=0.1, index=dts)
 
         factor_returns = pd.DataFrame(
             columns=styles,
             index=dts,
-            data={'risk_factor1': [.1, .1],
-                  'risk_factor2': [.1, .1]}
+            data=0.1
         )
 
         # since positions has no stock2 column, it will not multiply with
@@ -506,8 +505,7 @@ class PerfAttribTestCase(unittest.TestCase):
         factor_loadings = pd.DataFrame(
             columns=styles,
             index=index,
-            data={'risk_factor1': [0.25, 0.25, 0.25, 0.25],
-                  'risk_factor2': [0.25, 0.25, 0.25, 0.25]}
+            data=0.25
         )
         factor_loadings.index =\
             factor_loadings.index.set_names(['dates', 'asset'])
@@ -535,8 +533,7 @@ class PerfAttribTestCase(unittest.TestCase):
         expected_exposures_portfolio = pd.DataFrame(
             index=dts,
             columns=['risk_factor1', 'risk_factor2'],
-            data={'risk_factor1': [0.25, 0.25],
-                  'risk_factor2': [0.25, 0.25]}
+            data=0.25
         )
 
         exposures_portfolio, perf_attrib_output = perf_attrib(returns,
