@@ -608,8 +608,20 @@ def _align_and_warn(returns,
             )
             warnings.warn(warning_msg)
 
-    factor_loadings = factor_loadings.copy(deep=False)
-    factor_loadings.index = factor_loadings.index.set_names(['dt', 'ticker'])
+    # remove any extra data in factor loadings
+    extra_factor_loadings_dates = factor_loadings.index.levels[0].difference(
+        positions.index
+    )
+    if len(extra_factor_loadings_dates):
+        factor_loadings = factor_loadings.drop(extra_factor_loadings_dates)
+
+    extra_factor_loadings_stocks = factor_loadings.index.levels[1].difference(
+        positions.columns
+    )
+    if len(extra_factor_loadings_stocks):
+        factor_loadings = factor_loadings.drop(
+            extra_factor_loadings_stocks, level=1
+        )
 
     return (returns, positions, factor_returns, factor_loadings)
 

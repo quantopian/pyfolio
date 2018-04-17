@@ -519,8 +519,10 @@ class PerfAttribTestCase(unittest.TestCase):
         ):
             factor_loadings.multiply(positions, axis='rows')
 
+        expected_index = dts.set_names(['dates'])
+
         expected_perf_attrib_output = pd.DataFrame(
-            index=dts,
+            index=expected_index,
             columns=['risk_factor1', 'risk_factor2', 'common_returns',
                      'specific_returns', 'total_returns'],
             data={'risk_factor1': [0.025, 0.025],
@@ -531,7 +533,7 @@ class PerfAttribTestCase(unittest.TestCase):
         )
 
         expected_exposures_portfolio = pd.DataFrame(
-            index=dts,
+            index=expected_index,
             columns=['risk_factor1', 'risk_factor2'],
             data=0.25
         )
