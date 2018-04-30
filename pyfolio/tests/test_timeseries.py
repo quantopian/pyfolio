@@ -10,9 +10,7 @@ import numpy as np
 import pandas as pd
 
 from .. import timeseries
-from pyfolio.utils import (get_symbol_rets,
-                           to_utc,
-                           to_series)
+from pyfolio.utils import to_utc, to_series
 import gzip
 
 
@@ -169,19 +167,20 @@ class TestDrawdown(TestCase):
                 drawdowns.loc[0, 'Duration'], expected_duration)
 
     def test_drawdown_overlaps(self):
-        # Add test to show that drawdowns don't overlap
-        # Bug #145 observed for FB stock on the period 2014-10-24 - 2015-03-19
-        # Reproduced on SPY data (cached) but need a large number of drawdowns
-        spy_rets = get_symbol_rets('SPY',
-                                   start='2003-01-01',
-                                   end='2008-06-01')
+        rand = np.random.RandomState(1337)
+        n_samples = 252 * 5
+        spy_returns = pd.Series(
+            rand.standard_t(3.1, n_samples),
+            pd.date_range('2005-01-02', periods=n_samples),
+        )
         spy_drawdowns = timeseries.gen_drawdown_table(
-            spy_rets,
+            spy_returns,
             top=20).sort_values(by='Peak date')
         # Compare the recovery date of each drawdown with the peak of the next
         # Last pair might contain a NaT if drawdown didn't finish, so ignore it
         pairs = list(zip(spy_drawdowns['Recovery date'],
                          spy_drawdowns['Peak date'].shift(-1)))[:-1]
+        self.assertGreater(len(pairs), 0)
         for recovery, peak in pairs:
             if recovery != pd.NaT:
                 self.assertLessEqual(recovery, peak)
@@ -272,15 +271,16 @@ class TestStats(TestCase):
             returns, rolling_sharpe_window).values.tolist()), expected)
 
     @parameterized.expand([
-        (simple_rets[:5], simple_benchmark, 2, 8.024708101613483e-32)
+        (simple_rets[:5], simple_benchmark, 2, 0)
     ])
     def test_beta(self, returns, benchmark_rets, rolling_window, expected):
-        self.assertEqual(
-            timeseries.rolling_beta(
-                returns,
-                benchmark_rets,
-                rolling_window=rolling_window).values.tolist()[2],
-            expected)
+        actual = timeseries.rolling_beta(
+            returns,
+            benchmark_rets,
+            rolling_window=rolling_window,
+        ).values.tolist()[2]
+
+        np.testing.assert_almost_equal(actual, expected)
 
 
 class TestCone(TestCase):
