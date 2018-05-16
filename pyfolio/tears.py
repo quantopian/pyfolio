@@ -280,7 +280,6 @@ def create_simple_tear_sheet(returns,
         daily turnover, transaction time distribution.
     - Never accept market_data input (market_data = None)
     - Never accept sector_mappings input (sector_mappings = None)
-    - Never attempt to infer intraday strategy (estimate_intraday = False)
     - Never perform bootstrap analysis (bootstrap = False)
     - Never hide posistions on top 10 holdings plot (hide_positions = False)
     - Always use default cone_std (cone_std = (1.0, 1.5, 2.0))
@@ -472,6 +471,9 @@ def create_returns_tear_sheet(returns, positions=None,
     positions : pd.DataFrame, optional
         Daily net position values.
          - See full explanation in create_full_tear_sheet.
+    transactions : pd.DataFrame, optional
+        Executed trade volumes and fill prices.
+        - See full explanation in create_full_tear_sheet.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading,
         after its backtest period.
@@ -493,8 +495,6 @@ def create_returns_tear_sheet(returns, positions=None,
         Extra rows to display at the top of the perf stats table.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
-    set_context : boolean, optional
-        If True, set default plotting style context.
     """
 
     if benchmark_rets is None:
@@ -937,8 +937,6 @@ def create_interesting_times_tear_sheet(
          The legend's location.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
-    set_context : boolean, optional
-        If True, set default plotting style context.
     """
 
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
@@ -1126,10 +1124,10 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         Number of posterior samples to draw.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
-    set_context : boolean, optional
-        If True, set default plotting style context.
     stoch_vol : boolean, optional
         If True, run and plot the stochastic volatility model
+    progressbar : boolean, optional
+        If True, show a progress bar
     """
 
     if not have_bayesian:
@@ -1352,7 +1350,7 @@ def create_risk_tear_sheet(positions,
         2017-04-04	  -0.73381     0.98149
         2017-04-05	  -0.90132	   1.13981
 
-    sector : pd.DataFrame
+    sectors : pd.DataFrame
         Daily Morningstar sector code per asset
         - DataFrame with dates as index and equities as columns
         - Example:
