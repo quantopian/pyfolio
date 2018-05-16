@@ -128,7 +128,7 @@ def _groupby_consecutive(txn, max_delta=pd.Timedelta('8h')):
         t['order_sign'] = t.amount > 0
         t['block_dir'] = (t.order_sign.shift(
             1) != t.order_sign).astype(int).cumsum()
-        t['block_time'] = ((t.dt - t.dt.shift(1)) >
+        t['block_time'] = ((t.dt.sub(t.dt.shift(1))) >
                            max_delta).astype(int).cumsum()
         grouped_price = (t.groupby(('block_dir',
                                    'block_time'))
@@ -252,7 +252,7 @@ def extract_round_trips(transactions,
 
     roundtrips = pd.DataFrame(roundtrips)
 
-    roundtrips['duration'] = roundtrips['close_dt'] - roundtrips['open_dt']
+    roundtrips['duration'] = roundtrips['close_dt'].sub(roundtrips['open_dt'])
 
     if portfolio_value is not None:
         # Need to normalize so that we can join
@@ -398,14 +398,15 @@ def print_round_trip_stats(round_trips, hide_pos=False):
 
     stats = gen_round_trip_stats(round_trips)
 
-    print_table(stats['summary'], fmt='{:.2f}', name='Summary stats')
-    print_table(stats['pnl'], fmt='${:.2f}', name='PnL stats')
-    print_table(stats['duration'], fmt='{:.2f}',
+    print_table(stats['summary'], float_format='{:.2f}'.format,
+                name='Summary stats')
+    print_table(stats['pnl'], float_format='${:.2f}'.format, name='PnL stats')
+    print_table(stats['duration'], float_format='{:.2f}'.format,
                 name='Duration stats')
-    print_table(stats['returns'] * 100, fmt='{:.2f}%',
+    print_table(stats['returns'] * 100, float_format='{:.2f}%'.format,
                 name='Return stats')
 
     if not hide_pos:
         stats['symbols'].columns = stats['symbols'].columns.map(format_asset)
         print_table(stats['symbols'] * 100,
-                    fmt='{:.2f}%', name='Symbol stats')
+                    float_format='{:.2f}%'.format, name='Symbol stats')

@@ -32,7 +32,7 @@ from . import _seaborn as sns
 from empyrical import cum_returns
 
 
-def model_returns_t_alpha_beta(data, bmark, samples=2000):
+def model_returns_t_alpha_beta(data, bmark, samples=2000, progressbar=True):
     """
     Run Bayesian alpha-beta-model with T distributed returns.
 
@@ -86,12 +86,12 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000):
                  mu=mu_reg,
                  sd=sigma,
                  observed=y)
-        trace = pm.sample(samples)
+        trace = pm.sample(samples, progressbar=progressbar)
 
     return model, trace
 
 
-def model_returns_normal(data, samples=500):
+def model_returns_normal(data, samples=500, progressbar=True):
     """
     Run Bayesian model assuming returns are normally distributed.
 
@@ -125,11 +125,11 @@ def model_returns_normal(data, samples=500):
             returns.distribution.variance**.5 *
             np.sqrt(252))
 
-        trace = pm.sample(samples)
+        trace = pm.sample(samples, progressbar=progressbar)
     return model, trace
 
 
-def model_returns_t(data, samples=500):
+def model_returns_t(data, samples=500, progressbar=True):
     """
     Run Bayesian model assuming returns are Student-T distributed.
 
@@ -167,11 +167,11 @@ def model_returns_t(data, samples=500):
                          returns.distribution.variance**.5 *
                          np.sqrt(252))
 
-        trace = pm.sample(samples)
+        trace = pm.sample(samples, progressbar=progressbar)
     return model, trace
 
 
-def model_best(y1, y2, samples=1000):
+def model_best(y1, y2, samples=1000, progressbar=True):
     """
     Bayesian Estimation Supersedes the T-Test
 
@@ -252,7 +252,7 @@ def model_best(y1, y2, samples=1000):
                          returns_group2.distribution.variance**.5 *
                          np.sqrt(252))
 
-        trace = pm.sample(samples)
+        trace = pm.sample(samples, progressbar=progressbar)
     return model, trace
 
 
@@ -347,7 +347,7 @@ def plot_best(trace=None, data_train=None, data_test=None,
                ylabel='Belief', yticklabels=[])
 
 
-def model_stoch_vol(data, samples=2000):
+def model_stoch_vol(data, samples=2000, progressbar=True):
     """
     Run stochastic volatility model.
 
@@ -385,7 +385,7 @@ def model_stoch_vol(data, samples=2000):
                                               pm.math.exp(-2 * s))
         StudentT('r', nu, lam=volatility_process, observed=data)
 
-        trace = pm.sample(samples)
+        trace = pm.sample(samples, progressbar=progressbar)
 
     return model, trace
 
@@ -525,7 +525,7 @@ def _plot_bayes_cone(returns_train, returns_test,
 
 
 def run_model(model, returns_train, returns_test=None,
-              bmark=None, samples=500, ppc=False):
+              bmark=None, samples=500, ppc=False, progressbar=True):
     """
     Run one of the Bayesian models.
 
@@ -563,13 +563,18 @@ def run_model(model, returns_train, returns_test=None,
 
     if model == 'alpha_beta':
         model, trace = model_returns_t_alpha_beta(returns_train,
-                                                  bmark, samples)
+                                                  bmark, samples,
+                                                  progressbar=progressbar)
     elif model == 't':
-        model, trace = model_returns_t(returns_train, samples)
+        model, trace = model_returns_t(returns_train, samples,
+                                       progressbar=progressbar)
     elif model == 'normal':
-        model, trace = model_returns_normal(returns_train, samples)
+        model, trace = model_returns_normal(returns_train, samples,
+                                            progressbar=progressbar)
     elif model == 'best':
-        model, trace = model_best(returns_train, returns_test, samples=samples)
+        model, trace = model_best(returns_train, returns_test,
+                                  samples=samples,
+                                  progressbar=progressbar)
     else:
         raise NotImplementedError(
             'Model {} not found.'
@@ -577,7 +582,8 @@ def run_model(model, returns_train, returns_test=None,
 
     if ppc:
         ppc_samples = pm.sample_ppc(trace, samples=samples,
-                                    model=model, size=len(returns_test))
+                                    model=model, size=len(returns_test),
+                                    progressbar=progressbar)
         return trace, ppc_samples['returns']
 
     return trace

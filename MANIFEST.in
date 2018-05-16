@@ -1,2 +1,3 @@
 include versioneer.py
 include pyfolio/_version.py
+include LICENSE

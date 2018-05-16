@@ -12,9 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import numpy as np
-import matplotlib.pyplot as plt
 from collections import OrderedDict
+from functools import partial
+
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 SECTORS = OrderedDict([
     (101, 'Basic Materials'),
@@ -432,9 +435,26 @@ def compute_volume_exposures(shares_held, volumes, percentile):
     shorted_frac = shares_shorted.divide(volumes)
     grossed_frac = shares_grossed.divide(volumes)
 
-    longed_threshold = 100*longed_frac.quantile(percentile, axis='columns')
-    shorted_threshold = 100*shorted_frac.quantile(percentile, axis='columns')
-    grossed_threshold = 100*grossed_frac.quantile(percentile, axis='columns')
+    # NOTE: To work around a bug in `quantile` with nan-handling in
+    #       pandas 0.18, use np.nanpercentile by applying to each row of
+    #       the dataframe. This is fixed in pandas 0.19.
+    #
+    # longed_threshold = 100*longed_frac.quantile(percentile, axis='columns')
+    # shorted_threshold = 100*shorted_frac.quantile(percentile, axis='columns')
+    # grossed_threshold = 100*grossed_frac.quantile(percentile, axis='columns')
+
+    longed_threshold = 100 * longed_frac.apply(
+        partial(np.nanpercentile, q=100 * percentile),
+        axis='columns',
+    )
+    shorted_threshold = 100 * shorted_frac.apply(
+        partial(np.nanpercentile, q=100 * percentile),
+        axis='columns',
+    )
+    grossed_threshold = 100 * grossed_frac.apply(
+        partial(np.nanpercentile, q=100 * percentile),
+        axis='columns',
+    )
 
     return longed_threshold, shorted_threshold, grossed_threshold
 
@@ -465,7 +485,7 @@ def plot_volume_exposures_longshort(longed_threshold, shorted_threshold,
     ax.axhline(0, color='k')
     ax.set(title='Long and short exposures to illiquidity',
            ylabel='{}th percentile of proportion of volume (%)'
-           .format(100*percentile))
+           .format(100 * percentile))
     ax.legend(frameon=True, framealpha=0.5)
 
     return ax
@@ -494,7 +514,7 @@ def plot_volume_exposures_gross(grossed_threshold, percentile, ax=None):
     ax.axhline(0, color='k')
     ax.set(title='Gross exposure to illiquidity',
            ylabel='{}th percentile of \n proportion of volume (%)'
-           .format(100*percentile))
+           .format(100 * percentile))
     ax.legend(frameon=True, framealpha=0.5)
 
     return ax

@@ -21,7 +21,7 @@ def test_nbs():
         if ipynb.endswith('bayesian.ipynb'):
             try:
                 import pymc3  # NOQA
-            except:
+            except ImportError:
                 continue
 
         with open(ipynb) as f:

@@ -128,4 +128,5 @@ class PositionsTestCase(TestCase):
         create_bayesian_tear_sheet(
             self.test_returns,
             live_start_date=self.test_returns.index[-20],
+            progressbar=False,
             **kwargs)

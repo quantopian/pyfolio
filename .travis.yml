@@ -1,11 +1,20 @@
 language: python
 sudo: false
 
-python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
+python: 
+  - 2.7
+  - 3.5
+  - 3.6
+
+env:
+  - PANDAS_VERSION=0.18.1
+  - PANDAS_VERSION=0.19.2
+  - PANDAS_VERSION=0.20.3
+
+matrix:
+  exclude:
+  - python: 3.6
+    env: PANDAS_VERSION=0.18.1
 
 before_install:
   # We do this conditionally because it saves us some downloading if the
@@ -17,6 +26,8 @@ before_install:
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
+  # required for using mkl-service
+  - export MKL_THREADING_LAYER=GNU
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
@@ -25,11 +36,15 @@ before_install:
   - cp pyfolio/tests/matplotlibrc .
 
 install:
+<<<<<<< HEAD
   - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib engarde
+=======
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas=$PANDAS_VERSION Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib mkl-service
+>>>>>>> 20060a3045c4176f9a2c417a0cb993b987441885
   - source activate testenv
   - pip install nose_parameterized
   #- pip install --no-deps git+https://github.com/quantopian/zipline
-  - pip install -e .[bayesian]
+  - pip install -e .[bayesian] -c constraints.txt
 
 before_script:
   - "flake8 pyfolio"

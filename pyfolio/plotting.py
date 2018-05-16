@@ -18,7 +18,7 @@ import datetime
 from collections import OrderedDict
 from functools import wraps
 
-import empyrical
+import empyrical as ep
 import matplotlib
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
@@ -184,11 +184,12 @@ def plot_rolling_fama_french(returns,
 
     ax.set_ylabel('Beta')
 
-    rolling_beta = timeseries.rolling_fama_french(
+    rolling_beta = timeseries.rolling_regression(
         returns,
         factor_returns=factor_returns,
         rolling_window=rolling_window)
 
+    rolling_beta = rolling_beta[['SMB', 'HML', 'Mom']]
     rolling_beta.plot(alpha=0.7, ax=ax, **kwargs)
 
     ax.axhline(0.0, color='black')
@@ -228,7 +229,7 @@ def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
     if ax is None:
         ax = plt.gca()
 
-    monthly_ret_table = empyrical.aggregate_returns(returns, 'monthly')
+    monthly_ret_table = ep.aggregate_returns(returns, 'monthly')
     monthly_ret_table = monthly_ret_table.unstack().round(3)
 
     sns.heatmap(
@@ -275,7 +276,7 @@ def plot_annual_returns(returns, ax=None, **kwargs):
     ax.tick_params(axis='x', which='major')
 
     ann_ret_df = pd.DataFrame(
-        empyrical.aggregate_returns(
+        ep.aggregate_returns(
             returns,
             'yearly'))
 
@@ -324,7 +325,7 @@ def plot_monthly_returns_dist(returns, ax=None, **kwargs):
     ax.xaxis.set_major_formatter(FuncFormatter(x_axis_formatter))
     ax.tick_params(axis='x', which='major')
 
-    monthly_ret_table = empyrical.aggregate_returns(returns, 'monthly')
+    monthly_ret_table = ep.aggregate_returns(returns, 'monthly')
 
     ax.hist(
         100 * monthly_ret_table,
@@ -493,7 +494,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_cum_rets = empyrical.cum_returns(returns, starting_value=1.0)
+    df_cum_rets = ep.cum_returns(returns, starting_value=1.0)
     df_drawdowns = timeseries.gen_drawdown_table(returns, top=top)
 
     df_cum_rets.plot(ax=ax, **kwargs)
@@ -545,7 +546,7 @@ def plot_drawdown_underwater(returns, ax=None, **kwargs):
     y_axis_formatter = FuncFormatter(utils.percentage)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_cum_rets = empyrical.cum_returns(returns, starting_value=1.0)
+    df_cum_rets = ep.cum_returns(returns, starting_value=1.0)
     running_max = np.maximum.accumulate(df_cum_rets)
     underwater = -100 * ((running_max - df_cum_rets) / running_max)
     (underwater).plot(ax=ax, kind='area', color='coral', alpha=0.7, **kwargs)
@@ -601,8 +602,9 @@ STAT_FUNCS_PCT = [
 
 
 def show_perf_stats(returns, factor_returns, positions=None,
-                    transactions=None, live_start_date=None,
-                    bootstrap=False):
+                    transactions=None, turnover_denom='AGB',
+                    live_start_date=None, bootstrap=False,
+                    header_rows=None):
     """
     Prints some performance metrics of the strategy.
 
@@ -620,16 +622,24 @@ def show_perf_stats(returns, factor_returns, positions=None,
     factor_returns : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
-    positions : pd.DataFrame
+    positions : pd.DataFrame, optional
         Daily net position values.
          - See full explanation in create_full_tear_sheet.
+    transactions : pd.DataFrame, optional
+        Prices and amounts of executed trades. One row per trade.
+        - See full explanation in tears.create_full_tear_sheet
+    turnover_denom : str, optional
+        Either AGB or portfolio_value, default AGB.
+        - See full explanation in txn.get_turnover.
     live_start_date : datetime, optional
         The point in time when the strategy began live trading, after
         its backtest period.
-    bootstrap : boolean (optional)
+    bootstrap : boolean, optional
         Whether to perform bootstrap analysis for the performance
         metrics.
          - For more information, see timeseries.perf_stats_bootstrap
+    header_rows : dict or OrderedDict, optional
+        Extra rows to display at the top of the displayed table.
     """
 
     if bootstrap:
@@ -641,10 +651,16 @@ def show_perf_stats(returns, factor_returns, positions=None,
         returns,
         factor_returns=factor_returns,
         positions=positions,
-        transactions=transactions)
+        transactions=transactions,
+        turnover_denom=turnover_denom)
+
+    date_rows = OrderedDict()
+    if len(returns.index) > 0:
+        date_rows['Start date'] = returns.index[0].strftime('%Y-%m-%d')
+        date_rows['End date'] = returns.index[-1].strftime('%Y-%m-%d')
 
     if live_start_date is not None:
-        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
+        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
         returns_is = returns[returns.index < live_start_date]
         returns_oos = returns[returns.index >= live_start_date]
 
@@ -666,18 +682,20 @@ def show_perf_stats(returns, factor_returns, positions=None,
             returns_is,
             factor_returns=factor_returns,
             positions=positions_is,
-            transactions=transactions_is)
+            transactions=transactions_is,
+            turnover_denom=turnover_denom)
 
         perf_stats_oos = perf_func(
             returns_oos,
             factor_returns=factor_returns,
             positions=positions_oos,
-            transactions=transactions_oos)
-
-        print('In-sample months: ' +
-              str(int(len(returns_is) / APPROX_BDAYS_PER_MONTH)))
-        print('Out-of-sample months: ' +
-              str(int(len(returns_oos) / APPROX_BDAYS_PER_MONTH)))
+            transactions=transactions_oos,
+            turnover_denom=turnover_denom)
+        if len(returns.index) > 0:
+            date_rows['In-sample months'] = int(len(returns_is) /
+                                                APPROX_BDAYS_PER_MONTH)
+            date_rows['Out-of-sample months'] = int(len(returns_oos) /
+                                                    APPROX_BDAYS_PER_MONTH)
 
         perf_stats = pd.concat(OrderedDict([
             ('In-sample', perf_stats_is),
@@ -685,8 +703,9 @@ def show_perf_stats(returns, factor_returns, positions=None,
             ('All', perf_stats_all),
         ]), axis=1)
     else:
-        print('Backtest months: ' +
-              str(int(len(returns) / APPROX_BDAYS_PER_MONTH)))
+        if len(returns.index) > 0:
+            date_rows['Total months'] = int(len(returns) /
+                                            APPROX_BDAYS_PER_MONTH)
         perf_stats = pd.DataFrame(perf_stats_all, columns=['Backtest'])
 
     for column in perf_stats.columns:
@@ -694,8 +713,17 @@ def show_perf_stats(returns, factor_returns, positions=None,
             if stat in STAT_FUNCS_PCT:
                 perf_stats.loc[stat, column] = str(np.round(value * 100,
                                                             1)) + '%'
+    if header_rows is None:
+        header_rows = date_rows
+    else:
+        header_rows = OrderedDict(header_rows)
+        header_rows.update(date_rows)
 
-    utils.print_table(perf_stats, fmt='{0:.2f}')
+    utils.print_table(
+        perf_stats,
+        float_format='{0:.2f}'.format,
+        header_rows=header_rows,
+    )
 
 
 def plot_returns(returns,
@@ -733,7 +761,7 @@ def plot_returns(returns,
     ax.set_ylabel('Returns')
 
     if live_start_date is not None:
-        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
+        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
         is_returns = returns.loc[returns.index < live_start_date]
         oos_returns = returns.loc[returns.index >= live_start_date]
         is_returns.plot(ax=ax, color='g')
@@ -819,20 +847,20 @@ def plot_rolling_returns(returns,
         bmark_vol = factor_returns.loc[returns.index].std()
         returns = (returns / returns.std()) * bmark_vol
 
-    cum_rets = empyrical.cum_returns(returns, 1.0)
+    cum_rets = ep.cum_returns(returns, 1.0)
 
     y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
     if factor_returns is not None:
-        cum_factor_returns = empyrical.cum_returns(
+        cum_factor_returns = ep.cum_returns(
             factor_returns[cum_rets.index], 1.0)
         cum_factor_returns.plot(lw=2, color='gray',
                                 label=factor_returns.name, alpha=0.60,
                                 ax=ax, **kwargs)
 
     if live_start_date is not None:
-        live_start_date = empyrical.utils.get_utc_timestamp(live_start_date)
+        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
         is_cum_returns = cum_rets.loc[cum_rets.index < live_start_date]
         oos_cum_returns = cum_rets.loc[cum_rets.index >= live_start_date]
     else:
@@ -1168,21 +1196,21 @@ def show_and_plot_top_positions(returns, positions_alloc,
 
     if show_and_plot == 1 or show_and_plot == 2:
         utils.print_table(pd.DataFrame(df_top_long * 100, columns=['max']),
-                          fmt='{0:.2f}%',
+                          float_format='{0:.2f}%'.format,
                           name='Top 10 long positions of all time')
 
         utils.print_table(pd.DataFrame(df_top_short * 100, columns=['max']),
-                          fmt='{0:.2f}%',
+                          float_format='{0:.2f}%'.format,
                           name='Top 10 short positions of all time')
 
         utils.print_table(pd.DataFrame(df_top_abs * 100, columns=['max']),
-                          fmt='{0:.2f}%',
+                          float_format='{0:.2f}%'.format,
                           name='Top 10 positions of all time')
 
         _, _, df_top_abs_all = pos.get_top_long_short_abs(
             positions_alloc, top=9999)
         utils.print_table(pd.DataFrame(df_top_abs_all * 100, columns=['max']),
-                          fmt='{0:.2f}%',
+                          float_format='{0:.2f}%'.format,
                           name='All positions ever held')
 
     if show_and_plot == 0 or show_and_plot == 2:
@@ -1319,16 +1347,16 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
 
     is_returns = returns if live_start_date is None \
         else returns.loc[returns.index < live_start_date]
-    is_weekly = empyrical.aggregate_returns(is_returns, 'weekly')
-    is_monthly = empyrical.aggregate_returns(is_returns, 'monthly')
+    is_weekly = ep.aggregate_returns(is_returns, 'weekly')
+    is_monthly = ep.aggregate_returns(is_returns, 'monthly')
     sns.boxplot(data=[is_returns, is_weekly, is_monthly],
                 palette=["#4c72B0", "#55A868", "#CCB974"],
                 ax=ax, **kwargs)
 
     if live_start_date is not None:
         oos_returns = returns.loc[returns.index >= live_start_date]
-        oos_weekly = empyrical.aggregate_returns(oos_returns, 'weekly')
-        oos_monthly = empyrical.aggregate_returns(oos_returns, 'monthly')
+        oos_weekly = ep.aggregate_returns(oos_returns, 'weekly')
+        oos_monthly = ep.aggregate_returns(oos_returns, 'monthly')
 
         sns.swarmplot(data=[oos_returns, oos_weekly, oos_monthly], ax=ax,
                       color="red",
@@ -1401,13 +1429,13 @@ def plot_turnover(returns, transactions, positions,
               loc=legend_loc, frameon=True, framealpha=0.5)
     ax.set_title('Daily turnover')
     ax.set_xlim((returns.index[0], returns.index[-1]))
-    ax.set_ylim((0, 1))
+    ax.set_ylim((0, 2))
     ax.set_ylabel('Turnover')
     ax.set_xlabel('')
     return ax
 
 
-def plot_slippage_sweep(returns, transactions, positions,
+def plot_slippage_sweep(returns, positions, transactions,
                         slippage_params=(3, 8, 10, 12, 15, 20, 50),
                         ax=None, **kwargs):
     """
@@ -1418,11 +1446,11 @@ def plot_slippage_sweep(returns, transactions, positions,
     returns : pd.Series
         Timeseries of portfolio returns to be adjusted for various
         degrees of slippage.
-    transactions : pd.DataFrame
-        Prices and amounts of executed trades. One row per trade.
-         - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     slippage_params: tuple
         Slippage pameters to apply to the return time series (in
@@ -1441,14 +1469,12 @@ def plot_slippage_sweep(returns, transactions, positions,
     if ax is None:
         ax = plt.gca()
 
-    turnover = txn.get_turnover(positions, transactions,
-                                period=None, average=False)
-
     slippage_sweep = pd.DataFrame()
     for bps in slippage_params:
-        adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
+        adj_returns = txn.adjust_returns_for_slippage(returns, positions,
+                                                      transactions, bps)
         label = str(bps) + " bps"
-        slippage_sweep[label] = empyrical.cum_returns(adj_returns, 1)
+        slippage_sweep[label] = ep.cum_returns(adj_returns, 1)
 
     slippage_sweep.plot(alpha=1.0, lw=0.5, ax=ax)
 
@@ -1460,7 +1486,7 @@ def plot_slippage_sweep(returns, transactions, positions,
     return ax
 
 
-def plot_slippage_sensitivity(returns, transactions, positions,
+def plot_slippage_sensitivity(returns, positions, transactions,
                               ax=None, **kwargs):
     """
     Plots curve relating per-dollar slippage to average annual returns.
@@ -1470,11 +1496,11 @@ def plot_slippage_sensitivity(returns, transactions, positions,
     returns : pd.Series
         Timeseries of portfolio returns to be adjusted for various
         degrees of slippage.
-    transactions : pd.DataFrame
-        Prices and amounts of executed trades. One row per trade.
-         - See full explanation in tears.create_full_tear_sheet.
     positions : pd.DataFrame
         Daily net position values.
+         - See full explanation in tears.create_full_tear_sheet.
+    transactions : pd.DataFrame
+        Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -1490,12 +1516,11 @@ def plot_slippage_sensitivity(returns, transactions, positions,
     if ax is None:
         ax = plt.gca()
 
-    turnover = txn.get_turnover(positions, transactions,
-                                period=None, average=False)
     avg_returns_given_slippage = pd.Series()
     for bps in range(1, 100):
-        adj_returns = txn.adjust_returns_for_slippage(returns, turnover, bps)
-        avg_returns = empyrical.annual_return(adj_returns)
+        adj_returns = txn.adjust_returns_for_slippage(returns, positions,
+                                                      transactions, bps)
+        avg_returns = ep.annual_return(adj_returns)
         avg_returns_given_slippage.loc[bps] = avg_returns
 
     avg_returns_given_slippage.plot(alpha=1.0, lw=2, ax=ax)
@@ -1523,7 +1548,7 @@ def plot_capacity_sweep(returns, transactions, market_data,
                                                   txn_daily_w_bar,
                                                   start_pv,
                                                   bt_starting_capital)
-        sharpe = empyrical.sharpe_ratio(adj_ret)
+        sharpe = ep.sharpe_ratio(adj_ret)
         if sharpe < -1:
             break
         captial_base_sweep.loc[start_pv] = sharpe
@@ -1566,7 +1591,7 @@ def plot_daily_turnover_hist(transactions, positions,
 
     if ax is None:
         ax = plt.gca()
-    turnover = txn.get_turnover(positions, transactions, period=None)
+    turnover = txn.get_turnover(positions, transactions)
     sns.distplot(turnover, ax=ax, **kwargs)
     ax.set_title('Distribution of daily turnover rates')
     ax.set_xlabel('Turnover rate')
@@ -1645,14 +1670,14 @@ def plot_txn_time_hist(transactions, bin_minutes=5, tz='America/New_York',
     txn_time = transactions.copy()
 
     txn_time.index = txn_time.index.tz_convert(pytz.timezone(tz))
-    txn_time.index = txn_time.index.map(lambda x: x.hour*60 + x.minute)
+    txn_time.index = txn_time.index.map(lambda x: x.hour * 60 + x.minute)
     txn_time['trade_value'] = (txn_time.amount * txn_time.price).abs()
     txn_time = txn_time.groupby(level=0).sum().reindex(index=range(570, 961))
-    txn_time.index = (txn_time.index/bin_minutes).astype(int) * bin_minutes
+    txn_time.index = (txn_time.index / bin_minutes).astype(int) * bin_minutes
     txn_time = txn_time.groupby(level=0).sum()
 
     txn_time['time_str'] = txn_time.index.map(lambda x:
-                                              str(datetime.time(int(x/60),
+                                              str(datetime.time(int(x / 60),
                                                                 x % 60))[:-3])
 
     trade_value_sum = txn_time.trade_value.sum()
@@ -1661,8 +1686,8 @@ def plot_txn_time_hist(transactions, bin_minutes=5, tz='America/New_York',
     ax.bar(txn_time.index, txn_time.trade_value, width=bin_minutes, **kwargs)
 
     ax.set_xlim(570, 960)
-    ax.set_xticks(txn_time.index[::int(30/bin_minutes)])
-    ax.set_xticklabels(txn_time.time_str[::int(30/bin_minutes)])
+    ax.set_xticks(txn_time.index[::int(30 / bin_minutes)])
+    ax.set_xticklabels(txn_time.time_str[::int(30 / bin_minutes)])
     ax.set_title('Transaction time distribution')
     ax.set_ylabel('Proportion')
     ax.set_xlabel('')
@@ -1686,9 +1711,67 @@ def show_worst_drawdown_periods(returns, top=5):
     """
 
     drawdown_df = timeseries.gen_drawdown_table(returns, top=top)
-    utils.print_table(drawdown_df.sort_values('Net drawdown in %',
-                                              ascending=False),
-                      name='Worst drawdown periods', fmt='{0:.2f}')
+    utils.print_table(
+        drawdown_df.sort_values('Net drawdown in %', ascending=False),
+        name='Worst drawdown periods',
+        float_format='{0:.2f}'.format,
+    )
+
+
+def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
+    """
+    Plots monthly returns as a timeseries.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to seaborn plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
+    def cumulate_returns(x):
+        return ep.cum_returns(x)[-1]
+
+    if ax is None:
+        ax = plt.gca()
+
+    monthly_rets = returns.resample('M').apply(lambda x: cumulate_returns(x))
+    monthly_rets = monthly_rets.to_period()
+
+    sns.barplot(x=monthly_rets.index,
+                y=monthly_rets.values,
+                color='steelblue')
+
+    locs, labels = plt.xticks()
+    plt.setp(labels, rotation=90)
+
+    # only show x-labels on year boundary
+    xticks_coord = []
+    xticks_label = []
+    count = 0
+    for i in monthly_rets.index:
+        if i.month == 1:
+            xticks_label.append(i)
+            xticks_coord.append(count)
+            # plot yearly boundary line
+            ax.axvline(count, color='gray', ls='--', alpha=0.3)
+
+        count += 1
+
+    ax.axhline(0.0, color='darkgray', ls='-')
+    ax.set_xticks(xticks_coord)
+    ax.set_xticklabels(xticks_label)
+
+    return ax
 
 
 def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
@@ -1766,11 +1849,14 @@ def show_profit_attribution(round_trips):
     pnl_attribution.name = ''
 
     pnl_attribution.index = pnl_attribution.index.map(utils.format_asset)
-    utils.print_table(pnl_attribution.sort_values(
-        inplace=False,
-        ascending=False),
+    utils.print_table(
+        pnl_attribution.sort_values(
+            inplace=False,
+            ascending=False,
+        ),
         name='Profitability (PnL / PnL total) per name',
-        fmt='{:.2%}')
+        float_format='{:.2%}'.format,
+    )
 
 
 def plot_prob_profit_trade(round_trips, ax=None):
@@ -1877,7 +1963,7 @@ def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
     else:
         axes = ax
 
-    returns = empyrical.cum_returns(oos_returns, starting_value=1.)
+    returns = ep.cum_returns(oos_returns, starting_value=1.)
     bounds_tmp = bounds.copy()
     returns_tmp = returns.copy()
     cone_start = returns.index[0]
