@@ -51,10 +51,13 @@ install_reqs = [
     'pandas>=0.18.1',
     'pytz>=2014.10',
     'scipy>=0.14.0',
-    'scikit-learn>=0.16.1',
+<<<<<<< HEAD
     'seaborn>=0.7.1',
     'pandas-datareader>=0.2',
-    'empyrical>=0.3.4'
+    'empyrical>=0.3.2',
+    'engarde>=0.4.0'
+    'scikit-learn>=0.16.1',
+>>>>>>> 20060a3045c4176f9a2c417a0cb993b987441885
 ]
 
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']

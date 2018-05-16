@@ -35,6 +35,7 @@ from . import round_trips
 from . import timeseries
 from . import txn
 from . import utils
+from . import check_inputs
 
 try:
     from . import bayesian
@@ -115,7 +116,7 @@ def create_full_tear_sheet(returns,
     positions : pd.DataFrame, optional
         Daily net position values.
          - Time series of dollar amount invested in each position and cash.
-         - Days where stocks are not held can be represented by 0 or NaN.
+         - Days where stocks are not held must be represented by 0.
          - Non-working capital is labelled 'cash'
          - Example:
             index         'AAPL'         'MSFT'          cash
@@ -126,7 +127,7 @@ def create_full_tear_sheet(returns,
         Executed trade volumes and fill prices.
         - One row per trade.
         - Trades on different names that occur at the
-          same time will have identical indicies.
+          same time will have identical indices.
         - Example:
             index                  amount   price    symbol
             2004-01-09 12:18:01    483      324.12   'AAPL'
@@ -189,6 +190,7 @@ def create_full_tear_sheet(returns,
         factor returns and risk exposures plots
         - See create_perf_attrib_tear_sheet().
     """
+    check_inputs.check_inputs(returns, positions, transactions)
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
@@ -336,6 +338,7 @@ def create_simple_tear_sheet(returns,
     set_context : boolean, optional
         If True, set default plotting style context.
     """
+    check_inputs.check_inputs(returns, positions, transactions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -497,6 +500,7 @@ def create_returns_tear_sheet(returns, positions=None,
     set_context : boolean, optional
         If True, set default plotting style context.
     """
+    check_inputs.check_inputs(returns, positions, transactions)
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
@@ -679,6 +683,7 @@ def create_position_tear_sheet(returns, positions,
         Approximate returns for intraday strategies.
         See description in create_full_tear_sheet.
     """
+    check_inputs.check_inputs(returns, positions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -769,6 +774,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
+    check_inputs.check_inputs(returns, positions, transactions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -852,6 +858,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
+    check_inputs.check_inputs(returns, positions, transactions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -941,6 +948,7 @@ def create_interesting_times_tear_sheet(
     set_context : boolean, optional
         If True, set default plotting style context.
     """
+    check_inputs.check_inputs(returns)
 
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
 
@@ -1038,6 +1046,7 @@ def create_capacity_tear_sheet(returns, positions, transactions,
         Approximate returns for intraday strategies.
         See description in create_full_tear_sheet.
     """
+    check_inputs.check_inputs(returns, positions, transactions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -1132,6 +1141,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     stoch_vol : boolean, optional
         If True, run and plot the stochastic volatility model
     """
+    check_inputs.check_inputs(returns)
 
     if not have_bayesian:
         raise NotImplementedError(
@@ -1396,6 +1406,7 @@ def create_risk_tear_sheet(positions,
         Percentile to use when computing and plotting volume exposures.
         - Defaults to 10th percentile
     '''
+    check_inputs.check_inputs(returns, positions, transactions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
