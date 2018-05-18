@@ -86,7 +86,6 @@ def create_full_tear_sheet(returns,
                            volumes=None,
                            percentile=None,
                            turnover_denom='AGB',
-                           set_context=True,
                            factor_returns=None,
                            factor_loadings=None,
                            pos_in_dollars=True,
@@ -180,9 +179,6 @@ def create_full_tear_sheet(returns,
         indicates whether positions is in dollars
     header_rows : dict or OrderedDict, optional
         Extra rows to display at the top of the perf stats table.
-    set_context : boolean, optional
-        If True, set default plotting style context.
-         - See plotting.context().
     factor_partitions : dict, optional
         dict specifying how factors should be separated in perf attrib
         factor returns and risk exposures plots
@@ -210,25 +206,21 @@ def create_full_tear_sheet(returns,
         benchmark_rets=benchmark_rets,
         bootstrap=bootstrap,
         turnover_denom=turnover_denom,
-        header_rows=header_rows,
-        set_context=set_context)
+        header_rows=header_rows)
 
     create_interesting_times_tear_sheet(returns,
-                                        benchmark_rets=benchmark_rets,
-                                        set_context=set_context)
+                                        benchmark_rets=benchmark_rets)
 
     if positions is not None:
         create_position_tear_sheet(returns, positions,
                                    hide_positions=hide_positions,
-                                   set_context=set_context,
                                    sector_mappings=sector_mappings,
                                    estimate_intraday=False)
 
         if transactions is not None:
             create_txn_tear_sheet(returns, positions, transactions,
                                   unadjusted_returns=unadjusted_returns,
-                                  estimate_intraday=False,
-                                  set_context=set_context)
+                                  estimate_intraday=False)
             if round_trips:
                 create_round_trip_tear_sheet(
                     returns=returns,
@@ -257,8 +249,7 @@ def create_full_tear_sheet(returns,
     if bayesian:
         create_bayesian_tear_sheet(returns,
                                    live_start_date=live_start_date,
-                                   benchmark_rets=benchmark_rets,
-                                   set_context=set_context)
+                                   benchmark_rets=benchmark_rets)
 
 
 @plotting.customize
@@ -331,8 +322,6 @@ def create_simple_tear_sheet(returns,
         - See full explanation in txn.get_turnover.
     header_rows : dict or OrderedDict, optional
         Extra rows to display at the top of the perf stats table.
-    set_context : boolean, optional
-        If True, set default plotting style context.
     """
 
     positions = utils.check_intraday(estimate_intraday, returns,
