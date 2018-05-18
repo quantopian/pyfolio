@@ -515,7 +515,6 @@ def get_treasury_yield(start=None, end=None, period='3MO'):
                                               period='3MO')
 
 
-@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def get_utc_timestamp(dt):
     """
     Returns the Timestamp/DatetimeIndex

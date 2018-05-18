@@ -105,7 +105,6 @@ Users should beware that the following functions are now deprecated:
 - `pyfolio.utils.get_returns_cached`
 - `pyfolio.utils.get_symbol_returns_from_yahoo`
 - `pyfolio.utils.get_treasury_yield`
-- `pyfolio.utils.get_utc_timestamp`
 - `pyfolio.utils.cache_dir`
 - `pyfolio.utils.ensure_directory`
 - `pyfolio.utils.data_path`
