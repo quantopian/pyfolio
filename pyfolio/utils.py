@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Quantopian, Inc.
+# Copyright 2018 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,10 +49,14 @@ ANNUALIZATION_FACTORS = {
     MONTHLY: MONTHS_PER_YEAR
 }
 
-DEPRECATION_WARNING = ("Data loaders have been moved to empyrical and will "
-                       "be removed from pyfolio in a future release. Please "
-                       "use e.g. empyrical.utils.get_symbol_rets() instead "
-                       "of pyfolio.utils.get_symbol_rets()")
+DATAREADER_DEPRECATION_WARNING = \
+        ("Yahoo and Google Finance have suffered large API breaks with no "
+         "stable replacement. As a result, any data reading functionality "
+         "in empyrical has been deprecated and will be removed in a future "
+         "version."
+         ""
+         "Please use empyrical in the Quantopian Research environment, or "
+         "supply your own data. See README.md for more details.")
 
 COLORMAP = 'Paired'
 COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231',
@@ -402,7 +406,7 @@ def to_series(df):
     return df[df.columns[0]]
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def default_returns_func(symbol, start=None, end=None):
     """
     Gets returns for a symbol.
@@ -426,7 +430,7 @@ def default_returns_func(symbol, start=None, end=None):
     return empyrical.utils.default_returns_func(symbol, start=None, end=None)
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def get_fama_french():
     """
     Retrieve Fama-French factors via pandas-datareader
@@ -438,7 +442,7 @@ def get_fama_french():
     return empyrical.utils.get_fama_french()
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
     """
     Get returns from a cached file if the cache is recent enough,
@@ -465,7 +469,7 @@ def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
                                               **kwargs)
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def get_symbol_returns_from_yahoo(symbol, start=None, end=None):
     """
     Wrapper for pandas.io.data.get_data_yahoo().
@@ -487,7 +491,7 @@ def get_symbol_returns_from_yahoo(symbol, start=None, end=None):
     return get_symbol_returns_from_yahoo(symbol, start=None, end=None)
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def get_treasury_yield(start=None, end=None, period='3MO'):
     """
     Load treasury yields from FRED.
@@ -511,7 +515,7 @@ def get_treasury_yield(start=None, end=None, period='3MO'):
                                               period='3MO')
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def get_utc_timestamp(dt):
     """
     Returns the Timestamp/DatetimeIndex
@@ -528,12 +532,12 @@ def get_utc_timestamp(dt):
     return empyrical.utils.get_utc_timestamp(dt)
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def cache_dir(environ=environ):
     return empyrical.utils.cache_dir(environ=environ)
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def ensure_directory(path):
     """
     Ensure that a directory named "path" exists.
@@ -541,17 +545,17 @@ def ensure_directory(path):
     return empyrical.data_path(path)
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def data_path(name):
     return empyrical.data_path(name)
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def _1_bday_ago():
     return empyrical._1_bday_ago()
 
 
-@deprecated(msg=DEPRECATION_WARNING)
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
     """
     Load risk factors Mkt-Rf, SMB, HML, Rf, and UMD.
