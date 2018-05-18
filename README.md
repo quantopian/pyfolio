@@ -110,12 +110,15 @@ Users should beware that the following functions are now deprecated:
 - `pyfolio.utils.data_path`
 - `pyfolio.utils._1_bday_ago`
 - `pyfolio.utils.load_portfolio_risk_factors`
+- `pyfolio.utils.register_return_func`
+- `pyfolio.utils.get_symbol_rets`
 
 Users should expect regular failures from the following functions, pending
 patches to the Yahoo or Google Finance API:
 
 - `pyfolio.utils.default_returns_func`
 - `pyfolio.utils.get_symbol_returns_from_yahoo`
+- `pyfolio.utils.get_symbol_rets`
 
 For alternative data sources, we suggest the following:
 

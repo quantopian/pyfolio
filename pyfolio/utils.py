@@ -577,6 +577,7 @@ SETTINGS = {
 }
 
 
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def register_return_func(func):
     """
     Registers the 'returns_func' that will be called for
@@ -600,6 +601,7 @@ def register_return_func(func):
     SETTINGS['returns_func'] = func
 
 
+@deprecated(msg=DATAREADER_DEPRECATION_WARNING)
 def get_symbol_rets(symbol, start=None, end=None):
     """
     Calls the currently registered 'returns_func'

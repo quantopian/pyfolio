@@ -500,7 +500,9 @@ def create_returns_tear_sheet(returns, positions=None,
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
 
-    returns = returns[returns.index > benchmark_rets.index[0]]
+    # If the strategy's history is longer than the benchmark's, limit strategy
+    if returns.index[0] < benchmark_rets.index[0]:
+        returns = returns[returns.index > benchmark_rets.index[0]]
 
     plotting.show_perf_stats(returns, benchmark_rets,
                              positions=positions,
@@ -511,10 +513,6 @@ def create_returns_tear_sheet(returns, positions=None,
                              header_rows=header_rows)
 
     plotting.show_worst_drawdown_periods(returns)
-
-    # If the strategy's history is longer than the benchmark's, limit strategy
-    if returns.index[0] < benchmark_rets.index[0]:
-        returns = returns[returns.index > benchmark_rets.index[0]]
 
     vertical_sections = 13
 
