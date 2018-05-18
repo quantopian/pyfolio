@@ -80,6 +80,60 @@ If you find a bug, feel free to [open an issue](https://github.com/quantopian/py
 You can also join our [mailing list](https://groups.google.com/forum/#!forum/pyfolio) or
 our [Gitter channel](https://gitter.im/quantopian/pyfolio).
 
+## Support
+
+Please [open an issue](https://github.com/quantopian/pyfolio/issues/new) for support.
+
+### Deprecated: Data Reading via `pandas-datareader`
+
+As of early 2018, Yahoo Finance has suffered major API breaks with no stable
+replacement, and the Google Finance API has not been stable since late 2017
+[(source)](https://github.com/pydata/pandas-datareader/blob/da18fbd7621d473828d7fa81dfa5e0f9516b6793/README.rst).
+In recent months it has become a greater and greater strain on the `empyrical`
+and `pyfolio` development teams to maintain support for fetching data through
+`pandas-datareader` and other third-party libraries, as these APIs are known to
+be unstable.
+
+As a result, all `empyrical` (and therefore `pyfolio`, which is a downstream
+dependency) support for data reading functionality has been deprecated and will
+be removed in a future version.
+
+Users should beware that the following functions are now deprecated:
+
+- `pyfolio.utils.default_returns_func`
+- `pyfolio.utils.get_fama_french`
+- `pyfolio.utils.get_returns_cached`
+- `pyfolio.utils.get_symbol_returns_from_yahoo`
+- `pyfolio.utils.get_treasury_yield`
+- `pyfolio.utils.get_utc_timestamp`
+- `pyfolio.utils.cache_dir`
+- `pyfolio.utils.ensure_directory`
+- `pyfolio.utils.data_path`
+- `pyfolio.utils._1_bday_ago`
+- `pyfolio.utils.load_portfolio_risk_factors`
+
+Users should expect regular failures from the following functions, pending
+patches to the Yahoo or Google Finance API:
+
+- `pyfolio.utils.default_returns_func`
+- `pyfolio.utils.get_symbol_returns_from_yahoo`
+
+For alternative data sources, we suggest the following:
+
+1. Migrate your research workflow to the Quantopian Research environment,
+   where there is [free and flexible data access to over 57
+   datasets](https://www.quantopian.com/data)
+2. Make use of any remaining functional APIs supported by
+   `pandas-datareader`. These include:
+
+   - [Morningstar](https://pydata.github.io/pandas-datareader/stable/remote_data.html#remote-data-morningstar)
+   - [Quandl](https://pydata.github.io/pandas-datareader/stable/remote_data.html#remote-data-quandl)
+
+   Please note that you may need to create free accounts with these data
+   providers and receive an API key in order to access data. These API keys
+   should be set as environment variables, or passed as an argument to
+   `pandas-datareader`.
+
 
 ## Contributing
 
