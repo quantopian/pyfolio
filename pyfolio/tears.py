@@ -304,7 +304,7 @@ def create_simple_tear_sheet(returns,
             2004-01-09 12:18:01    122      83.10    'MSFT'
             2004-01-13 14:12:23    -75      340.43   'AAPL'
     benchmark_rets : pd.Series, optional
-        Daily returns of the benchmark, noncumulative. Defaults to SPY.
+        Daily returns of the benchmark, noncumulative.
     slippage : int/float, optional
         Basis points of slippage to apply to returns before generating
         tearsheet stats and plots.
@@ -325,22 +325,29 @@ def create_simple_tear_sheet(returns,
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
 
-    if benchmark_rets is None:
-        benchmark_rets = utils.get_symbol_rets('SPY')
-
     if (slippage is not None) and (transactions is not None):
         returns = txn.adjust_returns_for_slippage(returns, positions,
                                                   transactions, slippage)
 
     if (positions is not None) and (transactions is not None):
-        vertical_sections = 11
+        vertical_sections = 10
     elif positions is not None:
-        vertical_sections = 9
+        vertical_sections = 8
     else:
-        vertical_sections = 5
+        vertical_sections = 4
 
-    # Plot simple returns tear sheet
-    returns = returns[returns.index > benchmark_rets.index[0]]
+    if live_start_date is not None:
+        vertical_sections += 1
+        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
+
+    if benchmark_rets is not None:
+        vertical_sections += 1
+
+    # If benchmark has been passed, and the strategy's history is longer than
+    # the benchmark's, limit strategy returns.
+    if (benchmark_rets is not None
+            and returns.index[0] < benchmark_rets.index[0]):
+        returns = returns[returns.index > benchmark_rets.index[0]]
 
     plotting.show_perf_stats(returns,
                              benchmark_rets,
@@ -350,20 +357,14 @@ def create_simple_tear_sheet(returns,
                              live_start_date=live_start_date,
                              header_rows=header_rows)
 
-    if returns.index[0] < benchmark_rets.index[0]:
-        returns = returns[returns.index > benchmark_rets.index[0]]
-
-    if live_start_date is not None:
-        vertical_sections += 1
-        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
-
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
 
     ax_rolling_returns = plt.subplot(gs[:2, :])
     i = 2
-    ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
-    i += 1
+    if benchmark_rets is not None:
+        ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+        i += 1
     ax_rolling_sharpe = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
     ax_underwater = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
@@ -376,7 +377,8 @@ def create_simple_tear_sheet(returns,
                                   ax=ax_rolling_returns)
     ax_rolling_returns.set_title('Cumulative returns')
 
-    plotting.plot_rolling_beta(returns, benchmark_rets, ax=ax_rolling_beta)
+    if benchmark_rets is not None:
+        plotting.plot_rolling_beta(returns, benchmark_rets, ax=ax_rolling_beta)
 
     plotting.plot_rolling_sharpe(returns, ax=ax_rolling_sharpe)
 
