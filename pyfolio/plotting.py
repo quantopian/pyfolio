@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Quantopian, Inc.
+# Copyright 2018 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -501,8 +501,7 @@ def plot_perf_stats(returns, factor_returns, ax=None):
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.DataFrame
-        data set containing the Fama-French risk factors. See
-        utils.load_portfolio_risk_factors.
+        Data set containing the risk factors.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
