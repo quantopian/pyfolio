@@ -185,9 +185,6 @@ def create_full_tear_sheet(returns,
         - See create_perf_attrib_tear_sheet().
     """
 
-    if benchmark_rets is None:
-        benchmark_rets = utils.get_symbol_rets('SPY')
-
     if (unadjusted_returns is None) and (slippage is not None) and\
        (transactions is not None):
         unadjusted_returns = returns.copy()
@@ -486,11 +483,10 @@ def create_returns_tear_sheet(returns, positions=None,
         If True, returns the figure that was plotted on.
     """
 
-    if benchmark_rets is None:
-        benchmark_rets = utils.get_symbol_rets('SPY')
-
-    # If the strategy's history is longer than the benchmark's, limit strategy
-    if returns.index[0] < benchmark_rets.index[0]:
+    # If benchmark has been passed, and the strategy's history is longer than
+    # the benchmark's, limit strategy returns.
+    if (benchmark_rets is not None
+            and returns.index[0] < benchmark_rets.index[0]):
         returns = returns[returns.index > benchmark_rets.index[0]]
 
     plotting.show_perf_stats(returns, benchmark_rets,

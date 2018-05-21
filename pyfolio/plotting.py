@@ -601,7 +601,7 @@ STAT_FUNCS_PCT = [
 ]
 
 
-def show_perf_stats(returns, factor_returns, positions=None,
+def show_perf_stats(returns, factor_returns=None, positions=None,
                     transactions=None, turnover_denom='AGB',
                     live_start_date=None, bootstrap=False,
                     header_rows=None):
@@ -619,7 +619,7 @@ def show_perf_stats(returns, factor_returns, positions=None,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    factor_returns : pd.Series
+    factor_returns : pd.Series, optional
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
     positions : pd.DataFrame, optional
@@ -1005,7 +1005,7 @@ def plot_rolling_volatility(returns, factor_returns=None,
 
     ax.set_ylabel('Volatility')
     ax.set_xlabel('')
-    if factor_returns.empty:
+    if factor_returns is None:
         ax.legend(['Volatility', 'Average volatility'],
                   loc=legend_loc, frameon=True, framealpha=0.5)
     else:
