@@ -774,7 +774,7 @@ def plot_rolling_returns(returns,
     ax.set_yscale('log' if logy else 'linear')
 
     if volatility_match and factor_returns is None:
-        raise ValueError('volatility_match requires passing of'
+        raise ValueError('volatility_match requires passing of '
                          'factor_returns.')
     elif volatility_match and factor_returns is not None:
         bmark_vol = factor_returns.loc[returns.index].std()
