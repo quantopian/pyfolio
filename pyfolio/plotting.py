@@ -140,6 +140,8 @@ def axes_style(style='darkgrid', rc=None):
     return sns.axes_style(style=style, rc=rc)
 
 
+# FIXME what to do about this function? Returns tear sheet includes it by
+# default... but its just a wrapper for timeseries.rolling_regression
 def plot_rolling_fama_french(returns,
                              factor_returns=None,
                              rolling_window=APPROX_BDAYS_PER_MONTH * 6,
