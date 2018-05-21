@@ -502,7 +502,7 @@ def create_returns_tear_sheet(returns, positions=None,
 
     plotting.show_worst_drawdown_periods(returns)
 
-    vertical_sections = 13
+    vertical_sections = 12
 
     if live_start_date is not None:
         vertical_sections += 1
@@ -530,8 +530,6 @@ def create_returns_tear_sheet(returns, positions=None,
     ax_rolling_volatility = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
     ax_rolling_sharpe = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
-    i += 1
-    ax_rolling_risk = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
     ax_drawdown = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
@@ -590,9 +588,6 @@ def create_returns_tear_sheet(returns, positions=None,
 
     plotting.plot_rolling_sharpe(
         returns, ax=ax_rolling_sharpe)
-
-    plotting.plot_rolling_fama_french(
-        returns, ax=ax_rolling_risk)
 
     # Drawdowns
     plotting.plot_drawdown_periods(
@@ -962,9 +957,9 @@ def create_interesting_times_tear_sheet(
         ep.cum_returns(rets_period).plot(
             ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
         ep.cum_returns(bmark_interesting[name]).plot(
-            ax=ax, color='gray', label='SPY', alpha=0.6)
+            ax=ax, color='gray', label='benchmark', alpha=0.6)
         ax.legend(['Algo',
-                   'SPY'],
+                   'benchmark'],
                   loc=legend_loc, frameon=True, framealpha=0.5)
         ax.set_title(name)
         ax.set_ylabel('Returns')

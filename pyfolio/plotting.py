@@ -140,74 +140,6 @@ def axes_style(style='darkgrid', rc=None):
     return sns.axes_style(style=style, rc=rc)
 
 
-# FIXME what to do about this function? Returns tear sheet includes it by
-# default... but its just a wrapper for timeseries.rolling_regression
-def plot_rolling_fama_french(returns,
-                             factor_returns=None,
-                             rolling_window=APPROX_BDAYS_PER_MONTH * 6,
-                             legend_loc='best',
-                             ax=None, **kwargs):
-    """
-    Plots rolling Fama-French single factor betas.
-
-    Specifically, plots SMB, HML, and UMD vs. date with a legend.
-
-    Parameters
-    ----------
-    returns : pd.Series
-        Daily returns of the strategy, noncumulative.
-         - See full explanation in tears.create_full_tear_sheet.
-    factor_returns : pd.DataFrame, optional
-        data set containing the Fama-French risk factors. See
-        utils.load_portfolio_risk_factors.
-    rolling_window : int, optional
-        The days window over which to compute the beta.
-    legend_loc : matplotlib.loc, optional
-        The location of the legend on the plot.
-    ax : matplotlib.Axes, optional
-        Axes upon which to plot.
-    **kwargs, optional
-        Passed to plotting function.
-
-    Returns
-    -------
-    ax : matplotlib.Axes
-        The axes that were plotted on.
-    """
-
-    if ax is None:
-        ax = plt.gca()
-
-    ax.set_title(
-        "Rolling Fama-French single factor betas (%.0f-month)" % (
-            rolling_window / APPROX_BDAYS_PER_MONTH
-        )
-    )
-
-    ax.set_ylabel('Beta')
-
-    rolling_beta = timeseries.rolling_regression(
-        returns,
-        factor_returns=factor_returns,
-        rolling_window=rolling_window)
-
-    rolling_beta = rolling_beta[['SMB', 'HML', 'Mom']]
-    rolling_beta.plot(alpha=0.7, ax=ax, **kwargs)
-
-    ax.axhline(0.0, color='black')
-    ax.legend(['Small cap (SMB)',
-               'High growth (HML)',
-               'Momentum (UMD)'],
-              loc=legend_loc, frameon=True, framealpha=0.5)
-
-    y_axis_formatter = FuncFormatter(utils.two_dec_places)
-    ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
-    ax.axhline(0.0, color='black')
-    ax.set_xlabel('')
-    ax.set_ylim((-1.0, 1.0))
-    return ax
-
-
 def plot_monthly_returns_heatmap(returns, ax=None, **kwargs):
     """
     Plots a heatmap of returns by month.
@@ -568,7 +500,7 @@ def plot_perf_stats(returns, factor_returns, ax=None):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    factor_returns : pd.DataFrame, optional
+    factor_returns : pd.DataFrame
         data set containing the Fama-French risk factors. See
         utils.load_portfolio_risk_factors.
     ax : matplotlib.Axes, optional
