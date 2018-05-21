@@ -49,6 +49,7 @@ class PositionsTestCase(TestCase):
         create_full_tear_sheet(self.test_returns,
                                positions=self.test_pos,
                                transactions=self.test_txn,
+                               benchmark_rets=self.test_returns,
                                **kwargs
                                )
 
@@ -73,6 +74,7 @@ class PositionsTestCase(TestCase):
     @cleanup
     def test_create_returns_tear_sheet_breakdown(self, kwargs):
         create_returns_tear_sheet(self.test_returns,
+                                  benchmark_rets=self.test_returns,
                                   **kwargs
                                   )
 
