@@ -503,6 +503,7 @@ def create_returns_tear_sheet(returns, positions=None,
 
     plotting.show_worst_drawdown_periods(returns)
 
+    # TODO check to make sure these numbers are correct...
     vertical_sections = 11
 
     if live_start_date is not None:
@@ -959,7 +960,6 @@ def create_interesting_times_tear_sheet(
     gs = gridspec.GridSpec(num_rows, 2, wspace=0.5, hspace=0.5)
 
     for i, (name, rets_period) in enumerate(rets_interesting.items()):
-
         # i=0 -> 0, i=1 -> 0, i=2 -> 1 ;; i=0 -> 0, i=1 -> 1, i=2 -> 0
         ax = plt.subplot(gs[int(i / 2.0), i % 2])
         ep.cum_returns(rets_period).plot(
