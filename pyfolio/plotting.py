@@ -842,7 +842,7 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    factor_returns : pd.Series, optional
+    factor_returns : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
     legend_loc : matplotlib.loc, optional

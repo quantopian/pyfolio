@@ -329,6 +329,7 @@ def create_simple_tear_sheet(returns,
         returns = txn.adjust_returns_for_slippage(returns, positions,
                                                   transactions, slippage)
 
+    # TODO check to make sure these numbers are correct...
     if (positions is not None) and (transactions is not None):
         vertical_sections = 10
     elif positions is not None:
@@ -502,11 +503,14 @@ def create_returns_tear_sheet(returns, positions=None,
 
     plotting.show_worst_drawdown_periods(returns)
 
-    vertical_sections = 12
+    vertical_sections = 11
 
     if live_start_date is not None:
         vertical_sections += 1
         live_start_date = ep.utils.get_utc_timestamp(live_start_date)
+
+    if benchmark_rets is not None:
+        vertical_sections += 1
 
     if bootstrap:
         vertical_sections += 1
@@ -525,8 +529,9 @@ def create_returns_tear_sheet(returns, positions=None,
     ax_returns = plt.subplot(gs[i, :],
                              sharex=ax_rolling_returns)
     i += 1
-    ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
-    i += 1
+    if benchmark_rets is not None:
+        ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+        i += 1
     ax_rolling_volatility = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
     ax_rolling_sharpe = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
@@ -580,8 +585,9 @@ def create_returns_tear_sheet(returns, positions=None,
     ax_returns.set_title(
         'Returns')
 
-    plotting.plot_rolling_beta(
-        returns, benchmark_rets, ax=ax_rolling_beta)
+    if benchmark_rets is not None:
+        plotting.plot_rolling_beta(
+            returns, benchmark_rets, ax=ax_rolling_beta)
 
     plotting.plot_rolling_volatility(
         returns, factor_returns=benchmark_rets, ax=ax_rolling_volatility)
@@ -605,10 +611,12 @@ def create_returns_tear_sheet(returns, positions=None,
         live_start_date=live_start_date,
         ax=ax_return_quantiles)
 
-    if bootstrap:
+    if bootstrap and benchmark_rets is not None:
         ax_bootstrap = plt.subplot(gs[i, :])
         plotting.plot_perf_stats(returns, benchmark_rets,
                                  ax=ax_bootstrap)
+    elif bootstrap:
+        raise ValueError('bootstrap requires passing of benchmark_rets.')
 
     for ax in fig.axes:
         plt.setp(ax.get_xticklabels(), visible=True)
@@ -1096,7 +1104,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in create_full_tear_sheet.
-    benchmark_rets : pd.Series
+    benchmark_rets : pd.Series, optional
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
     live_start_date : datetime, optional
