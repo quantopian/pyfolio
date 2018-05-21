@@ -205,8 +205,9 @@ def create_full_tear_sheet(returns,
         turnover_denom=turnover_denom,
         header_rows=header_rows)
 
-    create_interesting_times_tear_sheet(returns,
-                                        benchmark_rets=benchmark_rets)
+    if benchmark_rets is not None:
+        create_interesting_times_tear_sheet(returns,
+                                            benchmark_rets=benchmark_rets)
 
     if positions is not None:
         create_position_tear_sheet(returns, positions,
@@ -898,7 +899,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
 @plotting.customize
 def create_interesting_times_tear_sheet(
-        returns, benchmark_rets=None, legend_loc='best', return_fig=False):
+        returns, benchmark_rets, legend_loc='best', return_fig=False):
     """
     Generate a number of returns plots around interesting points in time,
     like the flash crash and 9/11.
@@ -908,12 +909,15 @@ def create_interesting_times_tear_sheet(
     bubble burst, EZB IR, Great Recession (August 2007, March and September
     of 2008, Q1 & Q2 2009), flash crash, April and October 2014.
 
+    benchmark_rets must be passed, as it is meaningless to analyze performance
+    during interesting times without some benchmark to refer to.
+
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in create_full_tear_sheet.
-    benchmark_rets : pd.Series, optional
+    benchmark_rets : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
     legend_loc : plt.legend_loc, optional
@@ -935,12 +939,10 @@ def create_interesting_times_tear_sheet(
                       name='Stress Events',
                       float_format='{0:.2f}%'.format)
 
-    if benchmark_rets is None:
-        benchmark_rets = utils.get_symbol_rets('SPY')
-        # If the strategy's history is longer than the benchmark's, limit
-        # strategy
-        if returns.index[0] < benchmark_rets.index[0]:
-            returns = returns[returns.index > benchmark_rets.index[0]]
+    # If benchmark has been passed, and the strategy's history is longer than
+    # the benchmark's, limit strategy returns.
+    if returns.index[0] < benchmark_rets.index[0]:
+        returns = returns[returns.index > benchmark_rets.index[0]]
 
     bmark_interesting = timeseries.extract_interesting_date_ranges(
         benchmark_rets)
