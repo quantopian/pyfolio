@@ -329,7 +329,6 @@ def create_simple_tear_sheet(returns,
         returns = txn.adjust_returns_for_slippage(returns, positions,
                                                   transactions, slippage)
 
-    # TODO check to make sure these numbers are correct...
     if (positions is not None) and (transactions is not None):
         vertical_sections = 10
     elif positions is not None:
@@ -503,7 +502,6 @@ def create_returns_tear_sheet(returns, positions=None,
 
     plotting.show_worst_drawdown_periods(returns)
 
-    # TODO check to make sure these numbers are correct...
     vertical_sections = 11
 
     if live_start_date is not None:
