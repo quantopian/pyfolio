@@ -205,9 +205,8 @@ def create_full_tear_sheet(returns,
         turnover_denom=turnover_denom,
         header_rows=header_rows)
 
-    if benchmark_rets is not None:
-        create_interesting_times_tear_sheet(returns,
-                                            benchmark_rets=benchmark_rets)
+    create_interesting_times_tear_sheet(returns,
+                                        benchmark_rets=benchmark_rets)
 
     if positions is not None:
         create_position_tear_sheet(returns, positions,
@@ -903,7 +902,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
 @plotting.customize
 def create_interesting_times_tear_sheet(
-        returns, benchmark_rets, legend_loc='best', return_fig=False):
+        returns, benchmark_rets=None, legend_loc='best', return_fig=False):
     """
     Generate a number of returns plots around interesting points in time,
     like the flash crash and 9/11.
@@ -932,7 +931,7 @@ def create_interesting_times_tear_sheet(
 
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
 
-    if len(rets_interesting) == 0:
+    if not rets_interesting:
         warnings.warn('Passed returns do not overlap with any'
                       'interesting times.', UserWarning)
         return
@@ -960,13 +959,20 @@ def create_interesting_times_tear_sheet(
     for i, (name, rets_period) in enumerate(rets_interesting.items()):
         # i=0 -> 0, i=1 -> 0, i=2 -> 1 ;; i=0 -> 0, i=1 -> 1, i=2 -> 0
         ax = plt.subplot(gs[int(i / 2.0), i % 2])
+
         ep.cum_returns(rets_period).plot(
             ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
-        ep.cum_returns(bmark_interesting[name]).plot(
-            ax=ax, color='gray', label='benchmark', alpha=0.6)
-        ax.legend(['Algo',
-                   'benchmark'],
-                  loc=legend_loc, frameon=True, framealpha=0.5)
+
+        if benchmark_rets is not None:
+            ep.cum_returns(bmark_interesting[name]).plot(
+                ax=ax, color='gray', label='benchmark', alpha=0.6)
+            ax.legend(['Algo',
+                       'benchmark'],
+                      loc=legend_loc, frameon=True, framealpha=0.5)
+        else:
+            ax.legend(['Algo'],
+                      loc=legend_loc, frameon=True, framealpha=0.5)
+
         ax.set_title(name)
         ax.set_ylabel('Returns')
         ax.set_xlabel('')
