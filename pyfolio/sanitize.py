@@ -75,9 +75,7 @@ def sanitize_returns(returns):
         - If not, coerce values to float and warn
         - Failing that, raise a ValueError
     """
-    try:
-        assert isinstance(returns, pd.Series)
-    except AssertionError:
+    if not isinstance(returns, pd.Series):
         if isinstance(returns, pd.DataFrame) and returns.shape[1] == 1:
             returns = returns.squeeze()
             msg = ('`returns` is a 1-dimensional pd.DataFrame. '
@@ -88,24 +86,18 @@ def sanitize_returns(returns):
                    'into one.')
             raise ValueError(msg)
 
-    try:
-        assert not returns.isnull().any()
-    except AssertionError:
+    if returns.isnull().any():
         msg = ('`returns` has NaN values. Perhaps those are days with zero '
                'returns, or are not trading days?')
         raise ValueError(msg)
 
-    try:
-        assert returns.index.tz is not None
-    except AssertionError:
+    if returns.index.tz is None:
         returns.index = returns.index.tz_localize('UTC')
         msg = ('`returns` index is not timezone-localized. '
                'Localizing to UTC...')
         warn(msg)
 
-    try:
-        assert returns.dtype == float
-    except AssertionError:
+    if returns.dtype != float:
         try:
             returns = returns.astype(float)
             msg = '`returns` does not have float dtype. Coercing to float...'
@@ -149,38 +141,27 @@ def sanitize_positions(positions):
         - if not, coerce values to float and warn
         - Failing that, raise a ValueError
     """
-    try:
-        assert isinstance(positions, pd.DataFrame)
-    except AssertionError:
+    if not isinstance(positions, pd.DataFrame):
         msg = '`positions` is not a pd.DataFrame.'
         raise ValueError(msg)
 
-    try:
-        assert not positions.isnull().any().any()
-    except AssertionError:
+    if positions.isnull().any().any():
         positions = positions.fillna(0)
         msg = '`positions` contains NaNs. Filling with 0...'
         warn(msg)
 
-    try:
-        assert positions.index.tz is not None
-    except AssertionError:
+    if positions.index.tz is None:
         positions.index = positions.index.tz_localize('UTC')
         msg = ('`positions` index is not timezone-localized. '
                'Localizing to UTC...')
         warn(msg)
 
-    try:
-        assert 'cash' in positions.columns
-    except AssertionError:
+    if 'cash' not in positions.columns:
         msg = '`positions does not contain a `cash` column.'
         raise ValueError(msg)
 
-    try:
-        # FIXME more idiomatic way to check dtype of all columns?
-        assert all(positions.apply(lambda col: col.dtype,
-                                   axis='columns') == float)
-    except AssertionError:
+    if not all(positions.apply(lambda col: col.dtype,
+                               axis='columns') == float):
         try:
             positions = positions.astype(float)
             msg = '`positions` does not have float dtype. Coercing to float...'
@@ -225,37 +206,27 @@ def sanitize_txns(txns):
     - Symbols must be strings or ints
         - If not, warn
     """
-    try:
-        assert isinstance(txns, pd.DataFrame)
-    except AssertionError:
+    if not isinstance(txns, pd.DataFrame):
         msg = '`txns` is not a pd.DataFrame.'
         raise ValueError(msg)
 
-    try:
-        assert not txns.isnull().any().any()
-    except AssertionError:
+    if txns.isnull().any().any():
         msg = '`txns` contains NaNs.'
         raise ValueError(msg)
 
-    try:
-        assert txns.index.tz is not None
-    except AssertionError:
+    if txns.index.tz is None:
         txns.index = txns.index.tz_localize('UTC')
         msg = ('`txns` index is not timezone-localized. '
                'Localizing to UTC...')
         warn(msg)
 
-    try:
-        assert set(['amount', 'price', 'symbol']) <= set(txns.columns)
-    except AssertionError:
+    if not set(['amount', 'price', 'symbol']) <= set(txns.columns):
         msg = '`txns` does not have an `amount`, `price`, or `symbol` column.'
         raise ValueError(msg)
 
-    try:
-        assert txns.loc[:, 'amount'].dtype == int
-        assert txns.loc[:, 'price'].dtype == float
-        assert txns.loc[:, 'symbol'].dtype in [str, int]
-    except AssertionError:
+    if not (txns.loc[:, 'amount'].dtype == int
+            and txns.loc[:, 'price'].dtype == float
+            and txns.loc[:, 'symbol'].dtype in [str, int]):
         msg = ('`txns` columns do not have the correct dtypes. '
                '`amount` column should have int dtype, '
                '`price` column should have float dtype, and '
