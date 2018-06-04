@@ -12,15 +12,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
 from warnings import warn
+import pandas as pd
 
 
 def sanitize_inputs(returns=None,
                     positions=None,
                     txns=None):
     """
-    Sanitize inputs to any pyfolio create_x_tear_sheet function
+    Sanitize inputs to pyfolio.
+
+    Returns
+    -------
+    returns, positions, txns : pd.Series or pd.DataFrame
+        Sanitized inputs to pyfolio create_x_tear_sheet functions.
+        See pyfolio.create_full_tear_sheet for more details.
+
+    Usage
+    -----
+    To sanitize all inputs:
+        rets, pos, txns = sanitize_inputs(rets, pos, txns)
+    To sanitize only e.g. positions:
+        _, pos, _ = sanitize_inputs(returns=None, positions=pos, txns=None)
     """
     if returns is not None:
         returns = sanitize_returns(returns)
@@ -64,7 +77,7 @@ def sanitize_returns(returns):
     """
     try:
         assert isinstance(returns, pd.Series)
-    except AssertionError as e:
+    except AssertionError:
         if isinstance(returns, pd.DataFrame) and returns.shape[1] == 1:
             returns = returns.squeeze()
             msg = ('`returns` is a 1-dimensional pd.DataFrame. '
@@ -77,14 +90,14 @@ def sanitize_returns(returns):
 
     try:
         assert not returns.isnull().any()
-    except AssertionError as e:
+    except AssertionError:
         msg = ('`returns` has NaN values. Perhaps those are days with zero '
                'returns, or are not trading days?')
         raise ValueError(msg)
 
     try:
         assert returns.index.tz is not None
-    except AssertionError as e:
+    except AssertionError:
         returns.index = returns.index.tz_localize('UTC')
         msg = ('`returns` index is not timezone-localized. '
                'Localizing to UTC...')
@@ -92,7 +105,7 @@ def sanitize_returns(returns):
 
     try:
         assert returns.dtype == float
-    except AssertionError as e:
+    except AssertionError:
         try:
             returns = returns.astype(float)
             msg = '`returns` does not have float dtype. Coercing to float...'
@@ -138,20 +151,20 @@ def sanitize_positions(positions):
     """
     try:
         assert isinstance(positions, pd.DataFrame)
-    except AssertionError as e:
+    except AssertionError:
         msg = '`positions` is not a pd.DataFrame.'
         raise ValueError(msg)
 
     try:
         assert not positions.isnull().any().any()
-    except AssertionError as e:
+    except AssertionError:
         positions = positions.fillna(0)
         msg = '`positions` contains NaNs. Filling with 0...'
         warn(msg)
 
     try:
         assert positions.index.tz is not None
-    except AssertionError as e:
+    except AssertionError:
         positions.index = positions.index.tz_localize('UTC')
         msg = ('`positions` index is not timezone-localized. '
                'Localizing to UTC...')
@@ -159,7 +172,7 @@ def sanitize_positions(positions):
 
     try:
         assert 'cash' in positions.columns
-    except AssertionError as e:
+    except AssertionError:
         msg = '`positions does not contain a `cash` column.'
         raise ValueError(msg)
 
@@ -167,7 +180,7 @@ def sanitize_positions(positions):
         # FIXME more idiomatic way to check dtype of all columns?
         assert all(positions.apply(lambda col: col.dtype,
                                    axis='columns') == float)
-    except AssertionError as e:
+    except AssertionError:
         try:
             positions = positions.astype(float)
             msg = '`positions` does not have float dtype. Coercing to float...'
@@ -214,19 +227,19 @@ def sanitize_txns(txns):
     """
     try:
         assert isinstance(txns, pd.DataFrame)
-    except AssertionError as e:
+    except AssertionError:
         msg = '`txns` is not a pd.DataFrame.'
         raise ValueError(msg)
 
     try:
         assert not txns.isnull().any().any()
-    except AssertionError as e:
+    except AssertionError:
         msg = '`txns` contains NaNs.'
         raise ValueError(msg)
 
     try:
         assert txns.index.tz is not None
-    except AssertionError as e:
+    except AssertionError:
         txns.index = txns.index.tz_localize('UTC')
         msg = ('`txns` index is not timezone-localized. '
                'Localizing to UTC...')
@@ -234,7 +247,7 @@ def sanitize_txns(txns):
 
     try:
         assert set(['amount', 'price', 'symbol']) <= set(txns.columns)
-    except AssertionError as e:
+    except AssertionError:
         msg = '`txns` does not have an `amount`, `price`, or `symbol` column.'
         raise ValueError(msg)
 
@@ -242,7 +255,7 @@ def sanitize_txns(txns):
         assert txns.loc[:, 'amount'].dtype == int
         assert txns.loc[:, 'price'].dtype == float
         assert txns.loc[:, 'symbol'].dtype in [str, int]
-    except AssertionError as e:
+    except AssertionError:
         msg = ('`txns` columns do not have the correct dtypes. '
                '`amount` column should have int dtype, '
                '`price` column should have float dtype, and '
