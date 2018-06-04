@@ -110,7 +110,7 @@ def sanitize_returns(returns):
             returns = returns.astype(float)
             msg = '`returns` does not have float dtype. Coercing to float...'
             warn(msg)
-        except:
+        except ValueError:
             msg = ('`returns` does not have float dtype, and could not be '
                    'coerced into floats.')
             raise ValueError(msg)
@@ -185,7 +185,7 @@ def sanitize_positions(positions):
             positions = positions.astype(float)
             msg = '`positions` does not have float dtype. Coercing to float...'
             warn(msg)
-        except:
+        except ValueError:
             msg = ('`positions` does not have float dtype, and could not be '
                    'coerced into floats.')
             raise ValueError(msg)
