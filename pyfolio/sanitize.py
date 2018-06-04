@@ -16,9 +16,9 @@ from warnings import warn
 import pandas as pd
 
 
-def sanitize_inputs(returns=None,
-                    positions=None,
-                    txns=None):
+def sanitize(returns=None,
+             positions=None,
+             txns=None):
     """
     Sanitize inputs to pyfolio.
 
