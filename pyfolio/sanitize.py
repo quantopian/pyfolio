@@ -33,7 +33,7 @@ def sanitize(returns=None,
     To sanitize all inputs:
         rets, pos, txns = sanitize_inputs(rets, pos, txns)
     To sanitize only e.g. positions:
-        _, pos, _ = sanitize_inputs(returns=None, positions=pos, txns=None)
+        _, pos, _ = sanitize_inputs(positions=pos)
     """
     if returns is not None:
         returns = sanitize_returns(returns)
