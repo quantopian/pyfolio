@@ -115,7 +115,7 @@ def create_full_tear_sheet(returns,
     positions : pd.DataFrame, optional
         Daily net position values.
          - Time series of dollar amount invested in each position and cash.
-         - Days where stocks are not held can be represented by 0 or NaN.
+         - Days where stocks are not held must be represented by 0.
          - Non-working capital is labelled 'cash'
          - Example:
             index         'AAPL'         'MSFT'          cash
