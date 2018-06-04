@@ -35,6 +35,7 @@ from . import round_trips
 from . import timeseries
 from . import txn
 from . import utils
+from . import sanitize
 
 try:
     from . import bayesian
@@ -188,6 +189,9 @@ def create_full_tear_sheet(returns,
         factor returns and risk exposures plots
         - See create_perf_attrib_tear_sheet().
     """
+    returns, positions, transactions = sanitize.sanitize(returns=returns,
+                                                         positions=positions,
+                                                         txns=transactions)
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
@@ -334,6 +338,9 @@ def create_simple_tear_sheet(returns,
     set_context : boolean, optional
         If True, set default plotting style context.
     """
+    returns, positions, transactions = sanitize.sanitize(returns=returns,
+                                                         positions=positions,
+                                                         txns=transactions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -496,6 +503,9 @@ def create_returns_tear_sheet(returns, positions=None,
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
+    returns, positions, transactions = sanitize.sanitize(returns=returns,
+                                                         positions=positions,
+                                                         txns=transactions)
 
     if benchmark_rets is None:
         benchmark_rets = utils.get_symbol_rets('SPY')
@@ -678,6 +688,8 @@ def create_position_tear_sheet(returns, positions,
         Approximate returns for intraday strategies.
         See description in create_full_tear_sheet.
     """
+    returns, positions, _ = sanitize.sanitize(returns=returns,
+                                              positions=positions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -768,6 +780,9 @@ def create_txn_tear_sheet(returns, positions, transactions,
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
+    returns, positions, transactions = sanitize.sanitize(returns=returns,
+                                                         positions=positions,
+                                                         txns=transactions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -851,6 +866,9 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
+    returns, positions, transactions = sanitize.sanitize(returns=returns,
+                                                         positions=positions,
+                                                         txns=transactions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -938,6 +956,7 @@ def create_interesting_times_tear_sheet(
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
+    returns, _, _ = sanitize.sanitize(returns=returns)
 
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
 
@@ -1035,6 +1054,9 @@ def create_capacity_tear_sheet(returns, positions, transactions,
         Approximate returns for intraday strategies.
         See description in create_full_tear_sheet.
     """
+    returns, positions, transactions = sanitize.sanitize(returns=returns,
+                                                         positions=positions,
+                                                         txns=transactions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -1129,6 +1151,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     progressbar : boolean, optional
         If True, show a progress bar
     """
+    returns, _, _ = sanitize.sanitize(returns=returns)
 
     if not have_bayesian:
         raise NotImplementedError(
@@ -1393,6 +1416,7 @@ def create_risk_tear_sheet(positions,
         Percentile to use when computing and plotting volume exposures.
         - Defaults to 10th percentile
     '''
+    _, positions, _ = sanitize.sanitize(positions=positions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
@@ -1541,6 +1565,9 @@ def create_perf_attrib_tear_sheet(returns,
           {'style': ['momentum', 'size', 'value', ...],
            'sector': ['technology', 'materials', ... ]}
     """
+    returns, positions, _ = sanitize.sanitize(returns=returns,
+                                              positions=positions)
+
     portfolio_exposures, perf_attrib_data = perf_attrib.perf_attrib(
         returns, positions, factor_returns, factor_loadings, transactions,
         pos_in_dollars=pos_in_dollars
