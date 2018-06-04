@@ -27,4 +27,4 @@ del get_versions
 
 __all__ = ['utils', 'timeseries', 'pos', 'txn', 'bayesian',
            'interesting_periods', 'capacity', 'round_trips',
-           'risk', 'perf_attrib']
+           'risk', 'perf_attrib', 'sanitize']
