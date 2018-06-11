@@ -328,22 +328,22 @@ def create_simple_tear_sheet(returns,
         returns = txn.adjust_returns_for_slippage(returns, positions,
                                                   transactions, slippage)
 
-    if (positions is not None) and (transactions is not None):
-        vertical_sections = 10
-    elif positions is not None:
-        vertical_sections = 8
-    else:
-        vertical_sections = 4
+    always_sections = 4
+    positions_sections = 4 if positions is not None else 0
+    transactions_sections = 2 if transactions is not None else 0
+    live_sections = 1 if live_start_date is not None else 0
+    benchmark_sections = 1 if benchmark_rets is not None else 0
+
+    vertical_sections = sum([
+        always_sections,
+        positions_sections,
+        transactions_sections,
+        live_sections,
+        benchmark_sections,
+    ])
 
     if live_start_date is not None:
-        vertical_sections += 1
         live_start_date = ep.utils.get_utc_timestamp(live_start_date)
-
-    if benchmark_rets is not None:
-        vertical_sections += 1
-
-    if benchmark_rets is not None:
-        returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
     plotting.show_perf_stats(returns,
                              benchmark_rets,
