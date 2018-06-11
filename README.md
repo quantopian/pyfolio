@@ -117,23 +117,6 @@ patches to the Yahoo or Google Finance API:
 - `pyfolio.utils.default_returns_func`
 - `pyfolio.utils.get_symbol_returns_from_yahoo`
 
-For alternative data sources, we suggest the following:
-
-1. Migrate your research workflow to the Quantopian Research environment,
-   where there is [free and flexible data access to over 57
-   datasets](https://www.quantopian.com/data)
-2. Make use of any remaining functional APIs supported by
-   `pandas-datareader`. These include:
-
-   - [Morningstar](https://pydata.github.io/pandas-datareader/stable/remote_data.html#remote-data-morningstar)
-   - [Quandl](https://pydata.github.io/pandas-datareader/stable/remote_data.html#remote-data-quandl)
-
-   Please note that you may need to create free accounts with these data
-   providers and receive an API key in order to access data. These API keys
-   should be set as environment variables, or passed as an argument to
-   `pandas-datareader`.
-
-
 ## Contributing
 
 If you'd like to contribute, a great place to look is the [issues marked with help-wanted](https://github.com/quantopian/pyfolio/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
