@@ -433,8 +433,8 @@ get_symbol_returns_from_yahoo = empyrical.utils.get_symbol_returns_from_yahoo
 get_treasury_yield = empyrical.utils.get_treasury_yield
 get_utc_timestamp = empyrical.utils.get_utc_timestamp
 cache_dir = empyrical.utils.cache_dir
-ensure_directory = empyrical.data_path
-data_path = empyrical.data_path
+ensure_directory = empyrical.utils.ensure_directory
+data_path = empyrical.utils.data_path
 _1_bday_ago = empyrical._1_bday_ago
 load_portfolio_risk_factors = empyrical.utils.load_portfolio_risk_factors
 
