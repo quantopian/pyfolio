@@ -24,8 +24,6 @@ import pandas as pd
 from IPython.display import display, HTML
 
 import empyrical.utils
-from os import environ
-from .deprecate import deprecated
 
 from . import pos
 from . import txn
@@ -48,15 +46,6 @@ ANNUALIZATION_FACTORS = {
     WEEKLY: WEEKS_PER_YEAR,
     MONTHLY: MONTHS_PER_YEAR
 }
-
-DATAREADER_DEPRECATION_WARNING = \
-        ("Yahoo and Google Finance have suffered large API breaks with no "
-         "stable replacement. As a result, any data reading functionality "
-         "in empyrical has been deprecated and will be removed in a future "
-         "version."
-         ""
-         "Please use empyrical in the Quantopian Research environment, or "
-         "supply your own data. See README.md for more details.")
 
 COLORMAP = 'Paired'
 COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231',
