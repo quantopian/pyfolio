@@ -501,7 +501,8 @@ def plot_perf_stats(returns, factor_returns, ax=None):
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.Series
-        Daily noncumulative returns of the benchmark.
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
          - This is in the same style as returns.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -554,7 +555,8 @@ def show_perf_stats(returns, factor_returns=None, positions=None,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.Series, optional
-        Daily noncumulative returns of the benchmark.
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
          - This is in the same style as returns.
     positions : pd.DataFrame, optional
         Daily net position values.
@@ -731,7 +733,8 @@ def plot_rolling_returns(returns,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.Series, optional
-        Daily noncumulative returns of a risk factor.
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
          - This is in the same style as returns.
     live_start_date : datetime, optional
         The date when the strategy began live trading, after
@@ -844,7 +847,8 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.Series
-        Daily noncumulative returns of the benchmark.
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
          - This is in the same style as returns.
     legend_loc : matplotlib.loc, optional
         The location of the legend on the plot.
@@ -896,7 +900,9 @@ def plot_rolling_volatility(returns, factor_returns=None,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.Series, optional
-        Daily noncumulative returns of the benchmark.
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
+         - This is in the same style as returns.
     rolling_window : int, optional
         The days window over which to compute the volatility.
     legend_loc : matplotlib.loc, optional

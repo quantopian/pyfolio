@@ -301,8 +301,8 @@ def alpha_beta(returns, factor_returns):
         Daily returns of the strategy, noncumulative.
         - See full explanation in :func:`~pyfolio.timeseries.cum_returns`.
     factor_returns : pd.Series
-         Daily noncumulative returns of the factor to which beta is
-         computed. Usually a benchmark such as the market.
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
          - This is in the same style as returns.
 
     Returns
@@ -327,8 +327,8 @@ def alpha(returns, factor_returns):
         Daily returns of the strategy, noncumulative.
         - See full explanation in :func:`~pyfolio.timeseries.cum_returns`.
     factor_returns : pd.Series
-         Daily noncumulative returns of the factor to which beta is
-         computed. Usually a benchmark such as the market.
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
          - This is in the same style as returns.
 
     Returns
@@ -351,8 +351,8 @@ def beta(returns, factor_returns):
         Daily returns of the strategy, noncumulative.
         - See full explanation in :func:`~pyfolio.timeseries.cum_returns`.
     factor_returns : pd.Series
-         Daily noncumulative returns of the factor to which beta is
-         computed. Usually a benchmark such as the market.
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
          - This is in the same style as returns.
 
     Returns
@@ -515,9 +515,10 @@ def rolling_beta(returns, factor_returns,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.Series or pd.DataFrame
-        Daily noncumulative returns of the benchmark.
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
+         - If DataFrame is passed, computes rolling beta for each column.
          - This is in the same style as returns.
-        If DataFrame is passed, computes rolling beta for each column.
     rolling_window : int, optional
         The size of the rolling window, in days, over which to compute
         beta (default 6 months).
@@ -561,7 +562,10 @@ def rolling_regression(returns, factor_returns,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.DataFrame
-        Data set containing the risk factors.
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
+         - Computes rolling beta for each column.
+         - This is in the same style as returns.
     rolling_window : int, optional
         The days window over which to compute the beta. Defaults to 6 months.
     nan_threshold : float, optional
@@ -696,10 +700,11 @@ def perf_stats(returns, factor_returns=None, positions=None,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    factor_returns : pd.Series (optional)
-        Daily noncumulative returns of the benchmark.
+    factor_returns : pd.Series, optional
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
          - This is in the same style as returns.
-        If None, do not compute alpha, beta, and information ratio.
+         - If None, do not compute alpha, beta, and information ratio.
     positions : pd.DataFrame
         Daily net position values.
          - See full explanation in tears.create_full_tear_sheet.
@@ -743,10 +748,11 @@ def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    factor_returns : pd.Series (optional)
-        Daily noncumulative returns of the benchmark.
+    factor_returns : pd.Series, optional
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
          - This is in the same style as returns.
-        If None, do not compute alpha, beta, and information ratio.
+         - If None, do not compute alpha, beta, and information ratio.
     return_stats : boolean (optional)
         If True, returns a DataFrame of mean, median, 5 and 95 percentiles
         for each perf metric.
@@ -801,10 +807,11 @@ def calc_bootstrap(func, returns, *args, **kwargs):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    factor_returns : pd.Series (optional)
-        Daily noncumulative returns of the benchmark.
+    factor_returns : pd.Series, optional
+        Daily noncumulative returns of the benchmark factor to which betas are
+        computed. Usually a benchmark such as market returns.
          - This is in the same style as returns.
-    n_samples : int (optional)
+    n_samples : int, optional
         Number of bootstrap samples to draw. Default is 1000.
         Increasing this will lead to more stable / accurate estimates.
 
