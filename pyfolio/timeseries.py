@@ -551,7 +551,7 @@ def rolling_regression(returns, factor_returns,
                        rolling_window=APPROX_BDAYS_PER_MONTH * 6,
                        nan_threshold=0.1):
     """
-    Computes rolling single factor betas using a multivariate linear regression
+    Computes rolling factor betas using a multivariate linear regression
     (separate linear regressions is problematic because the factors may be
     confounded).
 
