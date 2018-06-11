@@ -194,7 +194,7 @@ def plot_rolling_fama_french(returns,
 
     ax.axhline(0.0, color='black')
     ax.legend(['Small cap (SMB)',
-               'High growth (HML)',
+               'Value (HML)',
                'Momentum (UMD)'],
               loc=legend_loc, frameon=True, framealpha=0.5)
 
