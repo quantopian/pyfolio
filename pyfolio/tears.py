@@ -342,11 +342,8 @@ def create_simple_tear_sheet(returns,
     if benchmark_rets is not None:
         vertical_sections += 1
 
-    # If benchmark has been passed, and the strategy's history is longer than
-    # the benchmark's, limit strategy returns.
-    if (benchmark_rets is not None
-            and returns.index[0] < benchmark_rets.index[0]):
-        returns = returns[returns.index > benchmark_rets.index[0]]
+    if benchmark_rets is not None:
+        returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
     plotting.show_perf_stats(returns,
                              benchmark_rets,
@@ -485,11 +482,8 @@ def create_returns_tear_sheet(returns, positions=None,
         If True, returns the figure that was plotted on.
     """
 
-    # If benchmark has been passed, and the strategy's history is longer than
-    # the benchmark's, limit strategy returns.
-    if (benchmark_rets is not None
-            and returns.index[0] < benchmark_rets.index[0]):
-        returns = returns[returns.index > benchmark_rets.index[0]]
+    if benchmark_rets is not None:
+        returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
     plotting.show_perf_stats(returns, benchmark_rets,
                              positions=positions,
@@ -942,10 +936,8 @@ def create_interesting_times_tear_sheet(
                       name='Stress Events',
                       float_format='{0:.2f}%'.format)
 
-    # If benchmark has been passed, and the strategy's history is longer than
-    # the benchmark's, limit strategy returns.
-    if returns.index[0] < benchmark_rets.index[0]:
-        returns = returns[returns.index > benchmark_rets.index[0]]
+    if benchmark_rets is not None:
+        returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
     bmark_interesting = timeseries.extract_interesting_date_ranges(
         benchmark_rets)

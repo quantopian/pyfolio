@@ -374,6 +374,34 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
     return corrected_positions
 
 
+def clip_returns_to_benchmark(rets, benchmark_rets):
+    """
+    If the returns is longer than the benchmark's, limit strategy returns.
+
+    Parameters
+    ----------
+    rets : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See pf.tears.create_full_tear_sheet for more details
+
+    benchmark_rets : pd.Series
+        Daily returns of the benchmark, noncumulative.
+
+    Returns
+    -------
+    clipped_rets : pd.Series
+        Daily noncumulative returns with index clipped to match that of
+        benchmark returns.
+    """
+
+    if rets.index[0] < benchmark_rets.index[0]:
+        clipped_rets = rets[rets.index > benchmark_rets.index[0]]
+    else:
+        clipped_rets = rets
+
+    return clipped_rets
+
+
 def to_utc(df):
     """
     For use in tests; applied UTC timestamp to DataFrame.
