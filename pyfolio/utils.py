@@ -435,7 +435,7 @@ get_utc_timestamp = empyrical.utils.get_utc_timestamp
 cache_dir = empyrical.utils.cache_dir
 ensure_directory = empyrical.utils.ensure_directory
 data_path = empyrical.utils.data_path
-_1_bday_ago = empyrical._1_bday_ago
+_1_bday_ago = empyrical.utils._1_bday_ago
 load_portfolio_risk_factors = empyrical.utils.load_portfolio_risk_factors
 
 
