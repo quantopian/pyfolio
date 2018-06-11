@@ -500,8 +500,9 @@ def plot_perf_stats(returns, factor_returns, ax=None):
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
-    factor_returns : pd.DataFrame
-        Data set containing the risk factors.
+    factor_returns : pd.Series
+        Daily noncumulative returns of the benchmark.
+         - This is in the same style as returns.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
 
