@@ -376,7 +376,8 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
 
 def clip_returns_to_benchmark(rets, benchmark_rets):
     """
-    If the returns is longer than the benchmark's, limit strategy returns.
+    Drop entries from rets so that the start and end dates of rets match those
+    of benchmark_rets.
 
     Parameters
     ----------
@@ -394,8 +395,9 @@ def clip_returns_to_benchmark(rets, benchmark_rets):
         benchmark returns.
     """
 
-    if rets.index[0] < benchmark_rets.index[0]:
-        clipped_rets = rets[rets.index > benchmark_rets.index[0]]
+    if (rets.index[0] < benchmark_rets.index[0]) \
+            or (rets.index[-1] > benchmark_rets.index[-1]):
+        clipped_rets = rets[benchmark_rets.index]
     else:
         clipped_rets = rets
 
