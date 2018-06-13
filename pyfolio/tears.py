@@ -328,6 +328,8 @@ def create_simple_tear_sheet(returns,
         - See full explanation in txn.get_turnover.
     header_rows : dict or OrderedDict, optional
         Extra rows to display at the top of the perf stats table.
+    set_context : boolean, optional
+        If True, set default plotting style context.
     """
 
     positions = utils.check_intraday(estimate_intraday, returns,
