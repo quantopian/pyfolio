@@ -118,7 +118,6 @@ class PositionsTestCase(TestCase):
     @cleanup
     def test_create_interesting_times_tear_sheet_breakdown(self,
                                                            kwargs):
-        # FIXME needs benchmark_rets
         create_interesting_times_tear_sheet(self.test_returns,
                                             self.test_returns,
                                             **kwargs
