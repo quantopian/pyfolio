@@ -923,7 +923,10 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
 @plotting.customize
 def create_interesting_times_tear_sheet(
-        returns, benchmark_rets=utils.NOT_PASSED_SENTINEL, legend_loc='best', return_fig=False):
+        returns,
+        benchmark_rets=utils.NOT_PASSED_SENTINEL,
+        legend_loc='best',
+        return_fig=False):
     """
     Generate a number of returns plots around interesting points in time,
     like the flash crash and 9/11.
