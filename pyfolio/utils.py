@@ -425,21 +425,9 @@ def to_series(df):
     return df[df.columns[0]]
 
 
-# The following functions are all simply passthroughs to empyrical. With the
-# exception of get_utc_timestamp, they are all deprecated and will be removed
-# in a later version.
+# This functions is simply a passthrough to empyrical, but is
+# required by the register_returns_func and get_symbol_rets.
 default_returns_func = empyrical.utils.default_returns_func
-get_fama_french = empyrical.utils.get_fama_french
-get_returns_cached = empyrical.utils.get_returns_cached
-get_symbol_returns_from_yahoo = empyrical.utils.get_symbol_returns_from_yahoo
-get_treasury_yield = empyrical.utils.get_treasury_yield
-get_utc_timestamp = empyrical.utils.get_utc_timestamp
-cache_dir = empyrical.utils.cache_dir
-ensure_directory = empyrical.utils.ensure_directory
-data_path = empyrical.utils.data_path
-_1_bday_ago = empyrical.utils._1_bday_ago
-load_portfolio_risk_factors = empyrical.utils.load_portfolio_risk_factors
-
 
 # Settings dict to store functions/values that may
 # need to be overridden depending on the users environment
