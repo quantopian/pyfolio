@@ -84,39 +84,6 @@ our [Gitter channel](https://gitter.im/quantopian/pyfolio).
 
 Please [open an issue](https://github.com/quantopian/pyfolio/issues/new) for support.
 
-### Deprecated: Data Reading via `pandas-datareader`
-
-As of early 2018, Yahoo Finance has suffered major API breaks with no stable
-replacement, and the Google Finance API has not been stable since late 2017
-[(source)](https://github.com/pydata/pandas-datareader/blob/da18fbd7621d473828d7fa81dfa5e0f9516b6793/README.rst).
-In recent months it has become a greater and greater strain on the `empyrical`
-and `pyfolio` development teams to maintain support for fetching data through
-`pandas-datareader` and other third-party libraries, as these APIs are known to
-be unstable.
-
-As a result, all `empyrical` (and therefore `pyfolio`, which is a downstream
-dependency) support for data reading functionality has been deprecated and will
-be removed in a future version.
-
-Users should beware that the following functions are now deprecated:
-
-- `pyfolio.utils.default_returns_func`
-- `pyfolio.utils.get_fama_french`
-- `pyfolio.utils.get_returns_cached`
-- `pyfolio.utils.get_symbol_returns_from_yahoo`
-- `pyfolio.utils.get_treasury_yield`
-- `pyfolio.utils.cache_dir`
-- `pyfolio.utils.ensure_directory`
-- `pyfolio.utils.data_path`
-- `pyfolio.utils._1_bday_ago`
-- `pyfolio.utils.load_portfolio_risk_factors`
-
-Users should expect regular failures from the following functions, pending
-patches to the Yahoo or Google Finance API:
-
-- `pyfolio.utils.default_returns_func`
-- `pyfolio.utils.get_symbol_returns_from_yahoo`
-
 ## Contributing
 
 If you'd like to contribute, a great place to look is the [issues marked with help-wanted](https://github.com/quantopian/pyfolio/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
