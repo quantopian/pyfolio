@@ -54,6 +54,13 @@ FACTOR_PARTITIONS = {
                'technology']
 }
 
+BENCHMARK_RETS_WARNING = ('The latest version of pyfolio requires users to '
+                          'supply benchmark returns. Your current tearsheets '
+                          'will not include plots and analyses that require a '
+                          'benchmark. In the future, please pass '
+                          'benchmark_rets, or pass None to silence this '
+                          'warning.')
+
 
 def timer(msg_body, previous_time):
     current_time = time()
@@ -68,7 +75,7 @@ def create_full_tear_sheet(returns,
                            positions=None,
                            transactions=None,
                            market_data=None,
-                           benchmark_rets=None,
+                           benchmark_rets=utils.NOT_PASSED_SENTINEL,
                            slippage=None,
                            live_start_date=None,
                            sector_mappings=None,
@@ -188,6 +195,8 @@ def create_full_tear_sheet(returns,
         factor returns and risk exposures plots
         - See create_perf_attrib_tear_sheet().
     """
+    if benchmark_rets == utils.NOT_PASSED_SENTINEL:
+        warnings.warn(BENCHMARK_RETS_WARNING)
 
     if (unadjusted_returns is None) and (slippage is not None) and\
        (transactions is not None):
@@ -262,7 +271,7 @@ def create_full_tear_sheet(returns,
 def create_simple_tear_sheet(returns,
                              positions=None,
                              transactions=None,
-                             benchmark_rets=None,
+                             benchmark_rets=utils.NOT_PASSED_SENTINEL,
                              slippage=None,
                              estimate_intraday='infer',
                              live_start_date=None,
@@ -334,6 +343,9 @@ def create_simple_tear_sheet(returns,
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
+
+    if benchmark_rets == utils.NOT_PASSED_SENTINEL:
+        warnings.warn(BENCHMARK_RETS_WARNING)
 
     if (slippage is not None) and (transactions is not None):
         returns = txn.adjust_returns_for_slippage(returns, positions,
@@ -443,7 +455,7 @@ def create_returns_tear_sheet(returns, positions=None,
                               transactions=None,
                               live_start_date=None,
                               cone_std=(1.0, 1.5, 2.0),
-                              benchmark_rets=None,
+                              benchmark_rets=utils.NOT_PASSED_SENTINEL,
                               bootstrap=False,
                               turnover_denom='AGB',
                               header_rows=None,
@@ -493,7 +505,10 @@ def create_returns_tear_sheet(returns, positions=None,
         If True, returns the figure that was plotted on.
     """
 
-    if benchmark_rets is not None:
+    if benchmark_rets == utils.NOT_PASSED_SENTINEL:
+        warnings.warn(BENCHMARK_RETS_WARNING)
+
+    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
         returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
     plotting.show_perf_stats(returns, benchmark_rets,
@@ -512,7 +527,7 @@ def create_returns_tear_sheet(returns, positions=None,
         vertical_sections += 1
         live_start_date = ep.utils.get_utc_timestamp(live_start_date)
 
-    if benchmark_rets is not None:
+    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
         vertical_sections += 1
 
     if bootstrap:
@@ -532,7 +547,7 @@ def create_returns_tear_sheet(returns, positions=None,
     ax_returns = plt.subplot(gs[i, :],
                              sharex=ax_rolling_returns)
     i += 1
-    if benchmark_rets is not None:
+    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
         ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
         i += 1
     ax_rolling_volatility = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
@@ -588,7 +603,7 @@ def create_returns_tear_sheet(returns, positions=None,
     ax_returns.set_title(
         'Returns')
 
-    if benchmark_rets is not None:
+    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
         plotting.plot_rolling_beta(
             returns, benchmark_rets, ax=ax_rolling_beta)
 
@@ -614,7 +629,8 @@ def create_returns_tear_sheet(returns, positions=None,
         live_start_date=live_start_date,
         ax=ax_return_quantiles)
 
-    if bootstrap and benchmark_rets is not None:
+    if ((bootstrap is not None)
+            and (benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL))):
         ax_bootstrap = plt.subplot(gs[i, :])
         plotting.plot_perf_stats(returns, benchmark_rets,
                                  ax=ax_bootstrap)
@@ -907,7 +923,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
 @plotting.customize
 def create_interesting_times_tear_sheet(
-        returns, benchmark_rets=None, legend_loc='best', return_fig=False):
+        returns, benchmark_rets=utils.NOT_PASSED_SENTINEL, legend_loc='best', return_fig=False):
     """
     Generate a number of returns plots around interesting points in time,
     like the flash crash and 9/11.
@@ -934,6 +950,9 @@ def create_interesting_times_tear_sheet(
         If True, returns the figure that was plotted on.
     """
 
+    if benchmark_rets == utils.NOT_PASSED_SENTINEL:
+        warnings.warn(BENCHMARK_RETS_WARNING)
+
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
 
     if not rets_interesting:
@@ -947,7 +966,7 @@ def create_interesting_times_tear_sheet(
                       name='Stress Events',
                       float_format='{0:.2f}%'.format)
 
-    if benchmark_rets is not None:
+    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
         returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
     bmark_interesting = timeseries.extract_interesting_date_ranges(
@@ -966,7 +985,7 @@ def create_interesting_times_tear_sheet(
         ep.cum_returns(rets_period).plot(
             ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
 
-        if benchmark_rets is not None:
+        if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
             ep.cum_returns(bmark_interesting[name]).plot(
                 ax=ax, color='gray', label='benchmark', alpha=0.6)
             ax.legend(['Algo',
@@ -1094,7 +1113,8 @@ def create_capacity_tear_sheet(returns, positions, transactions,
 
 
 @plotting.customize
-def create_bayesian_tear_sheet(returns, benchmark_rets=None,
+def create_bayesian_tear_sheet(returns,
+                               benchmark_rets=utils.NOT_PASSED_SENTINEL,
                                live_start_date=None, samples=2000,
                                return_fig=False, stoch_vol=False,
                                progressbar=True):
@@ -1228,7 +1248,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     previous_time = timer("plotting Bayesian VaRs estimate", previous_time)
 
     # Run alpha beta model
-    if benchmark_rets is not None:
+    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
         print("\nRunning alpha beta model")
         benchmark_rets = benchmark_rets.loc[df_train.index]
         trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
