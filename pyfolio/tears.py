@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Quantopian, Inc.
+# Copyright 2018 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -189,9 +189,6 @@ def create_full_tear_sheet(returns,
         - See create_perf_attrib_tear_sheet().
     """
 
-    if benchmark_rets is None:
-        benchmark_rets = utils.get_symbol_rets('SPY')
-
     if (unadjusted_returns is None) and (slippage is not None) and\
        (transactions is not None):
         unadjusted_returns = returns.copy()
@@ -315,7 +312,7 @@ def create_simple_tear_sheet(returns,
             2004-01-09 12:18:01    122      83.10    'MSFT'
             2004-01-13 14:12:23    -75      340.43   'AAPL'
     benchmark_rets : pd.Series, optional
-        Daily returns of the benchmark, noncumulative. Defaults to SPY.
+        Daily returns of the benchmark, noncumulative.
     slippage : int/float, optional
         Basis points of slippage to apply to returns before generating
         tearsheet stats and plots.
@@ -338,22 +335,26 @@ def create_simple_tear_sheet(returns,
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
 
-    if benchmark_rets is None:
-        benchmark_rets = utils.get_symbol_rets('SPY')
-
     if (slippage is not None) and (transactions is not None):
         returns = txn.adjust_returns_for_slippage(returns, positions,
                                                   transactions, slippage)
 
-    if (positions is not None) and (transactions is not None):
-        vertical_sections = 11
-    elif positions is not None:
-        vertical_sections = 9
-    else:
-        vertical_sections = 5
+    always_sections = 4
+    positions_sections = 4 if positions is not None else 0
+    transactions_sections = 2 if transactions is not None else 0
+    live_sections = 1 if live_start_date is not None else 0
+    benchmark_sections = 1 if benchmark_rets is not None else 0
 
-    # Plot simple returns tear sheet
-    returns = returns[returns.index > benchmark_rets.index[0]]
+    vertical_sections = sum([
+        always_sections,
+        positions_sections,
+        transactions_sections,
+        live_sections,
+        benchmark_sections,
+    ])
+
+    if live_start_date is not None:
+        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
 
     plotting.show_perf_stats(returns,
                              benchmark_rets,
@@ -363,20 +364,14 @@ def create_simple_tear_sheet(returns,
                              live_start_date=live_start_date,
                              header_rows=header_rows)
 
-    if returns.index[0] < benchmark_rets.index[0]:
-        returns = returns[returns.index > benchmark_rets.index[0]]
-
-    if live_start_date is not None:
-        vertical_sections += 1
-        live_start_date = ep.utils.get_utc_timestamp(live_start_date)
-
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
 
     ax_rolling_returns = plt.subplot(gs[:2, :])
     i = 2
-    ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
-    i += 1
+    if benchmark_rets is not None:
+        ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+        i += 1
     ax_rolling_sharpe = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
     ax_underwater = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
@@ -389,7 +384,8 @@ def create_simple_tear_sheet(returns,
                                   ax=ax_rolling_returns)
     ax_rolling_returns.set_title('Cumulative returns')
 
-    plotting.plot_rolling_beta(returns, benchmark_rets, ax=ax_rolling_beta)
+    if benchmark_rets is not None:
+        plotting.plot_rolling_beta(returns, benchmark_rets, ax=ax_rolling_beta)
 
     plotting.plot_rolling_sharpe(returns, ax=ax_rolling_sharpe)
 
@@ -497,10 +493,8 @@ def create_returns_tear_sheet(returns, positions=None,
         If True, returns the figure that was plotted on.
     """
 
-    if benchmark_rets is None:
-        benchmark_rets = utils.get_symbol_rets('SPY')
-
-    returns = returns[returns.index > benchmark_rets.index[0]]
+    if benchmark_rets is not None:
+        returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
     plotting.show_perf_stats(returns, benchmark_rets,
                              positions=positions,
@@ -512,15 +506,14 @@ def create_returns_tear_sheet(returns, positions=None,
 
     plotting.show_worst_drawdown_periods(returns)
 
-    # If the strategy's history is longer than the benchmark's, limit strategy
-    if returns.index[0] < benchmark_rets.index[0]:
-        returns = returns[returns.index > benchmark_rets.index[0]]
-
-    vertical_sections = 13
+    vertical_sections = 11
 
     if live_start_date is not None:
         vertical_sections += 1
         live_start_date = ep.utils.get_utc_timestamp(live_start_date)
+
+    if benchmark_rets is not None:
+        vertical_sections += 1
 
     if bootstrap:
         vertical_sections += 1
@@ -539,13 +532,12 @@ def create_returns_tear_sheet(returns, positions=None,
     ax_returns = plt.subplot(gs[i, :],
                              sharex=ax_rolling_returns)
     i += 1
-    ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
-    i += 1
+    if benchmark_rets is not None:
+        ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+        i += 1
     ax_rolling_volatility = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
     ax_rolling_sharpe = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
-    i += 1
-    ax_rolling_risk = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
     ax_drawdown = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
@@ -572,7 +564,7 @@ def create_returns_tear_sheet(returns, positions=None,
         factor_returns=benchmark_rets,
         live_start_date=live_start_date,
         cone_std=None,
-        volatility_match=True,
+        volatility_match=(benchmark_rets is not None),
         legend_loc=None,
         ax=ax_rolling_returns_vol_match)
     ax_rolling_returns_vol_match.set_title(
@@ -596,17 +588,15 @@ def create_returns_tear_sheet(returns, positions=None,
     ax_returns.set_title(
         'Returns')
 
-    plotting.plot_rolling_beta(
-        returns, benchmark_rets, ax=ax_rolling_beta)
+    if benchmark_rets is not None:
+        plotting.plot_rolling_beta(
+            returns, benchmark_rets, ax=ax_rolling_beta)
 
     plotting.plot_rolling_volatility(
         returns, factor_returns=benchmark_rets, ax=ax_rolling_volatility)
 
     plotting.plot_rolling_sharpe(
         returns, ax=ax_rolling_sharpe)
-
-    plotting.plot_rolling_fama_french(
-        returns, ax=ax_rolling_risk)
 
     # Drawdowns
     plotting.plot_drawdown_periods(
@@ -624,10 +614,12 @@ def create_returns_tear_sheet(returns, positions=None,
         live_start_date=live_start_date,
         ax=ax_return_quantiles)
 
-    if bootstrap:
+    if bootstrap and benchmark_rets is not None:
         ax_bootstrap = plt.subplot(gs[i, :])
         plotting.plot_perf_stats(returns, benchmark_rets,
                                  ax=ax_bootstrap)
+    elif bootstrap:
+        raise ValueError('bootstrap requires passing of benchmark_rets.')
 
     for ax in fig.axes:
         plt.setp(ax.get_xticklabels(), visible=True)
@@ -925,12 +917,15 @@ def create_interesting_times_tear_sheet(
     bubble burst, EZB IR, Great Recession (August 2007, March and September
     of 2008, Q1 & Q2 2009), flash crash, April and October 2014.
 
+    benchmark_rets must be passed, as it is meaningless to analyze performance
+    during interesting times without some benchmark to refer to.
+
     Parameters
     ----------
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in create_full_tear_sheet.
-    benchmark_rets : pd.Series, optional
+    benchmark_rets : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
     legend_loc : plt.legend_loc, optional
@@ -941,7 +936,7 @@ def create_interesting_times_tear_sheet(
 
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
 
-    if len(rets_interesting) == 0:
+    if not rets_interesting:
         warnings.warn('Passed returns do not overlap with any'
                       'interesting times.', UserWarning)
         return
@@ -952,12 +947,8 @@ def create_interesting_times_tear_sheet(
                       name='Stress Events',
                       float_format='{0:.2f}%'.format)
 
-    if benchmark_rets is None:
-        benchmark_rets = utils.get_symbol_rets('SPY')
-        # If the strategy's history is longer than the benchmark's, limit
-        # strategy
-        if returns.index[0] < benchmark_rets.index[0]:
-            returns = returns[returns.index > benchmark_rets.index[0]]
+    if benchmark_rets is not None:
+        returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
     bmark_interesting = timeseries.extract_interesting_date_ranges(
         benchmark_rets)
@@ -969,16 +960,22 @@ def create_interesting_times_tear_sheet(
     gs = gridspec.GridSpec(num_rows, 2, wspace=0.5, hspace=0.5)
 
     for i, (name, rets_period) in enumerate(rets_interesting.items()):
-
         # i=0 -> 0, i=1 -> 0, i=2 -> 1 ;; i=0 -> 0, i=1 -> 1, i=2 -> 0
         ax = plt.subplot(gs[int(i / 2.0), i % 2])
+
         ep.cum_returns(rets_period).plot(
             ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
-        ep.cum_returns(bmark_interesting[name]).plot(
-            ax=ax, color='gray', label='SPY', alpha=0.6)
-        ax.legend(['Algo',
-                   'SPY'],
-                  loc=legend_loc, frameon=True, framealpha=0.5)
+
+        if benchmark_rets is not None:
+            ep.cum_returns(bmark_interesting[name]).plot(
+                ax=ax, color='gray', label='benchmark', alpha=0.6)
+            ax.legend(['Algo',
+                       'benchmark'],
+                      loc=legend_loc, frameon=True, framealpha=0.5)
+        else:
+            ax.legend(['Algo'],
+                      loc=legend_loc, frameon=True, framealpha=0.5)
+
         ax.set_title(name)
         ax.set_ylabel('Returns')
         ax.set_xlabel('')
@@ -1114,7 +1111,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     returns : pd.Series
         Daily returns of the strategy, noncumulative.
          - See full explanation in create_full_tear_sheet.
-    benchmark_rets : pd.Series or pd.DataFrame, optional
+    benchmark_rets : pd.Series, optional
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
     live_start_date : datetime, optional
@@ -1141,21 +1138,6 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
         raise NotImplementedError(
             'Bayesian tear sheet requires setting of live_start_date'
         )
-
-    # start by benchmark is S&P500
-    fama_french = False
-    if benchmark_rets is None:
-        benchmark_rets = pd.DataFrame(
-            utils.get_symbol_rets('SPY',
-                                  start=returns.index[0],
-                                  end=returns.index[-1]))
-    # unless user indicates otherwise
-    elif isinstance(benchmark_rets, str) and (benchmark_rets ==
-                                              'Fama-French'):
-        fama_french = True
-        rolling_window = utils.APPROX_BDAYS_PER_MONTH * 6
-        benchmark_rets = timeseries.rolling_regression(
-            returns, rolling_window=rolling_window)
 
     live_start_date = ep.utils.get_utc_timestamp(live_start_date)
     df_train = returns.loc[returns.index < live_start_date]
@@ -1246,36 +1228,27 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     previous_time = timer("plotting Bayesian VaRs estimate", previous_time)
 
     # Run alpha beta model
-    print("\nRunning alpha beta model")
-    benchmark_rets = benchmark_rets.loc[df_train.index]
-    trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
-                                          bmark=benchmark_rets,
-                                          samples=samples,
-                                          progressbar=progressbar)
-    previous_time = timer("running alpha beta model", previous_time)
+    if benchmark_rets is not None:
+        print("\nRunning alpha beta model")
+        benchmark_rets = benchmark_rets.loc[df_train.index]
+        trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
+                                              bmark=benchmark_rets,
+                                              samples=samples,
+                                              progressbar=progressbar)
+        previous_time = timer("running alpha beta model", previous_time)
 
-    # Plot alpha and beta
-    row += 1
-    ax_alpha = plt.subplot(gs[row, 0])
-    ax_beta = plt.subplot(gs[row, 1])
-    if fama_french:
-        sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1,
-                     ax=ax_alpha)
-        betas = ['SMB', 'HML', 'UMD']
-        nbeta = trace_alpha_beta['beta'].shape[1]
-        for i in range(nbeta):
-            sns.distplot(trace_alpha_beta['beta'][100:, i], ax=ax_beta,
-                         label=betas[i])
-        plt.legend(frameon=True, framealpha=0.5)
-    else:
+        # Plot alpha and beta
+        row += 1
+        ax_alpha = plt.subplot(gs[row, 0])
+        ax_beta = plt.subplot(gs[row, 1])
         sns.distplot((1 + trace_alpha_beta['alpha'][100:])**252 - 1,
                      ax=ax_alpha)
         sns.distplot(trace_alpha_beta['beta'][100:], ax=ax_beta)
-    ax_alpha.set_xlabel('Annual Alpha')
-    ax_alpha.set_ylabel('Belief')
-    ax_beta.set_xlabel('Beta')
-    ax_beta.set_ylabel('Belief')
-    previous_time = timer("plotting alpha beta model", previous_time)
+        ax_alpha.set_xlabel('Annual Alpha')
+        ax_alpha.set_ylabel('Belief')
+        ax_beta.set_xlabel('Beta')
+        ax_beta.set_ylabel('Belief')
+        previous_time = timer("plotting alpha beta model", previous_time)
 
     if stoch_vol:
         # run stochastic volatility model

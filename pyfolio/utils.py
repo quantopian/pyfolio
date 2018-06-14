@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Quantopian, Inc.
+# Copyright 2018 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import pandas as pd
 from IPython.display import display, HTML
 
 import empyrical.utils
-from os import environ
-from .deprecate import deprecated
 
 from . import pos
 from . import txn
@@ -48,11 +46,6 @@ ANNUALIZATION_FACTORS = {
     WEEKLY: WEEKS_PER_YEAR,
     MONTHLY: MONTHS_PER_YEAR
 }
-
-DEPRECATION_WARNING = ("Data loaders have been moved to empyrical and will "
-                       "be removed from pyfolio in a future release. Please "
-                       "use e.g. empyrical.utils.get_symbol_rets() instead "
-                       "of pyfolio.utils.get_symbol_rets()")
 
 COLORMAP = 'Paired'
 COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231',
@@ -381,6 +374,36 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
     return corrected_positions
 
 
+def clip_returns_to_benchmark(rets, benchmark_rets):
+    """
+    Drop entries from rets so that the start and end dates of rets match those
+    of benchmark_rets.
+
+    Parameters
+    ----------
+    rets : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See pf.tears.create_full_tear_sheet for more details
+
+    benchmark_rets : pd.Series
+        Daily returns of the benchmark, noncumulative.
+
+    Returns
+    -------
+    clipped_rets : pd.Series
+        Daily noncumulative returns with index clipped to match that of
+        benchmark returns.
+    """
+
+    if (rets.index[0] < benchmark_rets.index[0]) \
+            or (rets.index[-1] > benchmark_rets.index[-1]):
+        clipped_rets = rets[benchmark_rets.index]
+    else:
+        clipped_rets = rets
+
+    return clipped_rets
+
+
 def to_utc(df):
     """
     For use in tests; applied UTC timestamp to DataFrame.
@@ -402,170 +425,9 @@ def to_series(df):
     return df[df.columns[0]]
 
 
-@deprecated(msg=DEPRECATION_WARNING)
-def default_returns_func(symbol, start=None, end=None):
-    """
-    Gets returns for a symbol.
-    Queries Yahoo Finance. Attempts to cache SPY.
-    Parameters
-    ----------
-    symbol : str
-        Ticker symbol, e.g. APPL.
-    start : date, optional
-        Earliest date to fetch data for.
-        Defaults to earliest date available.
-    end : date, optional
-        Latest date to fetch data for.
-        Defaults to latest date available.
-    Returns
-    -------
-    pd.Series
-        Daily returns for the symbol.
-         - See full explanation in tears.create_full_tear_sheet (returns).
-    """
-    return empyrical.utils.default_returns_func(symbol, start=None, end=None)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def get_fama_french():
-    """
-    Retrieve Fama-French factors via pandas-datareader
-    Returns
-    -------
-    pandas.DataFrame
-        Percent change of Fama-French factors
-    """
-    return empyrical.utils.get_fama_french()
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
-    """
-    Get returns from a cached file if the cache is recent enough,
-    otherwise, try to retrieve via a provided update function and
-    update the cache file.
-    Parameters
-    ----------
-    filepath : str
-        Path to cached csv file
-    update_func : function
-        Function to call in case cache is not up-to-date.
-    latest_dt : pd.Timestamp (tz=UTC)
-        Latest datetime required in csv file.
-    **kwargs : Keyword arguments
-        Optional keyword arguments will be passed to update_func()
-    Returns
-    -------
-    pandas.DataFrame
-        DataFrame containing returns
-    """
-    return empyrical.utils.get_returns_cached(filepath,
-                                              update_func,
-                                              latest_dt,
-                                              **kwargs)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def get_symbol_returns_from_yahoo(symbol, start=None, end=None):
-    """
-    Wrapper for pandas.io.data.get_data_yahoo().
-    Retrieves prices for symbol from yahoo and computes returns
-    based on adjusted closing prices.
-    Parameters
-    ----------
-    symbol : str
-        Symbol name to load, e.g. 'SPY'
-    start : pandas.Timestamp compatible, optional
-        Start date of time period to retrieve
-    end : pandas.Timestamp compatible, optional
-        End date of time period to retrieve
-    Returns
-    -------
-    pandas.DataFrame
-        Returns of symbol in requested period.
-    """
-    return get_symbol_returns_from_yahoo(symbol, start=None, end=None)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def get_treasury_yield(start=None, end=None, period='3MO'):
-    """
-    Load treasury yields from FRED.
-    Parameters
-    ----------
-    start : date, optional
-        Earliest date to fetch data for.
-        Defaults to earliest date available.
-    end : date, optional
-        Latest date to fetch data for.
-        Defaults to latest date available.
-    period : {'1MO', '3MO', '6MO', 1', '5', '10'}, optional
-        Which maturity to use.
-    Returns
-    -------
-    pd.Series
-        Annual treasury yield for every day.
-    """
-    return empyrical.utils.get_treasury_yield(start=None,
-                                              end=None,
-                                              period='3MO')
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def get_utc_timestamp(dt):
-    """
-    Returns the Timestamp/DatetimeIndex
-    with either localized or converted to UTC.
-    Parameters
-    ----------
-    dt : Timestamp/DatetimeIndex
-        the date(s) to be converted
-    Returns
-    -------
-    same type as input
-        date(s) converted to UTC
-    """
-    return empyrical.utils.get_utc_timestamp(dt)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def cache_dir(environ=environ):
-    return empyrical.utils.cache_dir(environ=environ)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def ensure_directory(path):
-    """
-    Ensure that a directory named "path" exists.
-    """
-    return empyrical.data_path(path)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def data_path(name):
-    return empyrical.data_path(name)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def _1_bday_ago():
-    return empyrical._1_bday_ago()
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
-    """
-    Load risk factors Mkt-Rf, SMB, HML, Rf, and UMD.
-    Data is stored in HDF5 file. If the data is more than 2
-    days old, redownload from Dartmouth.
-    Returns
-    -------
-    five_factors : pd.DataFrame
-        Risk factors timeseries.
-    """
-    return empyrical.utils.load_portfolio_risk_factors(filepath_prefix=None,
-                                                       start=None,
-                                                       end=None)
-
+# This functions is simply a passthrough to empyrical, but is
+# required by the register_returns_func and get_symbol_rets.
+default_returns_func = empyrical.utils.default_returns_func
 
 # Settings dict to store functions/values that may
 # need to be overridden depending on the users environment
