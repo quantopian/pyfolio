@@ -197,6 +197,7 @@ def create_full_tear_sheet(returns,
     """
     if benchmark_rets == utils.NOT_PASSED_SENTINEL:
         warnings.warn(BENCHMARK_RETS_WARNING)
+        benchmark_rets = None
 
     if (unadjusted_returns is None) and (slippage is not None) and\
        (transactions is not None):
@@ -346,6 +347,7 @@ def create_simple_tear_sheet(returns,
 
     if benchmark_rets == utils.NOT_PASSED_SENTINEL:
         warnings.warn(BENCHMARK_RETS_WARNING)
+        benchmark_rets = None
 
     if (slippage is not None) and (transactions is not None):
         returns = txn.adjust_returns_for_slippage(returns, positions,
@@ -507,6 +509,7 @@ def create_returns_tear_sheet(returns, positions=None,
 
     if benchmark_rets == utils.NOT_PASSED_SENTINEL:
         warnings.warn(BENCHMARK_RETS_WARNING)
+        benchmark_rets = None
 
     if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
         returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
@@ -955,6 +958,7 @@ def create_interesting_times_tear_sheet(
 
     if benchmark_rets == utils.NOT_PASSED_SENTINEL:
         warnings.warn(BENCHMARK_RETS_WARNING)
+        benchmark_rets = None
 
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
 
