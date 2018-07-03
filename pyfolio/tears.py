@@ -195,7 +195,8 @@ def create_full_tear_sheet(returns,
         factor returns and risk exposures plots
         - See create_perf_attrib_tear_sheet().
     """
-    if benchmark_rets == utils.NOT_PASSED_SENTINEL:
+    if (isinstance(benchmark_rets, str)
+            and benchmark_rets == utils.NOT_PASSED_SENTINEL):
         warnings.warn(BENCHMARK_RETS_WARNING)
         benchmark_rets = None
 
@@ -345,7 +346,8 @@ def create_simple_tear_sheet(returns,
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
 
-    if benchmark_rets == utils.NOT_PASSED_SENTINEL:
+    if (isinstance(benchmark_rets, str)
+            and benchmark_rets == utils.NOT_PASSED_SENTINEL):
         warnings.warn(BENCHMARK_RETS_WARNING)
         benchmark_rets = None
 
@@ -507,7 +509,8 @@ def create_returns_tear_sheet(returns, positions=None,
         If True, returns the figure that was plotted on.
     """
 
-    if benchmark_rets == utils.NOT_PASSED_SENTINEL:
+    if (isinstance(benchmark_rets, str)
+            and benchmark_rets == utils.NOT_PASSED_SENTINEL):
         warnings.warn(BENCHMARK_RETS_WARNING)
         benchmark_rets = None
 
@@ -956,7 +959,8 @@ def create_interesting_times_tear_sheet(
         If True, returns the figure that was plotted on.
     """
 
-    if benchmark_rets == utils.NOT_PASSED_SENTINEL:
+    if (isinstance(benchmark_rets, str)
+            and benchmark_rets == utils.NOT_PASSED_SENTINEL):
         warnings.warn(BENCHMARK_RETS_WARNING)
         benchmark_rets = None
 
