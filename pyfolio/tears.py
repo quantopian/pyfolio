@@ -514,7 +514,7 @@ def create_returns_tear_sheet(returns, positions=None,
         warnings.warn(BENCHMARK_RETS_WARNING)
         benchmark_rets = None
 
-    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
+    if benchmark_rets is not None:
         returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
     plotting.show_perf_stats(returns, benchmark_rets,
@@ -533,7 +533,7 @@ def create_returns_tear_sheet(returns, positions=None,
         vertical_sections += 1
         live_start_date = ep.utils.get_utc_timestamp(live_start_date)
 
-    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
+    if benchmark_rets is not None:
         vertical_sections += 1
 
     if bootstrap:
@@ -553,7 +553,7 @@ def create_returns_tear_sheet(returns, positions=None,
     ax_returns = plt.subplot(gs[i, :],
                              sharex=ax_rolling_returns)
     i += 1
-    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
+    if benchmark_rets is not None:
         ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
         i += 1
     ax_rolling_volatility = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
@@ -609,7 +609,7 @@ def create_returns_tear_sheet(returns, positions=None,
     ax_returns.set_title(
         'Returns')
 
-    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
+    if benchmark_rets is not None:
         plotting.plot_rolling_beta(
             returns, benchmark_rets, ax=ax_rolling_beta)
 
@@ -636,7 +636,7 @@ def create_returns_tear_sheet(returns, positions=None,
         ax=ax_return_quantiles)
 
     if ((bootstrap is not None)
-            and (benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL))):
+            and (benchmark_rets is not None)):
         ax_bootstrap = plt.subplot(gs[i, :])
         plotting.plot_perf_stats(returns, benchmark_rets,
                                  ax=ax_bootstrap)
@@ -977,7 +977,7 @@ def create_interesting_times_tear_sheet(
                       name='Stress Events',
                       float_format='{0:.2f}%'.format)
 
-    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
+    if benchmark_rets is not None:
         returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
     bmark_interesting = timeseries.extract_interesting_date_ranges(
@@ -996,7 +996,7 @@ def create_interesting_times_tear_sheet(
         ep.cum_returns(rets_period).plot(
             ax=ax, color='forestgreen', label='algo', alpha=0.7, lw=2)
 
-        if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
+        if benchmark_rets is not None:
             ep.cum_returns(bmark_interesting[name]).plot(
                 ax=ax, color='gray', label='benchmark', alpha=0.6)
             ax.legend(['Algo',
@@ -1157,6 +1157,10 @@ def create_bayesian_tear_sheet(returns,
     progressbar : boolean, optional
         If True, show a progress bar
     """
+    if (isinstance(benchmark_rets, str)
+            and benchmark_rets == utils.NOT_PASSED_SENTINEL):
+        warnings.warn(BENCHMARK_RETS_WARNING)
+        benchmark_rets = None
 
     if not have_bayesian:
         raise NotImplementedError(
@@ -1259,7 +1263,7 @@ def create_bayesian_tear_sheet(returns,
     previous_time = timer("plotting Bayesian VaRs estimate", previous_time)
 
     # Run alpha beta model
-    if benchmark_rets not in (None, utils.NOT_PASSED_SENTINEL):
+    if benchmark_rets is not None:
         print("\nRunning alpha beta model")
         benchmark_rets = benchmark_rets.loc[df_train.index]
         trace_alpha_beta = bayesian.run_model('alpha_beta', df_train,
