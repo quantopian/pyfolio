@@ -527,17 +527,20 @@ def create_returns_tear_sheet(returns, positions=None,
 
     plotting.show_worst_drawdown_periods(returns)
 
-    vertical_sections = 11
+    always_sections = 11
+    live_start_date_sections = 1 if (live_start_date is not None) else 0
+    benchmark_sections = 1 if (benchmark_rets is not None) else 0
+    bootstrap_sections = 1 if bootstrap else 0
+
+    vertical_sections = sum([
+        always_sections,
+        live_start_date_sections,
+        benchmark_sections,
+        bootstrap_sections
+    ])
 
     if live_start_date is not None:
-        vertical_sections += 1
         live_start_date = ep.utils.get_utc_timestamp(live_start_date)
-
-    if benchmark_rets is not None:
-        vertical_sections += 1
-
-    if bootstrap:
-        vertical_sections += 1
 
     fig = plt.figure(figsize=(14, vertical_sections * 6))
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
