@@ -555,10 +555,10 @@ def create_returns_tear_sheet(returns, positions=None,
     i += 1
     ax_returns = plt.subplot(gs[i, :],
                              sharex=ax_rolling_returns)
-    i += 1
     if benchmark_rets is not None:
-        ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
         i += 1
+        ax_rolling_beta = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
+    i += 1
     ax_rolling_volatility = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
     ax_rolling_sharpe = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
