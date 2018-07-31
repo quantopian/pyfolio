@@ -452,7 +452,9 @@ def plot_factor_contribution_to_perf(
         ['total_returns', 'common_returns'], axis='columns', errors='ignore'
     )
 
-    factors_cumulative = ep.cum_returns(factors_to_plot)
+    factors_cumulative = pd.DataFrame()
+    for factor in factors_to_plot:
+        factors_cumulative[factor] = ep.cum_returns(factors_to_plot[factor])
 
     for col in factors_cumulative:
         ax.plot(factors_cumulative[col])
