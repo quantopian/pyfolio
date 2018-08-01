@@ -27,7 +27,6 @@ import empyrical.utils
 
 from . import pos
 from . import txn
-from .deprecate import deprecated
 
 APPROX_BDAYS_PER_MONTH = 21
 APPROX_BDAYS_PER_YEAR = 252
@@ -53,11 +52,6 @@ COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231',
           '#911eb4', '#46f0f0', '#f032e6', '#d2f53c', '#fabebe',
           '#008080', '#e6beff', '#aa6e28', '#800000', '#aaffc3',
           '#808000', '#ffd8b1', '#000080', '#808080']
-
-DEPRECATION_WARNING = ('register_return_func and get_symbol_rets are '
-                       'deprecated and will be removed in a future version.')
-
-NOT_PASSED_SENTINEL = '__not_passed_by_user'
 
 
 def one_dec_places(x, pos):
@@ -442,7 +436,6 @@ SETTINGS = {
 }
 
 
-@deprecated(msg=DEPRECATION_WARNING)
 def register_return_func(func):
     """
     Registers the 'returns_func' that will be called for
@@ -466,7 +459,6 @@ def register_return_func(func):
     SETTINGS['returns_func'] = func
 
 
-@deprecated(msg=DEPRECATION_WARNING)
 def get_symbol_rets(symbol, start=None, end=None):
     """
     Calls the currently registered 'returns_func'
