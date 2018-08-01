@@ -1,7 +1,5 @@
 # What's New
 
-These are new features and improvements of note in each release.
-
 ## v0.9.0 (June 14th, 2018)
 
 ### New features
@@ -11,12 +9,16 @@ These are new features and improvements of note in each release.
    alternative data sets, `pyfolio` is now completely independent of benchmarks.
    If a benchmark is passed, all benchmark-related analyses will be performed;
    if not, they will simply be skipped. By [George Ho](https://github.com/eigenfoo)
+  - Improved implementation of `get_turnover` [PR332](https://github.com/quantopian/pyfolio/pull/432). By [Gus Gordon](https://github.com/gusgordon).
+  - Users can now pass in extra rows (as a dict or OrderedDict) to display in the perf_stats table [PR445](https://github.com/quantopian/pyfolio/pull/445). By [Gus Gordon](https://github.com/gusgordon).
+  - Experimental: performance attribution tearsheet [PR441](https://github.com/quantopian/pyfolio/pull/441), [PR433](https://github.com/quantopian/pyfolio/pull/433), [PR442](https://github.com/quantopian/pyfolio/pull/442). By [Vikram Narayan](https://github.com/vikram-narayan).
 
 ### Maintenance
 
  - Many features have been more extensively troubleshooted, maintained and
    tested. By [Ana Ruelas](https://github.com/ahgnaw) and [Vikram
    Narayan](https://github.com/vikram-narayan).
+ - Various fixes to support pandas versions >= 0.18.1 [PR443](https://github.com/quantopian/pyfolio/pull/443). By [Andrew Daniels](https://github.com/yankees714).
 
 ## v0.8.0 (Aug 23rd, 2017)
 
