@@ -77,10 +77,10 @@ def model_returns_t_alpha_beta(data, bmark, samples=2000, progressbar=True):
 
         mu_reg = alpha_reg + beta_reg * X
         pm.StudentT('returns',
-                 nu=nu + 2,
-                 mu=mu_reg,
-                 sd=sigma,
-                 observed=y)
+                    nu=nu + 2,
+                    mu=mu_reg,
+                    sd=sigma,
+                    observed=y)
         trace = pm.sample(samples, progressbar=progressbar)
 
     return model, trace
@@ -154,7 +154,7 @@ def model_returns_t(data, samples=500, progressbar=True):
         nu = pm.Exponential('nu_minus_two', 1. / 10., testval=3.)
 
         returns = pm.StudentT('returns', nu=nu + 2, mu=mu, sd=sigma,
-                           observed=data)
+                              observed=data)
         pm.Deterministic('annual volatility',
                          returns.distribution.variance**.5 * np.sqrt(252))
 
@@ -221,9 +221,9 @@ def model_best(y1, y2, samples=1000, progressbar=True):
         nu = pm.Exponential('nu_minus_two', 1 / 29., testval=4.) + 2.
 
         returns_group1 = pm.StudentT('group1', nu=nu, mu=group1_mean,
-                                  lam=group1_std**-2, observed=y1)
+                                     lam=group1_std**-2, observed=y1)
         returns_group2 = pm.StudentT('group2', nu=nu, mu=group2_mean,
-                                  lam=group2_std**-2, observed=y2)
+                                     lam=group2_std**-2, observed=y2)
 
         diff_of_means = pm.Deterministic('difference of means',
                                          group2_mean - group1_mean)
