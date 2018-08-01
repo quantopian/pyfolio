@@ -1147,12 +1147,6 @@ def show_and_plot_top_positions(returns, positions_alloc,
                           float_format='{0:.2f}%'.format,
                           name='Top 10 positions of all time')
 
-        _, _, df_top_abs_all = pos.get_top_long_short_abs(
-            positions_alloc, top=9999)
-        utils.print_table(pd.DataFrame(df_top_abs_all * 100, columns=['max']),
-                          float_format='{0:.2f}%'.format,
-                          name='All positions ever held')
-
     if show_and_plot == 0 or show_and_plot == 2:
 
         if ax is None:
