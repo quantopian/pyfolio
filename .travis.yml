@@ -26,6 +26,8 @@ before_install:
     fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
+  # required for using mkl-service
+  - export MKL_THREADING_LAYER=GNU
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
@@ -34,11 +36,11 @@ before_install:
   - cp pyfolio/tests/matplotlibrc .
 
 install:
-  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas=$PANDAS_VERSION Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib
+  - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas=$PANDAS_VERSION Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib mkl-service
   - source activate testenv
   - pip install nose_parameterized
   #- pip install --no-deps git+https://github.com/quantopian/zipline
-  - pip install -e .[bayesian]
+  - pip install -e .[bayesian] -c constraints.txt
 
 before_script:
   - "flake8 pyfolio"

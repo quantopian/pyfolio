@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Quantopian, Inc.
+# Copyright 2018 Quantopian, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,16 +17,17 @@ from __future__ import division
 
 import warnings
 
+from itertools import cycle
+from matplotlib.pyplot import cm
 import numpy as np
 import pandas as pd
 from IPython.display import display, HTML
 
 import empyrical.utils
-from os import environ
-from .deprecate import deprecated
 
 from . import pos
 from . import txn
+from .deprecate import deprecated
 
 APPROX_BDAYS_PER_MONTH = 21
 APPROX_BDAYS_PER_YEAR = 252
@@ -47,22 +48,16 @@ ANNUALIZATION_FACTORS = {
     MONTHLY: MONTHS_PER_YEAR
 }
 
-DEPRECATION_WARNING = ("Data loaders have been moved to empyrical and will "
-                       "be removed from pyfolio in a future release. Please "
-                       "use e.g. empyrical.utils.get_symbol_rets() instead "
-                       "of pyfolio.utils.get_symbol_rets()")
+COLORMAP = 'Paired'
+COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231',
+          '#911eb4', '#46f0f0', '#f032e6', '#d2f53c', '#fabebe',
+          '#008080', '#e6beff', '#aa6e28', '#800000', '#aaffc3',
+          '#808000', '#ffd8b1', '#000080', '#808080']
 
-# 31 visually distinct colors
-# http://phrogz.net/css/distinct-colors.html
-COLORS = [
-    '#f23d3d', '#828c23', '#698c83', '#594080', '#994d4d',
-    '#206380', '#dd39e6', '#cc9999', '#7c8060', '#66adcc',
-    '#6c7dd9', '#8a698c', '#7f6340', '#66cc7a', '#a3abd9',
-    '#d9c0a3', '#bfffcc', '#542699', '#b35986', '#d4e639',
-    '#b380ff', '#e0e6ac', '#a253a6', '#418020', '#ff409f',
-    '#ffa940', '#83ff40', '#3d58f2', '#e3ace6', '#d9a86c',
-    '#2db391'
-]
+DEPRECATION_WARNING = ('register_return_func and get_symbol_rets are '
+                       'deprecated and will be removed in a future version.')
+
+NOT_PASSED_SENTINEL = '__not_passed_by_user'
 
 
 def one_dec_places(x, pos):
@@ -98,7 +93,7 @@ def format_asset(asset):
 
     try:
         import zipline.assets
-    except:
+    except ImportError:
         return asset
 
     if isinstance(asset, zipline.assets.Asset):
@@ -178,7 +173,11 @@ def extract_rets_pos_txn_from_zipline(backtest):
     return returns, positions, transactions
 
 
-def print_table(table, name=None, fmt=None, header_rows=None):
+def print_table(table,
+                name=None,
+                float_format=None,
+                formatters=None,
+                header_rows=None):
     """
     Pretty print a pandas DataFrame.
 
@@ -191,23 +190,25 @@ def print_table(table, name=None, fmt=None, header_rows=None):
         Table to pretty-print.
     name : str, optional
         Table name to display in upper left corner.
-    fmt : str, optional
-        Formatter to use for displaying table elements.
-        E.g. '{0:.2f}%' for displaying 100 as '100.00%'.
-        Restores original setting after displaying.
+    float_format : function, optional
+        Formatter to use for displaying table elements, passed as the
+        `float_format` arg to pd.Dataframe.to_html.
+        E.g. `'{0:.2%}'.format` for displaying 100 as '100.00%'.
+    formatters : list or dict, optional
+        Formatters to use by column, passed as the `formatters` arg to
+        pd.Dataframe.to_html.
+    header_rows : dict, optional
+        Extra rows to display at the top of the table.
     """
 
     if isinstance(table, pd.Series):
         table = pd.DataFrame(table)
 
-    if fmt is not None:
-        prev_option = pd.get_option('display.float_format')
-        pd.set_option('display.float_format', lambda x: fmt.format(x))
-
     if name is not None:
         table.columns.name = name
 
-    html = table.to_html()
+    html = table.to_html(float_format=float_format, formatters=formatters)
+
     if header_rows is not None:
         # Count the number of columns for the text to span
         n_cols = html.split('<thead>')[1].split('</thead>')[0].count('<th>')
@@ -222,9 +223,6 @@ def print_table(table, name=None, fmt=None, header_rows=None):
         html = html.replace('<thead>', '<thead>' + rows)
 
     display(HTML(html))
-
-    if fmt is not None:
-        pd.set_option('display.float_format', prev_option)
 
 
 def standardize_data(x):
@@ -382,6 +380,36 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
     return corrected_positions
 
 
+def clip_returns_to_benchmark(rets, benchmark_rets):
+    """
+    Drop entries from rets so that the start and end dates of rets match those
+    of benchmark_rets.
+
+    Parameters
+    ----------
+    rets : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See pf.tears.create_full_tear_sheet for more details
+
+    benchmark_rets : pd.Series
+        Daily returns of the benchmark, noncumulative.
+
+    Returns
+    -------
+    clipped_rets : pd.Series
+        Daily noncumulative returns with index clipped to match that of
+        benchmark returns.
+    """
+
+    if (rets.index[0] < benchmark_rets.index[0]) \
+            or (rets.index[-1] > benchmark_rets.index[-1]):
+        clipped_rets = rets[benchmark_rets.index]
+    else:
+        clipped_rets = rets
+
+    return clipped_rets
+
+
 def to_utc(df):
     """
     For use in tests; applied UTC timestamp to DataFrame.
@@ -403,170 +431,9 @@ def to_series(df):
     return df[df.columns[0]]
 
 
-@deprecated(msg=DEPRECATION_WARNING)
-def default_returns_func(symbol, start=None, end=None):
-    """
-    Gets returns for a symbol.
-    Queries Yahoo Finance. Attempts to cache SPY.
-    Parameters
-    ----------
-    symbol : str
-        Ticker symbol, e.g. APPL.
-    start : date, optional
-        Earliest date to fetch data for.
-        Defaults to earliest date available.
-    end : date, optional
-        Latest date to fetch data for.
-        Defaults to latest date available.
-    Returns
-    -------
-    pd.Series
-        Daily returns for the symbol.
-         - See full explanation in tears.create_full_tear_sheet (returns).
-    """
-    return empyrical.utils.default_returns_func(symbol, start=None, end=None)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def get_fama_french():
-    """
-    Retrieve Fama-French factors via pandas-datareader
-    Returns
-    -------
-    pandas.DataFrame
-        Percent change of Fama-French factors
-    """
-    return empyrical.utils.get_fama_french()
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def get_returns_cached(filepath, update_func, latest_dt, **kwargs):
-    """
-    Get returns from a cached file if the cache is recent enough,
-    otherwise, try to retrieve via a provided update function and
-    update the cache file.
-    Parameters
-    ----------
-    filepath : str
-        Path to cached csv file
-    update_func : function
-        Function to call in case cache is not up-to-date.
-    latest_dt : pd.Timestamp (tz=UTC)
-        Latest datetime required in csv file.
-    **kwargs : Keyword arguments
-        Optional keyword arguments will be passed to update_func()
-    Returns
-    -------
-    pandas.DataFrame
-        DataFrame containing returns
-    """
-    return empyrical.utils.get_returns_cached(filepath,
-                                              update_func,
-                                              latest_dt,
-                                              **kwargs)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def get_symbol_returns_from_yahoo(symbol, start=None, end=None):
-    """
-    Wrapper for pandas.io.data.get_data_yahoo().
-    Retrieves prices for symbol from yahoo and computes returns
-    based on adjusted closing prices.
-    Parameters
-    ----------
-    symbol : str
-        Symbol name to load, e.g. 'SPY'
-    start : pandas.Timestamp compatible, optional
-        Start date of time period to retrieve
-    end : pandas.Timestamp compatible, optional
-        End date of time period to retrieve
-    Returns
-    -------
-    pandas.DataFrame
-        Returns of symbol in requested period.
-    """
-    return get_symbol_returns_from_yahoo(symbol, start=None, end=None)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def get_treasury_yield(start=None, end=None, period='3MO'):
-    """
-    Load treasury yields from FRED.
-    Parameters
-    ----------
-    start : date, optional
-        Earliest date to fetch data for.
-        Defaults to earliest date available.
-    end : date, optional
-        Latest date to fetch data for.
-        Defaults to latest date available.
-    period : {'1MO', '3MO', '6MO', 1', '5', '10'}, optional
-        Which maturity to use.
-    Returns
-    -------
-    pd.Series
-        Annual treasury yield for every day.
-    """
-    return empyrical.utils.get_treasury_yield(start=None,
-                                              end=None,
-                                              period='3MO')
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def get_utc_timestamp(dt):
-    """
-    Returns the Timestamp/DatetimeIndex
-    with either localized or converted to UTC.
-    Parameters
-    ----------
-    dt : Timestamp/DatetimeIndex
-        the date(s) to be converted
-    Returns
-    -------
-    same type as input
-        date(s) converted to UTC
-    """
-    return empyrical.utils.get_utc_timestamp(dt)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def cache_dir(environ=environ):
-    return empyrical.utils.cache_dir(environ=environ)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def ensure_directory(path):
-    """
-    Ensure that a directory named "path" exists.
-    """
-    return empyrical.data_path(path)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def data_path(name):
-    return empyrical.data_path(name)
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def _1_bday_ago():
-    return empyrical._1_bday_ago()
-
-
-@deprecated(msg=DEPRECATION_WARNING)
-def load_portfolio_risk_factors(filepath_prefix=None, start=None, end=None):
-    """
-    Load risk factors Mkt-Rf, SMB, HML, Rf, and UMD.
-    Data is stored in HDF5 file. If the data is more than 2
-    days old, redownload from Dartmouth.
-    Returns
-    -------
-    five_factors : pd.DataFrame
-        Risk factors timeseries.
-    """
-    return empyrical.utils.load_portfolio_risk_factors(filepath_prefix=None,
-                                                       start=None,
-                                                       end=None)
-
+# This functions is simply a passthrough to empyrical, but is
+# required by the register_returns_func and get_symbol_rets.
+default_returns_func = empyrical.utils.default_returns_func
 
 # Settings dict to store functions/values that may
 # need to be overridden depending on the users environment
@@ -575,6 +442,7 @@ SETTINGS = {
 }
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def register_return_func(func):
     """
     Registers the 'returns_func' that will be called for
@@ -598,6 +466,7 @@ def register_return_func(func):
     SETTINGS['returns_func'] = func
 
 
+@deprecated(msg=DEPRECATION_WARNING)
 def get_symbol_rets(symbol, start=None, end=None):
     """
     Calls the currently registered 'returns_func'
@@ -626,18 +495,56 @@ def get_symbol_rets(symbol, start=None, end=None):
                                     end=end)
 
 
-def set_legend_location(ax, autofmt_xdate=True):
+def configure_legend(ax, autofmt_xdate=True, change_colors=False,
+                     rotation=30, ha='right'):
     """
-    Put legend in right of plot instead of overlapping with it.
+    Format legend for perf attribution plots:
+    - put legend to the right of plot instead of overlapping with it
+    - make legend order match up with graph lines
+    - set colors according to colormap
     """
     chartBox = ax.get_position()
     ax.set_position([chartBox.x0, chartBox.y0,
                      chartBox.width * 0.75, chartBox.height])
 
-    ax.legend(frameon=True, framealpha=0.5, loc='upper left',
-              bbox_to_anchor=(1.05, 1))
+    # make legend order match graph lines
+    handles, labels = ax.get_legend_handles_labels()
+    handles_and_labels_sorted = sorted(zip(handles, labels),
+                                       key=lambda x: x[0].get_ydata()[-1],
+                                       reverse=True)
 
-    ax.set_prop_cycle('color', COLORS)
+    handles_sorted = [h[0] for h in handles_and_labels_sorted]
+    labels_sorted = [h[1] for h in handles_and_labels_sorted]
 
+    if change_colors:
+        for handle, color in zip(handles_sorted,
+                                 cycle(COLORS)):
+
+            handle.set_color(color)
+
+    ax.legend(handles=handles_sorted,
+              labels=labels_sorted,
+              frameon=True,
+              framealpha=0.5,
+              loc='upper left',
+              bbox_to_anchor=(1.05, 1),
+              fontsize='large')
+
+    # manually rotate xticklabels instead of using matplotlib's autofmt_xdate
+    # because it disables xticklabels for all but the last plot
     if autofmt_xdate:
-        ax.figure.autofmt_xdate()
+        for label in ax.get_xticklabels():
+            label.set_ha(ha)
+            label.set_rotation(rotation)
+
+
+def sample_colormap(cmap_name, n_samples):
+    """
+    Sample a colormap from matplotlib
+    """
+    colors = []
+    colormap = cm.cmap_d[cmap_name]
+    for i in np.linspace(0, 1, n_samples):
+        colors.append(colormap(i))
+
+    return colors

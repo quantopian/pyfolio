@@ -80,6 +80,9 @@ If you find a bug, feel free to [open an issue](https://github.com/quantopian/py
 You can also join our [mailing list](https://groups.google.com/forum/#!forum/pyfolio) or
 our [Gitter channel](https://gitter.im/quantopian/pyfolio).
 
+## Support
+
+Please [open an issue](https://github.com/quantopian/pyfolio/issues/new) for support.
 
 ## Contributing
 
