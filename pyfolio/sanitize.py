@@ -17,6 +17,23 @@ import numpy as np
 import pandas as pd
 
 
+def make_kind_check(python_types, numpy_kind):
+    """
+    Make a function that checks whether a scalar or array is of a given kind
+    (e.g. float, int, datetime, timedelta).
+    """
+    def check(value):
+        if hasattr(value, 'dtype'):
+            return value.dtype.kind == numpy_kind
+        return isinstance(value, python_types)
+    return check
+
+
+_is_int = make_kind_check(int, 'i')
+_is_float = make_kind_check(float, 'f')
+_is_object = make_kind_check(object, 'O')
+
+
 def sanitize(returns=None,
              positions=None,
              txns=None):
@@ -101,7 +118,7 @@ def sanitize_returns(returns):
                'Localizing to UTC...')
         warn(msg)
 
-    if sanitized_returns.dtype != float:
+    if not _is_float(sanitized_returns):
         try:
             sanitized_returns = sanitized_returns.astype(float)
             msg = '`returns` does not have float dtype. Coercing to float...'
@@ -243,9 +260,10 @@ def sanitize_txns(txns):
                .format(unexpected))
         warn(msg)
 
-    if not (sanitized_txns.loc[:, 'amount'].dtype == int
-            and sanitized_txns.loc[:, 'price'].dtype == float
-            and sanitized_txns.loc[:, 'symbol'].dtype in [str, int]):
+    dtypes = sanitized_txns.dtypes
+    if not (dtypes.loc['amount'].kind == 'i'
+            and dtypes.loc['price'].kind == 'f'
+            and dtypes.loc['symbol'].kind in ['O', 'i']):
         msg = ('`txns` columns do not have the correct dtypes. '
                '`amount` column should have int dtype, '
                '`price` column should have float dtype, and '
