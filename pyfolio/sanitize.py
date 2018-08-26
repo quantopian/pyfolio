@@ -84,8 +84,8 @@ def sanitize_returns(returns):
                    'Squeezing into a pd.Series...')
             warn(msg)
         else:
-            msg = ('`returns` is not a pd.Series, and could not be coerced '
-                   'into one.')
+            msg = ('`returns` is a {}, expected pd.Series or pd.DataFrame'
+                   .format(type(returns)))
             raise ValueError(msg)
     else:
         sanitized_returns = returns.copy()
@@ -107,8 +107,8 @@ def sanitize_returns(returns):
             msg = '`returns` does not have float dtype. Coercing to float...'
             warn(msg)
         except ValueError:
-            msg = ('`returns` does not have float dtype, and could not be '
-                   'coerced into floats.')
+            msg = ('`returns` has dtype {}, expected float (or float-like).'
+                   .format(sanitized_returns.dtype))
             raise ValueError(msg)
 
     return sanitized_returns
@@ -146,7 +146,8 @@ def sanitize_positions(positions):
         - Failing that, raise a ValueError
     """
     if not isinstance(positions, pd.DataFrame):
-        msg = '`positions` is not a pd.DataFrame.'
+        msg = ('`positions` is a {}, expected pd.DataFrame.'
+               .format(type(positions)))
         raise ValueError(msg)
 
     sanitized_positions = positions.copy()
@@ -164,7 +165,8 @@ def sanitize_positions(positions):
         warn(msg)
 
     if 'cash' not in sanitized_positions.columns:
-        msg = '`positions does not contain a `cash` column.'
+        msg = ('`positions` does not contain a `cash` column, '
+               'which is expected.')
         raise ValueError(msg)
 
     if not (positions.dtypes == np.dtype('float64')).all():
@@ -173,8 +175,8 @@ def sanitize_positions(positions):
             msg = '`positions` does not have float dtype. Coercing to float...'
             warn(msg)
         except ValueError:
-            msg = ('`positions` does not have float dtype, and could not be '
-                   'coerced into floats.')
+            msg = ('`positions` has dtype {}, expected float (or float-like).'
+                   .format(sanitized_positions.dtype))
             raise ValueError(msg)
 
     return sanitized_positions
