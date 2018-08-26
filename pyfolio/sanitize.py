@@ -77,7 +77,7 @@ def sanitize_returns(returns):
     """
     if not isinstance(returns, pd.Series):
         if isinstance(returns, pd.DataFrame) and returns.shape[1] == 1:
-            returns = returns.squeeze()
+            sanitized_returns = sanitized_returns.squeeze()
             msg = ('`returns` is a 1-dimensional pd.DataFrame. '
                    'Squeezing into a pd.Series...')
             warn(msg)
@@ -86,20 +86,22 @@ def sanitize_returns(returns):
                    'into one.')
             raise ValueError(msg)
 
-    if returns.isnull().any():
+    sanitized_returns = returns.copy()
+
+    if sanitized_returns.isnull().any():
         msg = ('`returns` has NaN values. Perhaps those are days with zero '
                'returns, or are not trading days?')
         raise ValueError(msg)
 
-    if returns.index.tz is None:
-        returns.index = returns.index.tz_localize('UTC')
+    if sanitized_returns.index.tz is None:
+        sanitized_returns.index = sanitized_returns.index.tz_localize('UTC')
         msg = ('`returns` index is not timezone-localized. '
                'Localizing to UTC...')
         warn(msg)
 
-    if returns.dtype != float:
+    if sanitized_returns.dtype != float:
         try:
-            returns = returns.astype(float)
+            sanitized_returns = sanitized_returns.astype(float)
             msg = '`returns` does not have float dtype. Coercing to float...'
             warn(msg)
         except ValueError:
@@ -107,7 +109,7 @@ def sanitize_returns(returns):
                    'coerced into floats.')
             raise ValueError(msg)
 
-    return returns
+    return sanitized_returns
 
 
 def sanitize_positions(positions):
@@ -145,25 +147,27 @@ def sanitize_positions(positions):
         msg = '`positions` is not a pd.DataFrame.'
         raise ValueError(msg)
 
-    if positions.isnull().any().any():
-        positions = positions.fillna(0)
+    sanitized_positions = positions.copy()
+
+    if sanitized_positions.isnull().any().any():
+        sanitized_positions = sanitized_positions.fillna(0)
         msg = '`positions` contains NaNs. Filling with 0...'
         warn(msg)
 
-    if positions.index.tz is None:
-        positions.index = positions.index.tz_localize('UTC')
+    if sanitized_positions.index.tz is None:
+        sanitized_positions.index = sanitized_positions.index.tz_localize('UTC')
         msg = ('`positions` index is not timezone-localized. '
                'Localizing to UTC...')
         warn(msg)
 
-    if 'cash' not in positions.columns:
+    if 'cash' not in sanitized_positions.columns:
         msg = '`positions does not contain a `cash` column.'
         raise ValueError(msg)
 
-    if not all(positions.apply(lambda col: col.dtype,
-                               axis='columns') == float):
+    if not all(sanitized_positions.apply(lambda col: col.dtype,
+                                         axis='columns') == float):
         try:
-            positions = positions.astype(float)
+            sanitized_positions = sanitized_positions.astype(float)
             msg = '`positions` does not have float dtype. Coercing to float...'
             warn(msg)
         except ValueError:
@@ -171,7 +175,7 @@ def sanitize_positions(positions):
                    'coerced into floats.')
             raise ValueError(msg)
 
-    return positions
+    return sanitized_positions
 
 
 def sanitize_txns(txns):
@@ -210,23 +214,25 @@ def sanitize_txns(txns):
         msg = '`txns` is not a pd.DataFrame.'
         raise ValueError(msg)
 
-    if txns.isnull().any().any():
+    sanitized_txns = txns.copy()
+
+    if sanitized_txns.isnull().any().any():
         msg = '`txns` contains NaNs.'
         raise ValueError(msg)
 
-    if txns.index.tz is None:
-        txns.index = txns.index.tz_localize('UTC')
+    if sanitized_txns.index.tz is None:
+        sanitized_txns.index = sanitized_txns.index.tz_localize('UTC')
         msg = ('`txns` index is not timezone-localized. '
                'Localizing to UTC...')
         warn(msg)
 
-    if not set(['amount', 'price', 'symbol']) <= set(txns.columns):
+    if not set(['amount', 'price', 'symbol']) <= set(sanitized_txns.columns):
         msg = '`txns` does not have an `amount`, `price`, or `symbol` column.'
         raise ValueError(msg)
 
-    if not (txns.loc[:, 'amount'].dtype == int
-            and txns.loc[:, 'price'].dtype == float
-            and txns.loc[:, 'symbol'].dtype in [str, int]):
+    if not (sanitized_txns.loc[:, 'amount'].dtype == int
+            and sanitized_txns.loc[:, 'price'].dtype == float
+            and sanitized_txns.loc[:, 'symbol'].dtype in [str, int]):
         msg = ('`txns` columns do not have the correct dtypes. '
                '`amount` column should have int dtype, '
                '`price` column should have float dtype, and '
@@ -234,4 +240,4 @@ def sanitize_txns(txns):
                'Attempting to create tear sheets...')
         warn(msg)
 
-    return txns
+    return sanitized_txns
