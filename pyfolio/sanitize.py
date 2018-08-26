@@ -88,7 +88,10 @@ def sanitize_returns(returns):
         - Otherwise, raise a ValueError
     - There must not be any NaNs
         - If there are, raise a ValueError
-    - Index must be timezone-localized datetimes
+    - Index must be a DatetimeIndex
+        - If not, warn and attempt to coerce to DatetimeIndex
+        - If coercion fails, raise ValueError
+    - Index must be timezone-localized
         - If not, localize to UTC and warn.
     - Returns must be floats
         - If not, coerce values to float and warn
@@ -154,7 +157,10 @@ def sanitize_positions(positions):
         - If not, raise a ValueError
     - There must not be any NaNs
         - If there are, fill NaNs with zeros and warn
-    - Index must be timezone-localized datetimes
+    - Index must be a DatetimeIndex
+        - If not, warn and attempt to coerce to DatetimeIndex
+        - If coercion fails, raise ValueError
+    - Index must be timezone-localized
         - If not, localize to UTC and warn
     - There must a column called 'cash'
         - If not, raise ValueError
@@ -173,6 +179,19 @@ def sanitize_positions(positions):
         sanitized_positions = sanitized_positions.fillna(0)
         msg = '`positions` contains NaNs. Filling with 0...'
         warn(msg)
+
+    if not isinstance(sanitized_positions.index, pd.DatetimeIndex):
+        msg = ('`positions` does not have a DatetimeIndex. '
+               'Attempting to coerce to DatetimeIndex...')
+        warn(msg)
+        try:
+            sanitized_positions.index = \
+                pd.to_datetime(sanitized_positions.index)
+        except ValueError:
+            msg = ('`positions.index` is a {}, expected DatetimeIndex '
+                   '(or DatetimeIndex-like).'
+                   .format(type(sanitized_positions.index)))
+            raise ValueError(msg)
 
     if sanitized_positions.index.tz is None:
         sanitized_positions.index = \
@@ -241,6 +260,19 @@ def sanitize_txns(txns):
     if sanitized_txns.isnull().any().any():
         msg = '`txns` contains NaNs.'
         raise ValueError(msg)
+
+    if not isinstance(sanitized_txns.index, pd.DatetimeIndex):
+        msg = ('`txns` does not have a DatetimeIndex. '
+               'Attempting to coerce to DatetimeIndex...')
+        warn(msg)
+        try:
+            sanitized_txns.index = \
+                pd.to_datetime(sanitized_txns.index)
+        except ValueError:
+            msg = ('`txns.index` is a {}, expected DatetimeIndex '
+                   '(or DatetimeIndex-like).'
+                   .format(type(sanitized_txns.index)))
+            raise ValueError(msg)
 
     if sanitized_txns.index.tz is None:
         sanitized_txns.index = sanitized_txns.index.tz_localize('UTC')
