@@ -282,8 +282,8 @@ def sanitize_txns(txns):
 
     expected = {'amount', 'price', 'symbol'}
     received = set(txns.columns)
-    missing = received - expected
-    unexpected = expected - received
+    missing = expected - received
+    unexpected = received - expected
     if missing:
         msg = '`txns` is missing the following columns: {}'.format(missing)
         raise ValueError(msg)
