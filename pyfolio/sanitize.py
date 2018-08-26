@@ -164,8 +164,7 @@ def sanitize_positions(positions):
         msg = '`positions does not contain a `cash` column.'
         raise ValueError(msg)
 
-    if not all(sanitized_positions.apply(lambda col: col.dtype,
-                                         axis='columns') == float):
+    if not (positions.dtypes == np.dtype('float64')).all():
         try:
             sanitized_positions = sanitized_positions.astype(float)
             msg = '`positions` does not have float dtype. Coercing to float...'
