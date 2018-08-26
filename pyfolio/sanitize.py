@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from warnings import warn
+import numpy as np
 import pandas as pd
 
 
@@ -20,7 +21,7 @@ def sanitize(returns=None,
              positions=None,
              txns=None):
     """
-    Sanitize inputs to pyfolio.
+    Helper function to sanitize all inputs to pyfolio.
 
     Returns
     -------
@@ -32,8 +33,9 @@ def sanitize(returns=None,
     -----
     To sanitize all inputs:
         rets, pos, txns = sanitize_inputs(rets, pos, txns)
-    To sanitize only e.g. positions:
-        _, pos, _ = sanitize_inputs(positions=pos)
+    To sanitize only e.g. returns and positions:
+        rets, pos, _ = sanitize_inputs(returns=rets, positions=pos)
+    For only one input, simply call sanitize_x() directly.
     """
     if returns is not None:
         returns = sanitize_returns(returns)
@@ -77,7 +79,7 @@ def sanitize_returns(returns):
     """
     if not isinstance(returns, pd.Series):
         if isinstance(returns, pd.DataFrame) and returns.shape[1] == 1:
-            sanitized_returns = sanitized_returns.squeeze()
+            sanitized_returns = returns.squeeze()
             msg = ('`returns` is a 1-dimensional pd.DataFrame. '
                    'Squeezing into a pd.Series...')
             warn(msg)
@@ -85,8 +87,8 @@ def sanitize_returns(returns):
             msg = ('`returns` is not a pd.Series, and could not be coerced '
                    'into one.')
             raise ValueError(msg)
-
-    sanitized_returns = returns.copy()
+    else:
+        sanitized_returns = returns.copy()
 
     if sanitized_returns.isnull().any():
         msg = ('`returns` has NaN values. Perhaps those are days with zero '
@@ -155,7 +157,8 @@ def sanitize_positions(positions):
         warn(msg)
 
     if sanitized_positions.index.tz is None:
-        sanitized_positions.index = sanitized_positions.index.tz_localize('UTC')
+        sanitized_positions.index = \
+            sanitized_positions.index.tz_localize('UTC')
         msg = ('`positions` index is not timezone-localized. '
                'Localizing to UTC...')
         warn(msg)
@@ -203,7 +206,8 @@ def sanitize_txns(txns):
     - Index must be timezone-localized datetimes
         - If not, localize to UTC and warn
     - There must be columns called 'amount', 'price', and 'symbol'
-        - If not, raise a ValueError
+        - If any are missing, raise a ValueError
+        - If there are any unexpected columns, warn
     - Amounts must be ints
     - Prices must be floats
     - Symbols must be strings or ints
@@ -225,9 +229,17 @@ def sanitize_txns(txns):
                'Localizing to UTC...')
         warn(msg)
 
-    if not set(['amount', 'price', 'symbol']) <= set(sanitized_txns.columns):
-        msg = '`txns` does not have an `amount`, `price`, or `symbol` column.'
+    expected = {'amount', 'price', 'symbol'}
+    received = set(txns.columns)
+    missing = received - expected
+    unexpected = expected - received
+    if missing:
+        msg = '`txns` is missing the following columns: {}'.format(missing)
         raise ValueError(msg)
+    if unexpected:
+        msg = ('`txns` has the following unexpected columns: {}'
+               .format(unexpected))
+        warn(msg)
 
     if not (sanitized_txns.loc[:, 'amount'].dtype == int
             and sanitized_txns.loc[:, 'price'].dtype == float

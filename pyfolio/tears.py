@@ -956,7 +956,7 @@ def create_interesting_times_tear_sheet(
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
-    returns, _, _ = sanitize.sanitize(returns=returns)
+    returns, = sanitize.sanitize_returns(returns)
 
     rets_interesting = timeseries.extract_interesting_date_ranges(returns)
 
@@ -1151,7 +1151,7 @@ def create_bayesian_tear_sheet(returns, benchmark_rets=None,
     progressbar : boolean, optional
         If True, show a progress bar
     """
-    returns, _, _ = sanitize.sanitize(returns=returns)
+    returns = sanitize.sanitize_returns(returns)
 
     if not have_bayesian:
         raise NotImplementedError(
@@ -1416,7 +1416,7 @@ def create_risk_tear_sheet(positions,
         Percentile to use when computing and plotting volume exposures.
         - Defaults to 10th percentile
     '''
-    _, positions, _ = sanitize.sanitize(positions=positions)
+    positions = sanitize.sanitize_positions(positions)
 
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
