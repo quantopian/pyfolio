@@ -966,8 +966,9 @@ def plot_rolling_sharpe(returns, factor_returns=None,
         Daily returns of the strategy, noncumulative.
          - See full explanation in tears.create_full_tear_sheet.
     factor_returns : pd.Series, optional
-        Daily noncumulative returns of the benchmark factor to which betas are
-        computed. Usually a benchmark such as market returns.
+        Daily noncumulative returns of the benchmark factor for
+        which the benchmark rolling Sharpe is computed. Usually
+        a benchmark such as market returns.
          - This is in the same style as returns.
     rolling_window : int, optional
         The days window over which to compute the sharpe ratio.
