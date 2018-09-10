@@ -950,8 +950,8 @@ def create_interesting_times_tear_sheet(
     if benchmark_rets is not None:
         returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
-    bmark_interesting = timeseries.extract_interesting_date_ranges(
-        benchmark_rets)
+        bmark_interesting = timeseries.extract_interesting_date_ranges(
+            benchmark_rets)
 
     num_plots = len(rets_interesting)
     # 2 plots, 1 row; 3 plots, 2 rows; 4 plots, 2 rows; etc.
