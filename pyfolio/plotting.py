@@ -1186,7 +1186,7 @@ def show_and_plot_top_positions(returns, positions_alloc,
             ax.legend(loc=legend_loc)
 
         ax.set_xlim((returns.index[0], returns.index[-1]))
-        ax.set_ylabel('Exposure by stock')
+        ax.set_ylabel('Exposure by holding')
 
         if hide_positions:
             ax.legend_.remove()
