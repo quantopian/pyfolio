@@ -25,7 +25,7 @@ PERIODS = OrderedDict()
 PERIODS['Dotcom'] = (pd.Timestamp('20000310'), pd.Timestamp('20000910'))
 
 # Lehmann Brothers
-PERIODS['Lehmann'] = (pd.Timestamp('20080801'), pd.Timestamp('20081001'))
+PERIODS['Lehman'] = (pd.Timestamp('20080801'), pd.Timestamp('20081001'))
 
 # 9/11
 PERIODS['9/11'] = (pd.Timestamp('20010911'), pd.Timestamp('20011011'))

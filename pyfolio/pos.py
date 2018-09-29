@@ -18,6 +18,13 @@ import pandas as pd
 import numpy as np
 import warnings
 
+try:
+    from zipline.assets import Equity, Future
+    ZIPLINE = True
+except:
+    ZIPLINE = False
+    warnings.warn('Module "zipline.assets" not found; mutltipliers will not be applied to position notionals.')
+
 
 def get_percent_alloc(values):
     """
@@ -126,12 +133,18 @@ def extract_pos(positions, cash):
 
     positions = positions.copy()
     positions['values'] = positions.amount * positions.last_sale_price
+
     cash.name = 'cash'
 
     values = positions.reset_index().pivot_table(index='index',
                                                  columns='sid',
                                                  values='values')
 
+    if ZIPLINE:
+        for asset in values.columns:
+            if type(asset) in [Equity, Future]:
+                values[asset] = values[asset]*asset.price_multiplier
+    
     values = values.join(cash).fillna(0)
 
     # NOTE: Set name of DataFrame.columns to sid, to match the behavior
