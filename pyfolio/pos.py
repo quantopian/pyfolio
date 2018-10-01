@@ -21,9 +21,12 @@ import warnings
 try:
     from zipline.assets import Equity, Future
     ZIPLINE = True
-except:
+except ImportError as error:
     ZIPLINE = False
-    warnings.warn('Module "zipline.assets" not found; mutltipliers will not be applied to position notionals.')
+    warnings.warn(
+        'Module "zipline.assets" not found; mutltipliers will not be applied' +
+        'to position notionals.'
+    )
 
 
 def get_percent_alloc(values):
@@ -144,7 +147,7 @@ def extract_pos(positions, cash):
         for asset in values.columns:
             if type(asset) in [Equity, Future]:
                 values[asset] = values[asset] * asset.price_multiplier
-    
+
     values = values.join(cash).fillna(0)
 
     # NOTE: Set name of DataFrame.columns to sid, to match the behavior
