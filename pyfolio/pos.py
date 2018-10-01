@@ -143,7 +143,7 @@ def extract_pos(positions, cash):
     if ZIPLINE:
         for asset in values.columns:
             if type(asset) in [Equity, Future]:
-                values[asset] = values[asset]*asset.price_multiplier
+                values[asset] = values[asset] * asset.price_multiplier
     
     values = values.join(cash).fillna(0)
 
