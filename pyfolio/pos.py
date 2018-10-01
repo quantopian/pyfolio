@@ -25,7 +25,7 @@ except ImportError as error:
     ZIPLINE = False
     warnings.warn(
         'Module "zipline.assets" not found; mutltipliers will not be applied' +
-        'to position notionals.'
+        ' to position notionals.'
     )
 
 
