@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from builtins import range
 from collections import OrderedDict
 from functools import partial
 
@@ -138,7 +139,7 @@ def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
         - Defaults to Morningstar sectors
     """
 
-    sector_ids = sector_dict.keys()
+    sector_ids = list(sector_dict.keys())
 
     long_exposures = []
     short_exposures = []
@@ -191,9 +192,9 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures,
         ax = plt.gca()
 
     if sector_dict is None:
-        sector_names = SECTORS.values()
+        sector_names = list(SECTORS.values())
     else:
-        sector_names = sector_dict.values()
+        sector_names = list(sector_dict.values())
 
     color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 11))
 
@@ -228,9 +229,9 @@ def plot_sector_exposures_gross(gross_exposures, sector_dict=None, ax=None):
         ax = plt.gca()
 
     if sector_dict is None:
-        sector_names = SECTORS.values()
+        sector_names = list(SECTORS.values())
     else:
-        sector_names = sector_dict.values()
+        sector_names = list(sector_dict.values())
 
     color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 11))
 
@@ -262,9 +263,9 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
         ax = plt.gca()
 
     if sector_dict is None:
-        sector_names = SECTORS.values()
+        sector_names = list(SECTORS.values())
     else:
-        sector_names = sector_dict.values()
+        sector_names = list(sector_dict.values())
 
     color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 11))
 
@@ -305,7 +306,7 @@ def compute_cap_exposures(positions, caps):
     tot_short_exposure = positions_wo_cash[positions_wo_cash < 0] \
         .abs().sum(axis='columns')
 
-    for bucket_name, boundaries in CAP_BUCKETS.items():
+    for bucket_name, boundaries in list(CAP_BUCKETS.items()):
         in_bucket = positions_wo_cash[(caps >= boundaries[0]) &
                                       (caps <= boundaries[1])]
 
@@ -342,7 +343,7 @@ def plot_cap_exposures_longshort(long_exposures, short_exposures, ax=None):
     color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 5))
 
     ax.stackplot(long_exposures[0].index, long_exposures,
-                 labels=CAP_BUCKETS.keys(), colors=color_list, alpha=0.8,
+                 labels=list(CAP_BUCKETS.keys()), colors=color_list, alpha=0.8,
                  baseline='zero')
     ax.stackplot(long_exposures[0].index, short_exposures, colors=color_list,
                  alpha=0.8, baseline='zero')
@@ -370,7 +371,7 @@ def plot_cap_exposures_gross(gross_exposures, ax=None):
     color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 5))
 
     ax.stackplot(gross_exposures[0].index, gross_exposures,
-                 labels=CAP_BUCKETS.keys(), colors=color_list, alpha=0.8,
+                 labels=list(CAP_BUCKETS.keys()), colors=color_list, alpha=0.8,
                  baseline='zero')
     ax.axhline(0, color='k', linestyle='-')
     ax.set(title='Gross exposure to market caps',
@@ -394,7 +395,7 @@ def plot_cap_exposures_net(net_exposures, ax=None):
 
     color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 5))
 
-    cap_names = CAP_BUCKETS.keys()
+    cap_names = list(CAP_BUCKETS.keys())
     for i in range(len(net_exposures)):
         ax.plot(net_exposures[i], color=color_list[i], alpha=0.8,
                 label=cap_names[i])

@@ -14,6 +14,8 @@
 # limitations under the License.
 from __future__ import division
 
+from builtins import zip
+from builtins import range
 from collections import OrderedDict
 from functools import partial
 
@@ -1222,7 +1224,7 @@ def extract_interesting_date_ranges(returns):
     returns_dupe = returns.copy()
     returns_dupe.index = returns_dupe.index.map(pd.Timestamp)
     ranges = OrderedDict()
-    for name, (start, end) in PERIODS.items():
+    for name, (start, end) in list(PERIODS.items()):
         try:
             period = returns_dupe.loc[start:end]
             if len(period) == 0:

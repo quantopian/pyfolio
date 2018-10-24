@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 from unittest import TestCase
 from nose_parameterized import parameterized
 from collections import OrderedDict
@@ -46,7 +48,7 @@ class PositionsTestCase(TestCase):
         result = get_percent_alloc(frame)
         expected_raw = zeros_like(raw_data)
         for idx, row in enumerate(raw_data):
-            expected_raw[idx] = row / row.sum()
+            expected_raw[idx] = old_div(row, row.sum())
 
         expected = DataFrame(
             expected_raw,

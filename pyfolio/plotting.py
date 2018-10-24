@@ -14,6 +14,8 @@
 # limitations under the License.
 from __future__ import division
 
+from builtins import str
+from builtins import range
 import datetime
 from collections import OrderedDict
 from functools import wraps
@@ -94,7 +96,7 @@ def plotting_context(context='notebook', font_scale=1.5, rc=None):
     rc_default = {'lines.linewidth': 1.5}
 
     # Add defaults if they do not exist
-    for name, val in rc_default.items():
+    for name, val in list(rc_default.items()):
         rc.setdefault(name, val)
 
     return sns.plotting_context(context=context, font_scale=font_scale, rc=rc)
@@ -134,7 +136,7 @@ def axes_style(style='darkgrid', rc=None):
     rc_default = {}
 
     # Add defaults if they do not exist
-    for name, val in rc_default.items():
+    for name, val in list(rc_default.items()):
         rc.setdefault(name, val)
 
     return sns.axes_style(style=style, rc=rc)
@@ -645,7 +647,7 @@ def show_perf_stats(returns, factor_returns=None, positions=None,
         perf_stats = pd.DataFrame(perf_stats_all, columns=['Backtest'])
 
     for column in perf_stats.columns:
-        for stat, value in perf_stats[column].iteritems():
+        for stat, value in perf_stats[column].items():
             if stat in STAT_FUNCS_PCT:
                 perf_stats.loc[stat, column] = str(np.round(value * 100,
                                                             1)) + '%'
@@ -1623,7 +1625,7 @@ def plot_txn_time_hist(transactions, bin_minutes=5, tz='America/New_York',
     txn_time.index = txn_time.index.tz_convert(pytz.timezone(tz))
     txn_time.index = txn_time.index.map(lambda x: x.hour * 60 + x.minute)
     txn_time['trade_value'] = (txn_time.amount * txn_time.price).abs()
-    txn_time = txn_time.groupby(level=0).sum().reindex(index=range(570, 961))
+    txn_time = txn_time.groupby(level=0).sum().reindex(index=list(range(570, 961)))
     txn_time.index = (txn_time.index / bin_minutes).astype(int) * bin_minutes
     txn_time = txn_time.groupby(level=0).sum()
 
@@ -1762,7 +1764,7 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
                     [y_ix, y_ix], color=c,
                     linewidth=lsize, solid_capstyle='butt')
 
-    ax.set_yticks(range(disp_amount))
+    ax.set_yticks(list(range(disp_amount)))
     ax.set_yticklabels([utils.format_asset(s) for s in sample])
 
     ax.set_ylim((-0.5, min(len(sample), disp_amount) - 0.5))

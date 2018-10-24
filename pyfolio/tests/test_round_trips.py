@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 from nose_parameterized import parameterized
 
 from unittest import TestCase
@@ -100,7 +102,7 @@ class RoundTripTestCase(TestCase):
                           True, 'A'],
                          [dates[1], dates[2],
                           Timedelta(days=1),
-                          -10, (-1. / 3),
+                          -10, (old_div(-1., 3)),
                           False, 'A']],
                    columns=['open_dt', 'close_dt',
                             'duration', 'pnl', 'rt_returns',

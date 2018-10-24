@@ -1,3 +1,7 @@
+from __future__ import division
+from builtins import str
+from builtins import range
+from past.utils import old_div
 import numpy as np
 import pandas as pd
 import unittest
@@ -34,12 +38,12 @@ def generate_toy_risk_model_output(start_date='2017-01-01', periods=10,
     tickers = ['AAPL', 'TLT', 'XOM']
     styles = ['factor{}'.format(i) for i in range(num_styles)]
 
-    returns = pd.Series(index=dts,
-                        data=np.random.randn(periods)) / 100
+    returns = old_div(pd.Series(index=dts,
+                        data=np.random.randn(periods)), 100)
 
-    factor_returns = pd.DataFrame(
+    factor_returns = old_div(pd.DataFrame(
         columns=styles, index=dts,
-        data=np.random.randn(periods, len(styles))) / 100
+        data=np.random.randn(periods, len(styles))), 100)
 
     arrays = [dts, tickers]
     index = pd.MultiIndex.from_product(arrays, names=['dt', 'ticker'])

@@ -1,5 +1,7 @@
 from __future__ import division
 
+from builtins import zip
+from builtins import str
 import os
 from unittest import TestCase
 from nose_parameterized import parameterized
@@ -305,7 +307,7 @@ class TestCone(TestCase):
             rets, days_forward, cone_stdevs, starting_value=1,
             random_seed=random_seed, num_samples=10000)
 
-        for col, vals in bootstrap_cone.iteritems():
+        for col, vals in bootstrap_cone.items():
             expected = normal_cone[col].values
             assert_allclose(vals.values, expected, rtol=.005)
 

@@ -85,7 +85,7 @@ class RiskTestCase(TestCase):
     def test_compute_style_factor_exposures(self, positions,
                                             risk_factor_panel, expected):
         style_list = []
-        for name, value in risk_factor_panel.iteritems():
+        for name, value in risk_factor_panel.items():
             risk_factor_panel[name].columns = \
                 risk_factor_panel[name].columns.astype(int)
             style_list.append(

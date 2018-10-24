@@ -14,6 +14,7 @@
 # limitations under the License.
 from __future__ import division
 
+from builtins import map
 import pandas as pd
 import numpy as np
 import warnings
