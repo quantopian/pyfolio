@@ -884,7 +884,8 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
     ax.legend(['6-mo',
                '12-mo'],
               loc=legend_loc, frameon=True, framealpha=0.5)
-    ax.set_ylim((-1.0, 1.0))
+    lim = ax.get_ylim()
+    ax.set_ylim(lim)
     return ax
 
 
