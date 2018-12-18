@@ -614,7 +614,8 @@ def create_returns_tear_sheet(returns, positions=None,
         live_start_date=live_start_date,
         ax=ax_return_quantiles)
 
-    if bootstrap and benchmark_rets is not None:
+    if ((bootstrap is not False)
+            and (benchmark_rets is not False)):
         ax_bootstrap = plt.subplot(gs[i, :])
         plotting.plot_perf_stats(returns, benchmark_rets,
                                  ax=ax_bootstrap)
