@@ -21,7 +21,7 @@ import warnings
 try:
     from zipline.assets import Equity, Future
     ZIPLINE = True
-except ImportError as error:
+except ImportError:
     ZIPLINE = False
     warnings.warn(
         'Module "zipline.assets" not found; mutltipliers will not be applied' +
