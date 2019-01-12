@@ -15,6 +15,7 @@
 
 ## Versions
 
-* Pyfolio version:
-* Python version:
-* Matplotlib version:
+* Pyfolio version: 
+* Python version: 
+* Pandas version: 
+* Matplotlib version: 
