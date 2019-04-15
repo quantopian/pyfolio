@@ -45,6 +45,7 @@ else:
 
 install_reqs = [
     'ipython>=3.2.3' if support_ipython_6 else 'ipython>=3.2.3, <6',
+    'future',
     'matplotlib>=1.4.0',
     'numpy>=1.11.1',
     'pandas>=0.18.1',
