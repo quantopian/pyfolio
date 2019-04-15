@@ -39,7 +39,7 @@ def generate_toy_risk_model_output(start_date='2017-01-01', periods=10,
     styles = ['factor{}'.format(i) for i in range(num_styles)]
 
     returns = old_div(pd.Series(index=dts,
-                        data=np.random.randn(periods)), 100)
+        data=np.random.randn(periods)), 100)
 
     factor_returns = old_div(pd.DataFrame(
         columns=styles, index=dts,
