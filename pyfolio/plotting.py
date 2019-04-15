@@ -1215,7 +1215,7 @@ def plot_max_median_position_concentration(positions, ax=None, **kwargs):
     """
 
     if ax is None:
-        ax = plt.gcf()
+        ax = plt.gca()
 
     alloc_summary = pos.get_max_median_position_concentration(positions)
     colors = ['mediumblue', 'steelblue', 'tomato', 'firebrick']
@@ -1251,7 +1251,7 @@ def plot_sector_allocations(returns, sector_alloc, ax=None, **kwargs):
     """
 
     if ax is None:
-        ax = plt.gcf()
+        ax = plt.gca()
 
     sector_alloc.plot(title='Sector allocation over time',
                       alpha=0.5, ax=ax, **kwargs)
