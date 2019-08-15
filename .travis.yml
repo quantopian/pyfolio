@@ -39,7 +39,7 @@ install:
   - source activate testenv
   - pip install nose_parameterized
   #- pip install --no-deps git+https://github.com/quantopian/zipline
-  - pip install -e .[bayesian] -c constraints.txt
+  - pip install -e -c constraints.txt
 
 before_script:
   - "flake8 pyfolio"
