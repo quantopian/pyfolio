@@ -60,7 +60,7 @@ class TestDrawdown(TestCase):
             first_expected_recovery, first_net_drawdown,
             second_expected_peak, second_expected_valley,
             second_expected_recovery, second_net_drawdown
-            ):
+    ):
 
         rets = px.pct_change()
 
@@ -264,11 +264,12 @@ class TestStats(TestCase):
     dt_2 = pd.date_range('2000-1-3', periods=8, freq='D')
 
     @parameterized.expand([
-        (simple_rets[:5], 2, '[nan, inf, inf, 11.224972160321828, inf]')
+        (simple_rets[:5], 2, [np.nan, np.inf, np.inf, 11.224972160321, np.inf])
     ])
     def test_sharpe_2(self, returns, rolling_sharpe_window, expected):
-        self.assertEqual(str(timeseries.rolling_sharpe(
-            returns, rolling_sharpe_window).values.tolist()), expected)
+        np.testing.assert_array_almost_equal(timeseries.rolling_sharpe(returns,
+                                                                       rolling_sharpe_window).values,
+                                             np.asarray(expected))
 
     @parameterized.expand([
         (simple_rets[:5], simple_benchmark, 2, 0)

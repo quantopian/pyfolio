@@ -1066,7 +1066,7 @@ def create_capacity_tear_sheet(returns, positions, transactions,
         llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit * 100])
 
     bt_starting_capital = positions.iloc[0].sum() / (1 + returns.iloc[0])
-    fig, ax_capacity_sweep = plt.subplots(figsize=(14, 6))
+    _, ax_capacity_sweep = plt.subplots(figsize=(14, 6))
     plotting.plot_capacity_sweep(returns, transactions, market_data,
                                  bt_starting_capital,
                                  min_pv=100000,
@@ -1516,7 +1516,7 @@ def create_perf_attrib_tear_sheet(returns,
 
     if factor_partitions is not None:
 
-        for factor_type, partitions in factor_partitions.iteritems():
+        for factor_type, partitions in factor_partitions.items():
 
             columns_to_select = perf_attrib_data.columns.intersection(
                 partitions
@@ -1531,7 +1531,7 @@ def create_perf_attrib_tear_sheet(returns,
             )
             current_section += 1
 
-        for factor_type, partitions in factor_partitions.iteritems():
+        for factor_type, partitions in factor_partitions.items():
 
             perf_attrib.plot_risk_exposures(
                 portfolio_exposures[portfolio_exposures.columns

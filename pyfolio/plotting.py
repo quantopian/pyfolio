@@ -645,7 +645,7 @@ def show_perf_stats(returns, factor_returns=None, positions=None,
         perf_stats = pd.DataFrame(perf_stats_all, columns=['Backtest'])
 
     for column in perf_stats.columns:
-        for stat, value in perf_stats[column].iteritems():
+        for stat, value in perf_stats[column].items():
             if stat in STAT_FUNCS_PCT:
                 perf_stats.loc[stat, column] = str(np.round(value * 100,
                                                             1)) + '%'
@@ -1702,7 +1702,7 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
                 y=monthly_rets.values,
                 color='steelblue')
 
-    locs, labels = plt.xticks()
+    _, labels = plt.xticks()
     plt.setp(labels, rotation=90)
 
     # only show x-labels on year boundary
