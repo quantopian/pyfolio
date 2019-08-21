@@ -38,8 +38,6 @@ install:
   - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas=$PANDAS_VERSION Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib mkl-service
   - source activate testenv
   - pip install nose_parameterized
-  #- pip install --no-deps git+https://github.com/quantopian/zipline
-  - pip install -e -r constraints.txt
 
 before_script:
   - "flake8 pyfolio"
