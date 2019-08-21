@@ -267,9 +267,10 @@ class TestStats(TestCase):
         (simple_rets[:5], 2, [np.nan, np.inf, np.inf, 11.224972160321, np.inf])
     ])
     def test_sharpe_2(self, returns, rolling_sharpe_window, expected):
-        np.testing.assert_array_almost_equal(timeseries.rolling_sharpe(returns,
-                                                                       rolling_sharpe_window).values,
-                                             np.asarray(expected))
+        np.testing.assert_array_almost_equal(
+            timeseries.rolling_sharpe(returns,
+                                      rolling_sharpe_window).values,
+            np.asarray(expected))
 
     @parameterized.expand([
         (simple_rets[:5], simple_benchmark, 2, 0)
