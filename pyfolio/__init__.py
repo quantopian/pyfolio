@@ -1,5 +1,3 @@
-import warnings
-
 from . import utils
 from . import timeseries
 from . import pos

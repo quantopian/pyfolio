@@ -21,9 +21,7 @@ import empyrical as ep
 from IPython.display import display, Markdown
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-import scipy.stats
 
 from . import _seaborn as sns
 from . import capacity

@@ -6,7 +6,8 @@ from setuptools import setup
 import versioneer
 
 DISTNAME = 'pyfolio'
-DESCRIPTION = "pyfolio is a Python library for performance and risk analysis of financial portfolios"
+DESCRIPTION = "pyfolio is a Python library for performance"
+"and risk analysis of financial portfolios"
 LONG_DESCRIPTION = """pyfolio is a Python library for performance and risk analysis of
 financial portfolios developed by `Quantopian Inc`_. It works well with the
 `Zipline`_ open source backtesting library.

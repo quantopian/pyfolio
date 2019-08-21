@@ -265,7 +265,9 @@ def extract_round_trips(transactions,
                                                                  minute=0,
                                                                  second=0))
 
-        tmp = roundtrips.set_index('date').join(pv.set_index('date'), lsuffix='_').reset_index()
+        tmp = (roundtrips.set_index('date')
+                         .join(pv.set_index('date'), lsuffix='_')
+                         .reset_index())
 
         roundtrips['returns'] = tmp.pnl / tmp.portfolio_value
         roundtrips = roundtrips.drop('date', axis='columns')
