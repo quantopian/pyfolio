@@ -37,7 +37,7 @@ before_install:
 install:
   - conda create -q -n testenv --yes python=$TRAVIS_PYTHON_VERSION ipython pyzmq numpy scipy nose matplotlib pandas=$PANDAS_VERSION Cython patsy flake8 seaborn scikit-learn runipy pytables networkx pandas-datareader matplotlib-tests joblib mkl-service
   - source activate testenv
-  - pip install nose_parameterized empyrical
+  - pip install -e .[all]
 
 before_script:
   - "flake8 pyfolio"
