@@ -7,13 +7,14 @@ python:
 
 env:
   - PANDAS_VERSION=0.18.1
-  - PANDAS_VERSION=0.19.2
   - PANDAS_VERSION=0.25.0
 
 matrix:
   exclude:
   - python: 3.7
     env: PANDAS_VERSION=0.18.1
+  - python: 2.7
+    env: PANDAS_VERSION=0.25.0
 
 before_install:
   # We do this conditionally because it saves us some downloading if the
