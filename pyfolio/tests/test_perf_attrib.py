@@ -125,7 +125,7 @@ class PerfAttribTestCase(unittest.TestCase):
                   'common_returns': [0.05, 0.05],
                   'specific_returns': [0.05, 0.05],
                   'tilt_returns': [0.05, 0.05],
-                  'timing_returns': [0.0, 0.0],
+                  'timing_returns': [0., 0.],
                   'total_returns': returns}
         )
 

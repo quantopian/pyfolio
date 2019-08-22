@@ -6,7 +6,8 @@ from setuptools import setup
 import versioneer
 
 DISTNAME = 'pyfolio'
-DESCRIPTION = "pyfolio is a Python library for performance and risk analysis of financial portfolios"
+DESCRIPTION = "pyfolio is a Python library for performance"
+"and risk analysis of financial portfolios"
 LONG_DESCRIPTION = """pyfolio is a Python library for performance and risk analysis of
 financial portfolios developed by `Quantopian Inc`_. It works well with the
 `Zipline`_ open source backtesting library.
@@ -52,16 +53,14 @@ install_reqs = [
     'scipy>=0.14.0',
     'scikit-learn>=0.16.1',
     'seaborn>=0.7.1',
-    'empyrical>=0.5.0'
+    'empyrical>=0.5.2'
 ]
 
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
-bayesian_reqs = ['pymc3 >= 3.5']
 
 extras_reqs = {
-    'bayesian': bayesian_reqs,
     'test': test_reqs,
-    'all': test_reqs + bayesian_reqs,
+    'all': test_reqs
 }
 
 if __name__ == "__main__":

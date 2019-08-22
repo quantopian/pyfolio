@@ -952,7 +952,7 @@ def get_top_drawdowns(returns, top=10):
     underwater = df_cum / running_max - 1
 
     drawdowns = []
-    for t in range(top):
+    for _ in range(top):
         peak, valley, recovery = get_max_drawdown_underwater(underwater)
         # Slice out draw-down period
         if not pd.isnull(recovery):

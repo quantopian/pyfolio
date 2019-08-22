@@ -15,8 +15,7 @@ from pyfolio.tears import (create_full_tear_sheet,
                            create_position_tear_sheet,
                            create_txn_tear_sheet,
                            create_round_trip_tear_sheet,
-                           create_interesting_times_tear_sheet,
-                           create_bayesian_tear_sheet)
+                           create_interesting_times_tear_sheet,)
 
 
 class PositionsTestCase(TestCase):
@@ -122,14 +121,3 @@ class PositionsTestCase(TestCase):
                                             self.test_returns,
                                             **kwargs
                                             )
-
-    @parameterized.expand([({},),
-                           ({'stoch_vol': True},),
-                           ])
-    @cleanup
-    def test_create_bayesian_tear_sheet_breakdown(self, kwargs):
-        create_bayesian_tear_sheet(
-            self.test_returns,
-            live_start_date=self.test_returns.index[-20],
-            progressbar=False,
-            **kwargs)
