@@ -449,7 +449,8 @@ def plot_factor_contribution_to_perf(
         ax = plt.gca()
 
     factors_to_plot = perf_attrib_data.drop(
-        ['total_returns', 'common_returns'], axis='columns', errors='ignore'
+        ['total_returns', 'common_returns', 'tilt_returns', 'timing_returns'],
+        axis='columns', errors='ignore'
     )
 
     factors_cumulative = pd.DataFrame()

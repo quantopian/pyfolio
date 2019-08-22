@@ -120,7 +120,7 @@ def _groupby_consecutive(txn, max_delta=pd.Timedelta('8h')):
             transaction.amount.sum()
 
     out = []
-    for sym, t in txn.groupby('symbol'):
+    for _, t in txn.groupby('symbol'):
         t = t.sort_index()
         t.index.name = 'dt'
         t = t.reset_index()
@@ -130,11 +130,11 @@ def _groupby_consecutive(txn, max_delta=pd.Timedelta('8h')):
             1) != t.order_sign).astype(int).cumsum()
         t['block_time'] = ((t.dt.sub(t.dt.shift(1))) >
                            max_delta).astype(int).cumsum()
-        grouped_price = (t.groupby(('block_dir',
-                                   'block_time'))
+        grouped_price = (t.groupby(['block_dir',
+                                   'block_time'])
                           .apply(vwap))
         grouped_price.name = 'price'
-        grouped_rest = t.groupby(('block_dir', 'block_time')).agg({
+        grouped_rest = t.groupby(['block_dir', 'block_time']).agg({
             'amount': 'sum',
             'symbol': 'first',
             'dt': 'first'})
@@ -265,7 +265,9 @@ def extract_round_trips(transactions,
                                                                  minute=0,
                                                                  second=0))
 
-        tmp = roundtrips.join(pv, on='date', lsuffix='_')
+        tmp = (roundtrips.set_index('date')
+                         .join(pv.set_index('date'), lsuffix='_')
+                         .reset_index())
 
         roundtrips['returns'] = tmp.pnl / tmp.portfolio_value
         roundtrips = roundtrips.drop('date', axis='columns')
@@ -307,9 +309,11 @@ def add_closing_transactions(positions, transactions):
         ending_amount = txn_sym.amount.sum()
 
         ending_price = ending_val / ending_amount
-        closing_txn = {'symbol': sym,
-                       'amount': -ending_amount,
-                       'price': ending_price}
+        closing_txn = OrderedDict([
+            ('amount', -ending_amount),
+            ('price', ending_price),
+            ('symbol', sym),
+        ])
 
         closing_txn = pd.DataFrame(closing_txn, index=[end_dt])
         closed_txns = closed_txns.append(closing_txn)

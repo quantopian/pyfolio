@@ -16,14 +16,6 @@ from pyfolio.ipycompat import read as read_notebook
 def test_nbs():
     path = os.path.join(pyfolio_root(), 'examples', '*.ipynb')
     for ipynb in glob.glob(path):
-
-        # See if bayesian is useable before we run a test
-        if ipynb.endswith('bayesian.ipynb'):
-            try:
-                import pymc3  # NOQA
-            except ImportError:
-                continue
-
         with open(ipynb) as f:
             nb = read_notebook(f, 'json')
             nb_runner = NotebookRunner(nb)

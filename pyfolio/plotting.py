@@ -1703,7 +1703,7 @@ def plot_monthly_returns_timeseries(returns, ax=None, **kwargs):
                 y=monthly_rets.values,
                 color='steelblue')
 
-    locs, labels = plt.xticks()
+    _, labels = plt.xticks()
     plt.setp(labels, rotation=90)
 
     # only show x-labels on year boundary
