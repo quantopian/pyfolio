@@ -161,11 +161,14 @@ class PerfAttribTestCase(unittest.TestCase):
         expected_perf_attrib_output = pd.DataFrame(
             index=dts,
             columns=['risk_factor1', 'risk_factor2', 'total_returns',
-                     'common_returns', 'specific_returns'],
+                     'common_returns', 'specific_returns',
+                     'tilt_returns', 'timing_returns'],
             data={'risk_factor1': [0.0, 0.0],
                   'risk_factor2': [0.0, 0.0],
                   'common_returns': [0.0, 0.0],
                   'specific_returns': [0.1, 0.1],
+                  'tilt_returns': [0.0, 0.0],
+                  'timing_returns': [0.0, 0.0],
                   'total_returns': returns}
         )
 
