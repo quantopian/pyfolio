@@ -1089,11 +1089,14 @@ def create_risk_tear_sheet(positions,
         - DataFrame with dates as index, equities as columns
         - DataFrame has a multi-index index, one level is dates and another is style
         - Example:
-                     Equity(24   Equity(62
-                      [AAPL])      [ABT])
-        2017-04-03	  -0.51284     1.39173
-        2017-04-04	  -0.73381     0.98149
-        2017-04-05	  -0.90132	   1.13981
+                                    Equity(24   Equity(62
+                dt       style      [AAPL])      [ABT])
+        2017-04-03	 momentum       -0.51284     1.39173
+                     size           0.1          -0.05
+        2017-04-04	  momentum      -0.73381     0.98149
+                      size           0.11          -0.0506
+        2017-04-05	  momentum      -0.90132	   1.13981
+                      size           0.12          -0.051
 
     sectors : pd.DataFrame
         Daily Morningstar sector code per asset
