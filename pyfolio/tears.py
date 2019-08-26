@@ -67,7 +67,7 @@ def create_full_tear_sheet(returns,
                            cone_std=(1.0, 1.5, 2.0),
                            bootstrap=False,
                            unadjusted_returns=None,
-                           style_factor_panel=None,
+                           style_factors=None,
                            sectors=None,
                            caps=None,
                            shares_held=None,
@@ -227,8 +227,8 @@ def create_full_tear_sheet(returns,
                                            last_n_days=125,
                                            estimate_intraday=False)
 
-        if style_factor_panel is not None:
-            create_risk_tear_sheet(positions, style_factor_panel, sectors,
+        if style_factors is not None:
+            create_risk_tear_sheet(positions, style_factors, sectors,
                                    caps, shares_held, volumes, percentile)
 
         if factor_returns is not None and factor_loadings is not None:
@@ -1057,7 +1057,7 @@ def create_capacity_tear_sheet(returns, positions, transactions,
 
 @plotting.customize
 def create_risk_tear_sheet(positions,
-                           style_factor_panel=None,
+                           style_factors,
                            sectors=None,
                            caps=None,
                            shares_held=None,
@@ -1084,13 +1084,13 @@ def create_risk_tear_sheet(positions,
         2017-04-04	-108852.00	  4373.820     2.540999e+07
         2017-04-05	-119968.66	  4336.200     2.839812e+07
 
-    style_factor_panel : pd.Panel
-        Panel where each item is a DataFrame that tabulates style factor per
-        equity per day.
-        - Each item has dates as index, equities as columns
-        - Example item:
+    style_factors : pd.DataFrame
+        Daily equity style factors
+        - DataFrame with dates as index, equities as columns
+        - DataFrame has a multi-index index, one level is dates and another is style
+        - Example:
                      Equity(24   Equity(62
-                       [AAPL])      [ABT])
+                      [AAPL])      [ABT])
         2017-04-03	  -0.51284     1.39173
         2017-04-04	  -0.73381     0.98149
         2017-04-05	  -0.90132	   1.13981
@@ -1142,19 +1142,23 @@ def create_risk_tear_sheet(positions,
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
 
-    idx = positions.index & style_factor_panel.iloc[0].index & sectors.index \
-        & caps.index & shares_held.index & volumes.index
+    idx = positions.index & style_factors.index.levels[0]
+    if sectors is not None:
+        idx = idx & sectors.index
+    if caps is not None:
+        idx = idx & caps.index
+    if shares_held is not None:
+        idx = idx & shares_held.index
+    if volumes is not None:
+        idx = idx & volumes.index
+
     positions = positions.loc[idx]
 
+    style_factors_names = style_factors.index.levels[1].tolist()
     vertical_sections = 0
-    if style_factor_panel is not None:
-        vertical_sections += len(style_factor_panel.items)
-        new_style_dict = {}
-        for item in style_factor_panel.items:
-            new_style_dict.update({item:
-                                   style_factor_panel.loc[item].loc[idx]})
-        style_factor_panel = pd.Panel()
-        style_factor_panel = style_factor_panel.from_dict(new_style_dict)
+    vertical_sections += len(style_factors_names)
+    style_factors = style_factors.loc[idx]
+
     if sectors is not None:
         vertical_sections += 4
         sectors = sectors.loc[idx]
@@ -1166,24 +1170,21 @@ def create_risk_tear_sheet(positions,
         vertical_sections += 3
         shares_held = shares_held.loc[idx]
         volumes = volumes.loc[idx]
-
-    if percentile is None:
         percentile = 0.1
 
     fig = plt.figure(figsize=[14, vertical_sections * 6])
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
 
-    if style_factor_panel is not None:
-        style_axes = []
-        style_axes.append(plt.subplot(gs[0, :]))
-        for i in range(1, len(style_factor_panel.items)):
-            style_axes.append(plt.subplot(gs[i, :], sharex=style_axes[0]))
+    style_axes = []
+    style_axes.append(plt.subplot(gs[0, :]))
+    for i in range(1, len(style_factors_names)):
+        style_axes.append(plt.subplot(gs[i, :], sharex=style_axes[0]))
 
-        j = 0
-        for name, df in style_factor_panel.iteritems():
-            sfe = risk.compute_style_factor_exposures(positions, df)
-            risk.plot_style_factor_exposures(sfe, name, style_axes[j])
-            j += 1
+    j = 0
+    for name in style_factors_names:
+        sfe = risk.compute_style_factor_exposures(positions, style_factors.xs(name, level=1))
+        risk.plot_style_factor_exposures(sfe, name, style_axes[j])
+        j += 1
 
     if sectors is not None:
         i += 1
