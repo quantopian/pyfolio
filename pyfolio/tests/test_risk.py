@@ -65,15 +65,17 @@ class RiskTestCase(TestCase):
         __location__ + '/test_data/expected_volumes.csv',
         index_col=0, parse_dates=True))
 
-    test_dict = {}
+    test_style_list = []
     styles = ['LT_MOMENTUM', 'LMCAP', 'VLTY', 'MACDSignal']
     for style in styles:
         df = to_utc(read_csv(
             __location__ + '/test_data/test_{}.csv'.format(style),
             index_col=0, parse_dates=True))
-        test_dict.update({style: df})
-    test_styles = pd.Panel()
-    test_styles = test_styles.from_dict(test_dict)
+        df.index.name = 'dt'
+        df['style'] = style
+        test_style_list.append(df.reset_index())
+    test_styles = pd.concat(test_style_list)
+    test_styles = test_styles.set_index(['dt', 'style'])
 
     expected_styles = to_utc(read_csv(
         __location__ + '/test_data/expected_styles.csv',
@@ -83,14 +85,15 @@ class RiskTestCase(TestCase):
         (test_pos, test_styles, expected_styles)
     ])
     def test_compute_style_factor_exposures(self, positions,
-                                            risk_factor_panel, expected):
+                                            risk_factors, expected):
         style_list = []
-        for name, value in risk_factor_panel.iteritems():
-            risk_factor_panel[name].columns = \
-                risk_factor_panel[name].columns.astype(int)
+        for name in risk_factors.index.levels[1]:
+            risk_factor = risk_factors.xs(name, level=1)
+            risk_factor.columns = \
+                risk_factor.columns.astype(int)
             style_list.append(
                 compute_style_factor_exposures(positions,
-                                               risk_factor_panel[name])
+                                               risk_factor)
                 )
         expected.columns = expected.columns.astype(int)
         assert_frame_equal(pd.concat(style_list, axis=1), expected)
