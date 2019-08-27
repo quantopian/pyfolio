@@ -1202,7 +1202,7 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
     return cone_bounds
 
 
-def extract_interesting_date_ranges(returns):
+def extract_interesting_date_ranges(returns, periods=None):
     """
     Extracts returns based on interesting events. See
     gen_date_range_interesting.
@@ -1218,11 +1218,12 @@ def extract_interesting_date_ranges(returns):
     ranges : OrderedDict
         Date ranges, with returns, of all valid events.
     """
-
+    if periods is None:
+        periods = PERIODS
     returns_dupe = returns.copy()
     returns_dupe.index = returns_dupe.index.map(pd.Timestamp)
     ranges = OrderedDict()
-    for name, (start, end) in PERIODS.items():
+    for name, (start, end) in periods.items():
         try:
             period = returns_dupe.loc[start:end]
             if len(period) == 0:

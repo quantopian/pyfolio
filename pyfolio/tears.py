@@ -872,7 +872,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
 @plotting.customize
 def create_interesting_times_tear_sheet(
-        returns, benchmark_rets=None, legend_loc='best', return_fig=False):
+        returns, benchmark_rets=None, periods=None, legend_loc='best', return_fig=False):
     """
     Generate a number of returns plots around interesting points in time,
     like the flash crash and 9/11.
@@ -893,13 +893,16 @@ def create_interesting_times_tear_sheet(
     benchmark_rets : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
+    periods: dict or OrderedDict, optional
+        historical event dates that may have had significant
+        impact on markets
     legend_loc : plt.legend_loc, optional
          The legend's location.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
 
-    rets_interesting = timeseries.extract_interesting_date_ranges(returns)
+    rets_interesting = timeseries.extract_interesting_date_ranges(returns, periods)
 
     if not rets_interesting:
         warnings.warn('Passed returns do not overlap with any'
@@ -916,7 +919,7 @@ def create_interesting_times_tear_sheet(
         returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
         bmark_interesting = timeseries.extract_interesting_date_ranges(
-            benchmark_rets)
+            benchmark_rets, periods)
 
     num_plots = len(rets_interesting)
     # 2 plots, 1 row; 3 plots, 2 rows; 4 plots, 2 rows; etc.
