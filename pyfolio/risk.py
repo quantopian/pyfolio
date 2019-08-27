@@ -116,7 +116,7 @@ def plot_style_factor_exposures(tot_style_factor_exposure, factor_name=None,
     return ax
 
 
-def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
+def compute_sector_exposures(positions, sectors, sector_dict=None):
     """
     Returns arrays of long, short and gross sector exposures of an algorithm's
     positions
@@ -138,7 +138,10 @@ def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
         - Defaults to Morningstar sectors
     """
 
-    sector_ids = sector_dict.keys()
+    if sector_dict is None:
+        sector_ids = SECTORS.keys()
+    else:
+        sector_ids = sector_dict.keys()
 
     long_exposures = []
     short_exposures = []
@@ -172,7 +175,7 @@ def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
 
 
 def plot_sector_exposures_longshort(long_exposures, short_exposures,
-                                    sector_dict=SECTORS, ax=None):
+                                    sector_dict=None, ax=None):
     """
     Plots outputs of compute_sector_exposures as area charts
 
@@ -195,7 +198,7 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures,
     else:
         sector_names = sector_dict.values()
 
-    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 11))
+    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, len(sector_names)))
 
     ax.stackplot(long_exposures[0].index, long_exposures,
                  labels=sector_names, colors=color_list, alpha=0.8,
@@ -232,7 +235,7 @@ def plot_sector_exposures_gross(gross_exposures, sector_dict=None, ax=None):
     else:
         sector_names = sector_dict.values()
 
-    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 11))
+    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, len(sector_names)))
 
     ax.stackplot(gross_exposures[0].index, gross_exposures,
                  labels=sector_names, colors=color_list, alpha=0.8,
@@ -266,7 +269,9 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
     else:
         sector_names = sector_dict.values()
 
-    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 11))
+    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, len(sector_names)))
+
+    sector_names = list(sector_names)
 
     for i in range(len(net_exposures)):
         ax.plot(net_exposures[i], color=color_list[i], alpha=0.8,
