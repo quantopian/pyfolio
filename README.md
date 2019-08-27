@@ -10,7 +10,7 @@ financial portfolios developed by
 [Quantopian Inc](https://www.quantopian.com). It works well with the
 [Zipline](https://www.zipline.io/) open source backtesting library.
 Quantopian also offers a `fully managed service for professionals <https://factset.quantopian.com>`_ 
-that includes zipline, alphalens, pyfolio, FactSet data, and more.
+that includes Zipline, Alphalens, Pyfolio, FactSet data, and more.
 
 At the core of pyfolio is a so-called tear sheet that consists of
 various individual plots that provide a comprehensive image of the
