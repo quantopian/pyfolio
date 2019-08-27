@@ -52,7 +52,7 @@ install_reqs = [
     'scipy>=0.14.0',
     'scikit-learn>=0.16.1',
     'seaborn>=0.7.1',
-    'empyrical>=0.5.3'
+    'empyrical==0.5.2'
 ]
 
 test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
