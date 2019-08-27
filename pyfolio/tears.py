@@ -119,10 +119,10 @@ def create_full_tear_sheet(returns,
             2004-01-09 12:18:01    483      324.12   'AAPL'
             2004-01-09 12:18:01    122      83.10    'MSFT'
             2004-01-13 14:12:23    -75      340.43   'AAPL'
-    market_data : pd.Panel, optional
-        Panel with items axis of 'price' and 'volume' DataFrames.
-        The major and minor axes should match those of the
-        the passed positions DataFrame (same dates and symbols).
+    market_data : pd.DataFrame, optional
+        Daily market_data
+        - DataFrame has a multi-index index, one level is dates and another is
+        market_data contains volume & price, equities as columns
     slippage : int/float, optional
         Basis points of slippage to apply to returns before generating
         tearsheet stats and plots.
@@ -977,10 +977,10 @@ def create_capacity_tear_sheet(returns, positions, transactions,
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
          - See full explanation in create_full_tear_sheet.
-    market_data : pd.Panel
-        Panel with items axis of 'price' and 'volume' DataFrames.
-        The major and minor axes should match those of the
-        the passed positions DataFrame (same dates and symbols).
+    market_data : pd.DataFrame
+        Daily market_data
+        - DataFrame has a multi-index index, one level is dates and another is
+        market_data contains volume & price, equities as columns
     liquidation_daily_vol_limit : float
         Max proportion of a daily bar that can be consumed in the
         process of liquidating a position in the
@@ -1089,8 +1089,7 @@ def create_risk_tear_sheet(positions,
 
     style_factors : pd.DataFrame
         Daily equity style factors
-        - DataFrame with dates as index, equities as columns
-        - DataFrame has a multi-index index, one level is dates and another is style
+        - DataFrame has a multi-index index, one level is dates and another is style, equities as columns
         - Example:
                                     Equity(24   Equity(62
                 dt       style      [AAPL])      [ABT])
