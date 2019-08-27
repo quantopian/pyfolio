@@ -1299,7 +1299,11 @@ def create_perf_attrib_tear_sheet(returns,
 
     # one section for the returns plot, and for each factor grouping
     # one section for factor returns, and one for risk exposures
-    vertical_sections = 1 + 2 * max(len(factor_partitions), 1)
+    if factor_partitions is not None:
+        vertical_sections = 1 + 2 * max(len(factor_partitions), 1)
+    else:
+        vertical_sections = 1 + 2
+
     current_section = 0
 
     fig = plt.figure(figsize=[14, vertical_sections * 6])
@@ -1351,7 +1355,7 @@ def create_perf_attrib_tear_sheet(returns,
             ax=plt.subplot(gs[current_section])
         )
 
-    gs.tight_layout(fig)
+    # gs.tight_layout(fig)
 
     if return_fig:
         return fig
