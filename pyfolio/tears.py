@@ -871,8 +871,9 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
 
 @plotting.customize
-def create_interesting_times_tear_sheet(
-        returns, benchmark_rets=None, periods=None, legend_loc='best', return_fig=False):
+def create_interesting_times_tear_sheet(returns, benchmark_rets=None,
+                                        periods=None, legend_loc='best',
+                                        return_fig=False):
     """
     Generate a number of returns plots around interesting points in time,
     like the flash crash and 9/11.
@@ -902,7 +903,8 @@ def create_interesting_times_tear_sheet(
         If True, returns the figure that was plotted on.
     """
 
-    rets_interesting = timeseries.extract_interesting_date_ranges(returns, periods)
+    rets_interesting = timeseries.extract_interesting_date_ranges(
+        returns, periods)
 
     if not rets_interesting:
         warnings.warn('Passed returns do not overlap with any'
@@ -1091,7 +1093,8 @@ def create_risk_tear_sheet(positions,
 
     style_factors : pd.DataFrame
         Daily equity style factors
-        - DataFrame has a multi-index index, one level is dates and another is style, equities as columns
+        - DataFrame has a multi-index index, one level is dates and another
+        is style, equities as columns
         - Example:
                                     Equity(24   Equity(62
                 dt       style      [AAPL])      [ABT])
@@ -1201,7 +1204,8 @@ def create_risk_tear_sheet(positions,
 
     j = 0
     for name in style_factors_names:
-        sfe = risk.compute_style_factor_exposures(positions, style_factors.xs(name, level=1))
+        sfe = risk.compute_style_factor_exposures(
+            positions, style_factors.xs(name, level=1))
         risk.plot_style_factor_exposures(sfe, name, style_axes[j])
         j += 1
 
