@@ -67,7 +67,7 @@ def create_full_tear_sheet(returns,
                            cone_std=(1.0, 1.5, 2.0),
                            bootstrap=False,
                            unadjusted_returns=None,
-                           style_factor_panel=None,
+                           style_factors=None,
                            sectors=None,
                            caps=None,
                            shares_held=None,
@@ -119,10 +119,10 @@ def create_full_tear_sheet(returns,
             2004-01-09 12:18:01    483      324.12   'AAPL'
             2004-01-09 12:18:01    122      83.10    'MSFT'
             2004-01-13 14:12:23    -75      340.43   'AAPL'
-    market_data : pd.Panel, optional
-        Panel with items axis of 'price' and 'volume' DataFrames.
-        The major and minor axes should match those of the
-        the passed positions DataFrame (same dates and symbols).
+    market_data : pd.DataFrame, optional
+        Daily market_data
+        - DataFrame has a multi-index index, one level is dates and another is
+        market_data contains volume & price, equities as columns
     slippage : int/float, optional
         Basis points of slippage to apply to returns before generating
         tearsheet stats and plots.
@@ -227,8 +227,8 @@ def create_full_tear_sheet(returns,
                                            last_n_days=125,
                                            estimate_intraday=False)
 
-        if style_factor_panel is not None:
-            create_risk_tear_sheet(positions, style_factor_panel, sectors,
+        if style_factors is not None:
+            create_risk_tear_sheet(positions, style_factors, sectors,
                                    caps, shares_held, volumes, percentile)
 
         if factor_returns is not None and factor_loadings is not None:
@@ -872,7 +872,7 @@ def create_round_trip_tear_sheet(returns, positions, transactions,
 
 @plotting.customize
 def create_interesting_times_tear_sheet(
-        returns, benchmark_rets=None, legend_loc='best', return_fig=False):
+        returns, benchmark_rets=None, periods=None, legend_loc='best', return_fig=False):
     """
     Generate a number of returns plots around interesting points in time,
     like the flash crash and 9/11.
@@ -893,13 +893,16 @@ def create_interesting_times_tear_sheet(
     benchmark_rets : pd.Series
         Daily noncumulative returns of the benchmark.
          - This is in the same style as returns.
+    periods: dict or OrderedDict, optional
+        historical event dates that may have had significant
+        impact on markets
     legend_loc : plt.legend_loc, optional
          The legend's location.
     return_fig : boolean, optional
         If True, returns the figure that was plotted on.
     """
 
-    rets_interesting = timeseries.extract_interesting_date_ranges(returns)
+    rets_interesting = timeseries.extract_interesting_date_ranges(returns, periods)
 
     if not rets_interesting:
         warnings.warn('Passed returns do not overlap with any'
@@ -916,7 +919,7 @@ def create_interesting_times_tear_sheet(
         returns = utils.clip_returns_to_benchmark(returns, benchmark_rets)
 
         bmark_interesting = timeseries.extract_interesting_date_ranges(
-            benchmark_rets)
+            benchmark_rets, periods)
 
     num_plots = len(rets_interesting)
     # 2 plots, 1 row; 3 plots, 2 rows; 4 plots, 2 rows; etc.
@@ -974,10 +977,10 @@ def create_capacity_tear_sheet(returns, positions, transactions,
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
          - See full explanation in create_full_tear_sheet.
-    market_data : pd.Panel
-        Panel with items axis of 'price' and 'volume' DataFrames.
-        The major and minor axes should match those of the
-        the passed positions DataFrame (same dates and symbols).
+    market_data : pd.DataFrame
+        Daily market_data
+        - DataFrame has a multi-index index, one level is dates and another is
+        market_data contains volume & price, equities as columns
     liquidation_daily_vol_limit : float
         Max proportion of a daily bar that can be consumed in the
         process of liquidating a position in the
@@ -1057,9 +1060,11 @@ def create_capacity_tear_sheet(returns, positions, transactions,
 
 @plotting.customize
 def create_risk_tear_sheet(positions,
-                           style_factor_panel=None,
+                           style_factors,
                            sectors=None,
+                           sector_dict=None,
                            caps=None,
+                           cap_buckets=None,
                            shares_held=None,
                            volumes=None,
                            percentile=None,
@@ -1084,16 +1089,18 @@ def create_risk_tear_sheet(positions,
         2017-04-04	-108852.00	  4373.820     2.540999e+07
         2017-04-05	-119968.66	  4336.200     2.839812e+07
 
-    style_factor_panel : pd.Panel
-        Panel where each item is a DataFrame that tabulates style factor per
-        equity per day.
-        - Each item has dates as index, equities as columns
-        - Example item:
-                     Equity(24   Equity(62
-                       [AAPL])      [ABT])
-        2017-04-03	  -0.51284     1.39173
-        2017-04-04	  -0.73381     0.98149
-        2017-04-05	  -0.90132	   1.13981
+    style_factors : pd.DataFrame
+        Daily equity style factors
+        - DataFrame has a multi-index index, one level is dates and another is style, equities as columns
+        - Example:
+                                    Equity(24   Equity(62
+                dt       style      [AAPL])      [ABT])
+        2017-04-03	 momentum       -0.51284     1.39173
+                     size           0.1          -0.05
+        2017-04-04	  momentum      -0.73381     0.98149
+                      size           0.11          -0.0506
+        2017-04-05	  momentum      -0.90132	   1.13981
+                      size           0.12          -0.051
 
     sectors : pd.DataFrame
         Daily Morningstar sector code per asset
@@ -1105,6 +1112,12 @@ def create_risk_tear_sheet(positions,
         2017-04-04	     311.0       206.0
         2017-04-05	     311.0	     206.0
 
+    sector_dict : dict or OrderedDict
+        Dictionary of all sectors
+        - Keys are sector codes (e.g. ints or strings) and values are sector
+          names (which must be strings)
+        - Defaults to Morningstar sectors, see SECTORS in risk.py
+
     caps : pd.DataFrame
         Daily market cap per asset
         - DataFrame with dates as index and equities as columns
@@ -1114,6 +1127,12 @@ def create_risk_tear_sheet(positions,
         2017-04-03     1.327160e+10     6.402460e+10
         2017-04-04	   1.329620e+10     6.403694e+10
         2017-04-05	   1.297464e+10	    6.397187e+10
+
+    cap_buckets : dict or OrderedDict
+        Dictionary of all cap buckets
+        - Keys are Micro/Small/Mid/Large/Mega
+        - Values are capital value range tuple
+        - Defaults to CAP_BUCKETS in risk.py
 
     shares_held : pd.DataFrame
         Daily number of shares held by an algorithm.
@@ -1142,19 +1161,23 @@ def create_risk_tear_sheet(positions,
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
 
-    idx = positions.index & style_factor_panel.iloc[0].index & sectors.index \
-        & caps.index & shares_held.index & volumes.index
+    idx = positions.index & style_factors.index.levels[0]
+    if sectors is not None:
+        idx = idx & sectors.index
+    if caps is not None:
+        idx = idx & caps.index
+    if shares_held is not None:
+        idx = idx & shares_held.index
+    if volumes is not None:
+        idx = idx & volumes.index
+
     positions = positions.loc[idx]
 
+    style_factors_names = style_factors.index.levels[1].tolist()
     vertical_sections = 0
-    if style_factor_panel is not None:
-        vertical_sections += len(style_factor_panel.items)
-        new_style_dict = {}
-        for item in style_factor_panel.items:
-            new_style_dict.update({item:
-                                   style_factor_panel.loc[item].loc[idx]})
-        style_factor_panel = pd.Panel()
-        style_factor_panel = style_factor_panel.from_dict(new_style_dict)
+    vertical_sections += len(style_factors_names)
+    style_factors = style_factors.loc[idx]
+
     if sectors is not None:
         vertical_sections += 4
         sectors = sectors.loc[idx]
@@ -1166,24 +1189,21 @@ def create_risk_tear_sheet(positions,
         vertical_sections += 3
         shares_held = shares_held.loc[idx]
         volumes = volumes.loc[idx]
-
-    if percentile is None:
         percentile = 0.1
 
     fig = plt.figure(figsize=[14, vertical_sections * 6])
     gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.5, hspace=0.5)
 
-    if style_factor_panel is not None:
-        style_axes = []
-        style_axes.append(plt.subplot(gs[0, :]))
-        for i in range(1, len(style_factor_panel.items)):
-            style_axes.append(plt.subplot(gs[i, :], sharex=style_axes[0]))
+    style_axes = []
+    style_axes.append(plt.subplot(gs[0, :]))
+    for i in range(1, len(style_factors_names)):
+        style_axes.append(plt.subplot(gs[i, :], sharex=style_axes[0]))
 
-        j = 0
-        for name, df in style_factor_panel.iteritems():
-            sfe = risk.compute_style_factor_exposures(positions, df)
-            risk.plot_style_factor_exposures(sfe, name, style_axes[j])
-            j += 1
+    j = 0
+    for name in style_factors_names:
+        sfe = risk.compute_style_factor_exposures(positions, style_factors.xs(name, level=1))
+        risk.plot_style_factor_exposures(sfe, name, style_axes[j])
+        j += 1
 
     if sectors is not None:
         i += 1
@@ -1193,7 +1213,7 @@ def create_risk_tear_sheet(positions,
         i += 1
         ax_sector_net = plt.subplot(gs[i, :], sharex=style_axes[0])
         long_exposures, short_exposures, gross_exposures, net_exposures \
-            = risk.compute_sector_exposures(positions, sectors)
+            = risk.compute_sector_exposures(positions, sectors, sector_dict)
         risk.plot_sector_exposures_longshort(long_exposures, short_exposures,
                                              ax=ax_sector_longshort)
         risk.plot_sector_exposures_gross(gross_exposures, ax=ax_sector_gross)
@@ -1207,7 +1227,7 @@ def create_risk_tear_sheet(positions,
         i += 1
         ax_cap_net = plt.subplot(gs[i, :], sharex=style_axes[0])
         long_exposures, short_exposures, gross_exposures, net_exposures \
-            = risk.compute_cap_exposures(positions, caps)
+            = risk.compute_cap_exposures(positions, caps, cap_buckets)
         risk.plot_cap_exposures_longshort(long_exposures, short_exposures,
                                           ax_cap_longshort)
         risk.plot_cap_exposures_gross(gross_exposures, ax_cap_gross)
@@ -1295,7 +1315,11 @@ def create_perf_attrib_tear_sheet(returns,
 
     # one section for the returns plot, and for each factor grouping
     # one section for factor returns, and one for risk exposures
-    vertical_sections = 1 + 2 * max(len(factor_partitions), 1)
+    if factor_partitions is not None:
+        vertical_sections = 1 + 2 * max(len(factor_partitions), 1)
+    else:
+        vertical_sections = 1 + 2
+
     current_section = 0
 
     fig = plt.figure(figsize=[14, vertical_sections * 6])
@@ -1347,7 +1371,7 @@ def create_perf_attrib_tear_sheet(returns,
             ax=plt.subplot(gs[current_section])
         )
 
-    gs.tight_layout(fig)
+    # gs.tight_layout(fig)
 
     if return_fig:
         return fig

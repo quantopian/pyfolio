@@ -116,7 +116,7 @@ def plot_style_factor_exposures(tot_style_factor_exposure, factor_name=None,
     return ax
 
 
-def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
+def compute_sector_exposures(positions, sectors, sector_dict=None):
     """
     Returns arrays of long, short and gross sector exposures of an algorithm's
     positions
@@ -133,12 +133,13 @@ def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
 
     sector_dict : dict or OrderedDict
         Dictionary of all sectors
-        - Keys are sector codes (e.g. ints or strings) and values are sector
-          names (which must be strings)
-        - Defaults to Morningstar sectors
+        - See full explanation in create_risk_tear_sheet
     """
 
-    sector_ids = sector_dict.keys()
+    if sector_dict is None:
+        sector_ids = SECTORS.keys()
+    else:
+        sector_ids = sector_dict.keys()
 
     long_exposures = []
     short_exposures = []
@@ -172,7 +173,7 @@ def compute_sector_exposures(positions, sectors, sector_dict=SECTORS):
 
 
 def plot_sector_exposures_longshort(long_exposures, short_exposures,
-                                    sector_dict=SECTORS, ax=None):
+                                    sector_dict=None, ax=None):
     """
     Plots outputs of compute_sector_exposures as area charts
 
@@ -195,7 +196,7 @@ def plot_sector_exposures_longshort(long_exposures, short_exposures,
     else:
         sector_names = sector_dict.values()
 
-    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 11))
+    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, len(sector_names)))
 
     ax.stackplot(long_exposures[0].index, long_exposures,
                  labels=sector_names, colors=color_list, alpha=0.8,
@@ -232,7 +233,7 @@ def plot_sector_exposures_gross(gross_exposures, sector_dict=None, ax=None):
     else:
         sector_names = sector_dict.values()
 
-    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 11))
+    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, len(sector_names)))
 
     ax.stackplot(gross_exposures[0].index, gross_exposures,
                  labels=sector_names, colors=color_list, alpha=0.8,
@@ -266,7 +267,9 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
     else:
         sector_names = sector_dict.values()
 
-    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, 11))
+    color_list = plt.cm.gist_rainbow(np.linspace(0, 1, len(sector_names)))
+
+    sector_names = list(sector_names)
 
     for i in range(len(net_exposures)):
         ax.plot(net_exposures[i], color=color_list[i], alpha=0.8,
@@ -277,7 +280,7 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
     return ax
 
 
-def compute_cap_exposures(positions, caps):
+def compute_cap_exposures(positions, caps, cap_buckets=None):
     """
     Returns arrays of long, short and gross market cap exposures of an
     algorithm's positions
@@ -291,7 +294,15 @@ def compute_cap_exposures(positions, caps):
     caps : pd.DataFrame
         Daily Morningstar sector code per asset
         - See full explanation in create_risk_tear_sheet
+
+    cap_buckets : dict or OrderedDict
+        Dictionary of all cap buckets
+        - See full explanation in create_risk_tear_sheet
+
     """
+
+    if cap_buckets is None:
+        cap_buckets = CAP_BUCKETS
 
     long_exposures = []
     short_exposures = []
@@ -305,7 +316,7 @@ def compute_cap_exposures(positions, caps):
     tot_short_exposure = positions_wo_cash[positions_wo_cash < 0] \
         .abs().sum(axis='columns')
 
-    for bucket_name, boundaries in CAP_BUCKETS.items():
+    for bucket_name, boundaries in cap_buckets.items():
         in_bucket = positions_wo_cash[(caps >= boundaries[0]) &
                                       (caps <= boundaries[1])]
 

@@ -520,7 +520,7 @@ def configure_legend(ax, autofmt_xdate=True, change_colors=False,
               framealpha=0.5,
               loc='upper left',
               bbox_to_anchor=(1.05, 1),
-              fontsize='large')
+              fontsize='small')
 
     # manually rotate xticklabels instead of using matplotlib's autofmt_xdate
     # because it disables xticklabels for all but the last plot
