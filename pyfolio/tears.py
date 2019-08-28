@@ -1062,7 +1062,9 @@ def create_capacity_tear_sheet(returns, positions, transactions,
 def create_risk_tear_sheet(positions,
                            style_factors,
                            sectors=None,
+                           sector_dict=None,
                            caps=None,
+                           cap_buckets=None,
                            shares_held=None,
                            volumes=None,
                            percentile=None,
@@ -1110,6 +1112,12 @@ def create_risk_tear_sheet(positions,
         2017-04-04	     311.0       206.0
         2017-04-05	     311.0	     206.0
 
+    sector_dict : dict or OrderedDict
+        Dictionary of all sectors
+        - Keys are sector codes (e.g. ints or strings) and values are sector
+          names (which must be strings)
+        - Defaults to Morningstar sectors, see SECTORS in risk.py
+
     caps : pd.DataFrame
         Daily market cap per asset
         - DataFrame with dates as index and equities as columns
@@ -1119,6 +1127,12 @@ def create_risk_tear_sheet(positions,
         2017-04-03     1.327160e+10     6.402460e+10
         2017-04-04	   1.329620e+10     6.403694e+10
         2017-04-05	   1.297464e+10	    6.397187e+10
+
+    cap_buckets : dict or OrderedDict
+        Dictionary of all cap buckets
+        - Keys are Micro/Small/Mid/Large/Mega
+        - Values are capital value range tuple
+        - Defaults to CAP_BUCKETS in risk.py
 
     shares_held : pd.DataFrame
         Daily number of shares held by an algorithm.
@@ -1199,7 +1213,7 @@ def create_risk_tear_sheet(positions,
         i += 1
         ax_sector_net = plt.subplot(gs[i, :], sharex=style_axes[0])
         long_exposures, short_exposures, gross_exposures, net_exposures \
-            = risk.compute_sector_exposures(positions, sectors)
+            = risk.compute_sector_exposures(positions, sectors, sector_dict)
         risk.plot_sector_exposures_longshort(long_exposures, short_exposures,
                                              ax=ax_sector_longshort)
         risk.plot_sector_exposures_gross(gross_exposures, ax=ax_sector_gross)
@@ -1213,7 +1227,7 @@ def create_risk_tear_sheet(positions,
         i += 1
         ax_cap_net = plt.subplot(gs[i, :], sharex=style_axes[0])
         long_exposures, short_exposures, gross_exposures, net_exposures \
-            = risk.compute_cap_exposures(positions, caps)
+            = risk.compute_cap_exposures(positions, caps, cap_buckets)
         risk.plot_cap_exposures_longshort(long_exposures, short_exposures,
                                           ax_cap_longshort)
         risk.plot_cap_exposures_gross(gross_exposures, ax_cap_gross)

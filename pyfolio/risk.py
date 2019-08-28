@@ -133,9 +133,7 @@ def compute_sector_exposures(positions, sectors, sector_dict=None):
 
     sector_dict : dict or OrderedDict
         Dictionary of all sectors
-        - Keys are sector codes (e.g. ints or strings) and values are sector
-          names (which must be strings)
-        - Defaults to Morningstar sectors
+        - See full explanation in create_risk_tear_sheet
     """
 
     if sector_dict is None:
@@ -282,7 +280,7 @@ def plot_sector_exposures_net(net_exposures, sector_dict=None, ax=None):
     return ax
 
 
-def compute_cap_exposures(positions, caps):
+def compute_cap_exposures(positions, caps, cap_buckets=None):
     """
     Returns arrays of long, short and gross market cap exposures of an
     algorithm's positions
@@ -296,7 +294,15 @@ def compute_cap_exposures(positions, caps):
     caps : pd.DataFrame
         Daily Morningstar sector code per asset
         - See full explanation in create_risk_tear_sheet
+
+    cap_buckets : dict or OrderedDict
+        Dictionary of all cap buckets
+        - See full explanation in create_risk_tear_sheet
+
     """
+
+    if cap_buckets is None:
+        cap_buckets = CAP_BUCKETS
 
     long_exposures = []
     short_exposures = []
@@ -310,7 +316,7 @@ def compute_cap_exposures(positions, caps):
     tot_short_exposure = positions_wo_cash[positions_wo_cash < 0] \
         .abs().sum(axis='columns')
 
-    for bucket_name, boundaries in CAP_BUCKETS.items():
+    for bucket_name, boundaries in cap_buckets.items():
         in_bucket = positions_wo_cash[(caps >= boundaries[0]) &
                                       (caps <= boundaries[1])]
 
