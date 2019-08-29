@@ -42,7 +42,8 @@ class CapacityTestCase(TestCase):
                       columns=['A', 'B'], index=dates)
     price.index.name = 'dt'
     price['market_data'] = 'price'
-    market_data = concat([volume, price]).reset_index().set_index(['dt', 'market_data'])
+    market_data = concat([volume, price]).reset_index().set_index(
+        ['dt', 'market_data'])
 
     def test_days_to_liquidate_positions(self):
         dtlp = days_to_liquidate_positions(self.positions,
