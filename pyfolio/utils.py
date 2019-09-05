@@ -348,8 +348,7 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
         columns='symbol').replace(np.nan, 0)
 
     # Cumulate transaction amounts each day
-    txn_val['date'] = txn_val.index.date
-    txn_val = txn_val.groupby('date').cumsum()
+    txn_val = txn_val.groupby(txn_val.index.date).cumsum()
 
     # Calculate exposure, then take peak of exposure every day
     txn_val['exposure'] = txn_val.abs().sum(axis=1)
