@@ -79,15 +79,13 @@ def agg_all_long_short(round_trips, col, stats_dict):
                  .groupby('ones')[col]
                  .agg(stats_dict)
                  .T
-                 .rename_axis({1.0: 'All trades'},
-                              axis='columns'))
+                 .rename(columns={1.0: 'All trades'}))
     stats_long_short = (round_trips
                         .groupby('long')[col]
                         .agg(stats_dict)
                         .T
-                        .rename_axis({False: 'Short trades',
-                                      True: 'Long trades'},
-                                     axis='columns'))
+                        .rename(columns={False: 'Short trades',
+                                         True: 'Long trades'}))
 
     return stats_all.join(stats_long_short)
 
