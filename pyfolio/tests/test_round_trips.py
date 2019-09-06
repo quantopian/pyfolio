@@ -39,7 +39,7 @@ class RoundTripTestCase(TestCase):
                          ],
                    columns=['amount', 'price', 'symbol'],
                    index=dates_intraday[[0, 2]])
-         .rename('dt', axis='index')
+         .rename_axis('dt', axis='index')
          ),
         (DataFrame(data=[[2, 10., 'A'],
                          [2, 20., 'A'],
@@ -53,7 +53,7 @@ class RoundTripTestCase(TestCase):
                          ],
                    columns=['amount', 'price', 'symbol'],
                    index=dates_intraday[[0, 4]])
-         .rename('dt', axis='index')
+         .rename_axis('dt', axis='index')
          ),
     ])
     def test_groupby_consecutive(self, transactions, expected):
