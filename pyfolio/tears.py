@@ -1354,9 +1354,12 @@ def create_perf_attrib_tear_sheet(returns,
 
         for factor_type, partitions in factor_partitions.items():
 
+            columns_to_select = portfolio_exposures.columns.intersection(
+                partitions
+            )
+
             perf_attrib.plot_risk_exposures(
-                portfolio_exposures[portfolio_exposures.columns
-                                    .intersection(partitions)],
+                portfolio_exposures[columns_to_select],
                 ax=plt.subplot(gs[current_section]),
                 title='Daily {} factor exposures'.format(factor_type)
             )
