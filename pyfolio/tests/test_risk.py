@@ -112,12 +112,12 @@ class RiskTestCase(TestCase):
         expected_shorted.columns = expected_shorted.columns.astype(int)
         expected_grossed.columns = expected_grossed.columns.astype(int)
 
-        assert_frame_equal(pd.concat(sector_exposures[0], axis=1),
-                           expected_longed, check_exact=False)
-        assert_frame_equal(pd.concat(sector_exposures[1], axis=1),
-                           expected_shorted, check_exact=False)
-        assert_frame_equal(pd.concat(sector_exposures[2], axis=1),
-                           expected_grossed, check_exact=False)
+        assert_frame_equal(pd.concat(sector_exposures[0], axis=1).fillna(0.),
+                           expected_longed)
+        assert_frame_equal(pd.concat(sector_exposures[1], axis=1).fillna(0.),
+                           expected_shorted)
+        assert_frame_equal(pd.concat(sector_exposures[2], axis=1).fillna(0.),
+                           expected_grossed)
 
     @parameterized.expand([
         (test_pos, test_caps, expected_caps_longed, expected_caps_shorted,
