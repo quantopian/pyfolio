@@ -112,12 +112,12 @@ class RiskTestCase(TestCase):
         expected_shorted.columns = expected_shorted.columns.astype(int)
         expected_grossed.columns = expected_grossed.columns.astype(int)
 
-        assert_frame_equal(pd.concat(sector_exposures[0], axis=1),
-                           expected_longed)
-        assert_frame_equal(pd.concat(sector_exposures[1], axis=1),
-                           expected_shorted)
+        assert_frame_equal(pd.concat(sector_exposures[0], axis=1).fillna(0.),
+                           expected_longed.fillna(0.))
+        assert_frame_equal(pd.concat(sector_exposures[1], axis=1).fillna(0.),
+                           expected_shorted.fillna(0.))
         assert_frame_equal(pd.concat(sector_exposures[2], axis=1),
-                           expected_grossed)
+                           expected_grossed.fillna(0.))
 
     @parameterized.expand([
         (test_pos, test_caps, expected_caps_longed, expected_caps_shorted,
@@ -134,14 +134,14 @@ class RiskTestCase(TestCase):
         expected_grossed.columns = expected_grossed.columns.astype(int)
         expected_netted.columns = expected_netted.columns.astype(int)
 
-        assert_frame_equal(pd.concat(cap_exposures[0], axis=1),
-                           expected_longed)
-        assert_frame_equal(pd.concat(cap_exposures[1], axis=1),
-                           expected_shorted)
-        assert_frame_equal(pd.concat(cap_exposures[2], axis=1),
-                           expected_grossed)
-        assert_frame_equal(pd.concat(cap_exposures[3], axis=1),
-                           expected_netted)
+        assert_frame_equal(pd.concat(cap_exposures[0], axis=1).fillna(0.),
+                           expected_longed.fillna(0.))
+        assert_frame_equal(pd.concat(cap_exposures[1], axis=1).fillna(0.),
+                           expected_shorted.fillna(0.))
+        assert_frame_equal(pd.concat(cap_exposures[2], axis=1).fillna(0.),
+                           expected_grossed.fillna(0.))
+        assert_frame_equal(pd.concat(cap_exposures[3], axis=1).fillna(0.),
+                           expected_netted.fillna(0.))
 
     @parameterized.expand([
         (test_shares_held, test_volumes, 0.1, expected_volumes)
