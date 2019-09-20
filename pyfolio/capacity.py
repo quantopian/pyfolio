@@ -18,9 +18,10 @@ def daily_txns_with_bar_data(transactions, market_data):
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
         - See full explanation in tears.create_full_tear_sheet
-    market_data : pd.Panel
-        Contains "volume" and "price" DataFrames for the tickers
-        in the passed positions DataFrames
+    market_data : pd.DataFrame
+        Daily market_data
+        - DataFrame has a multi-index index, one level is dates and another is
+        market_data contains volume & price, equities as columns
 
     Returns
     -------
@@ -33,9 +34,9 @@ def daily_txns_with_bar_data(transactions, market_data):
     transactions.index.name = 'date'
     txn_daily = pd.DataFrame(transactions.assign(
         amount=abs(transactions.amount)).groupby(
-        ['symbol', pd.TimeGrouper('D')]).sum()['amount'])
-    txn_daily['price'] = market_data['price'].unstack()
-    txn_daily['volume'] = market_data['volume'].unstack()
+        ['symbol', pd.Grouper(freq='D')]).sum()['amount'])
+    txn_daily['price'] = market_data.xs('price', level=1).unstack()
+    txn_daily['volume'] = market_data.xs('volume', level=1).unstack()
 
     txn_daily = txn_daily.reset_index().set_index('date')
 
@@ -63,10 +64,10 @@ def days_to_liquidate_positions(positions, market_data,
     positions: pd.DataFrame
         Contains daily position values including cash
         - See full explanation in tears.create_full_tear_sheet
-    market_data : pd.Panel
-        Panel with items axis of 'price' and 'volume' DataFrames.
-        The major and minor axes should match those of the
-        the passed positions DataFrame (same dates and symbols).
+    market_data : pd.DataFrame
+        Daily market_data
+        - DataFrame has a multi-index index, one level is dates and another is
+        market_data contains volume & price, equities as columns
     max_bar_consumption : float
         Max proportion of a daily bar that can be consumed in the
         process of liquidating a position.
@@ -83,7 +84,7 @@ def days_to_liquidate_positions(positions, market_data,
         Datetime index, symbols as columns.
     """
 
-    DV = market_data['volume'] * market_data['price']
+    DV = market_data.xs('volume', level=1) * market_data.xs('price', level=1)
     roll_mean_dv = DV.rolling(window=mean_volume_window,
                               center=False).mean().shift()
     roll_mean_dv = roll_mean_dv.replace(0, np.nan)
@@ -111,10 +112,10 @@ def get_max_days_to_liquidate_by_ticker(positions, market_data,
     positions: pd.DataFrame
         Contains daily position values including cash
         - See full explanation in tears.create_full_tear_sheet
-    market_data : pd.Panel
-        Panel with items axis of 'price' and 'volume' DataFrames.
-        The major and minor axes should match those of the
-        the passed positions DataFrame (same dates and symbols).
+    market_data : pd.DataFrame
+        Daily market_data
+        - DataFrame has a multi-index index, one level is dates and another is
+        market_data contains volume & price, equities as columns
     max_bar_consumption : float
         Max proportion of a daily bar that can be consumed in the
         process of liquidating a position.
@@ -168,10 +169,10 @@ def get_low_liquidity_transactions(transactions, market_data,
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
          - See full explanation in create_full_tear_sheet.
-    market_data : pd.Panel
-        Panel with items axis of 'price' and 'volume' DataFrames.
-        The major and minor axes should match those of the
-        the passed positions DataFrame (same dates and symbols).
+    market_data : pd.DataFrame
+        Daily market_data
+        - DataFrame has a multi-index index, one level is dates and another is
+        market_data contains volume & price, equities as columns
     last_n_days : integer
         Compute for only the last n days of the passed backtest data.
     """

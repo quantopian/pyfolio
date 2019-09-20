@@ -20,9 +20,9 @@ import empyrical as ep
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from pyfolio.pos import get_percent_alloc
-from pyfolio.txn import get_turnover
-from pyfolio.utils import print_table, configure_legend
+from .pos import get_percent_alloc
+from .txn import get_turnover
+from .utils import print_table, configure_legend
 
 PERF_ATTRIB_TURNOVER_THRESHOLD = 0.25
 
@@ -449,7 +449,8 @@ def plot_factor_contribution_to_perf(
         ax = plt.gca()
 
     factors_to_plot = perf_attrib_data.drop(
-        ['total_returns', 'common_returns'], axis='columns', errors='ignore'
+        ['total_returns', 'common_returns', 'tilt_returns', 'timing_returns'],
+        axis='columns', errors='ignore'
     )
 
     factors_cumulative = pd.DataFrame()
@@ -564,10 +565,6 @@ def _align_and_warn(returns,
 
         positions = positions.drop(missing_stocks, axis='columns',
                                    errors='ignore')
-
-    missing_factor_loadings_index = positions.index.difference(
-        factor_loadings.index.get_level_values(0).unique()
-    )
 
     missing_factor_loadings_index = positions.index.difference(
         factor_loadings.index.get_level_values(0).unique()

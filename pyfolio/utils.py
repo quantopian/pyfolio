@@ -348,13 +348,12 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
         columns='symbol').replace(np.nan, 0)
 
     # Cumulate transaction amounts each day
-    txn_val['date'] = txn_val.index.date
-    txn_val = txn_val.groupby('date').cumsum()
+    txn_val = txn_val.groupby(txn_val.index.date).cumsum()
 
     # Calculate exposure, then take peak of exposure every day
     txn_val['exposure'] = txn_val.abs().sum(axis=1)
     condition = (txn_val['exposure'] == txn_val.groupby(
-        pd.TimeGrouper('24H'))['exposure'].transform(max))
+        pd.Grouper(freq='24H'))['exposure'].transform(max))
     txn_val = txn_val[condition].drop('exposure', axis=1)
 
     # Compute cash delta
@@ -520,7 +519,7 @@ def configure_legend(ax, autofmt_xdate=True, change_colors=False,
               framealpha=0.5,
               loc='upper left',
               bbox_to_anchor=(1.05, 1),
-              fontsize='large')
+              fontsize='small')
 
     # manually rotate xticklabels instead of using matplotlib's autofmt_xdate
     # because it disables xticklabels for all but the last plot

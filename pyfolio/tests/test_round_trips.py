@@ -152,12 +152,12 @@ class RoundTripTestCase(TestCase):
                                        [-5, 10, 'A'],
                                        [-1, 10, 'B']],
                                  columns=['amount', 'price', 'symbol'],
-                                 index=[dates[:3]])
+                                 index=dates[:3])
         positions = DataFrame(data=[[20, 10, 0],
                                     [-30, 10, 30],
                                     [-60, 0, 30]],
                               columns=['A', 'B', 'cash'],
-                              index=[dates[:3]])
+                              index=dates[:3])
 
         expected_ix = dates[:3].append(DatetimeIndex([dates[2] +
                                                       Timedelta(seconds=1)]))

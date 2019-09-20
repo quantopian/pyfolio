@@ -7,7 +7,7 @@ from pandas import (
     DataFrame,
     date_range,
     datetime,
-    Panel
+    concat
 )
 from pandas.util.testing import (assert_frame_equal,
                                  assert_series_equal)
@@ -35,10 +35,15 @@ class CapacityTestCase(TestCase):
                         [2.0, 2.0],
                         [3.0, 1.0]],
                        columns=['A', 'B'], index=dates)
+    volume.index.name = 'dt'
     volume = volume * 1000000
+    volume['market_data'] = 'volume'
     price = DataFrame([[1.0, 1.0]] * len(dates),
                       columns=['A', 'B'], index=dates)
-    market_data = Panel({'volume': volume, 'price': price})
+    price.index.name = 'dt'
+    price['market_data'] = 'price'
+    market_data = concat([volume, price]).reset_index().set_index(
+        ['dt', 'market_data'])
 
     def test_days_to_liquidate_positions(self):
         dtlp = days_to_liquidate_positions(self.positions,

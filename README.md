@@ -41,18 +41,6 @@ mkvirtualenv pyfolio
 Next, clone this git repository and run `python setup.py develop`
 and edit the library files directly.
 
-#### Bayesian tear sheet
-
-Generating a [Bayesian tearsheet](https://github.com/quantopian/pyfolio/blob/master/pyfolio/examples/bayesian.ipynb) requires PyMC3 and Theano. You can install these packages with the following commands:
-
-```bash
-pip install theano
-```
-
-```bash
-pip install pymc3
-```
-
 #### Matplotlib on OSX
 
 If you are on OSX and using a non-framework build of Python, you may need to set your backend:
