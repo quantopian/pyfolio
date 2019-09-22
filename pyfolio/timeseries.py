@@ -548,6 +548,50 @@ def rolling_beta(returns, factor_returns,
         return out
 
 
+def rolling_alpha(returns, factor_returns,
+                 rolling_window=APPROX_BDAYS_PER_MONTH * 6):
+    """
+    Determines the rolling alpha of a strategy.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    factor_returns : pd.Series or pd.DataFrame
+        Daily noncumulative returns of the benchmark factor to which alpha are
+        computed. Usually a benchmark such as market returns.
+         - If DataFrame is passed, computes rolling alpha for each column.
+         - This is in the same style as returns.
+    rolling_window : int, optional
+        The size of the rolling window, in days, over which to compute
+        alpha (default 6 months).
+
+    Returns
+    -------
+    pd.Series
+        Rolling alpha.
+
+    Note
+    -----
+    See https://en.wikipedia.org/wiki/Alpha_(finance) for more details.
+    """
+
+    if factor_returns.ndim > 1:
+        # Apply column-wise
+        return factor_returns.apply(partial(rolling_alpha, returns),
+                                    rolling_window=rolling_window)
+    else:
+        out = pd.Series(index=returns.index)
+        for beg, end in zip(returns.index[0:-rolling_window],
+                            returns.index[rolling_window:]):
+            out.loc[end] = ep.alpha(
+                returns.loc[beg:end],
+                factor_returns.loc[beg:end])
+
+        return out
+
+
 def rolling_regression(returns, factor_returns,
                        rolling_window=APPROX_BDAYS_PER_MONTH * 6,
                        nan_threshold=0.1):

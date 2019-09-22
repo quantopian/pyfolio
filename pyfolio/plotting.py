@@ -44,6 +44,7 @@ def customize(func):
     """
     Decorator to set plotting context and axes style during function call.
     """
+
     @wraps(func)
     def call_w_context(*args, **kwargs):
         set_context = kwargs.pop('set_context', True)
@@ -52,6 +53,7 @@ def customize(func):
                 return func(*args, **kwargs)
         else:
             return func(*args, **kwargs)
+
     return call_w_context
 
 
@@ -436,7 +438,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
     lim = ax.get_ylim()
     colors = sns.cubehelix_palette(len(df_drawdowns))[::-1]
     for i, (peak, recovery) in df_drawdowns[
-            ['Peak date', 'Recovery date']].iterrows():
+        ['Peak date', 'Recovery date']].iterrows():
         if pd.isnull(recovery):
             recovery = returns.index[-1]
         ax.fill_between((peak, recovery),
@@ -875,6 +877,58 @@ def plot_rolling_beta(returns, factor_returns, legend_loc='best',
         returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6)
     rb_1.plot(color='steelblue', lw=3, alpha=0.6, ax=ax, **kwargs)
     rb_2 = timeseries.rolling_beta(
+        returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 12)
+    rb_2.plot(color='grey', lw=3, alpha=0.4, ax=ax, **kwargs)
+    ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)
+    ax.axhline(0.0, color='black', linestyle='-', lw=2)
+
+    ax.set_xlabel('')
+    ax.legend(['6-mo',
+               '12-mo'],
+              loc=legend_loc, frameon=True, framealpha=0.5)
+    ax.set_ylim((-1.0, 1.0))
+    return ax
+
+
+def plot_rolling_alpha(returns, factor_returns, legend_loc='best',
+                       ax=None, **kwargs):
+    """
+    Plots the rolling 6-month and 12-month alpha versus date.
+
+    Parameters
+    ----------
+    returns : pd.Series
+        Daily returns of the strategy, noncumulative.
+         - See full explanation in tears.create_full_tear_sheet.
+    factor_returns : pd.Series
+        Daily noncumulative returns of the benchmark factor to which alpha are
+        computed. Usually a benchmark such as market returns.
+         - This is in the same style as returns.
+    legend_loc : matplotlib.loc, optional
+        The location of the legend on the plot.
+    ax : matplotlib.Axes, optional
+        Axes upon which to plot.
+    **kwargs, optional
+        Passed to plotting function.
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        The axes that were plotted on.
+    """
+
+    if ax is None:
+        ax = plt.gca()
+
+    y_axis_formatter = FuncFormatter(utils.two_dec_places)
+    ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
+
+    ax.set_title("Rolling portfolio alpha to " + str(factor_returns.name))
+    ax.set_ylabel('Alpha')
+    rb_1 = timeseries.rolling_alpha(
+        returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6)
+    rb_1.plot(color='steelblue', lw=3, alpha=0.6, ax=ax, **kwargs)
+    rb_2 = timeseries.rolling_alpha(
         returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 12)
     rb_2.plot(color='grey', lw=3, alpha=0.4, ax=ax, **kwargs)
     ax.axhline(rb_1.mean(), color='steelblue', linestyle='--', lw=3)
