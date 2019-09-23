@@ -396,6 +396,7 @@ def create_simple_tear_sheet(returns,
             plotting.plot_turnover(returns,
                                    transactions,
                                    positions,
+                                   turnover_denom=turnover_denom,
                                    ax=ax_turnover)
 
             plotting.plot_txn_time_hist(transactions, ax=ax_txn_timings)
@@ -691,8 +692,8 @@ def create_position_tear_sheet(returns, positions,
 
 @plotting.customize
 def create_txn_tear_sheet(returns, positions, transactions,
-                          unadjusted_returns=None, estimate_intraday='infer',
-                          return_fig=False):
+                          turnover_denom='AGB', unadjusted_returns=None,
+                          estimate_intraday='infer', return_fig=False):
     """
     Generate a number of plots for analyzing a strategy's transactions.
 
@@ -737,6 +738,7 @@ def create_txn_tear_sheet(returns, positions, transactions,
         returns,
         transactions,
         positions,
+        turnover_denom=turnover_denom,
         ax=ax_turnover)
 
     plotting.plot_daily_volume(returns, transactions, ax=ax_daily_volume)

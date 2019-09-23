@@ -1323,7 +1323,7 @@ def plot_return_quantiles(returns, live_start_date=None, ax=None, **kwargs):
     return ax
 
 
-def plot_turnover(returns, transactions, positions,
+def plot_turnover(returns, transactions, positions, turnover_denom='AGB',
                   legend_loc='best', ax=None, **kwargs):
     """
     Plots turnover vs. date.
@@ -1345,6 +1345,9 @@ def plot_turnover(returns, transactions, positions,
     positions : pd.DataFrame
         Daily net position values.
          - See full explanation in tears.create_full_tear_sheet.
+    turnover_denom : str, optional
+        Either AGB or portfolio_value, default AGB.
+        - See full explanation in txn.get_turnover.
     legend_loc : matplotlib.loc, optional
         The location of the legend on the plot.
     ax : matplotlib.Axes, optional
@@ -1364,7 +1367,7 @@ def plot_turnover(returns, transactions, positions,
     y_axis_formatter = FuncFormatter(utils.two_dec_places)
     ax.yaxis.set_major_formatter(FuncFormatter(y_axis_formatter))
 
-    df_turnover = txn.get_turnover(positions, transactions)
+    df_turnover = txn.get_turnover(positions, transactions, turnover_denom)
     df_turnover_by_month = df_turnover.resample("M").mean()
     df_turnover.plot(color='steelblue', alpha=1.0, lw=0.5, ax=ax, **kwargs)
     df_turnover_by_month.plot(
