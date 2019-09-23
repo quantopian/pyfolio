@@ -66,12 +66,6 @@ def create_full_tear_sheet(returns,
                            cone_std=(1.0, 1.5, 2.0),
                            bootstrap=False,
                            unadjusted_returns=None,
-                           style_factors=None,
-                           sectors=None,
-                           caps=None,
-                           shares_held=None,
-                           volumes=None,
-                           percentile=None,
                            turnover_denom='AGB',
                            set_context=True,
                            factor_returns=None,
@@ -603,8 +597,8 @@ def create_returns_tear_sheet(returns, positions=None,
 @plotting.customize
 def create_position_tear_sheet(returns, positions,
                                show_and_plot_top_pos=2, hide_positions=False,
-                               return_fig=False, sector_mappings=None,
-                               transactions=None, estimate_intraday='infer'):
+                               sector_mappings=None, transactions=None,
+                               estimate_intraday='infer', return_fig=False):
     """
     Generate a number of plots for analyzing a
     strategy's positions and holdings.
@@ -627,8 +621,6 @@ def create_position_tear_sheet(returns, positions,
     hide_positions : bool, optional
         If True, will not output any symbol names.
         Overrides show_and_plot_top_pos to 0 to suppress text output.
-    return_fig : boolean, optional
-        If True, returns the figure that was plotted on.
     sector_mappings : dict or pd.Series, optional
         Security identifier to sector mapping.
         Security ids as keys, sectors as values.
@@ -638,6 +630,8 @@ def create_position_tear_sheet(returns, positions,
     estimate_intraday: boolean or str, optional
         Approximate returns for intraday strategies.
         See description in create_full_tear_sheet.
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
     """
 
     positions = utils.check_intraday(estimate_intraday, returns,
@@ -956,7 +950,8 @@ def create_capacity_tear_sheet(returns, positions, transactions,
                                trade_daily_vol_limit=0.05,
                                last_n_days=utils.APPROX_BDAYS_PER_MONTH * 6,
                                days_to_liquidate_limit=1,
-                               estimate_intraday='infer'):
+                               estimate_intraday='infer',
+                               return_fig=False):
     """
     Generates a report detailing portfolio size constraints set by
     least liquid tickers. Plots a "capacity sweep," a curve describing
@@ -993,6 +988,8 @@ def create_capacity_tear_sheet(returns, positions, transactions,
     estimate_intraday: boolean or str, optional
         Approximate returns for intraday strategies.
         See description in create_full_tear_sheet.
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
     """
 
     positions = utils.check_intraday(estimate_intraday, returns,
@@ -1046,13 +1043,16 @@ def create_capacity_tear_sheet(returns, positions, transactions,
         llt[llt['max_pct_bar_consumed'] > trade_daily_vol_limit * 100])
 
     bt_starting_capital = positions.iloc[0].sum() / (1 + returns.iloc[0])
-    _, ax_capacity_sweep = plt.subplots(figsize=(14, 6))
+    fig, ax_capacity_sweep = plt.subplots(figsize=(14, 6))
     plotting.plot_capacity_sweep(returns, transactions, market_data,
                                  bt_starting_capital,
                                  min_pv=100000,
                                  max_pv=300000000,
                                  step_size=1000000,
                                  ax=ax_capacity_sweep)
+
+    if return_fig:
+        return fig
 
 
 @plotting.customize
@@ -1062,8 +1062,8 @@ def create_perf_attrib_tear_sheet(returns,
                                   factor_loadings,
                                   transactions=None,
                                   pos_in_dollars=True,
-                                  return_fig=False,
-                                  factor_partitions=FACTOR_PARTITIONS):
+                                  factor_partitions=FACTOR_PARTITIONS,
+                                  return_fig=False):
     """
     Generate plots and tables for analyzing a strategy's performance.
 
@@ -1093,15 +1093,15 @@ def create_perf_attrib_tear_sheet(returns,
         Flag indicating whether `positions` are in dollars or percentages
         If True, positions are in dollars.
 
-    return_fig : boolean, optional
-        If True, returns the figure that was plotted on.
-
     factor_partitions : dict
         dict specifying how factors should be separated in factor returns
         and risk exposures plots
         - Example:
           {'style': ['momentum', 'size', 'value', ...],
            'sector': ['technology', 'materials', ... ]}
+
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
     """
     portfolio_exposures, perf_attrib_data = perf_attrib.perf_attrib(
         returns, positions, factor_returns, factor_loadings, transactions,
