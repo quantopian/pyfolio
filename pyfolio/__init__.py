@@ -5,7 +5,6 @@ from . import txn
 from . import interesting_periods
 from . import capacity
 from . import round_trips
-from . import risk
 from . import perf_attrib
 
 from .tears import *  # noqa
@@ -17,4 +16,4 @@ del get_versions
 
 __all__ = ['utils', 'timeseries', 'pos', 'txn',
            'interesting_periods', 'capacity', 'round_trips',
-           'risk', 'perf_attrib']
+           'perf_attrib']
