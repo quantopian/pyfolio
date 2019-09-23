@@ -710,6 +710,9 @@ def create_txn_tear_sheet(returns, positions, transactions,
     transactions : pd.DataFrame
         Prices and amounts of executed trades. One row per trade.
          - See full explanation in create_full_tear_sheet.
+    turnover_denom : str, optional
+        Either AGB or portfolio_value, default AGB.
+        - See full explanation in txn.get_turnover.
     unadjusted_returns : pd.Series, optional
         Daily unadjusted returns of the strategy, noncumulative.
         Will plot additional swippage sweep analysis.
@@ -744,7 +747,9 @@ def create_txn_tear_sheet(returns, positions, transactions,
     plotting.plot_daily_volume(returns, transactions, ax=ax_daily_volume)
 
     try:
-        plotting.plot_daily_turnover_hist(transactions, positions,
+        plotting.plot_daily_turnover_hist(transactions,
+                                          positions,
+                                          turnover_denom=turnover_denom,
                                           ax=ax_turnover_hist)
     except ValueError:
         warnings.warn('Unable to generate turnover plot.', UserWarning)

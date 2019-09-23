@@ -1520,7 +1520,7 @@ def plot_capacity_sweep(returns, transactions, market_data,
     return ax
 
 
-def plot_daily_turnover_hist(transactions, positions,
+def plot_daily_turnover_hist(transactions, positions, turnover_denom='AGB',
                              ax=None, **kwargs):
     """
     Plots a histogram of daily turnover rates.
@@ -1533,6 +1533,9 @@ def plot_daily_turnover_hist(transactions, positions,
     positions : pd.DataFrame
         Daily net position values.
          - See full explanation in tears.create_full_tear_sheet.
+    turnover_denom : str, optional
+        Either AGB or portfolio_value, default AGB.
+        - See full explanation in txn.get_turnover.
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     **kwargs, optional
@@ -1546,7 +1549,7 @@ def plot_daily_turnover_hist(transactions, positions,
 
     if ax is None:
         ax = plt.gca()
-    turnover = txn.get_turnover(positions, transactions)
+    turnover = txn.get_turnover(positions, transactions, turnover_denom)
     sns.distplot(turnover, ax=ax, **kwargs)
     ax.set_title('Distribution of daily turnover rates')
     ax.set_xlabel('Turnover rate')
