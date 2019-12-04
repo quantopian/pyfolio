@@ -34,7 +34,6 @@ def daily_txns_with_bar_data(transactions, market_data):
     txn_daily = pd.DataFrame(transactions.assign(
         amount=abs(transactions.amount)).groupby(
         ['symbol', pd.Grouper(freq='D')]).sum()['amount'])
-        # ['symbol', pd.TimeGrouper('D')]).sum()['amount'])
     txn_daily['price'] = market_data.xs('price', level='market_data').unstack()
     txn_daily['volume'] = market_data.xs('volume', level='market_data').unstack()
 
