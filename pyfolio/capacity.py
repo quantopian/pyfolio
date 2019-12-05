@@ -35,7 +35,8 @@ def daily_txns_with_bar_data(transactions, market_data):
         amount=abs(transactions.amount)).groupby(
         ['symbol', pd.Grouper(freq='D')]).sum()['amount'])
     txn_daily['price'] = market_data.xs('price', level='market_data').unstack()
-    txn_daily['volume'] = market_data.xs('volume', level='market_data').unstack()
+    txn_daily['volume'] = market_data.xs('volume',
+                                         level='market_data').unstack()
 
     txn_daily = txn_daily.reset_index().set_index('date')
 
@@ -83,7 +84,8 @@ def days_to_liquidate_positions(positions, market_data,
         Datetime index, symbols as columns.
     """
 
-    DV = market_data.xs('volume', level='market_data') * market_data.xs('price', level='market_data')
+    DV = market_data.xs('volume', level='market_data') * \
+         market_data.xs('price', level='market_data')
     roll_mean_dv = DV.rolling(window=mean_volume_window,
                               center=False).mean().shift()
     roll_mean_dv = roll_mean_dv.replace(0, np.nan)
@@ -185,8 +187,8 @@ def get_low_liquidity_transactions(transactions, market_data,
         txn_daily_w_bar = txn_daily_w_bar[txn_daily_w_bar.date > md]
 
     bar_consumption = txn_daily_w_bar.assign(
-        max_pct_bar_consumed=(
-                                     txn_daily_w_bar.amount / txn_daily_w_bar.volume) * 100
+        max_pct_bar_consumed=(txn_daily_w_bar.amount /
+                              txn_daily_w_bar.volume) * 100
     ).sort_values('max_pct_bar_consumed', ascending=False)
     max_bar_consumption = bar_consumption.groupby('symbol').first()
 
