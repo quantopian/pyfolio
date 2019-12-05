@@ -84,9 +84,10 @@ def days_to_liquidate_positions(positions, market_data,
         Datetime index, symbols as columns.
     """
 
-    DV = market_data.xs('volume', level='market_data') * \
+    dv = market_data.xs('volume', level='market_data') * \
          market_data.xs('price', level='market_data')
-    roll_mean_dv = DV.rolling(window=mean_volume_window,
+
+    roll_mean_dv = dv.rolling(window=mean_volume_window,
                               center=False).mean().shift()
     roll_mean_dv = roll_mean_dv.replace(0, np.nan)
 
@@ -229,8 +230,8 @@ def apply_slippage_penalty(returns, txn_daily, simulate_starting_capital,
     simulate_traded_dollars = txn_daily.price * simulate_traded_shares
     simulate_pct_volume_used = simulate_traded_shares / txn_daily.volume
 
-    penalties = simulate_pct_volume_used ** 2 \
-                * impact * simulate_traded_dollars
+    penalties = (simulate_pct_volume_used ** 2 *
+                 impact * simulate_traded_dollars)
 
     daily_penalty = penalties.resample('D').sum()
     daily_penalty = daily_penalty.reindex(returns.index).fillna(0)
