@@ -39,10 +39,7 @@ classifiers = ['Development Status :: 4 - Beta',
                'Topic :: Scientific/Engineering :: Mathematics',
                'Operating System :: OS Independent']
 
-if (sys.version_info.major, sys.version_info.minor) >= (3, 3):
-    support_ipython_6 = True
-else:
-    support_ipython_6 = False
+support_ipython_6 = (sys.version_info >= (3, 3))
 
 install_reqs = [
     'ipython>=3.2.3' if support_ipython_6 else 'ipython>=3.2.3, <6',
