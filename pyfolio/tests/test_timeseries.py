@@ -182,7 +182,7 @@ class TestDrawdown(TestCase):
                          spy_drawdowns['Peak date'].shift(-1)))[:-1]
         self.assertGreater(len(pairs), 0)
         for recovery, peak in pairs:
-            if recovery != pd.NaT:
+            if not pd.isnull(recovery):
                 self.assertLessEqual(recovery, peak)
 
     @parameterized.expand([
