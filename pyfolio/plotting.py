@@ -445,7 +445,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
                         alpha=.4,
                         color=colors[i])
     ax.set_ylim(lim)
-    ax.set_title('Top %i drawdown periods' % top)
+    ax.set_title('Top %i drawdown periods' % len(df_drawdowns))
     ax.set_ylabel('Cumulative returns')
     ax.legend(['Portfolio'], loc='upper left',
               frameon=True, framealpha=0.5)
