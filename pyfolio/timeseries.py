@@ -1223,7 +1223,7 @@ def extract_interesting_date_ranges(returns, periods=None):
     if periods is None:
         periods = PERIODS
     returns_dupe = returns.copy()
-    returns_dupe.index = returns_dupe.index.map(pd.Timestamp)
+    returns_dupe.index = returns_dupe.index.map(lambda t: pd.to_datetime(t.replace(tzinfo=None)).to_pydatetime())
     ranges = OrderedDict()
     for name, (start, end) in periods.items():
         try:

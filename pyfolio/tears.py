@@ -32,6 +32,8 @@ from . import round_trips
 from . import timeseries
 from . import txn
 from . import utils
+import base64
+from io import BytesIO
 
 FACTOR_PARTITIONS = {
     'style': ['momentum', 'size', 'value', 'reversal_short_term',
@@ -50,6 +52,16 @@ def timer(msg_body, previous_time):
     print(message.format(run_time))
 
     return current_time
+
+
+def fig_as_html(fig):
+    tmpfile = BytesIO()
+    fig.savefig(tmpfile, format='png')
+    encoded = base64.b64encode(tmpfile.getvalue()).decode('utf-8')
+    html = '''<div>
+  <img src=\'data:image/png;base64, %s\'>
+  </div>''' % (encoded)
+    return html
 
 
 def create_full_tear_sheet(returns,
@@ -166,7 +178,12 @@ def create_full_tear_sheet(returns,
         dict specifying how factors should be separated in perf attrib
         factor returns and risk exposures plots
         - See create_perf_attrib_tear_sheet().
+    return_fig : boolean, optional
+        If True, returns the figure that was plotted on.
+    html_dump : boolean, optional
+        If True, print html to stdout
     """
+    fig = None
 
     if (unadjusted_returns is None) and (slippage is not None) and\
        (transactions is not None):
@@ -177,7 +194,7 @@ def create_full_tear_sheet(returns,
     positions = utils.check_intraday(estimate_intraday, returns,
                                      positions, transactions)
 
-    create_returns_tear_sheet(
+    fig = create_returns_tear_sheet(
         returns,
         positions=positions,
         transactions=transactions,
@@ -187,44 +204,65 @@ def create_full_tear_sheet(returns,
         bootstrap=bootstrap,
         turnover_denom=turnover_denom,
         header_rows=header_rows,
-        set_context=set_context)
+        set_context=set_context,
+        return_fig=return_fig)
+    if html_dump and fig is not None:
+        print(fig_as_html(fig))
 
-    create_interesting_times_tear_sheet(returns,
+    fig = create_interesting_times_tear_sheet(returns,
                                         benchmark_rets=benchmark_rets,
-                                        set_context=set_context)
+                                        set_context=set_context,
+                                        return_fig=return_fig)
+    if html_dump and fig is not None:
+        print(fig_as_html(fig))
 
-    if positions is not None:
-        create_position_tear_sheet(returns, positions,
+    if html_dump and positions is not None:
+        fig = create_position_tear_sheet(returns, positions,
                                    hide_positions=hide_positions,
                                    set_context=set_context,
                                    sector_mappings=sector_mappings,
-                                   estimate_intraday=False)
+                                   estimate_intraday=False,
+                                   return_fig=return_fig)
+        if html_dump and fig is not None:
+            print(fig_as_html(fig))
 
         if transactions is not None:
-            create_txn_tear_sheet(returns, positions, transactions,
+            fig = create_txn_tear_sheet(returns, positions, transactions,
                                   unadjusted_returns=unadjusted_returns,
                                   estimate_intraday=False,
-                                  set_context=set_context)
+                                  set_context=set_context,
+                                  return_fig=return_fig)
+            if html_dump and fig is not None:
+                print(fig_as_html(fig))
             if round_trips:
-                create_round_trip_tear_sheet(
+                fig = create_round_trip_tear_sheet(
                     returns=returns,
                     positions=positions,
                     transactions=transactions,
                     sector_mappings=sector_mappings,
-                    estimate_intraday=False)
+                    estimate_intraday=False,
+                    return_fig=return_fig)
+                if html_dump and fig is not None:
+                    print(fig_as_html(fig))
 
             if market_data is not None:
-                create_capacity_tear_sheet(returns, positions, transactions,
+                fig = create_capacity_tear_sheet(returns, positions, transactions,
                                            market_data,
                                            liquidation_daily_vol_limit=0.2,
                                            last_n_days=125,
-                                           estimate_intraday=False)
+                                           estimate_intraday=False,
+                                           return_fig=return_fig)
+                if html_dump and fig is not None:
+                    print(fig_as_html(fig))
 
         if factor_returns is not None and factor_loadings is not None:
-            create_perf_attrib_tear_sheet(returns, positions, factor_returns,
+            fig = create_perf_attrib_tear_sheet(returns, positions, factor_returns,
                                           factor_loadings, transactions,
                                           pos_in_dollars=pos_in_dollars,
-                                          factor_partitions=factor_partitions)
+                                          factor_partitions=factor_partitions,
+                                          return_fig=return_fig)
+            if html_dump and fig is not None:
+                print(fig_as_html(fig))
 
 
 @plotting.customize

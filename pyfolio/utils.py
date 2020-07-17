@@ -216,7 +216,7 @@ def print_table(table,
         # Inject the new HTML
         html = html.replace('<thead>', '<thead>' + rows)
 
-    display(HTML(html))
+    display(HTML(html).data)
 
 
 def standardize_data(x):
