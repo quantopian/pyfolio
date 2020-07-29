@@ -589,7 +589,7 @@ def run_model(model, returns_train, returns_test=None,
             'Use alpha_beta, t, normal, or best.'.format(model))
 
     if ppc:
-        ppc_samples = pm.sample_ppc(trace, samples=samples,
+        ppc_samples = pm.sample_posterior_predictive(trace, samples=samples,
                                     model=model, size=len(returns_test))
         return trace, ppc_samples['returns']
 
