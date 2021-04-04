@@ -202,5 +202,6 @@ def get_turnover(positions, transactions, denominator='AGB'):
 
     denom.index = denom.index.normalize()
     turnover = traded_value.div(denom, axis='index')
-    turnover = turnover.fillna(0)
+    with pd.option_context('mode.use_inf_as_na', True):
+        turnover = turnover.fillna(0)
     return turnover
