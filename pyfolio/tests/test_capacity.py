@@ -75,8 +75,8 @@ class CapacityTestCase(TestCase):
 
         assert_frame_equal(mdtl, expected)
 
-    @parameterized.expand([(pd.DataFrame([[datetime(2015, 1, 1), 100],
-                                          [datetime(2015, 1, 2), 100]],
+    @parameterized.expand([(pd.DataFrame([[datetime(2015, 1, 1), 100.],
+                                          [datetime(2015, 1, 2), 100.]],
                                          columns=['date', 'max_pct_bar_consumed'],
                                          index=['A', 'B']), None),
                            (pd.DataFrame([[datetime(2015, 1, 3), 100 / 3]],

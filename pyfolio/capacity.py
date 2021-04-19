@@ -185,12 +185,12 @@ def get_low_liquidity_transactions(transactions, market_data,
         md = txn_daily_w_bar.date.max() - pd.Timedelta(days=last_n_days)
         txn_daily_w_bar = txn_daily_w_bar[txn_daily_w_bar.date > md]
 
-    bar_consumption = txn_daily_w_bar.assign(
-        max_pct_bar_consumed=txn_daily_w_bar.amount
-            .div(txn_daily_w_bar.volume)
-            .mul(100)
-            .sort_values('max_pct_bar_consumed',
-                         ascending=False))
+    bar_consumption = (txn_daily_w_bar
+                       .assign(max_pct_bar_consumed=txn_daily_w_bar.amount
+                               .div(txn_daily_w_bar.volume)
+                               .mul(100))
+                       .sort_values('max_pct_bar_consumed',
+                                    ascending=False))
     max_bar_consumption = bar_consumption.groupby('symbol').first()
 
     return max_bar_consumption[['date', 'max_pct_bar_consumed']]
