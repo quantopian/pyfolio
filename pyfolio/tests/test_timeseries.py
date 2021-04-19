@@ -11,7 +11,6 @@ from .. import timeseries
 from pyfolio.utils import to_utc, to_series
 import gzip
 
-
 DECIMAL_PLACES = 8
 
 
@@ -107,8 +106,8 @@ class TestDrawdown(TestCase):
         # Need to use isnull because the result can be NaN, NaT, etc.
         self.assertTrue(
             pd.isnull(peak)) if expected_peak is None else self.assertEqual(
-                peak,
-                expected_peak)
+            peak,
+            expected_peak)
         self.assertTrue(
             pd.isnull(valley)) if expected_valley is None else \
             self.assertEqual(
@@ -151,18 +150,18 @@ class TestDrawdown(TestCase):
             pd.isnull(
                 drawdowns.loc[0, 'Valley date'])) \
             if expected_valley is None else self.assertEqual(
-                drawdowns.loc[0, 'Valley date'],
-                expected_valley)
+            drawdowns.loc[0, 'Valley date'],
+            expected_valley)
         self.assertTrue(
             pd.isnull(
                 drawdowns.loc[0, 'Recovery date'])) \
             if expected_recovery is None else self.assertEqual(
-                drawdowns.loc[0, 'Recovery date'],
-                expected_recovery)
+            drawdowns.loc[0, 'Recovery date'],
+            expected_recovery)
         self.assertTrue(
             pd.isnull(drawdowns.loc[0, 'Duration'])) \
             if expected_duration is None else self.assertEqual(
-                drawdowns.loc[0, 'Duration'], expected_duration)
+            drawdowns.loc[0, 'Duration'], expected_duration)
 
     def test_drawdown_overlaps(self):
         rand = np.random.RandomState(1337)
@@ -262,12 +261,12 @@ class TestStats(TestCase):
     dt_2 = pd.date_range('2000-1-3', periods=8, freq='D')
 
     @parameterized.expand([
-        (simple_rets[:5], 2, [np.nan, np.inf, np.inf, 11.224972160321, np.inf])
+        (simple_rets[:5], 2, [np.nan, np.inf, np.inf, 11.224972160321, np.nan])
     ])
     def test_sharpe_2(self, returns, rolling_sharpe_window, expected):
         np.testing.assert_array_almost_equal(
             timeseries.rolling_sharpe(returns,
-                                      rolling_sharpe_window).values,
+                                      rolling_sharpe_window).to_numpy(),
             np.asarray(expected))
 
     @parameterized.expand([
@@ -294,7 +293,7 @@ class TestCone(TestCase):
         rets = pd.Series(np.random.normal(mu, sigma, 10000))
 
         midline = np.cumprod(1 + (rets.mean() * np.ones(days_forward)))
-        stdev = rets.std() * midline * np.sqrt(np.arange(days_forward)+1)
+        stdev = rets.std() * midline * np.sqrt(np.arange(days_forward) + 1)
 
         normal_cone = pd.DataFrame(columns=pd.Float64Index([]))
         for s in cone_stdevs:
