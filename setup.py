@@ -53,7 +53,7 @@ install_reqs = [
     'empyrical>=0.5.0',
 ]
 
-test_reqs = ['nose>=1.3.7', 'nose-parameterized>=0.5.0', 'runipy>=0.1.3']
+test_reqs = ['nose>=1.3.7', 'parameterized>=0.5.0', 'runipy>=0.1.3']
 
 extras_reqs = {
     'test': test_reqs,

@@ -102,7 +102,7 @@ class CapacityTestCase(TestCase):
                              columns=['symbol', 'amount', 'price', 'volume'],
                              index=self.dates)
 
-        assert_frame_equal(daily_txn, expected, check_less_precise=True)
+        assert_frame_equal(daily_txn, expected)
 
     @parameterized.expand([(1000000, 1, [0.9995, 0.9999375, 0.99998611]),
                            (10000000, 1, [0.95, 0.99375, 0.998611]),
