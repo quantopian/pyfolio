@@ -149,8 +149,7 @@ def get_max_days_to_liquidate_by_ticker(positions, market_data,
     liq_desc = pd.DataFrame()
     liq_desc['days_to_liquidate'] = dtlp.unstack()
     liq_desc['pos_alloc_pct'] = pos_alloc.unstack() * 100
-    liq_desc.index.levels[0].name = 'symbol'
-    liq_desc.index.levels[1].name = 'date'
+    liq_desc.index.set_names(['symbol', 'date'])
 
     worst_liq = liq_desc.reset_index().sort_values(
         'days_to_liquidate', ascending=False).groupby('symbol').first()

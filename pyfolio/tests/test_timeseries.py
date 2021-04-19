@@ -2,7 +2,7 @@ from __future__ import division
 
 import os
 from unittest import TestCase
-from nose_parameterized import parameterized
+from parameterized import parameterized
 from numpy.testing import assert_allclose, assert_almost_equal
 from pandas.util.testing import assert_series_equal
 

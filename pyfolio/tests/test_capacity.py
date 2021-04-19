@@ -1,6 +1,6 @@
 from __future__ import division
 from unittest import TestCase
-from nose_parameterized import parameterized
+from parameterized import parameterized
 
 from pandas import (
     Series,

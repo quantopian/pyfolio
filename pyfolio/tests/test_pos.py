@@ -1,5 +1,5 @@
 from unittest import TestCase
-from nose_parameterized import parameterized
+from parameterized import parameterized
 from collections import OrderedDict
 import os
 import gzip
