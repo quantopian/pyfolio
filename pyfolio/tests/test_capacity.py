@@ -34,12 +34,14 @@ class CapacityTestCase(TestCase):
                           index=dates)
 
     volume.index.name = 'dt'
-    volume = volume * 1000000
+    volume *= 1000000
     volume['market_data'] = 'volume'
+
     price = pd.DataFrame([[1.0, 1.0]] * len(dates),
                          columns=['A', 'B'], index=dates)
     price.index.name = 'dt'
     price['market_data'] = 'price'
+
     market_data = (pd.concat([volume, price])
                    .reset_index()
                    .set_index(['dt', 'market_data']))
@@ -73,11 +75,11 @@ class CapacityTestCase(TestCase):
 
         assert_frame_equal(mdtl, expected)
 
-    @parameterized.expand([(pd.DataFrame([[datetime(2015, 1, 1), 100.],
+    @parameterized.expand([(pd.DataFrame([[datetime(2015, 1, 1), 100],
                                           [datetime(2015, 1, 2), 100]],
                                          columns=['date', 'max_pct_bar_consumed'],
                                          index=['A', 'B']), None),
-                           (pd.DataFrame([[datetime(2015, 1, 3), (1 / 3) * 100.]],
+                           (pd.DataFrame([[datetime(2015, 1, 3), 100 / 3]],
                                          columns=['date', 'max_pct_bar_consumed'],
                                          index=['A']), 1)])
     def test_get_low_liquidity_transactions(self, expected, last_n_days):

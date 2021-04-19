@@ -39,7 +39,7 @@ def daily_txns_with_bar_data(transactions, market_data):
     txn_daily['price'] = market_data.xs('price', level=1).unstack()
     txn_daily['volume'] = market_data.xs('volume', level=1).unstack()
 
-    txn_daily = txn_daily.reset_index().set_index('date').asfreq('D')
+    txn_daily = txn_daily.reset_index().set_index('date').sort_index().asfreq('D')
 
     return txn_daily
 
