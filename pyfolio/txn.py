@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import division
-
 import pandas as pd
 
 
@@ -148,9 +146,8 @@ def adjust_returns_for_slippage(returns, positions, transactions,
 
 def get_turnover(positions, transactions, denominator='AGB'):
     """
-     - Value of purchases and sales divided
-    by either the actual gross book or the portfolio value
-    for the time step.
+     - Value of purchases and sales divided by either the actual
+     gross book or the portfolio value for the time step.
 
     Parameters
     ----------

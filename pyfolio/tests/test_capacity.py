@@ -1,4 +1,3 @@
-from __future__ import division
 from unittest import TestCase
 from parameterized import parameterized
 from datetime import datetime

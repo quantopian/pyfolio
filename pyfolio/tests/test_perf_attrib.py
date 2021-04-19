@@ -372,7 +372,7 @@ class PerfAttribTestCase(unittest.TestCase):
             missing_dates = ['2017-01-01', '2017-01-05']
             factor_loadings_missing_dates = factor_loadings.drop(missing_dates)
 
-            exposures, perf_attrib_data =\
+            exposures, perf_attrib_data = \
                 perf_attrib(returns,
                             positions,
                             factor_returns,
@@ -405,10 +405,10 @@ class PerfAttribTestCase(unittest.TestCase):
                 self.assertNotIn(date, perf_attrib_data.index)
 
             # test missing stocks and dates
-            factor_loadings_missing_both =\
+            factor_loadings_missing_both = \
                 factor_loadings_missing_dates.drop('TLT', level='ticker')
 
-            exposures, perf_attrib_data =\
+            exposures, perf_attrib_data = \
                 perf_attrib(returns,
                             positions,
                             factor_returns,
@@ -434,7 +434,7 @@ class PerfAttribTestCase(unittest.TestCase):
             with self.assertRaisesRegexp(ValueError,
                                          "No factor loadings were available"):
 
-                exposures, perf_attrib_data =\
+                exposures, perf_attrib_data = \
                     perf_attrib(returns,
                                 positions,
                                 factor_returns,

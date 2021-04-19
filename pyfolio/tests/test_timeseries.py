@@ -1,5 +1,3 @@
-from __future__ import division
-
 import os
 from unittest import TestCase
 from parameterized import parameterized
