@@ -4,7 +4,7 @@ import os
 from unittest import TestCase
 from parameterized import parameterized
 from numpy.testing import assert_allclose, assert_almost_equal
-from pandas.util.testing import assert_series_equal
+from pandas.testing import assert_series_equal
 
 import numpy as np
 import pandas as pd

@@ -5,7 +5,7 @@ from pandas import (
     DataFrame,
     date_range
 )
-from pandas.util.testing import (assert_series_equal)
+from pandas.testing import (assert_series_equal)
 
 from pyfolio.txn import (get_turnover,
                          adjust_returns_for_slippage)
