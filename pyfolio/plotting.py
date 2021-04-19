@@ -1769,7 +1769,7 @@ def plot_round_trip_lifetimes(round_trips, disp_amount=16, lsize=18, ax=None):
                     [y_ix, y_ix], color=c,
                     linewidth=lsize, solid_capstyle='butt')
 
-    ax.set_yticks(range(disp_amount))
+    ax.set_yticks(range(len(sample)))
     ax.set_yticklabels([utils.format_asset(s) for s in sample])
 
     ax.set_ylim((-0.5, min(len(sample), disp_amount) - 0.5))
