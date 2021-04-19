@@ -21,7 +21,7 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from . import _seaborn as sns
+import seaborn as sns
 from . import capacity
 from . import perf_attrib
 from . import plotting

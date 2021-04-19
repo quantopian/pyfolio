@@ -19,10 +19,12 @@ class CapacityTestCase(TestCase):
     positions = pd.DataFrame([[1.0, 3.0, 0.0],
                               [0.0, 1.0, 1.0],
                               [3.0, 0.0, 1.0]],
-                             columns=['A', 'B', 'cash'], index=dates)
+                             columns=['A', 'B', 'cash'],
+                             index=dates)
 
+    columns = ['sid', 'amount', 'price', 'symbol']
     transactions = pd.DataFrame(data=[[1, 100000, 10, 'A']] * len(dates),
-                                columns=['sid', 'amount', 'price', 'symbol'],
+                                columns=columns,
                                 index=dates)
 
     volume = pd.DataFrame([[1.0, 3.0],
@@ -85,7 +87,8 @@ class CapacityTestCase(TestCase):
                                  columns=['sid', 'amount', 'price', 'symbol'],
                                  index=self.dates)
 
-        llt = get_low_liquidity_transactions(txn_daily, self.market_data,
+        llt = get_low_liquidity_transactions(txn_daily,
+                                             self.market_data,
                                              last_n_days=last_n_days)
         expected.index.name = 'symbol'
         assert_frame_equal(llt, expected)
