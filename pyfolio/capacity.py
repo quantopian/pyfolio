@@ -32,13 +32,16 @@ def daily_txns_with_bar_data(transactions, market_data):
     """
 
     transactions.index.name = 'date'
-    txn_daily = pd.DataFrame(transactions.assign(
-        amount=abs(transactions.amount)).groupby(
-        ['symbol', pd.Grouper(freq='D')]).sum()['amount'])
+    txn_daily = (pd.DataFrame(transactions
+                              .assign(amount=abs(transactions.amount))
+                              .groupby(['symbol',
+                                        pd.Grouper(freq='D')])
+                              .sum()['amount']))
+
     txn_daily['price'] = market_data.xs('price', level=1).unstack()
     txn_daily['volume'] = market_data.xs('volume', level=1).unstack()
 
-    txn_daily = txn_daily.reset_index().set_index('date')
+    txn_daily = txn_daily.reset_index().set_index('date').asfreq('D')
 
     return txn_daily
 
@@ -93,7 +96,7 @@ def days_to_liquidate_positions(positions, market_data,
     positions_alloc = positions_alloc.drop('cash', axis=1)
 
     days_to_liquidate = (positions_alloc * capital_base) / \
-        (max_bar_consumption * roll_mean_dv)
+                        (max_bar_consumption * roll_mean_dv)
 
     return days_to_liquidate.iloc[mean_volume_window:]
 
@@ -186,7 +189,7 @@ def get_low_liquidity_transactions(transactions, market_data,
 
     bar_consumption = txn_daily_w_bar.assign(
         max_pct_bar_consumed=(
-            txn_daily_w_bar.amount/txn_daily_w_bar.volume)*100
+                                     txn_daily_w_bar.amount / txn_daily_w_bar.volume) * 100
     ).sort_values('max_pct_bar_consumed', ascending=False)
     max_bar_consumption = bar_consumption.groupby('symbol').first()
 
@@ -227,8 +230,8 @@ def apply_slippage_penalty(returns, txn_daily, simulate_starting_capital,
     simulate_traded_dollars = txn_daily.price * simulate_traded_shares
     simulate_pct_volume_used = simulate_traded_shares / txn_daily.volume
 
-    penalties = simulate_pct_volume_used**2 \
-        * impact * simulate_traded_dollars
+    penalties = simulate_pct_volume_used ** 2 \
+                * impact * simulate_traded_dollars
 
     daily_penalty = penalties.resample('D').sum()
     daily_penalty = daily_penalty.reindex(returns.index).fillna(0)

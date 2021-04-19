@@ -1550,7 +1550,7 @@ def plot_daily_turnover_hist(transactions, positions, turnover_denom='AGB',
     if ax is None:
         ax = plt.gca()
     turnover = txn.get_turnover(positions, transactions, turnover_denom)
-    sns.distplot(turnover, ax=ax, **kwargs)
+    sns.histplot(turnover, ax=ax, **kwargs)
     ax.set_title('Distribution of daily turnover rates')
     ax.set_xlabel('Turnover rate')
     return ax
