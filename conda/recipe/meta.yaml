@@ -1,13 +1,13 @@
-{ % set name = "pyfolio-reloaded" % }
-  { % set version = "0.9.3" % }
+{% set name = "pyfolio-reloaded" %}
+{% set version = "0.9.3" %}
 
 package:
-  name: { { name|lower } }
-  version: { { version } }
+  name: {{ name|lower }}
+  version: {{ version }}
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  md5: 55cc453ee83094a64988d2df45270bd6
+  md5: ad9dc043ecfbe3eaaa80a2277f90788f
 
 build:
   number: 0

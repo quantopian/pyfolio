@@ -6,20 +6,20 @@
 
 
 [![Join the chat at https://gitter.im/stefan-jansen/pyfolio-reloaded](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/stefan-jansen/pyfolio-reloaded?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![build status](https://travis-ci.org/stefan-jansen/pyfolio-reloaded.png?branch=master)](https://travis-ci.org/stefan-jansen/pyfolio-reloaded)
+[![PyPI Wheels](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/distribution.yml/badge.svg)](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/distribution.yml)
 
 pyfolio is a Python library for performance and risk analysis of financial portfolios that works well with the [Zipline](https://zipline.ml4trading.io/) open source backtesting library.
 
-## Trading Strategy Analysis with pyfolio 
+## Trading Strategy Analysis with pyfolio
 
 At the core of pyfolio are various tear sheets that combine various individual plots and summary statistics to
-provide a comprehensive view of the performance of a trading algorithm. 
+provide a comprehensive view of the performance of a trading algorithm.
 
 Here's an example of a simple tear sheet analyzing a strategy executed with the Zipline backtesting engine:
 
 ### Performance Metrics
 
-The tear sheet presents performance and risk metrics for the strategy separately during the backtest and out-of-sample periods:  
+The tear sheet presents performance and risk metrics for the strategy separately during the backtest and out-of-sample periods:
 
 <p align="center">
 <a href="#">
