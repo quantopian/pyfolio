@@ -1,0 +1,45 @@
+{ % set name = "pyfolio-reloaded" % }
+  { % set version = "0.9.3" % }
+
+package:
+  name: { { name|lower } }
+  version: { { version } }
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  md5: 55cc453ee83094a64988d2df45270bd6
+
+build:
+  number: 0
+  skip: true # [py<37 or not x86_64]
+  script: { { PYTHON } } -m pip install . -vv
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  run:
+    - python
+    - matplotlib >=1.4.0
+    - numpy >=1.9.1
+    - pandas >=0.18.0
+    - pytz >=2014.10
+    - scipy >=0.14.0
+    - seaborn >=0.6.0
+    - pandas-datareader >=0.2
+    - ipython
+    - empyrical-reloaded >=0.5.6
+
+test:
+  imports:
+    - pyfolio
+    - pyfolio.tests
+  commands:
+    nosetests pyfolio.tests
+
+about:
+  home: https://pyfolio.ml4trading.io
+  summary: pyfolio is a Python library for performance and risk analysis of financial portfolios
+  license: Apache 2.0
+  license_file: LICENSE
