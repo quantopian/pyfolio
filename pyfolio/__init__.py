@@ -11,9 +11,16 @@ from .tears import *  # noqa
 from .plotting import *  # noqa
 from ._version import get_versions
 
-__version__ = get_versions()['version']
+__version__ = get_versions()["version"]
 del get_versions
 
-__all__ = ['utils', 'timeseries', 'pos', 'txn',
-           'interesting_periods', 'capacity', 'round_trips',
-           'perf_attrib']
+__all__ = [
+    "utils",
+    "timeseries",
+    "pos",
+    "txn",
+    "interesting_periods",
+    "capacity",
+    "round_trips",
+    "perf_attrib",
+]

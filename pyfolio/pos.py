@@ -18,12 +18,13 @@ import warnings
 
 try:
     from zipline.assets import Equity, Future
+
     ZIPLINE = True
 except ImportError:
     ZIPLINE = False
     warnings.warn(
         'Module "zipline.assets" not found; multipliers will not be applied'
-        ' to position notionals.'
+        " to position notionals."
     )
 
 
@@ -42,10 +43,7 @@ def get_percent_alloc(values):
         Positions and their allocations.
     """
 
-    return values.divide(
-        values.sum(axis='columns'),
-        axis='rows'
-    )
+    return values.divide(values.sum(axis="columns"), axis="rows")
 
 
 def get_top_long_short_abs(positions, top=10):
@@ -69,7 +67,7 @@ def get_top_long_short_abs(positions, top=10):
         Top absolute positions.
     """
 
-    positions = positions.drop('cash', axis='columns')
+    positions = positions.drop("cash", axis="columns")
     df_max = positions.max()
     df_min = positions.min()
     df_abs_max = positions.abs().max()
@@ -97,16 +95,16 @@ def get_max_median_position_concentration(positions):
     """
 
     expos = get_percent_alloc(positions)
-    expos = expos.drop('cash', axis=1)
+    expos = expos.drop("cash", axis=1)
 
     longs = expos.where(expos.applymap(lambda x: x > 0))
     shorts = expos.where(expos.applymap(lambda x: x < 0))
 
     alloc_summary = pd.DataFrame()
-    alloc_summary['max_long'] = longs.max(axis=1)
-    alloc_summary['median_long'] = longs.median(axis=1)
-    alloc_summary['median_short'] = shorts.median(axis=1)
-    alloc_summary['max_short'] = shorts.min(axis=1)
+    alloc_summary["max_long"] = longs.max(axis=1)
+    alloc_summary["median_long"] = longs.median(axis=1)
+    alloc_summary["median_short"] = shorts.median(axis=1)
+    alloc_summary["max_short"] = shorts.min(axis=1)
 
     return alloc_summary
 
@@ -133,13 +131,13 @@ def extract_pos(positions, cash):
     """
 
     positions = positions.copy()
-    positions['values'] = positions.amount * positions.last_sale_price
+    positions["values"] = positions.amount * positions.last_sale_price
 
-    cash.name = 'cash'
+    cash.name = "cash"
 
-    values = positions.reset_index().pivot_table(index='index',
-                                                 columns='sid',
-                                                 values='values')
+    values = positions.reset_index().pivot_table(
+        index="index", columns="sid", values="values"
+    )
 
     if ZIPLINE:
         for asset in values.columns:
@@ -150,7 +148,7 @@ def extract_pos(positions, cash):
 
     # NOTE: Set name of DataFrame.columns to sid, to match the behavior
     # of DataFrame.join in earlier versions of pandas.
-    values.columns.name = 'sid'
+    values.columns.name = "sid"
 
     return values
 
@@ -187,21 +185,22 @@ def get_sector_exposures(positions, symbol_sector_map):
             2004-01-13    -199.640        -100.980            100.0000
     """
 
-    cash = positions['cash']
-    positions = positions.drop('cash', axis=1)
+    cash = positions["cash"]
+    positions = positions.drop("cash", axis=1)
 
-    unmapped_pos = np.setdiff1d(positions.columns.values,
-                                list(symbol_sector_map.keys()))
+    unmapped_pos = np.setdiff1d(
+        positions.columns.values, list(symbol_sector_map.keys())
+    )
     if len(unmapped_pos) > 0:
         warn_message = """Warning: Symbols {} have no sector mapping.
         They will not be included in sector allocations""".format(
-            ", ".join(map(str, unmapped_pos)))
+            ", ".join(map(str, unmapped_pos))
+        )
         warnings.warn(warn_message, UserWarning)
 
-    sector_exp = positions.groupby(
-        by=symbol_sector_map, axis=1).sum()
+    sector_exp = positions.groupby(by=symbol_sector_map, axis=1).sum()
 
-    sector_exp['cash'] = cash
+    sector_exp["cash"] = cash
 
     return sector_exp
 
@@ -222,13 +221,16 @@ def get_long_short_pos(positions):
         percentage of the total net liquidation
     """
 
-    pos_wo_cash = positions.drop('cash', axis=1)
+    pos_wo_cash = positions.drop("cash", axis=1)
     longs = pos_wo_cash[pos_wo_cash > 0].sum(axis=1).fillna(0)
     shorts = pos_wo_cash[pos_wo_cash < 0].sum(axis=1).fillna(0)
     cash = positions.cash
     net_liquidation = longs + shorts + cash
-    df_pos = pd.DataFrame({'long': longs.divide(net_liquidation, axis='index'),
-                           'short': shorts.divide(net_liquidation,
-                                                  axis='index')})
-    df_pos['net exposure'] = df_pos['long'] + df_pos['short']
+    df_pos = pd.DataFrame(
+        {
+            "long": longs.divide(net_liquidation, axis="index"),
+            "short": shorts.divide(net_liquidation, axis="index"),
+        }
+    )
+    df_pos["net exposure"] = df_pos["long"] + df_pos["short"]
     return df_pos

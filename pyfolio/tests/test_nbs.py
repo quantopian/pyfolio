@@ -14,9 +14,9 @@ from pyfolio.ipycompat import read as read_notebook
 
 
 def test_nbs():
-    path = os.path.join(pyfolio_root(), 'examples', '*.ipynb')
+    path = os.path.join(pyfolio_root(), "examples", "*.ipynb")
     for ipynb in glob.glob(path):
         with open(ipynb) as f:
-            nb = read_notebook(f, 'json')
+            nb = read_notebook(f, "json")
             nb_runner = NotebookRunner(nb)
             nb_runner.run_notebook(skip_exceptions=False)

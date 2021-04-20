@@ -30,20 +30,22 @@ def map_transaction(txn):
         Mapped transaction.
     """
 
-    if isinstance(txn['sid'], dict):
-        sid = txn['sid']['sid']
-        symbol = txn['sid']['symbol']
+    if isinstance(txn["sid"], dict):
+        sid = txn["sid"]["sid"]
+        symbol = txn["sid"]["symbol"]
     else:
-        sid = txn['sid']
-        symbol = txn['sid']
+        sid = txn["sid"]
+        symbol = txn["sid"]
 
-    return {'sid': sid,
-            'symbol': symbol,
-            'price': txn['price'],
-            'order_id': txn['order_id'],
-            'amount': txn['amount'],
-            'commission': txn['commission'],
-            'dt': txn['dt']}
+    return {
+        "sid": sid,
+        "symbol": symbol,
+        "price": txn["price"],
+        "order_id": txn["order_id"],
+        "amount": txn["amount"],
+        "commission": txn["commission"],
+        "dt": txn["dt"],
+    }
 
 
 def make_transaction_frame(transactions):
@@ -71,8 +73,8 @@ def make_transaction_frame(transactions):
         for txn in txns:
             txn = map_transaction(txn)
             transaction_list.append(txn)
-    df = pd.DataFrame(sorted(transaction_list, key=lambda x: x['dt']))
-    df['txn_dollars'] = -df['amount'] * df['price']
+    df = pd.DataFrame(sorted(transaction_list, key=lambda x: x["dt"]))
+    df["txn_dollars"] = -df["amount"] * df["price"]
 
     df.index = list(map(pd.Timestamp, df.dt.values))
     return df
@@ -108,8 +110,9 @@ def get_txn_vol(transactions):
     return pd.concat([daily_values, daily_amounts], axis=1)
 
 
-def adjust_returns_for_slippage(returns, positions, transactions,
-                                slippage_bps):
+def adjust_returns_for_slippage(
+    returns, positions, transactions, slippage_bps
+):
     """
     Apply a slippage penalty for every dollar traded.
 
@@ -144,7 +147,7 @@ def adjust_returns_for_slippage(returns, positions, transactions,
     return adjusted_returns
 
 
-def get_turnover(positions, transactions, denominator='AGB'):
+def get_turnover(positions, transactions, denominator="AGB"):
     """
      - Value of purchases and sales divided by either the actual
      gross book or the portfolio value for the time step.
@@ -179,16 +182,16 @@ def get_turnover(positions, transactions, denominator='AGB'):
     txn_vol = get_txn_vol(transactions)
     traded_value = txn_vol.txn_volume
 
-    if denominator == 'AGB':
+    if denominator == "AGB":
         # Actual gross book is the same thing as the algo's GMV
         # We want our denom to be avg(AGB previous, AGB current)
-        AGB = positions.drop('cash', axis=1).abs().sum(axis=1)
+        AGB = positions.drop("cash", axis=1).abs().sum(axis=1)
         denom = AGB.rolling(2).mean()
 
         # Since the first value of pd.rolling returns NaN, we
         # set our "day 0" AGB to 0.
         denom.iloc[0] = AGB.iloc[0] / 2
-    elif denominator == 'portfolio_value':
+    elif denominator == "portfolio_value":
         denom = positions.sum(axis=1)
     else:
         raise ValueError(
@@ -198,6 +201,6 @@ def get_turnover(positions, transactions, denominator='AGB'):
         )
 
     denom.index = denom.index.normalize()
-    turnover = traded_value.div(denom, axis='index')
+    turnover = traded_value.div(denom, axis="index")
     turnover = turnover.fillna(0)
     return turnover

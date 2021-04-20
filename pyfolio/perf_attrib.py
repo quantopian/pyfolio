@@ -26,12 +26,14 @@ from .utils import print_table, configure_legend
 PERF_ATTRIB_TURNOVER_THRESHOLD = 0.25
 
 
-def perf_attrib(returns,
-                positions,
-                factor_returns,
-                factor_loadings,
-                transactions=None,
-                pos_in_dollars=True):
+def perf_attrib(
+    returns,
+    positions,
+    factor_returns,
+    factor_loadings,
+    transactions=None,
+    pos_in_dollars=True,
+):
     """
     Attributes the performance of a returns stream to a set of risk factors.
 
@@ -130,15 +132,14 @@ def perf_attrib(returns,
             2017-01-01  0.249087  0.935925        1.185012          1.185012
             2017-01-02 -0.003194 -0.400786       -0.403980         -0.403980
     """
-    (returns,
-     positions,
-     factor_returns,
-     factor_loadings) = _align_and_warn(returns,
-                                        positions,
-                                        factor_returns,
-                                        factor_loadings,
-                                        transactions=transactions,
-                                        pos_in_dollars=pos_in_dollars)
+    (returns, positions, factor_returns, factor_loadings) = _align_and_warn(
+        returns,
+        positions,
+        factor_returns,
+        factor_loadings,
+        transactions=transactions,
+        pos_in_dollars=pos_in_dollars,
+    )
 
     # Note that we convert positions to percentages *after* the checks
     # above, since get_turnover() expects positions in dollars.
@@ -147,8 +148,9 @@ def perf_attrib(returns,
     return ep.perf_attrib(returns, positions, factor_returns, factor_loadings)
 
 
-def compute_exposures(positions, factor_loadings, stack_positions=True,
-                      pos_in_dollars=True):
+def compute_exposures(
+    positions, factor_loadings, stack_positions=True, pos_in_dollars=True
+):
     """
     Compute daily risk factor exposures.
 
@@ -221,55 +223,56 @@ def create_perf_attrib_stats(perf_attrib, risk_exposures):
     multifactor alpha, multifactor sharpe, risk exposures.
     """
     summary = OrderedDict()
-    total_returns = perf_attrib['total_returns']
-    specific_returns = perf_attrib['specific_returns']
-    common_returns = perf_attrib['common_returns']
+    total_returns = perf_attrib["total_returns"]
+    specific_returns = perf_attrib["specific_returns"]
+    common_returns = perf_attrib["common_returns"]
 
-    summary['Annualized Specific Return'] =\
-        ep.annual_return(specific_returns)
-    summary['Annualized Common Return'] =\
-        ep.annual_return(common_returns)
-    summary['Annualized Total Return'] =\
-        ep.annual_return(total_returns)
+    summary["Annualized Specific Return"] = ep.annual_return(specific_returns)
+    summary["Annualized Common Return"] = ep.annual_return(common_returns)
+    summary["Annualized Total Return"] = ep.annual_return(total_returns)
 
-    summary['Specific Sharpe Ratio'] =\
-        ep.sharpe_ratio(specific_returns)
+    summary["Specific Sharpe Ratio"] = ep.sharpe_ratio(specific_returns)
 
-    summary['Cumulative Specific Return'] =\
-        ep.cum_returns_final(specific_returns)
-    summary['Cumulative Common Return'] =\
-        ep.cum_returns_final(common_returns)
-    summary['Total Returns'] =\
-        ep.cum_returns_final(total_returns)
+    summary["Cumulative Specific Return"] = ep.cum_returns_final(
+        specific_returns
+    )
+    summary["Cumulative Common Return"] = ep.cum_returns_final(common_returns)
+    summary["Total Returns"] = ep.cum_returns_final(total_returns)
 
-    summary = pd.Series(summary, name='')
+    summary = pd.Series(summary, name="")
 
-    annualized_returns_by_factor = [ep.annual_return(perf_attrib[c])
-                                    for c in risk_exposures.columns]
-    cumulative_returns_by_factor = [ep.cum_returns_final(perf_attrib[c])
-                                    for c in risk_exposures.columns]
+    annualized_returns_by_factor = [
+        ep.annual_return(perf_attrib[c]) for c in risk_exposures.columns
+    ]
+    cumulative_returns_by_factor = [
+        ep.cum_returns_final(perf_attrib[c]) for c in risk_exposures.columns
+    ]
 
     risk_exposure_summary = pd.DataFrame(
-        data=OrderedDict([
-            (
-                'Average Risk Factor Exposure',
-                risk_exposures.mean(axis='rows')
-            ),
-            ('Annualized Return', annualized_returns_by_factor),
-            ('Cumulative Return', cumulative_returns_by_factor),
-        ]),
+        data=OrderedDict(
+            [
+                (
+                    "Average Risk Factor Exposure",
+                    risk_exposures.mean(axis="rows"),
+                ),
+                ("Annualized Return", annualized_returns_by_factor),
+                ("Cumulative Return", cumulative_returns_by_factor),
+            ]
+        ),
         index=risk_exposures.columns,
     )
 
     return summary, risk_exposure_summary
 
 
-def show_perf_attrib_stats(returns,
-                           positions,
-                           factor_returns,
-                           factor_loadings,
-                           transactions=None,
-                           pos_in_dollars=True):
+def show_perf_attrib_stats(
+    returns,
+    positions,
+    factor_returns,
+    factor_loadings,
+    transactions=None,
+    pos_in_dollars=True,
+):
     """
     Calls `perf_attrib` using inputs, and displays outputs using
     `utils.print_table`.
@@ -283,41 +286,46 @@ def show_perf_attrib_stats(returns,
         pos_in_dollars=pos_in_dollars,
     )
 
-    perf_attrib_stats, risk_exposure_stats =\
-        create_perf_attrib_stats(perf_attrib_data, risk_exposures)
+    perf_attrib_stats, risk_exposure_stats = create_perf_attrib_stats(
+        perf_attrib_data, risk_exposures
+    )
 
-    percentage_formatter = '{:.2%}'.format
-    float_formatter = '{:.2f}'.format
+    percentage_formatter = "{:.2%}".format
+    float_formatter = "{:.2f}".format
 
-    summary_stats = perf_attrib_stats.loc[['Annualized Specific Return',
-                                           'Annualized Common Return',
-                                           'Annualized Total Return',
-                                           'Specific Sharpe Ratio']]
+    summary_stats = perf_attrib_stats.loc[
+        [
+            "Annualized Specific Return",
+            "Annualized Common Return",
+            "Annualized Total Return",
+            "Specific Sharpe Ratio",
+        ]
+    ]
 
     # Format return rows in summary stats table as percentages.
     for col_name in (
-        'Annualized Specific Return',
-        'Annualized Common Return',
-        'Annualized Total Return',
+        "Annualized Specific Return",
+        "Annualized Common Return",
+        "Annualized Total Return",
     ):
         summary_stats[col_name] = percentage_formatter(summary_stats[col_name])
 
     # Display sharpe to two decimal places.
-    summary_stats['Specific Sharpe Ratio'] = float_formatter(
-        summary_stats['Specific Sharpe Ratio']
+    summary_stats["Specific Sharpe Ratio"] = float_formatter(
+        summary_stats["Specific Sharpe Ratio"]
     )
 
-    print_table(summary_stats, name='Summary Statistics')
+    print_table(summary_stats, name="Summary Statistics")
 
     print_table(
         risk_exposure_stats,
-        name='Exposures Summary',
+        name="Exposures Summary",
         # In exposures table, format exposure column to 2 decimal places, and
         # return columns  as percentages.
         formatters={
-            'Average Risk Factor Exposure': float_formatter,
-            'Annualized Return': percentage_formatter,
-            'Cumulative Return': percentage_formatter,
+            "Average Risk Factor Exposure": float_formatter,
+            "Annualized Return": percentage_formatter,
+            "Cumulative Return": percentage_formatter,
         },
     )
 
@@ -353,32 +361,39 @@ def plot_returns(perf_attrib_data, cost=None, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    returns = perf_attrib_data['total_returns']
-    total_returns_label = 'Total returns'
+    returns = perf_attrib_data["total_returns"]
+    total_returns_label = "Total returns"
 
     cumulative_returns_less_costs = _cumulative_returns_less_costs(
-        returns,
-        cost
+        returns, cost
     )
     if cost is not None:
-        total_returns_label += ' (adjusted)'
+        total_returns_label += " (adjusted)"
 
-    specific_returns = perf_attrib_data['specific_returns']
-    common_returns = perf_attrib_data['common_returns']
+    specific_returns = perf_attrib_data["specific_returns"]
+    common_returns = perf_attrib_data["common_returns"]
 
-    ax.plot(cumulative_returns_less_costs, color='b',
-            label=total_returns_label)
-    ax.plot(ep.cum_returns(specific_returns), color='g',
-            label='Cumulative specific returns')
-    ax.plot(ep.cum_returns(common_returns), color='r',
-            label='Cumulative common returns')
+    ax.plot(
+        cumulative_returns_less_costs, color="b", label=total_returns_label
+    )
+    ax.plot(
+        ep.cum_returns(specific_returns),
+        color="g",
+        label="Cumulative specific returns",
+    )
+    ax.plot(
+        ep.cum_returns(common_returns),
+        color="r",
+        label="Cumulative common returns",
+    )
 
     if cost is not None:
-        ax.plot(-ep.cum_returns(cost), color='k',
-                label='Cumulative cost spent')
+        ax.plot(
+            -ep.cum_returns(cost), color="k", label="Cumulative cost spent"
+        )
 
-    ax.set_title('Time series of cumulative returns')
-    ax.set_ylabel('Returns')
+    ax.set_title("Time series of cumulative returns")
+    ax.set_ylabel("Returns")
 
     configure_legend(ax)
 
@@ -404,21 +419,21 @@ def plot_alpha_returns(alpha_returns, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    ax.hist(alpha_returns, color='g', label='Multi-factor alpha')
-    ax.set_title('Histogram of alphas')
-    ax.axvline(0, color='k', linestyle='--', label='Zero')
+    ax.hist(alpha_returns, color="g", label="Multi-factor alpha")
+    ax.set_title("Histogram of alphas")
+    ax.axvline(0, color="k", linestyle="--", label="Zero")
 
     avg = alpha_returns.mean()
-    ax.axvline(avg, color='b', label='Mean = {: 0.5f}'.format(avg))
+    ax.axvline(avg, color="b", label="Mean = {: 0.5f}".format(avg))
     configure_legend(ax)
 
     return ax
 
 
 def plot_factor_contribution_to_perf(
-        perf_attrib_data,
-        ax=None,
-        title='Cumulative common returns attribution',
+    perf_attrib_data,
+    ax=None,
+    title="Cumulative common returns attribution",
 ):
     """
     Plot each factor's contribution to performance.
@@ -448,8 +463,9 @@ def plot_factor_contribution_to_perf(
         ax = plt.gca()
 
     factors_to_plot = perf_attrib_data.drop(
-        ['total_returns', 'common_returns', 'tilt_returns', 'timing_returns'],
-        axis='columns', errors='ignore'
+        ["total_returns", "common_returns", "tilt_returns", "timing_returns"],
+        axis="columns",
+        errors="ignore",
     )
 
     factors_cumulative = pd.DataFrame()
@@ -459,17 +475,18 @@ def plot_factor_contribution_to_perf(
     for col in factors_cumulative:
         ax.plot(factors_cumulative[col])
 
-    ax.axhline(0, color='k')
+    ax.axhline(0, color="k")
     configure_legend(ax, change_colors=True)
 
-    ax.set_ylabel('Cumulative returns by factor')
+    ax.set_ylabel("Cumulative returns by factor")
     ax.set_title(title)
 
     return ax
 
 
-def plot_risk_exposures(exposures, ax=None,
-                        title='Daily risk factor exposures'):
+def plot_risk_exposures(
+    exposures, ax=None, title="Daily risk factor exposures"
+):
     """
     Parameters
     ----------
@@ -495,18 +512,20 @@ def plot_risk_exposures(exposures, ax=None,
         ax.plot(exposures[col])
 
     configure_legend(ax, change_colors=True)
-    ax.set_ylabel('Factor exposures')
+    ax.set_ylabel("Factor exposures")
     ax.set_title(title)
 
     return ax
 
 
-def _align_and_warn(returns,
-                    positions,
-                    factor_returns,
-                    factor_loadings,
-                    transactions=None,
-                    pos_in_dollars=True):
+def _align_and_warn(
+    returns,
+    positions,
+    factor_returns,
+    factor_loadings,
+    transactions=None,
+    pos_in_dollars=True,
+):
     """
     Make sure that all inputs have matching dates and tickers,
     and raise warnings if necessary.
@@ -517,14 +536,16 @@ def _align_and_warn(returns,
 
     # cash will not be in factor_loadings
     num_stocks = len(positions.columns) - 1
-    missing_stocks = missing_stocks.drop('cash')
+    missing_stocks = missing_stocks.drop("cash")
     num_stocks_covered = num_stocks - len(missing_stocks)
     missing_ratio = round(len(missing_stocks) / num_stocks, ndigits=3)
 
     if num_stocks_covered == 0:
-        raise ValueError("Could not perform performance attribution. "
-                         "No factor loadings were available for this "
-                         "algorithm's positions.")
+        raise ValueError(
+            "Could not perform performance attribution. "
+            "No factor loadings were available for this "
+            "algorithm's positions."
+        )
 
     if len(missing_stocks) > 0:
 
@@ -532,9 +553,11 @@ def _align_and_warn(returns,
 
             missing_stocks_displayed = (
                 " {} assets were missing factor loadings, including: {}..{}"
-            ).format(len(missing_stocks),
-                     ', '.join(missing_stocks[:5].map(str)),
-                     missing_stocks[-1])
+            ).format(
+                len(missing_stocks),
+                ", ".join(missing_stocks[:5].map(str)),
+                missing_stocks[-1],
+            )
             avg_allocation_msg = "selected missing assets"
 
         else:
@@ -562,8 +585,9 @@ def _align_and_warn(returns,
 
         warnings.warn(missing_stocks_warning_msg)
 
-        positions = positions.drop(missing_stocks, axis='columns',
-                                   errors='ignore')
+        positions = positions.drop(
+            missing_stocks, axis="columns", errors="ignore"
+        )
 
     missing_factor_loadings_index = positions.index.difference(
         factor_loadings.index.get_level_values(0).unique()
@@ -576,7 +600,7 @@ def _align_and_warn(returns,
                 "(first missing is {}, last missing is {})"
             ).format(
                 missing_factor_loadings_index[0],
-                missing_factor_loadings_index[-1]
+                missing_factor_loadings_index[-1],
             )
         else:
             missing_dates_displayed = list(missing_factor_loadings_index)
@@ -588,11 +612,13 @@ def _align_and_warn(returns,
 
         warnings.warn(warning_msg)
 
-        positions = positions.drop(missing_factor_loadings_index,
-                                   errors='ignore')
-        returns = returns.drop(missing_factor_loadings_index, errors='ignore')
-        factor_returns = factor_returns.drop(missing_factor_loadings_index,
-                                             errors='ignore')
+        positions = positions.drop(
+            missing_factor_loadings_index, errors="ignore"
+        )
+        returns = returns.drop(missing_factor_loadings_index, errors="ignore")
+        factor_returns = factor_returns.drop(
+            missing_factor_loadings_index, errors="ignore"
+        )
 
     if transactions is not None and pos_in_dollars:
         turnover = get_turnover(positions, transactions).mean()
@@ -634,11 +660,11 @@ def _stack_positions(positions, pos_in_dollars=True):
         positions = get_percent_alloc(positions)
 
     # remove cash after normalizing positions
-    positions = positions.drop('cash', axis='columns')
+    positions = positions.drop("cash", axis="columns")
 
     # convert positions to long format
     positions = positions.stack()
-    positions.index = positions.index.set_names(['dt', 'ticker'])
+    positions.index = positions.index.set_names(["dt", "ticker"])
 
     return positions
 

@@ -29,25 +29,30 @@ def daily_txns_with_bar_data(transactions, market_data):
         the corresponding ticker, respectively.
     """
 
-    transactions.index.name = 'date'
-    txn_daily = (pd.DataFrame(transactions
-                              .assign(amount=abs(transactions.amount))
-                              .groupby(['symbol',
-                                        pd.Grouper(freq='D')])
-                              .sum()['amount']))
+    transactions.index.name = "date"
+    txn_daily = pd.DataFrame(
+        transactions.assign(amount=abs(transactions.amount))
+        .groupby(["symbol", pd.Grouper(freq="D")])
+        .sum()["amount"]
+    )
 
-    txn_daily['price'] = market_data.xs('price', level=1).unstack()
-    txn_daily['volume'] = market_data.xs('volume', level=1).unstack()
+    txn_daily["price"] = market_data.xs("price", level=1).unstack()
+    txn_daily["volume"] = market_data.xs("volume", level=1).unstack()
 
-    txn_daily = txn_daily.reset_index().set_index('date').sort_index().asfreq('D')
+    txn_daily = (
+        txn_daily.reset_index().set_index("date").sort_index().asfreq("D")
+    )
 
     return txn_daily
 
 
-def days_to_liquidate_positions(positions, market_data,
-                                max_bar_consumption=0.2,
-                                capital_base=1e6,
-                                mean_volume_window=5):
+def days_to_liquidate_positions(
+    positions,
+    market_data,
+    max_bar_consumption=0.2,
+    capital_base=1e6,
+    mean_volume_window=5,
+):
     """
     Compute the number of days that would have been required
     to fully liquidate each position on each day based on the
@@ -85,25 +90,30 @@ def days_to_liquidate_positions(positions, market_data,
         Datetime index, symbols as columns.
     """
 
-    DV = market_data.xs('volume', level=1) * market_data.xs('price', level=1)
-    roll_mean_dv = DV.rolling(window=mean_volume_window,
-                              center=False).mean().shift()
+    DV = market_data.xs("volume", level=1) * market_data.xs("price", level=1)
+    roll_mean_dv = (
+        DV.rolling(window=mean_volume_window, center=False).mean().shift()
+    )
     roll_mean_dv = roll_mean_dv.replace(0, np.nan)
 
     positions_alloc = pos.get_percent_alloc(positions)
-    positions_alloc = positions_alloc.drop('cash', axis=1)
+    positions_alloc = positions_alloc.drop("cash", axis=1)
 
-    days_to_liquidate = (positions_alloc * capital_base) / \
-                        (max_bar_consumption * roll_mean_dv)
+    days_to_liquidate = (positions_alloc * capital_base) / (
+        max_bar_consumption * roll_mean_dv
+    )
 
     return days_to_liquidate.iloc[mean_volume_window:]
 
 
-def get_max_days_to_liquidate_by_ticker(positions, market_data,
-                                        max_bar_consumption=0.2,
-                                        capital_base=1e6,
-                                        mean_volume_window=5,
-                                        last_n_days=None):
+def get_max_days_to_liquidate_by_ticker(
+    positions,
+    market_data,
+    max_bar_consumption=0.2,
+    capital_base=1e6,
+    mean_volume_window=5,
+    last_n_days=None,
+):
     """
     Finds the longest estimated liquidation time for each traded
     name over the course of backtest (or last n days of the backtest).
@@ -136,30 +146,38 @@ def get_max_days_to_liquidate_by_ticker(positions, market_data,
         date and position_alloc on that day.
     """
 
-    dtlp = days_to_liquidate_positions(positions, market_data,
-                                       max_bar_consumption=max_bar_consumption,
-                                       capital_base=capital_base,
-                                       mean_volume_window=mean_volume_window)
+    dtlp = days_to_liquidate_positions(
+        positions,
+        market_data,
+        max_bar_consumption=max_bar_consumption,
+        capital_base=capital_base,
+        mean_volume_window=mean_volume_window,
+    )
 
     if last_n_days is not None:
-        dtlp = dtlp.loc[dtlp.index.max() - pd.Timedelta(days=last_n_days):]
+        dtlp = dtlp.loc[dtlp.index.max() - pd.Timedelta(days=last_n_days) :]
 
     pos_alloc = pos.get_percent_alloc(positions)
-    pos_alloc = pos_alloc.drop('cash', axis=1)
+    pos_alloc = pos_alloc.drop("cash", axis=1)
 
     liq_desc = pd.DataFrame()
-    liq_desc['days_to_liquidate'] = dtlp.unstack()
-    liq_desc['pos_alloc_pct'] = pos_alloc.unstack() * 100
-    liq_desc.index.set_names(['symbol', 'date'], inplace=True)
+    liq_desc["days_to_liquidate"] = dtlp.unstack()
+    liq_desc["pos_alloc_pct"] = pos_alloc.unstack() * 100
+    liq_desc.index.set_names(["symbol", "date"], inplace=True)
 
-    worst_liq = liq_desc.reset_index().sort_values(
-        'days_to_liquidate', ascending=False).groupby('symbol').first()
+    worst_liq = (
+        liq_desc.reset_index()
+        .sort_values("days_to_liquidate", ascending=False)
+        .groupby("symbol")
+        .first()
+    )
 
     return worst_liq
 
 
-def get_low_liquidity_transactions(transactions, market_data,
-                                   last_n_days=None):
+def get_low_liquidity_transactions(
+    transactions, market_data, last_n_days=None
+):
     """
     For each traded name, find the daily transaction total that consumed
     the greatest proportion of available daily bar volume.
@@ -178,26 +196,30 @@ def get_low_liquidity_transactions(transactions, market_data,
     """
 
     txn_daily_w_bar = daily_txns_with_bar_data(transactions, market_data)
-    txn_daily_w_bar.index.name = 'date'
+    txn_daily_w_bar.index.name = "date"
     txn_daily_w_bar = txn_daily_w_bar.reset_index()
 
     if last_n_days is not None:
         md = txn_daily_w_bar.date.max() - pd.Timedelta(days=last_n_days)
         txn_daily_w_bar = txn_daily_w_bar[txn_daily_w_bar.date > md]
 
-    bar_consumption = (txn_daily_w_bar
-                       .assign(max_pct_bar_consumed=txn_daily_w_bar.amount
-                               .div(txn_daily_w_bar.volume)
-                               .mul(100))
-                       .sort_values('max_pct_bar_consumed',
-                                    ascending=False))
-    max_bar_consumption = bar_consumption.groupby('symbol').first()
+    bar_consumption = txn_daily_w_bar.assign(
+        max_pct_bar_consumed=txn_daily_w_bar.amount.div(
+            txn_daily_w_bar.volume
+        ).mul(100)
+    ).sort_values("max_pct_bar_consumed", ascending=False)
+    max_bar_consumption = bar_consumption.groupby("symbol").first()
 
-    return max_bar_consumption[['date', 'max_pct_bar_consumed']]
+    return max_bar_consumption[["date", "max_pct_bar_consumed"]]
 
 
-def apply_slippage_penalty(returns, txn_daily, simulate_starting_capital,
-                           backtest_starting_capital, impact=0.1):
+def apply_slippage_penalty(
+    returns,
+    txn_daily,
+    simulate_starting_capital,
+    backtest_starting_capital,
+    impact=0.1,
+):
     """
     Applies quadratic volumeshare slippage model to daily returns based
     on the proportion of the observed historical daily bar dollar volume
@@ -230,18 +252,21 @@ def apply_slippage_penalty(returns, txn_daily, simulate_starting_capital,
     simulate_traded_dollars = txn_daily.price * simulate_traded_shares
     simulate_pct_volume_used = simulate_traded_shares / txn_daily.volume
 
-    penalties = simulate_pct_volume_used ** 2 \
-                * impact * simulate_traded_dollars
+    penalties = (
+        simulate_pct_volume_used ** 2 * impact * simulate_traded_dollars
+    )
 
-    daily_penalty = penalties.resample('D').sum()
+    daily_penalty = penalties.resample("D").sum()
     daily_penalty = daily_penalty.reindex(returns.index).fillna(0)
 
     # Since we are scaling the numerator of the penalties linearly
     # by capital base, it makes the most sense to scale the denominator
     # similarly. In other words, since we aren't applying compounding to
     # simulate_traded_shares, we shouldn't apply compounding to pv.
-    portfolio_value = ep.cum_returns(
-        returns, starting_value=backtest_starting_capital) * mult
+    portfolio_value = (
+        ep.cum_returns(returns, starting_value=backtest_starting_capital)
+        * mult
+    )
 
     adj_returns = returns - (daily_penalty / portfolio_value)
 
