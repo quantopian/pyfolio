@@ -10,7 +10,7 @@
 
 pyfolio is a Python library for performance and risk analysis of financial portfolios that works well with the [Zipline](https://zipline.ml4trading.io/) open source backtesting library.
 
-## Trading Strategy Analysis: An Example Tear Sheet 
+## Trading Strategy Analysis with pyfolio 
 
 At the core of pyfolio are various tear sheets that combine various individual plots and summary statistics to
 provide a comprehensive view of the performance of a trading algorithm. 
