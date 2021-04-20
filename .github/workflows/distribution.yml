@@ -45,17 +45,17 @@ jobs:
           name: artifact
           path: dist
 
-      - name: publish to testpypi
-        uses: pypa/gh-action-pypi-publish@v1.4.1
-#        #        if: startsWith(github.event.head_commit.message, 'TEST')
+      #      - name: publish to testpypi
+      #        uses: pypa/gh-action-pypi-publish@v1.4.1
+      #        #        if: startsWith(github.event.head_commit.message, 'TEST')
+      #        with:
+      #          user: __token__
+      #          password: ${{ secrets.TESTPYPI_TOKEN }}
+      #          repository_url: https://test.pypi.org/legacy/
+      - name: publish to pypi
+        uses: pypa/gh-action-pypi-publish@master
+        if: startsWith(github.event.head_commit.message, 'PYPI')
         with:
           user: __token__
-          password: ${{ secrets.TESTPYPI_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
-#      - name: publish to pypi
-#        uses: pypa/gh-action-pypi-publish@master
-#        if: startsWith(github.event.head_commit.message, 'PYPI')
-#        with:
-#          user: __token__
-#          password: ${{ secrets.PYPI_TOKEN }}
-#
+          password: ${{ secrets.PYPI_TOKEN }}
+
