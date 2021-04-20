@@ -2,24 +2,30 @@
 
 These are new features and improvements of note in each release.
 
+## v0.9.3 (April 19, 2021)
+
+- Update to Python 3.7+, Pandas 1.0+
+- Drop support for Python 2
+- Updated docs
+- CI and packging via GitHub Actions
+- conda packages
+
 ## v0.9.0 (Aug 1st, 2018)
 
 ### New features
 
- - Previously, `pyfolio` has required a benchmark, usually the U.S. market
-   returns `SPY`. In order to provide support for international equities and
-   alternative data sets, `pyfolio` is now completely independent of benchmarks.
-   If a benchmark is passed, all benchmark-related analyses will be performed;
-   if not, they will simply be skipped. By [George Ho](https://github.com/eigenfoo)
-  - Performance attribution tearsheet [PR441](https://github.com/quantopian/pyfolio/pull/441), [PR433](https://github.com/quantopian/pyfolio/pull/433), [PR442](https://github.com/quantopian/pyfolio/pull/442). By [Vikram Narayan](https://github.com/vikram-narayan).
-  - Improved implementation of `get_turnover` [PR332](https://github.com/quantopian/pyfolio/pull/432). By [Gus Gordon](https://github.com/gusgordon).
+ - Previously, `pyfolio` has required a benchmark, usually the U.S. market returns `SPY`.
+   In order to provide support for international equities and alternative data sets, `pyfolio` is now completely independent of benchmarks.
+   If a benchmark is passed, all benchmark-related analyses will be performed; if not, they will simply be skipped. By [George Ho](https://github.com/eigenfoo)
+  - Performance attribution tearsheet [PR441](https://github.com/quantopian/pyfolio/pull/441), [PR433](https://github.com/quantopian/pyfolio/pull/433), [PR442](https://github.com/quantopian/pyfolio/pull/442).
+    By [Vikram Narayan](https://github.com/vikram-narayan).
+  - Improved implementation of `get_turnover` [PR332](https://github.com/quantopian/pyfolio/pull/432).
+    By [Gus Gordon](https://github.com/gusgordon).
   - Users can now pass in extra rows (as a dict or OrderedDict) to display in the perf_stats table [PR445](https://github.com/quantopian/pyfolio/pull/445). By [Gus Gordon](https://github.com/gusgordon).
 
 ### Maintenance
 
- - Many features have been more extensively troubleshooted, maintained and
-   tested. By [Ana Ruelas](https://github.com/ahgnaw) and [Vikram
-   Narayan](https://github.com/vikram-narayan).
+ - Many features have been more extensively troubleshooted, maintained and tested. By [Ana Ruelas](https://github.com/ahgnaw) and [Vikram Narayan](https://github.com/vikram-narayan).
  - Various fixes to support pandas versions >= 0.18.1 [PR443](https://github.com/quantopian/pyfolio/pull/443). By [Andrew Daniels](https://github.com/yankees714).
 
 ## v0.8.0 (Aug 23rd, 2017)
@@ -28,19 +34,10 @@ This is a major release from `0.7.0`, and all users are recommended to upgrade.
 
 ### New features
 
- - Risk tear sheet: added a new tear sheet to analyze risk exposures to common
-   factors (e.g. mean reversion and momentum), sector (e.g. Morningstar
-   sectors), market cap and illiquid stocks. By [George
-   Ho](https://github.com/eigenfoo).
- - Simple tear sheet: added a new tear sheet that presents only the most
-   important plots in the full tear sheet, for a quick general overview of a
-   portfolio's performance. By [George Ho](https://github.com/eigenfoo).
- - Performance attribution: added new table to do performance attribution
-   analysis, such as the amount of returns attributable to common factors, and
-   summary statistics such as the multi-factor alpha and multi-factor Sharpe
-   ratio. By [Vikram Narayan](https://github.com/vikram-narayan).
- - Volatility plot: added a rolling annual volatility plot to the returns tear
-   sheet. By [hkopp](https://github.com/hkopp).
+ - Risk tear sheet: added a new tear sheet to analyze risk exposures to common factors (e.g. mean reversion and momentum), sector (e.g. Morningstar sectors), market cap and illiquid stocks. By [George Ho](https://github.com/eigenfoo).
+ - Simple tear sheet: added a new tear sheet that presents only the most important plots in the full tear sheet, for a quick general overview of a portfolio's performance. By [George Ho](https://github.com/eigenfoo).
+ - Performance attribution: added new table to do performance attribution analysis, such as the amount of returns attributable to common factors, and summary statistics such as the multi-factor alpha and multi-factor Sharpe ratio. By [Vikram Narayan](https://github.com/vikram-narayan).
+ - Volatility plot: added a rolling annual volatility plot to the returns tear sheet. By [hkopp](https://github.com/hkopp).
 
 ### Bugfixes
 
