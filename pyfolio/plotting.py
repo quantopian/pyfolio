@@ -28,7 +28,6 @@ from matplotlib import figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.ticker import FuncFormatter
 
-# from . import _seaborn as sns
 import seaborn as sns
 from . import capacity
 from . import pos
