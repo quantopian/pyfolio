@@ -1,0 +1,20 @@
+[project]
+requires-python = '>=3.7'
+
+[build-system]
+requires = [
+    'setuptools>=54.0.0',
+    'wheel>=0.31.0',
+    'oldest-supported-numpy; python_version>="3.7"',
+]
+build-backend = 'setuptools.build_meta'
+
+[tool.black]
+target-version = ['py37', 'py38']
+line-length = 79
+include = '\.pyi?$'
+extend-exclude = '''
+\(
+  docs/source/conf.py
+\)
+'''
