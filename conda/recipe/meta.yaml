@@ -12,7 +12,7 @@ source:
 build:
   number: 0
   skip: true # [py<37 or not x86_64]
-  script: { { PYTHON } } -m pip install . -vv
+  script: {{ PYTHON }} -m pip install . -vv
 
 requirements:
   build:
