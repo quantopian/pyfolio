@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 import sys
-import os
 from pathlib import Path
 import pydata_sphinx_theme
-from alphalens import __version__ as version
+from pyfolio import __version__ as version
 
 sys.path.insert(0, Path("../..").resolve(strict=True).as_posix())
 
@@ -23,7 +22,7 @@ source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 
 master_doc = "index"
 
-project = "Alphalens"
+project = "pyfolio"
 copyright = "2016, Quantopian, Inc."
 author = "Quantopian, Inc."
 
@@ -42,7 +41,7 @@ html_theme = "pydata_sphinx_theme"
 html_theme_path = pydata_sphinx_theme.get_html_theme_path()
 
 html_theme_options = {
-    "github_url": "https://github.com/stefan-jansen/alphalens-reloaded",
+    "github_url": "https://github.com/stefan-jansen/pyfolio-reloaded",
     "twitter_url": "https://twitter.com/ml4trading",
     "external_links": [
         {"name": "ML for Trading", "url": "https://ml4trading.io"},
@@ -67,36 +66,36 @@ html_theme_options = {
 html_context = {
     "github_url": "https://github.com",
     "github_user": "stefan-jansen",
-    "github_repo": "alphalens-reloaded",
+    "github_repo": "pyfolio-reloaded",
     "github_version": "main",
     "doc_path": "docs/source",
 }
 
 html_static_path = []
 
-htmlhelp_basename = "Alphalensdoc"
+htmlhelp_basename = "Pyfoliodoc"
 
 latex_elements = {}
 
 latex_documents = [
     (
         master_doc,
-        "Alphalens.tex",
-        "Alphalens Documentation",
+        "Pyfolio.tex",
+        "Pyfolio Documentation",
         "Quantopian, Inc.",
         "manual",
     )
 ]
 
-man_pages = [(master_doc, "alphalens", "Alphalens Documentation", [author], 1)]
+man_pages = [(master_doc, "pyfolio", "Pyfolio Documentation", [author], 1)]
 
 texinfo_documents = [
     (
         master_doc,
-        "Alphalens",
-        "Alphalens Documentation",
+        "Pyfolio",
+        "Pyfolio Documentation",
         author,
-        "Alphalens",
+        "Pyfolio",
         "One line description of project.",
         "Miscellaneous",
     )

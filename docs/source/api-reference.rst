@@ -3,29 +3,40 @@
 API
 ===
 
-The alphalens API is organized into four modules:
+The pyfolio API is organized into various modules:
 
-* Tear Sheets: :mod:`alphalens.tears`
-* Performance Metrics: :mod:`alphalens.performance`
-* Plotting Functions: :mod:`alphalens.plotting`
-* Utilities: :mod:`alphalens.utils`
+* Tear Sheets: :mod:`pyfolio.tears`
+* Time Series Metrics: :mod:`pyfolio.timeseries`
+* Plotting Functions: :mod:`pyfolio.plotting`
+* Performance Attribution: :mod:`pyfolio.perf_attrib`
+* Utilities: :mod:`pyfolio.utils`
 
 Tear Sheets
 -----------
 
-Alphalens combines key metrics in plots in thematic and summary tear sheets.
+Pyfolio combines key portfolio metrics in thematic plots and summary tear sheets.
 
-.. automodule:: alphalens.tears
+.. automodule:: pyfolio.tears
     :members:
     :undoc-members:
     :show-inheritance:
 
-Performance Metrics
+Time Series Metrics
 -------------------
 
-The module :mod:`alphalens.performance` provides performance and risk metrics.
+The module :mod:`pyfolio.timeseries` provides performance and risk metrics.
 
-.. automodule:: alphalens.performance
+.. automodule:: pyfolio.timeseries
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Performance Attribution:
+------------------------
+
+The module :mod:`pyfolio.perf_attrib` provides performance and risk metrics.
+
+.. automodule:: pyfolio.perf_attrib
     :members:
     :undoc-members:
     :show-inheritance:
@@ -33,9 +44,9 @@ The module :mod:`alphalens.performance` provides performance and risk metrics.
 Plotting Functions
 ------------------
 
-The module :mod:`alphalens.plotting` facilitates the visualization of performance metrics.
+The module :mod:`pyfolio.plotting` facilitates the visualization of performance metrics.
 
-.. automodule:: alphalens.plotting
+.. automodule:: pyfolio.plotting
     :members:
     :undoc-members:
     :show-inheritance:
@@ -43,9 +54,9 @@ The module :mod:`alphalens.plotting` facilitates the visualization of performanc
 Utilities
 ---------
 
-The module :mod:`alphalens.utils` contains helper functions, e.g. to format factor data into the requisite input format.
+The module :mod:`pyfolio.utils` contains various helper functions, e.g. to format factor data into the requisite input format.
 
-.. automodule:: alphalens.utils
+.. automodule:: pyfolio.utils
     :members:
     :undoc-members:
     :show-inheritance:
