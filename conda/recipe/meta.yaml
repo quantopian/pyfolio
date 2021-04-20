@@ -34,9 +34,6 @@ requirements:
 test:
   imports:
     - pyfolio
-    - pyfolio.tests
-  commands:
-    nosetests pyfolio.tests
 
 about:
   home: https://pyfolio.ml4trading.io
