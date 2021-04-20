@@ -298,7 +298,6 @@ class TestStats(TestCase):
     px_list_2 = [1.0, 1.2, 1.0, 0.8, 0.7, 0.8, 0.8, 0.8]
     dt_2 = pd.date_range("2000-1-3", periods=8, freq="D")
 
-    @skipIf(pandas_one_point_one_or_less, 'pandas<1.2 returns np.inf not np.nan')
     @parameterized.expand(
         [
             (
@@ -307,6 +306,9 @@ class TestStats(TestCase):
                 [np.nan, np.inf, np.inf, 11.224972160321, np.nan],
             )
         ]
+    )
+    @skipIf(
+        pandas_one_point_one_or_less, "pandas<1.2 returns np.inf not np.nan"
     )
     def test_sharpe_2(self, returns, rolling_sharpe_window, expected):
         np.testing.assert_array_almost_equal(

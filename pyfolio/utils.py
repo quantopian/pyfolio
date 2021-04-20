@@ -70,9 +70,7 @@ COLORS = [
 
 pandas_version = StrictVersion(pd.__version__)
 
-pandas_one_point_one_or_less = (
-        pandas_version < StrictVersion("1.2")
-)
+pandas_one_point_one_or_less = pandas_version < StrictVersion("1.2")
 
 
 def one_dec_places(x, pos):
@@ -189,7 +187,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
 
 
 def print_table(
-        table, name=None, float_format=None, formatters=None, header_rows=None
+    table, name=None, float_format=None, formatters=None, header_rows=None
 ):
     """
     Pretty print a pandas DataFrame.
@@ -230,9 +228,9 @@ def print_table(
         rows = ""
         for name, value in header_rows.items():
             rows += (
-                            '\n    <tr style="text-align: right;"><th>%s</th>'
-                            + "<td colspan=%d>%s</td></tr>"
-                    ) % (name, n_cols, value)
+                '\n    <tr style="text-align: right;"><th>%s</th>'
+                + "<td colspan=%d>%s</td></tr>"
+            ) % (name, n_cols, value)
 
         # Inject the new HTML
         html = html.replace("<thead>", "<thead>" + rows)
@@ -368,8 +366,8 @@ def estimate_intraday(returns, positions, transactions, EOD_hour=23):
     txn_val["value"] = txn_val.amount * txn_val.price
     txn_val = (
         txn_val.reset_index()
-            .pivot_table(index="date", values="value", columns="symbol")
-            .replace(np.nan, 0)
+        .pivot_table(index="date", values="value", columns="symbol")
+        .replace(np.nan, 0)
     )
 
     # Cumulate transaction amounts each day
@@ -421,7 +419,7 @@ def clip_returns_to_benchmark(rets, benchmark_rets):
     """
 
     if (rets.index[0] < benchmark_rets.index[0]) or (
-            rets.index[-1] > benchmark_rets.index[-1]
+        rets.index[-1] > benchmark_rets.index[-1]
     ):
         clipped_rets = rets[benchmark_rets.index]
     else:
@@ -510,7 +508,7 @@ def get_symbol_rets(symbol, start=None, end=None):
 
 
 def configure_legend(
-        ax, autofmt_xdate=True, change_colors=False, rotation=30, ha="right"
+    ax, autofmt_xdate=True, change_colors=False, rotation=30, ha="right"
 ):
     """
     Format legend for perf attribution plots:

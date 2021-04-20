@@ -8,7 +8,7 @@
 [![Join the chat at https://gitter.im/stefan-jansen/pyfolio-reloaded](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/stefan-jansen/pyfolio-reloaded?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![build status](https://travis-ci.org/stefan-jansen/pyfolio-reloaded.png?branch=master)](https://travis-ci.org/stefan-jansen/pyfolio-reloaded)
 
-pyfolio is a Python library for performance and risk analysis of financial portfolios that works well with the [Zipline](https://zipline.ml4trading.io/) open source backtesting library. 
+pyfolio is a Python library for performance and risk analysis of financial portfolios that works well with the [Zipline](https://zipline.ml4trading.io/) open source backtesting library.
 
 At the core of pyfolio is a so-called tear sheet that consists of various individual plots that provide a comprehensive image of the
 performance of a trading algorithm. Here's an example of a simple tear sheet analyzing a strategy:
@@ -31,7 +31,7 @@ conda install -c ml4t pyfolio-reloaded
 
 #### Development
 
-For development, you may want to use a [virtual environment](https://docs.python-guide.org/en/latest/dev/virtualenvs/) to avoid dependency conflicts between pyfolio and other Python projects you have. 
+For development, you may want to use a [virtual environment](https://docs.python-guide.org/en/latest/dev/virtualenvs/) to avoid dependency conflicts between pyfolio and other Python projects you have.
 
 To get set up with a virtual env, run:
 ```bash
@@ -42,7 +42,7 @@ Next, clone this git repository and run `python -m pip install .[all]` and edit 
 
 ## Usage
 
-A good way to get started is to run the pyfolio examples in a 
+A good way to get started is to run the pyfolio examples in a
 [Jupyter notebook](https://jupyter.org/). To do this, you first want to
 start a Jupyter notebook server:
 
