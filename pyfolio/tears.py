@@ -247,7 +247,7 @@ def create_simple_tear_sheet(returns,
     - Never accept market_data input (market_data = None)
     - Never accept sector_mappings input (sector_mappings = None)
     - Never perform bootstrap analysis (bootstrap = False)
-    - Never hide posistions on top 10 holdings plot (hide_positions = False)
+    - Never hide positions on top 10 holdings plot (hide_positions = False)
     - Always use default cone_std (cone_std = (1.0, 1.5, 2.0))
 
     Parameters

@@ -60,7 +60,7 @@ def make_transaction_frame(transactions):
     Returns
     -------
     df : pd.DataFrame
-        Daily transaction volume and dollar ammount.
+        Daily transaction volume and dollar amount.
          - See full explanation in tears.create_full_tear_sheet.
     """
 
