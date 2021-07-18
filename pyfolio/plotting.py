@@ -72,7 +72,7 @@ def plotting_context(context='notebook', font_scale=1.5, rc=None):
         Config flags.
         By default, {'lines.linewidth': 1.5}
         is being used and will be added to any
-        rc passed in, unless explicitly overriden.
+        rc passed in, unless explicitly overridden.
 
     Returns
     -------
@@ -455,7 +455,7 @@ def plot_drawdown_periods(returns, top=10, ax=None, **kwargs):
 
 def plot_drawdown_underwater(returns, ax=None, **kwargs):
     """
-    Plots how far underwaterr returns are over time, or plots current
+    Plots how far underwater returns are over time, or plots current
     drawdown vs. date.
 
     Parameters
@@ -753,7 +753,7 @@ def plot_rolling_returns(returns,
         volatilities. Requires passing of benchmark_rets.
     cone_function : function, optional
         Function to use when generating forecast probability cone.
-        The function signiture must follow the form:
+        The function signature must follow the form:
         def cone(in_sample_returns (pd.Series),
                  days_to_project_forward (int),
                  cone_std= (float, or tuple),
@@ -1408,7 +1408,7 @@ def plot_slippage_sweep(returns, positions, transactions,
         Prices and amounts of executed trades. One row per trade.
          - See full explanation in tears.create_full_tear_sheet.
     slippage_params: tuple
-        Slippage pameters to apply to the return time series (in
+        Slippage parameters to apply to the return time series (in
         basis points).
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
@@ -1877,7 +1877,7 @@ def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
         Account name to be used as figure title.
     bounds : pandas.core.frame.DataFrame
         Contains upper and lower cone boundaries. Column names are
-        strings corresponding to the number of standard devations
+        strings corresponding to the number of standard deviations
         above (positive) or below (negative) the projected mean
         cumulative returns.
     oos_returns : pandas.core.frame.DataFrame
@@ -1890,7 +1890,7 @@ def plot_cones(name, bounds, oos_returns, num_samples=1000, ax=None,
     ax : matplotlib.Axes, optional
         Axes upon which to plot.
     cone_std : list of int/float
-        Number of standard devations to use in the boundaries of
+        Number of standard deviations to use in the boundaries of
         the cone. If multiple values are passed, cone bounds will
         be generated for each value.
     random_seed : int

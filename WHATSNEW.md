@@ -183,7 +183,7 @@ your dependencies, specifically, `pandas>=0.18.0`, `seaborn>=0.6.0` and
   Wiecki](https://github.com/twiecki)
 
 ### Bug fixes
-* Many depracation fixes for Pandas 0.18.0, seaborn 0.6.0, and zipline 0.8.4
+* Many deprecation fixes for Pandas 0.18.0, seaborn 0.6.0, and zipline 0.8.4
 
 
 ## v0.4.0 (Dec 10, 2015)

@@ -208,12 +208,12 @@ def apply_slippage_penalty(returns, txn_daily, simulate_starting_capital,
     returns : pd.Series
         Time series of daily returns.
     txn_daily : pd.Series
-        Daily transaciton totals, closing price, and daily volume for
+        Daily transaction totals, closing price, and daily volume for
         each traded name. See price_volume_daily_txns for more details.
     simulate_starting_capital : integer
         capital at which we want to test
     backtest_starting_capital: capital base at which backtest was
-        origionally run. impact: See Zipline volumeshare slippage model
+        originally run. impact: See Zipline volumeshare slippage model
     impact : float
         Scales the size of the slippage penalty.
 

@@ -1120,7 +1120,7 @@ def summarize_paths(samples, cone_std=(1., 1.5, 2.), starting_value=1.):
     samples : numpy.ndarray
         Alternative paths, or series of possible outcomes.
     cone_std : list of int/float
-        Number of standard devations to use in the boundaries of
+        Number of standard deviations to use in the boundaries of
         the cone. If multiple values are passed, cone bounds will
         be generated for each value.
 
@@ -1152,7 +1152,7 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
     """
     Determines the upper and lower bounds of an n standard deviation
     cone of forecasted cumulative returns. Future cumulative mean and
-    standard devation are computed by repeatedly sampling from the
+    standard deviation are computed by repeatedly sampling from the
     in-sample daily returns (i.e. bootstrap). This cone is non-parametric,
     meaning it does not assume that returns are normally distributed.
 
@@ -1164,7 +1164,7 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
     num_days : int
         Number of days to project the probability cone forward.
     cone_std : int, float, or list of int/float
-        Number of standard devations to use in the boundaries of
+        Number of standard deviations to use in the boundaries of
         the cone. If multiple values are passed, cone bounds will
         be generated for each value.
     starting_value : int or float
@@ -1182,7 +1182,7 @@ def forecast_cone_bootstrap(is_returns, num_days, cone_std=(1., 1.5, 2.),
     -------
     pd.DataFrame
         Contains upper and lower cone boundaries. Column names are
-        strings corresponding to the number of standard devations
+        strings corresponding to the number of standard deviations
         above (positive) or below (negative) the projected mean
         cumulative returns.
     """

@@ -193,7 +193,7 @@ def extract_round_trips(transactions,
         DataFrame with one row per round trip.  The returns column
         contains returns in respect to the portfolio value while
         rt_returns are the returns in regards to the invested capital
-        into that partiulcar round-trip.
+        into that particular round-trip.
     """
 
     transactions = _groupby_consecutive(transactions)
