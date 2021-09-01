@@ -5,17 +5,16 @@ Usage: `checkipnb.py foo.ipynb [bar.ipynb [...]]`
 Each cell is submitted to the kernel, and checked for errors.
 """
 
-import os
-import glob
+from pathlib import Path
 from runipy.notebook_runner import NotebookRunner
-
-from pyfolio.utils import pyfolio_root
 from pyfolio.ipycompat import read as read_notebook
+
+EXAMPLES_PATH = Path(__file__).resolve().parent.parent / "examples"
 
 
 def test_nbs():
-    path = os.path.join(pyfolio_root(), "examples", "*.ipynb")
-    for ipynb in glob.glob(path):
+    for ipynb in EXAMPLES_PATH.glob("*.ipynb"):
+        print(ipynb)
         with open(ipynb) as f:
             nb = read_notebook(f, "json")
             nb_runner = NotebookRunner(nb)

@@ -454,7 +454,13 @@ def create_simple_tear_sheet(
             plotting.plot_txn_time_hist(transactions, ax=ax_txn_timings)
 
     for ax in fig.axes:
-        plt.setp(ax.get_xticklabels(), visible=True)
+        ax.tick_params(
+            axis="x",
+            which="major",
+            bottom=True,
+            top=False,
+            labelbottom=True,
+        )
 
 
 @plotting.customize
@@ -642,7 +648,13 @@ def create_returns_tear_sheet(
         raise ValueError("bootstrap requires passing of benchmark_rets.")
 
     for ax in fig.axes:
-        plt.setp(ax.get_xticklabels(), visible=True)
+        ax.tick_params(
+            axis="x",
+            which="major",
+            bottom=True,
+            top=False,
+            labelbottom=True,
+        )
 
     if return_fig:
         return fig
@@ -746,7 +758,13 @@ def create_position_tear_sheet(
             )
 
     for ax in fig.axes:
-        plt.setp(ax.get_xticklabels(), visible=True)
+        ax.tick_params(
+            axis="x",
+            which="major",
+            bottom=True,
+            top=False,
+            labelbottom=True,
+        )
 
     if return_fig:
         return fig
@@ -841,7 +859,13 @@ def create_txn_tear_sheet(
             ax=ax_slippage_sensitivity,
         )
     for ax in fig.axes:
-        plt.setp(ax.get_xticklabels(), visible=True)
+        ax.tick_params(
+            axis="x",
+            which="major",
+            bottom=True,
+            top=False,
+            labelbottom=True,
+        )
 
     if return_fig:
         return fig
