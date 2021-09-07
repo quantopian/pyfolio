@@ -1,9 +1,16 @@
-name: PyPI Wheels
+name: PyPI
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Package Index'
+        required: true
+        default: 'TESTPYPI'
+  release:
+    types:
+      - published
+
 
 jobs:
   dist:
@@ -44,18 +51,17 @@ jobs:
         with:
           name: artifact
           path: dist
-
-      #      - name: publish to testpypi
-      #        uses: pypa/gh-action-pypi-publish@v1.4.1
-      #        #        if: startsWith(github.event.head_commit.message, 'TEST')
-      #        with:
-      #          user: __token__
-      #          password: ${{ secrets.TESTPYPI_TOKEN }}
-      #          repository_url: https://test.pypi.org/legacy/
+      - name: publish to testpypi
+        uses: pypa/gh-action-pypi-publish@v1.4.1
+        if: ${{ github.event.inputs.target }} == 'TESTPYPI'
+        with:
+          user: __token__
+          password: ${{ secrets.TESTPYPI_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
       - name: publish to pypi
         uses: pypa/gh-action-pypi-publish@master
-        if: startsWith(github.event.head_commit.message, 'PYPI')
+        if: ${{ github.event.inputs.target }} == 'PYPI' || (github.event_name == 'release' && github.event.action == 'published')
+        #        if: ${{ github.event.inputs.target }} == 'PYPI'
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
-

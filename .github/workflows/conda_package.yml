@@ -1,6 +1,6 @@
-name: Alphalens conda distribution
+name: conda
 
-on: [ push ]
+on: workflow_dispatch
 
 jobs:
   build_wheels:
@@ -21,7 +21,7 @@ jobs:
 #        python: [ '3.9' ]
 
     steps:
-      - name: Checkout alphalens-reloaded
+      - name: Checkout pyfolio-reloaded
         uses: actions/checkout@v2
 
       - name: Setup miniconda3
