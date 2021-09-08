@@ -446,14 +446,17 @@ class PerfAttribTestCase(unittest.TestCase):
                 factor_returns,
                 factor_loadings_missing_stocks,
             )
-
-            self.assertEqual(len(w), 1)
+            # avoids test failure due to DeprecationWarning for pandas>=1.0, <1.1
+            w_ = [warn for warn in w if issubclass(warn.category, UserWarning)]
+            self.assertEqual(len(w_), 1)
             self.assertIn(
                 "The following assets were missing factor loadings: "
                 "['TLT']",
-                str(w[-1].message),
+                str(w_[-1].message),
             )
-            self.assertIn("Ratio of assets missing: 0.333", str(w[-1].message))
+            self.assertIn(
+                "Ratio of assets missing: 0.333", str(w_[-1].message)
+            )
 
             # missing dates should raise a warning
             missing_dates = ["2017-01-01", "2017-01-05"]
@@ -465,12 +468,12 @@ class PerfAttribTestCase(unittest.TestCase):
                 factor_returns,
                 factor_loadings_missing_dates,
             )
-
-            self.assertEqual(len(w), 2)
+            w_ = [warn for warn in w if issubclass(warn.category, UserWarning)]
+            self.assertEqual(len(w_), 2)
             self.assertIn(
                 "Could not find factor loadings for "
                 "{} dates".format(len(missing_dates)),
-                str(w[-1].message),
+                str(w_[-1].message),
             )
 
             for date in missing_dates:
@@ -484,12 +487,12 @@ class PerfAttribTestCase(unittest.TestCase):
                 factor_returns.drop(pd.DatetimeIndex(missing_dates)),
                 factor_loadings_missing_dates,
             )
-
-            self.assertEqual(len(w), 3)
+            w_ = [warn for warn in w if issubclass(warn.category, UserWarning)]
+            self.assertEqual(len(w_), 3)
             self.assertIn(
                 "Could not find factor loadings for "
                 "{} dates".format(len(missing_dates)),
-                str(w[-1].message),
+                str(w_[-1].message),
             )
 
             for date in missing_dates:
@@ -507,19 +510,21 @@ class PerfAttribTestCase(unittest.TestCase):
                 factor_returns,
                 factor_loadings_missing_both,
             )
-
-            self.assertEqual(len(w), 5)
+            w_ = [warn for warn in w if issubclass(warn.category, UserWarning)]
+            self.assertEqual(len(w_), 5)
             self.assertIn(
                 "The following assets were missing factor loadings: "
                 "['TLT']",
-                str(w[-2].message),
+                str(w_[-2].message),
             )
-            self.assertIn("Ratio of assets missing: 0.333", str(w[-2].message))
+            self.assertIn(
+                "Ratio of assets missing: 0.333", str(w_[-2].message)
+            )
 
             self.assertIn(
                 "Could not find factor loadings for "
                 "{} dates".format(len(missing_dates)),
-                str(w[-1].message),
+                str(w_[-1].message),
             )
             for date in missing_dates:
                 self.assertNotIn(date, exposures.index)
@@ -564,8 +569,10 @@ class PerfAttribTestCase(unittest.TestCase):
                 factor_loadings,
                 transactions=transactions,
             )
+            # avoids test failure due to DeprecationWarning for pandas>=1.0, <1.1
+            w = [warn for warn in w if issubclass(warn.category, UserWarning)]
 
-        self.assertEqual(len(w), 1)
+        self.assertEqual(len([w]), 1)
         self.assertIn(
             "This algorithm has relatively high turnover of its positions.",
             str(w[-1].message),

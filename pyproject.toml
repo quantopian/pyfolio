@@ -18,3 +18,10 @@ extend-exclude = '''
   docs/source/conf.py
 \)
 '''
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-q"
+testpaths = [
+    "pyfolio/tests"
+]
