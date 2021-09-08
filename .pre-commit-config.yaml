@@ -1,0 +1,20 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+    -   id: check-yaml
+    -   id: check-merge-conflict
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+
+-   repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.1
+    hooks:
+    -   id: flake8
+
+-   repo: https://github.com/psf/black
+    rev: 20.8b1
+    hooks:
+    -   id: black
+
+exclude: '^conda/recipe/meta.yaml$'
