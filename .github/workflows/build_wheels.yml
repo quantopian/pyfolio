@@ -11,7 +11,6 @@ on:
     types:
       - published
 
-
 jobs:
   dist:
     runs-on: ${{ matrix.os }}
@@ -44,15 +43,13 @@ jobs:
   upload_pypi:
     needs: [ dist ]
     runs-on: ubuntu-latest
-    # upload to (Test)-PyPI on push with tag starting with v; diff by commit
-    #    if: startsWith(github.ref, 'refs/tags')
     steps:
       - uses: actions/download-artifact@v2
         with:
           name: artifact
           path: dist
       - name: publish to testpypi
-        uses: pypa/gh-action-pypi-publish@v1.4.1
+        uses: pypa/gh-action-pypi-publish@master
         if: ${{ github.event.inputs.target }} == 'TESTPYPI'
         with:
           user: __token__
@@ -61,7 +58,6 @@ jobs:
       - name: publish to pypi
         uses: pypa/gh-action-pypi-publish@master
         if: ${{ github.event.inputs.target }} == 'PYPI' || (github.event_name == 'release' && github.event.action == 'published')
-        #        if: ${{ github.event.inputs.target }} == 'PYPI'
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}

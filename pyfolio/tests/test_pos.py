@@ -155,10 +155,12 @@ class PositionsTestCase(TestCase):
             assert_frame_equal(
                 result_sector_exposure, expected_sector_exposure
             )
+            # avoids test failure due to DeprecationWarning for pandas>=1.0, <1.1
+            w_ = [warn for warn in w if issubclass(warn.category, UserWarning)]
             if warning_expected:
-                self.assertEqual(len(w), 1)
+                self.assertEqual(len(w_), 1)
             else:
-                self.assertEqual(len(w), 0)
+                self.assertEqual(len(w_), 0)
 
     @parameterized.expand(
         [

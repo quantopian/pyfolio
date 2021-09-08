@@ -4,9 +4,14 @@
 </a>
 </p>
 
-
-[![Join the chat at https://gitter.im/stefan-jansen/pyfolio-reloaded](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/stefan-jansen/pyfolio-reloaded?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![PyPI Wheels](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/distribution.yml/badge.svg)](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/distribution.yml)
+![PyPI](https://img.shields.io/pypi/v/pyfolio-reloaded)
+[![Tests](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/unit_tests.yml)
+[![conda](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/conda_package.yml/badge.svg)](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/conda_package.yml)
+[![PyPI](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/build_wheels.yml/badge.svg)](https://github.com/stefan-jansen/pyfolio-reloaded/actions/workflows/build_wheels.yml)
+[![Coverage Status](https://coveralls.io/repos/github/stefan-jansen/pyfolio-reloaded/badge.svg?branch=main)](https://coveralls.io/github/stefan-jansen/pyfolio-reloaded?branch=main)
+![GitHub issues](https://img.shields.io/github/issues/stefan-jansen/pyfolio-reloaded)
+![Discourse users](https://img.shields.io/discourse/users?server=https%3A%2F%2Fexchange.ml4trading.io%2F)
+![Twitter Follow](https://img.shields.io/twitter/follow/ml4trading?style=social)
 
 pyfolio is a Python library for performance and risk analysis of financial portfolios that works well with the [Zipline](https://zipline.ml4trading.io/) open source backtesting library.
 

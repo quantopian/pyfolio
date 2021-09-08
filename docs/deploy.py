@@ -9,8 +9,8 @@ from shutil import move, rmtree
 from subprocess import check_call
 
 HERE = Path(__file__).resolve(strict=True).parent
-ALPHALENS_ROOT = HERE.parent
-TEMP_LOCATION = "/tmp/alphalens-doc"
+PYFOLIO_ROOT = HERE.parent
+TEMP_LOCATION = "/tmp/pyfolio-doc"
 TEMP_LOCATION_GLOB = TEMP_LOCATION + "/*"
 
 
@@ -49,8 +49,8 @@ def main():
             print("Copying built files to temp location.")
             move("build/html", TEMP_LOCATION)
 
-            print("Moving to '%s'" % ALPHALENS_ROOT)
-            os.chdir(ALPHALENS_ROOT)
+            print("Moving to '%s'" % PYFOLIO_ROOT)
+            os.chdir(PYFOLIO_ROOT)
 
             print("Checking out gh-pages branch.")
             check_call(
@@ -77,7 +77,7 @@ def main():
         os.chdir(old_dir)
 
     print()
-    print("Updated documentation branch in directory %s" % ALPHALENS_ROOT)
+    print("Updated documentation branch in directory %s" % PYFOLIO_ROOT)
     print("If you are happy with these changes, commit and push to gh-pages.")
 
 
