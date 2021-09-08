@@ -42,7 +42,7 @@ jobs:
         run: |
           conda activate recipe
           mamba install -n recipe boa conda-verify anaconda-client
-          conda mambabuild --output-folder . --python ${{ matrix.python }} conda.recipe
+          conda mambabuild --output-folder . --python ${{ matrix.python }} conda/recipe
 
       - name: activate uploader
         # address broken client under py3.9
