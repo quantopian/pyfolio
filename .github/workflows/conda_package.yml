@@ -31,7 +31,7 @@ jobs:
           mamba-version: "*"
           python-version: ${{ matrix.python }}
           activate-environment: recipe
-          channels: conda-forge, defaults, anaconda
+          channels: ml4t, conda-forge, defaults, anaconda, ranaroussi
 
       - name: create uploader
         # address broken client under py3.9

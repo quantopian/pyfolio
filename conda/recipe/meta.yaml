@@ -1,5 +1,5 @@
 {% set name = "pyfolio-reloaded" %}
-{% set version = "0.9.3" %}
+{% set version = "0.9.4" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  md5: ad9dc043ecfbe3eaaa80a2277f90788f
+  md5: 0b8c38f40b57230623e1f32b53d16712
 
 build:
   number: 0
@@ -24,12 +24,12 @@ requirements:
     - ipython >=3.2.3
     - matplotlib >=1.4.0
     - numpy >=1.11.1
-    - pandas >=0.18.1
+    - pandas >=1.0
     - pytz >=2014.10
     - scipy >=0.14.0
     - scikit-learn>=0.16.1
     - seaborn >=0.7.1
-    - empyrical-reloaded >=0.5.7 # pending update
+    - empyrical-reloaded >=0.5.8 # pending update
 
 test:
   imports:
