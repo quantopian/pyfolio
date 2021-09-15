@@ -917,11 +917,15 @@ def plot_rolling_beta(
     )
     rb_2.plot(color="grey", lw=3, alpha=0.4, ax=ax, **kwargs)
     ax.axhline(rb_1.mean(), color="steelblue", linestyle="--", lw=3)
-    ax.axhline(0.0, color="black", linestyle="-", lw=2)
+    ax.axhline(1.0, color="black", linestyle="--", lw=1)
 
     ax.set_xlabel("")
-    ax.legend(["6-mo", "12-mo"], loc=legend_loc, frameon=True, framealpha=0.5)
-    ax.set_ylim((-1.0, 1.0))
+    ax.legend(
+        ["6-mo", "12-mo", "6-mo Average"],
+        loc=legend_loc,
+        frameon=True,
+        framealpha=0.5,
+    )
     return ax
 
 
