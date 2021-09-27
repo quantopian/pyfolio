@@ -16,6 +16,7 @@ from __future__ import division
 
 from collections import OrderedDict
 from functools import partial
+from datetime import datetime
 
 import empyrical as ep
 import numpy as np
@@ -898,6 +899,9 @@ def get_max_drawdown_underwater(underwater):
         recovery = underwater[valley:][underwater[valley:] == 0].index[0]
     except IndexError:
         recovery = np.nan  # drawdown not recovered
+    if not isinstance(valley, datetime):
+        valley = underwater.index[valley]
+
     return peak, valley, recovery
 
 
