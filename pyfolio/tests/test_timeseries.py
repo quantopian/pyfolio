@@ -338,14 +338,14 @@ class TestBootstrap(TestCase):
         assert_almost_equal(
             np.mean(samples),
             mean_of_mean,
-            3,
+            2,
             'Mean of bootstrap does not match theoretical mean of'
             'sampling distribution')
 
         assert_almost_equal(
             np.std(samples),
             sd_of_mean,
-            3,
+            2,
             'SD of bootstrap does not match theoretical SD of'
             'sampling distribution')
 
