@@ -202,6 +202,7 @@ def create_full_tear_sheet(returns,
 
         if transactions is not None:
             create_txn_tear_sheet(returns, positions, transactions,
+                                  turnover_denom=turnover_denom,
                                   unadjusted_returns=unadjusted_returns,
                                   estimate_intraday=False,
                                   set_context=set_context)
