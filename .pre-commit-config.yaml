@@ -6,6 +6,7 @@ repos:
     -   id: check-merge-conflict
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+    -   id: check-added-large-files
 
 -   repo: https://gitlab.com/pycqa/flake8
     rev: 3.9.1
@@ -13,7 +14,7 @@ repos:
     -   id: flake8
 
 -   repo: https://github.com/psf/black
-    rev: 20.8b1
+    rev: 22.3.0
     hooks:
     -   id: black
 

@@ -6,7 +6,7 @@ from pandas.testing import assert_series_equal
 import numpy as np
 import pandas as pd
 
-from .. import timeseries
+from src.pyfolio import timeseries
 from pyfolio.utils import to_utc, to_series, pandas_one_point_one_or_less
 
 import gzip
@@ -93,26 +93,18 @@ class TestDrawdown(TestCase):
             np.round(drawdowns.loc[0, "Net drawdown in %"]), first_net_drawdown
         )
         self.assertEqual(drawdowns.loc[0, "Peak date"], first_expected_peak)
-        self.assertEqual(
-            drawdowns.loc[0, "Valley date"], first_expected_valley
-        )
-        self.assertEqual(
-            drawdowns.loc[0, "Recovery date"], first_expected_recovery
-        )
+        self.assertEqual(drawdowns.loc[0, "Valley date"], first_expected_valley)
+        self.assertEqual(drawdowns.loc[0, "Recovery date"], first_expected_recovery)
 
         self.assertEqual(
             np.round(drawdowns.loc[1, "Net drawdown in %"]),
             second_net_drawdown,
         )
         self.assertEqual(drawdowns.loc[1, "Peak date"], second_expected_peak)
-        self.assertEqual(
-            drawdowns.loc[1, "Valley date"], second_expected_valley
-        )
+        self.assertEqual(drawdowns.loc[1, "Valley date"], second_expected_valley)
         self.assertTrue(pd.isnull(drawdowns.loc[1, "Recovery date"]))
 
-    px_list_1 = (
-        np.array([100, 120, 100, 80, 70, 110, 180, 150]) / 100.0
-    )  # Simple
+    px_list_1 = np.array([100, 120, 100, 80, 70, 110, 180, 150]) / 100.0  # Simple
     px_list_2 = (
         np.array([100, 120, 100, 80, 70, 80, 90, 90]) / 100.0
     )  # Ends in drawdown
@@ -141,14 +133,12 @@ class TestDrawdown(TestCase):
 
         peak, valley, recovery = timeseries.get_max_drawdown(rets)
         # Need to use isnull because the result can be NaN, NaT, etc.
-        self.assertTrue(
-            pd.isnull(peak)
-        ) if expected_peak is None else self.assertEqual(peak, expected_peak)
+        self.assertTrue(pd.isnull(peak)) if expected_peak is None else self.assertEqual(
+            peak, expected_peak
+        )
         self.assertTrue(
             pd.isnull(valley)
-        ) if expected_valley is None else self.assertEqual(
-            valley, expected_valley
-        )
+        ) if expected_valley is None else self.assertEqual(valley, expected_valley)
         self.assertTrue(
             pd.isnull(recovery)
         ) if expected_recovery is None else self.assertEqual(
@@ -212,9 +202,9 @@ class TestDrawdown(TestCase):
             rand.standard_t(3.1, n_samples),
             pd.date_range("2005-01-02", periods=n_samples),
         )
-        spy_drawdowns = timeseries.gen_drawdown_table(
-            spy_returns, top=20
-        ).sort_values(by="Peak date")
+        spy_drawdowns = timeseries.gen_drawdown_table(spy_returns, top=20).sort_values(
+            by="Peak date"
+        )
         # Compare the recovery date of each drawdown with the peak of the next
         # Last pair might contain a NaT if drawdown didn't finish, so ignore it
         pairs = list(
@@ -244,17 +234,13 @@ class TestDrawdown(TestCase):
         ]
     )
     def test_top_drawdowns(self, returns, top, expected):
-        self.assertEqual(
-            timeseries.get_top_drawdowns(returns, top=top), expected
-        )
+        self.assertEqual(timeseries.get_top_drawdowns(returns, top=top), expected)
 
 
 class TestVariance(TestCase):
     @parameterized.expand([(1e7, 0.5, 1, 1, -10000000.0)])
     def test_var_cov_var_normal(self, P, c, mu, sigma, expected):
-        self.assertEqual(
-            timeseries.var_cov_var_normal(P, c, mu, sigma), expected
-        )
+        self.assertEqual(timeseries.var_cov_var_normal(P, c, mu, sigma), expected)
 
 
 class TestNormalize(TestCase):
@@ -307,14 +293,10 @@ class TestStats(TestCase):
             )
         ]
     )
-    @skipIf(
-        pandas_one_point_one_or_less, "pandas<1.2 returns np.inf not np.nan"
-    )
+    @skipIf(pandas_one_point_one_or_less, "pandas<1.2 returns np.inf not np.nan")
     def test_sharpe_2(self, returns, rolling_sharpe_window, expected):
         np.testing.assert_array_almost_equal(
-            timeseries.rolling_sharpe(
-                returns, rolling_sharpe_window
-            ).to_numpy(),
+            timeseries.rolling_sharpe(returns, rolling_sharpe_window).to_numpy(),
             np.asarray(expected),
         )
 
@@ -342,7 +324,7 @@ class TestCone(TestCase):
         midline = np.cumprod(1 + (rets.mean() * np.ones(days_forward)))
         stdev = rets.std() * midline * np.sqrt(np.arange(days_forward) + 1)
 
-        normal_cone = pd.DataFrame(columns=pd.Float64Index([]))
+        normal_cone = pd.DataFrame(columns=pd.Index([], dtype="float64"))
         for s in cone_stdevs:
             normal_cone[s] = midline + s * stdev
             normal_cone[-s] = midline - s * stdev
@@ -356,7 +338,7 @@ class TestCone(TestCase):
             num_samples=10000,
         )
 
-        for col, vals in bootstrap_cone.iteritems():
+        for col, vals in bootstrap_cone.items():
             expected = normal_cone[col].values
             assert_allclose(vals.values, expected, rtol=0.005)
 
@@ -396,8 +378,7 @@ class TestBootstrap(TestCase):
             np.std(samples),
             sd_of_mean,
             3,
-            "SD of bootstrap does not match theoretical SD of"
-            "sampling distribution",
+            "SD of bootstrap does not match theoretical SD of" "sampling distribution",
         )
 
 

@@ -16,12 +16,12 @@ import warnings
 from time import time
 
 import empyrical as ep
-from IPython.display import display, Markdown
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import pandas as pd
-
 import seaborn as sns
+from IPython.display import display, Markdown
+
 from . import capacity
 from . import perf_attrib
 from . import plotting
@@ -554,9 +554,7 @@ def create_returns_tear_sheet(
     ax_rolling_returns = plt.subplot(gs[:2, :])
 
     i = 2
-    ax_rolling_returns_vol_match = plt.subplot(
-        gs[i, :], sharex=ax_rolling_returns
-    )
+    ax_rolling_returns_vol_match = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
     ax_rolling_returns_log = plt.subplot(gs[i, :], sharex=ax_rolling_returns)
     i += 1
@@ -735,9 +733,7 @@ def create_position_tear_sheet(
         ax=ax_top_positions,
     )
 
-    plotting.plot_max_median_position_concentration(
-        positions, ax=ax_max_median_pos
-    )
+    plotting.plot_max_median_position_concentration(positions, ax=ax_max_median_pos)
 
     plotting.plot_holdings(returns, positions_alloc, ax=ax_holdings)
 
@@ -753,9 +749,7 @@ def create_position_tear_sheet(
             sector_alloc = pos.get_percent_alloc(sector_exposures)
             sector_alloc = sector_alloc.drop("cash", axis="columns")
             ax_sector_alloc = plt.subplot(gs[6, :], sharex=ax_exposures)
-            plotting.plot_sector_allocations(
-                returns, sector_alloc, ax=ax_sector_alloc
-            )
+            plotting.plot_sector_allocations(returns, sector_alloc, ax=ax_sector_alloc)
 
     for ax in fig.axes:
         ax.tick_params(
@@ -912,9 +906,7 @@ def create_round_trip_tear_sheet(
         estimate_intraday, returns, positions, transactions
     )
 
-    transactions_closed = round_trips.add_closing_transactions(
-        positions, transactions
-    )
+    transactions_closed = round_trips.add_closing_transactions(positions, transactions)
     # extract_round_trips requires BoD portfolio_value
     trades = round_trips.extract_round_trips(
         transactions_closed,
@@ -1006,9 +998,7 @@ def create_interesting_times_tear_sheet(
         If True, returns the figure that was plotted on.
     """
 
-    rets_interesting = timeseries.extract_interesting_date_ranges(
-        returns, periods
-    )
+    rets_interesting = timeseries.extract_interesting_date_ranges(returns, periods)
 
     if not rets_interesting:
         warnings.warn(
@@ -1158,9 +1148,7 @@ def create_capacity_tear_sheet(
         mean_volume_window=5,
         last_n_days=last_n_days,
     )
-    max_days_by_ticker_lnd.index = max_days_by_ticker_lnd.index.map(
-        utils.format_asset
-    )
+    max_days_by_ticker_lnd.index = max_days_by_ticker_lnd.index.map(utils.format_asset)
 
     print("Last {} trading days:".format(last_n_days))
     utils.print_table(
@@ -1174,18 +1162,14 @@ def create_capacity_tear_sheet(
         "Tickers with daily transactions consuming >{}% of daily bar \n"
         "all backtest:".format(trade_daily_vol_limit * 100)
     )
-    utils.print_table(
-        llt[llt["max_pct_bar_consumed"] > trade_daily_vol_limit * 100]
-    )
+    utils.print_table(llt[llt["max_pct_bar_consumed"] > trade_daily_vol_limit * 100])
 
     llt = capacity.get_low_liquidity_transactions(
         transactions, market_data, last_n_days=last_n_days
     )
 
     print("Last {} trading days:".format(last_n_days))
-    utils.print_table(
-        llt[llt["max_pct_bar_consumed"] > trade_daily_vol_limit * 100]
-    )
+    utils.print_table(llt[llt["max_pct_bar_consumed"] > trade_daily_vol_limit * 100])
 
     bt_starting_capital = positions.iloc[0].sum() / (1 + returns.iloc[0])
     fig, ax_capacity_sweep = plt.subplots(figsize=(14, 6))
@@ -1288,33 +1272,23 @@ def create_perf_attrib_tear_sheet(
 
     gs = gridspec.GridSpec(vertical_sections, 1, wspace=0.5, hspace=0.5)
 
-    perf_attrib.plot_returns(
-        perf_attrib_data, ax=plt.subplot(gs[current_section])
-    )
+    perf_attrib.plot_returns(perf_attrib_data, ax=plt.subplot(gs[current_section]))
     current_section += 1
 
     if factor_partitions is not None:
 
         for factor_type, partitions in factor_partitions.items():
-
-            columns_to_select = perf_attrib_data.columns.intersection(
-                partitions
-            )
+            columns_to_select = perf_attrib_data.columns.intersection(partitions)
 
             perf_attrib.plot_factor_contribution_to_perf(
                 perf_attrib_data[columns_to_select],
                 ax=plt.subplot(gs[current_section]),
-                title=("Cumulative common {} returns attribution").format(
-                    factor_type
-                ),
+                title=("Cumulative common {} returns attribution").format(factor_type),
             )
             current_section += 1
 
         for factor_type, partitions in factor_partitions.items():
-
-            columns_to_select = portfolio_exposures.columns.intersection(
-                partitions
-            )
+            columns_to_select = portfolio_exposures.columns.intersection(partitions)
 
             perf_attrib.plot_risk_exposures(
                 portfolio_exposures[columns_to_select],

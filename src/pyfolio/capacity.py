@@ -39,9 +39,7 @@ def daily_txns_with_bar_data(transactions, market_data):
     txn_daily["price"] = market_data.xs("price", level=1).unstack()
     txn_daily["volume"] = market_data.xs("volume", level=1).unstack()
 
-    txn_daily = (
-        txn_daily.reset_index().set_index("date").sort_index().asfreq("D")
-    )
+    txn_daily = txn_daily.reset_index().set_index("date").sort_index().asfreq("D")
 
     return txn_daily
 
@@ -91,9 +89,7 @@ def days_to_liquidate_positions(
     """
 
     DV = market_data.xs("volume", level=1) * market_data.xs("price", level=1)
-    roll_mean_dv = (
-        DV.rolling(window=mean_volume_window, center=False).mean().shift()
-    )
+    roll_mean_dv = DV.rolling(window=mean_volume_window, center=False).mean().shift()
     roll_mean_dv = roll_mean_dv.replace(0, np.nan)
 
     positions_alloc = pos.get_percent_alloc(positions)
@@ -175,9 +171,7 @@ def get_max_days_to_liquidate_by_ticker(
     return worst_liq
 
 
-def get_low_liquidity_transactions(
-    transactions, market_data, last_n_days=None
-):
+def get_low_liquidity_transactions(transactions, market_data, last_n_days=None):
     """
     For each traded name, find the daily transaction total that consumed
     the greatest proportion of available daily bar volume.
@@ -204,9 +198,7 @@ def get_low_liquidity_transactions(
         txn_daily_w_bar = txn_daily_w_bar[txn_daily_w_bar.date > md]
 
     bar_consumption = txn_daily_w_bar.assign(
-        max_pct_bar_consumed=txn_daily_w_bar.amount.div(
-            txn_daily_w_bar.volume
-        ).mul(100)
+        max_pct_bar_consumed=txn_daily_w_bar.amount.div(txn_daily_w_bar.volume).mul(100)
     ).sort_values("max_pct_bar_consumed", ascending=False)
     max_bar_consumption = bar_consumption.groupby("symbol").first()
 
@@ -252,9 +244,7 @@ def apply_slippage_penalty(
     simulate_traded_dollars = txn_daily.price * simulate_traded_shares
     simulate_pct_volume_used = simulate_traded_shares / txn_daily.volume
 
-    penalties = (
-        simulate_pct_volume_used ** 2 * impact * simulate_traded_dollars
-    )
+    penalties = simulate_pct_volume_used**2 * impact * simulate_traded_dollars
 
     daily_penalty = penalties.resample("D").sum()
     daily_penalty = daily_penalty.reindex(returns.index).fillna(0)
@@ -264,8 +254,7 @@ def apply_slippage_penalty(
     # similarly. In other words, since we aren't applying compounding to
     # simulate_traded_shares, we shouldn't apply compounding to pv.
     portfolio_value = (
-        ep.cum_returns(returns, starting_value=backtest_starting_capital)
-        * mult
+        ep.cum_returns(returns, starting_value=backtest_starting_capital) * mult
     )
 
     adj_returns = returns - (daily_penalty / portfolio_value)

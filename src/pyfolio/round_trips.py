@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from math import copysign
 import warnings
 from collections import deque, OrderedDict
+from math import copysign
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from .utils import print_table, format_asset
 
@@ -121,9 +121,7 @@ def _groupby_consecutive(txn, max_delta=pd.Timedelta("8h")):
         if transaction.amount.sum() == 0:
             warnings.warn("Zero transacted shares, setting vwap to nan.")
             return np.nan
-        return (
-            transaction.amount * transaction.price
-        ).sum() / transaction.amount.sum()
+        return (transaction.amount * transaction.price).sum() / transaction.amount.sum()
 
     out = []
     for _, t in txn.groupby("symbol"):
@@ -132,12 +130,8 @@ def _groupby_consecutive(txn, max_delta=pd.Timedelta("8h")):
         t = t.reset_index()
 
         t["order_sign"] = t.amount > 0
-        t["block_dir"] = (
-            (t.order_sign.shift(1) != t.order_sign).astype(int).cumsum()
-        )
-        t["block_time"] = (
-            ((t.dt.sub(t.dt.shift(1))) > max_delta).astype(int).cumsum()
-        )
+        t["block_dir"] = (t.order_sign.shift(1) != t.order_sign).astype(int).cumsum()
+        t["block_time"] = ((t.dt.sub(t.dt.shift(1))) > max_delta).astype(int).cumsum()
         grouped_price = t.groupby(["block_dir", "block_time"]).apply(vwap)
         grouped_price.name = "price"
         grouped_rest = t.groupby(["block_dir", "block_time"]).agg(
@@ -213,9 +207,7 @@ def extract_round_trips(transactions, portfolio_value=None):
         trans_sym["abs_amount"] = trans_sym.amount.abs().astype(int)
         for dt, t in trans_sym.iterrows():
             if t.price < 0:
-                warnings.warn(
-                    "Negative price detected, ignoring for" "round-trip."
-                )
+                warnings.warn("Negative price detected, ignoring for" "round-trip.")
                 continue
 
             indiv_prices = [t.signed_price] * t.abs_amount
@@ -313,7 +305,7 @@ def add_closing_transactions(positions, transactions):
     # they don't conflict with other round_trips executed at that time.
     end_dt = open_pos.name + pd.Timedelta(seconds=1)
 
-    for sym, ending_val in open_pos.iteritems():
+    for sym, ending_val in open_pos.items():
         txn_sym = transactions[transactions.symbol == sym]
 
         ending_amount = txn_sym.amount.sum()
@@ -328,7 +320,7 @@ def add_closing_transactions(positions, transactions):
         )
 
         closing_txn = pd.DataFrame(closing_txn, index=[end_dt])
-        closed_txns = closed_txns.append(closing_txn)
+        closed_txns = pd.concat([closed_txns, closing_txn])
 
     closed_txns = closed_txns[closed_txns.amount != 0]
 
@@ -386,14 +378,10 @@ def gen_round_trip_stats(round_trips):
     stats = {}
     stats["pnl"] = agg_all_long_short(round_trips, "pnl", PNL_STATS)
     stats["summary"] = agg_all_long_short(round_trips, "pnl", SUMMARY_STATS)
-    stats["duration"] = agg_all_long_short(
-        round_trips, "duration", DURATION_STATS
-    )
+    stats["duration"] = agg_all_long_short(round_trips, "duration", DURATION_STATS)
     stats["returns"] = agg_all_long_short(round_trips, "returns", RETURN_STATS)
 
-    stats["symbols"] = (
-        round_trips.groupby("symbol")["returns"].agg(RETURN_STATS).T
-    )
+    stats["symbols"] = round_trips.groupby("symbol")["returns"].agg(RETURN_STATS).T
 
     return stats
 
@@ -415,13 +403,9 @@ def print_round_trip_stats(round_trips, hide_pos=False):
 
     stats = gen_round_trip_stats(round_trips)
 
-    print_table(
-        stats["summary"], float_format="{:.2f}".format, name="Summary stats"
-    )
+    print_table(stats["summary"], float_format="{:.2f}".format, name="Summary stats")
     print_table(stats["pnl"], float_format="${:.2f}".format, name="PnL stats")
-    print_table(
-        stats["duration"], float_format="{:.2f}".format, name="Duration stats"
-    )
+    print_table(stats["duration"], float_format="{:.2f}".format, name="Duration stats")
     print_table(
         stats["returns"] * 100,
         float_format="{:.2f}%".format,

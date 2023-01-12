@@ -252,9 +252,7 @@ def downside_risk(returns, required_return=0, period=DAILY):
         Annualized downside deviation
     """
 
-    return ep.downside_risk(
-        returns, required_return=required_return, period=period
-    )
+    return ep.downside_risk(returns, required_return=required_return, period=period)
 
 
 @deprecated(msg=DEPRECATION_WARNING)
@@ -502,9 +500,7 @@ def aggregate_returns(returns, convert_to):
     return ep.aggregate_returns(returns, convert_to=convert_to)
 
 
-def rolling_beta(
-    returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6
-):
+def rolling_beta(returns, factor_returns, rolling_window=APPROX_BDAYS_PER_MONTH * 6):
     """
     Determines the rolling beta of a strategy.
 
@@ -538,13 +534,11 @@ def rolling_beta(
             partial(rolling_beta, returns), rolling_window=rolling_window
         )
     else:
-        out = pd.Series(index=returns.index)
+        out = pd.Series(index=returns.index, dtype="float64")
         for beg, end in zip(
             returns.index[0:-rolling_window], returns.index[rolling_window:]
         ):
-            out.loc[end] = ep.beta(
-                returns.loc[beg:end], factor_returns.loc[beg:end]
-            )
+            out.loc[end] = ep.beta(returns.loc[beg:end], factor_returns.loc[beg:end])
 
         return out
 
@@ -731,7 +725,7 @@ def perf_stats(
         Performance metrics.
     """
 
-    stats = pd.Series()
+    stats = pd.Series(dtype="float64")
     for stat_func in SIMPLE_STAT_FUNCS:
         stats[STAT_FUNC_NAMES[stat_func.__name__]] = stat_func(returns)
 
@@ -749,9 +743,7 @@ def perf_stats(
     return stats
 
 
-def perf_stats_bootstrap(
-    returns, factor_returns=None, return_stats=True, **kwargs
-):
+def perf_stats_bootstrap(returns, factor_returns=None, return_stats=True, **kwargs):
     """Calculates various bootstrapped performance metrics of a strategy.
 
     Parameters
@@ -931,7 +923,7 @@ def get_max_drawdown(returns):
     """
 
     returns = returns.copy()
-    df_cum = cum_returns(returns, 1.0)
+    df_cum = ep.cum_returns(returns, 1.0)
     running_max = np.maximum.accumulate(df_cum)
     underwater = df_cum / running_max - 1
     return get_max_drawdown_underwater(underwater)
@@ -965,19 +957,13 @@ def get_top_drawdowns(returns, top=10):
         peak, valley, recovery = get_max_drawdown_underwater(underwater)
         # Slice out draw-down period
         if not pd.isnull(recovery):
-            underwater.drop(
-                underwater[peak:recovery].index[1:-1], inplace=True
-            )
+            underwater.drop(underwater[peak:recovery].index[1:-1], inplace=True)
         else:
             # drawdown has not ended yet
             underwater = underwater.loc[:peak]
 
         drawdowns.append((peak, valley, recovery))
-        if (
-            (len(returns) == 0)
-            or (len(underwater) == 0)
-            or (np.min(underwater) == 0)
-        ):
+        if (len(returns) == 0) or (len(underwater) == 0) or (np.min(underwater) == 0):
             break
 
     return drawdowns
@@ -1021,27 +1007,21 @@ def gen_drawdown_table(returns, top=10):
             df_drawdowns.loc[i, "Duration"] = len(
                 pd.date_range(peak, recovery, freq="B")
             )
-        df_drawdowns.loc[i, "Peak date"] = peak.to_pydatetime().strftime(
-            "%Y-%m-%d"
-        )
-        df_drawdowns.loc[i, "Valley date"] = valley.to_pydatetime().strftime(
-            "%Y-%m-%d"
-        )
+        df_drawdowns.loc[i, "Peak date"] = peak.to_pydatetime().strftime("%Y-%m-%d")
+        df_drawdowns.loc[i, "Valley date"] = valley.to_pydatetime().strftime("%Y-%m-%d")
         if isinstance(recovery, float):
             df_drawdowns.loc[i, "Recovery date"] = recovery
         else:
-            df_drawdowns.loc[
-                i, "Recovery date"
-            ] = recovery.to_pydatetime().strftime("%Y-%m-%d")
+            df_drawdowns.loc[i, "Recovery date"] = recovery.to_pydatetime().strftime(
+                "%Y-%m-%d"
+            )
         df_drawdowns.loc[i, "Net drawdown in %"] = (
             (df_cum.loc[peak] - df_cum.loc[valley]) / df_cum.loc[peak]
         ) * 100
 
     df_drawdowns["Peak date"] = pd.to_datetime(df_drawdowns["Peak date"])
     df_drawdowns["Valley date"] = pd.to_datetime(df_drawdowns["Valley date"])
-    df_drawdowns["Recovery date"] = pd.to_datetime(
-        df_drawdowns["Recovery date"]
-    )
+    df_drawdowns["Recovery date"] = pd.to_datetime(df_drawdowns["Recovery date"])
 
     return df_drawdowns
 
@@ -1064,9 +1044,7 @@ def rolling_volatility(returns, rolling_vol_window):
         Rolling volatility.
     """
 
-    return returns.rolling(rolling_vol_window).std() * np.sqrt(
-        APPROX_BDAYS_PER_YEAR
-    )
+    return returns.rolling(rolling_vol_window).std() * np.sqrt(APPROX_BDAYS_PER_YEAR)
 
 
 def rolling_sharpe(returns, rolling_sharpe_window):
@@ -1129,9 +1107,7 @@ def simulate_paths(
     samples = np.empty((num_samples, num_days))
     seed = np.random.RandomState(seed=random_seed)
     for i in range(num_samples):
-        samples[i, :] = is_returns.sample(
-            num_days, replace=True, random_state=seed
-        )
+        samples[i, :] = is_returns.sample(num_days, replace=True, random_state=seed)
 
     return samples
 
@@ -1163,7 +1139,7 @@ def summarize_paths(samples, cone_std=(1.0, 1.5, 2.0), starting_value=1.0):
     if isinstance(cone_std, (float, int)):
         cone_std = [cone_std]
 
-    cone_bounds = pd.DataFrame(columns=pd.Float64Index([]))
+    cone_bounds = pd.DataFrame(columns=pd.Index([], dtype="float64"))
     for num_std in cone_std:
         cone_bounds.loc[:, float(num_std)] = cum_mean + cum_std * num_std
         cone_bounds.loc[:, float(-num_std)] = cum_mean - cum_std * num_std
@@ -1250,6 +1226,7 @@ def extract_interesting_date_ranges(returns, periods=None):
     """
     if periods is None:
         periods = PERIODS
+
     returns_dupe = returns.copy()
     returns_dupe.index = returns_dupe.index.map(pd.Timestamp)
     ranges = OrderedDict()

@@ -14,14 +14,14 @@
 # limitations under the License.
 
 import warnings
-
 from itertools import cycle
-from matplotlib.pyplot import cm
+
+import empyrical.utils
 import numpy as np
 import pandas as pd
 from IPython.display import display, HTML
-from distutils.version import StrictVersion
-import empyrical.utils
+from matplotlib.pyplot import cm
+from packaging.version import Version
 
 from . import pos
 from . import txn
@@ -68,9 +68,9 @@ COLORS = [
     "#808080",
 ]
 
-pandas_version = StrictVersion(pd.__version__)
+pandas_version = Version(pd.__version__)
 
-pandas_one_point_one_or_less = pandas_version < StrictVersion("1.2")
+pandas_one_point_one_or_less = pandas_version < Version("1.2")
 
 
 def one_dec_places(x, pos):
@@ -171,7 +171,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
         backtest.index = backtest.index.tz_localize("UTC")
     returns = backtest.returns
     raw_positions = []
-    for dt, pos_row in backtest.positions.iteritems():
+    for dt, pos_row in backtest.positions.items():
         df = pd.DataFrame(pos_row)
         df.index = [dt] * len(df)
         raw_positions.append(df)
@@ -186,9 +186,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
     return returns, positions, transactions
 
 
-def print_table(
-    table, name=None, float_format=None, formatters=None, header_rows=None
-):
+def print_table(table, name=None, float_format=None, formatters=None, header_rows=None):
     """
     Pretty print a pandas DataFrame.
 
@@ -517,9 +515,7 @@ def configure_legend(
     - set colors according to colormap
     """
     chartBox = ax.get_position()
-    ax.set_position(
-        [chartBox.x0, chartBox.y0, chartBox.width * 0.75, chartBox.height]
-    )
+    ax.set_position([chartBox.x0, chartBox.y0, chartBox.width * 0.75, chartBox.height])
 
     # make legend order match graph lines
     handles, labels = ax.get_legend_handles_labels()

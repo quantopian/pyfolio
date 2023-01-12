@@ -1,17 +1,128 @@
 [project]
-requires-python = '>=3.7'
+name = "pyfolio-reloaded"
+description = "Performance and risk analysis of financial portfolios with Python"
+
+requires-python = '>=3.8'
+dynamic = ["version"]
+readme = "README.md"
+authors = [
+    { name = 'Quantopian Inc' },
+    { email = 'pm@ml4trading.io' }
+]
+maintainers = [
+    { name = 'Stefan Jansen' },
+    { email = 'pm@ml4trading.io' }
+]
+license = { file = "LICENSE" }
+
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'License :: OSI Approved :: Apache Software License',
+    'Natural Language :: English',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Operating System :: OS Independent',
+    'Intended Audience :: Science/Research',
+    'Topic :: Office/Business :: Financial :: Investment',
+    'Topic :: Scientific/Engineering :: Information Analysis',
+]
+
+dependencies = [
+    "ipython >=3.2.3",
+    "matplotlib >=1.4.0",
+    "numpy >=1.11.1",
+    "pandas >=0.18.1",
+    "pytz >=2014.10",
+    "scipy >=0.14.0",
+    "scikit-learn >=0.16.1",
+    "seaborn >=0.7.1",
+    "empyrical-reloaded >=0.5.8",
+]
+
+[project.urls]
+homepage = 'https://ml4trading.io'
+repository = 'https://github.com/stefan-jansen/pyfolio-reloaded'
+documentation = 'https://pyfolio.ml4trading.io'
 
 [build-system]
 requires = [
     'setuptools>=54.0.0',
+    "setuptools_scm[toml]>=6.2",
     'wheel>=0.31.0',
     'oldest-supported-numpy; python_version>="3.7"',
 ]
 build-backend = 'setuptools.build_meta'
 
+[project.optional-dependencies]
+test = [
+    "tox >=2.3.1",
+    "coverage >=4.0.3",
+    "coveralls ==3.0.1",
+    "pytest >=6.2",
+    'pytest-xdist >=2.5.0',
+    "pytest-cov >=2.12",
+    "parameterized >=0.6.1",
+    "flake8 >=3.9.1",
+    "black",
+]
+dev = [
+    "flake8 >=3.9.1",
+    "black",
+    "pre-commit >=2.12.1",
+]
+docs = [
+    'Cython',
+    'Sphinx >=1.3.2',
+    'numpydoc >=0.5.0',
+    'sphinx-autobuild >=0.6.0',
+    'pydata-sphinx-theme',
+    'sphinx-markdown-tables',
+    "sphinx_copybutton",
+    'm2r2'
+]
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ['src']
+exclude = ['tests*']
+
+[tool.setuptools_scm]
+write_to = "src/pyfolio/_version.py"
+version_scheme = 'guess-next-dev'
+local_scheme = 'dirty-tag'
+
+
+[tool.pytest]
+minversion = "6.0"
+testpaths = 'tests'
+addopts = '-v'
+
+
+[tool.cibuildwheel]
+test-extras = "test"
+test-command = "pytest -n 2 --reruns 5 {package}/tests"
+build-verbosity = 3
+
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64", "universal2"]
+test-skip = ["*universal2:arm64"]
+
+
+[tool.cibuildwheel.linux]
+archs = ["auto64"]
+skip = "*musllinux*"
+
+
 [tool.black]
-target-version = ['py37', 'py38']
-line-length = 79
+line-length = 88
+target-version = ['py38', 'py39', 'py310']
 include = '\.pyi?$'
 extend-exclude = '''
 \(
@@ -19,9 +130,34 @@ extend-exclude = '''
 \)
 '''
 
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "-q"
-testpaths = [
-    "pyfolio/tests"
-]
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py{38,39}-pandas12, py{38,39,310}-pandas{13,14,15}, py311-pandas15
+isolated_build = True
+skip_missing_interpreters = True
+minversion = 3.23.0
+
+[gh-actions]
+python =
+    3.8: py38
+    3.9: py39
+    3.10: py310
+    3.11: py311
+
+[testenv]
+usedevelop = True
+setenv =
+    MPLBACKEND = Agg
+
+changedir = tmp
+extras = test
+deps =
+    pandas12: pandas>=1.2.0,<1.3
+    pandas13: pandas>=1.3.0,<1.4
+    pandas14: pandas>=1.4.0,<1.5
+    pandas15: pandas>=1.5.0,<1.6
+
+commands =
+    pytest -n 4 --reruns 5 --cov={toxinidir}/src --cov-report term  --cov-report=xml --cov-report=html:htmlcov {toxinidir}/tests
+"""

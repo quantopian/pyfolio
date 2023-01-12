@@ -233,9 +233,7 @@ def create_perf_attrib_stats(perf_attrib, risk_exposures):
 
     summary["Specific Sharpe Ratio"] = ep.sharpe_ratio(specific_returns)
 
-    summary["Cumulative Specific Return"] = ep.cum_returns_final(
-        specific_returns
-    )
+    summary["Cumulative Specific Return"] = ep.cum_returns_final(specific_returns)
     summary["Cumulative Common Return"] = ep.cum_returns_final(common_returns)
     summary["Total Returns"] = ep.cum_returns_final(total_returns)
 
@@ -364,18 +362,14 @@ def plot_returns(perf_attrib_data, cost=None, ax=None):
     returns = perf_attrib_data["total_returns"]
     total_returns_label = "Total returns"
 
-    cumulative_returns_less_costs = _cumulative_returns_less_costs(
-        returns, cost
-    )
+    cumulative_returns_less_costs = _cumulative_returns_less_costs(returns, cost)
     if cost is not None:
         total_returns_label += " (adjusted)"
 
     specific_returns = perf_attrib_data["specific_returns"]
     common_returns = perf_attrib_data["common_returns"]
 
-    ax.plot(
-        cumulative_returns_less_costs, color="b", label=total_returns_label
-    )
+    ax.plot(cumulative_returns_less_costs, color="b", label=total_returns_label)
     ax.plot(
         ep.cum_returns(specific_returns),
         color="g",
@@ -388,9 +382,7 @@ def plot_returns(perf_attrib_data, cost=None, ax=None):
     )
 
     if cost is not None:
-        ax.plot(
-            -ep.cum_returns(cost), color="k", label="Cumulative cost spent"
-        )
+        ax.plot(-ep.cum_returns(cost), color="k", label="Cumulative cost spent")
 
     ax.set_title("Time series of cumulative returns")
     ax.set_ylabel("Returns")
@@ -484,9 +476,7 @@ def plot_factor_contribution_to_perf(
     return ax
 
 
-def plot_risk_exposures(
-    exposures, ax=None, title="Daily risk factor exposures"
-):
+def plot_risk_exposures(exposures, ax=None, title="Daily risk factor exposures"):
     """
     Parameters
     ----------
@@ -585,9 +575,7 @@ def _align_and_warn(
 
         warnings.warn(missing_stocks_warning_msg)
 
-        positions = positions.drop(
-            missing_stocks, axis="columns", errors="ignore"
-        )
+        positions = positions.drop(missing_stocks, axis="columns", errors="ignore")
 
     missing_factor_loadings_index = positions.index.difference(
         factor_loadings.index.get_level_values(0).unique()
@@ -612,9 +600,7 @@ def _align_and_warn(
 
         warnings.warn(warning_msg)
 
-        positions = positions.drop(
-            missing_factor_loadings_index, errors="ignore"
-        )
+        positions = positions.drop(missing_factor_loadings_index, errors="ignore")
         returns = returns.drop(missing_factor_loadings_index, errors="ignore")
         factor_returns = factor_returns.drop(
             missing_factor_loadings_index, errors="ignore"

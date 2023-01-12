@@ -36,16 +36,12 @@ class CapacityTestCase(TestCase):
     volume *= 1000000
     volume["market_data"] = "volume"
 
-    price = pd.DataFrame(
-        [[1.0, 1.0]] * len(dates), columns=["A", "B"], index=dates
-    )
+    price = pd.DataFrame([[1.0, 1.0]] * len(dates), columns=["A", "B"], index=dates)
     price.index.name = "dt"
     price["market_data"] = "price"
 
     market_data = (
-        pd.concat([volume, price])
-        .reset_index()
-        .set_index(["dt", "market_data"])
+        pd.concat([volume, price]).reset_index().set_index(["dt", "market_data"])
     )
 
     def test_days_to_liquidate_positions(self):
@@ -126,9 +122,7 @@ class CapacityTestCase(TestCase):
         assert_frame_equal(llt, expected)
 
     def test_daily_txns_with_bar_data(self):
-        daily_txn = daily_txns_with_bar_data(
-            self.transactions, self.market_data
-        )
+        daily_txn = daily_txns_with_bar_data(self.transactions, self.market_data)
 
         columns = ["symbol", "amount", "price", "volume"]
         expected = pd.DataFrame(
@@ -151,19 +145,13 @@ class CapacityTestCase(TestCase):
             (1000000, 0.1, [0.99995, 0.99999375, 0.999998611]),
         ]
     )
-    def test_apply_slippage_penalty(
-        self, starting_base, impact, expected_adj_returns
-    ):
+    def test_apply_slippage_penalty(self, starting_base, impact, expected_adj_returns):
         returns = pd.Series([1.0, 1.0, 1.0], index=self.dates)
-        daily_txn = daily_txns_with_bar_data(
-            self.transactions, self.market_data
-        )
+        daily_txn = daily_txns_with_bar_data(self.transactions, self.market_data)
 
         adj_returns = apply_slippage_penalty(
             returns, daily_txn, starting_base, 1000000, impact=impact
         )
-        expected_adj_returns = pd.Series(
-            expected_adj_returns, index=self.dates
-        )
+        expected_adj_returns = pd.Series(expected_adj_returns, index=self.dates)
 
         assert_series_equal(adj_returns, expected_adj_returns)

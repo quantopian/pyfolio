@@ -110,9 +110,7 @@ def get_txn_vol(transactions):
     return pd.concat([daily_values, daily_amounts], axis=1)
 
 
-def adjust_returns_for_slippage(
-    returns, positions, transactions, slippage_bps
-):
+def adjust_returns_for_slippage(returns, positions, transactions, slippage_bps):
     """
     Apply a slippage penalty for every dollar traded.
 

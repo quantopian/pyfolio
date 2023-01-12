@@ -152,9 +152,7 @@ class PositionsTestCase(TestCase):
         with warnings.catch_warnings(record=True) as w:
             result_sector_exposure = get_sector_exposures(positions, mapping)
 
-            assert_frame_equal(
-                result_sector_exposure, expected_sector_exposure
-            )
+            assert_frame_equal(result_sector_exposure, expected_sector_exposure)
             # avoids test failure due to DeprecationWarning for pandas>=1.0, <1.1
             w_ = [warn for warn in w if issubclass(warn.category, UserWarning)]
             if warning_expected:
@@ -262,9 +260,7 @@ class PositionsTestCase(TestCase):
             (False, test_returns, test_pos, test_txn, test_pos),
         ]
     )
-    def test_check_intraday(
-        self, estimate, returns, positions, transactions, expected
-    ):
+    def test_check_intraday(self, estimate, returns, positions, transactions, expected):
         detected = check_intraday(estimate, returns, positions, transactions)
         assert_frame_equal(detected, expected)
 
@@ -279,8 +275,6 @@ class PositionsTestCase(TestCase):
             ),
         ]
     )
-    def test_estimate_intraday(
-        self, returns, positions, transactions, expected
-    ):
+    def test_estimate_intraday(self, returns, positions, transactions, expected):
         intraday_pos = estimate_intraday(returns, positions, transactions)
         assert intraday_pos.shape == expected
