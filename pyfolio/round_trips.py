@@ -301,7 +301,7 @@ def add_closing_transactions(positions, transactions):
     # they don't conflict with other round_trips executed at that time.
     end_dt = open_pos.name + pd.Timedelta(seconds=1)
 
-    for sym, ending_val in open_pos.iteritems():
+    for sym, ending_val in open_pos.items():
         txn_sym = transactions[transactions.symbol == sym]
 
         ending_amount = txn_sym.amount.sum()

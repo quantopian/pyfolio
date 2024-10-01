@@ -152,7 +152,7 @@ def extract_rets_pos_txn_from_zipline(backtest):
         backtest.index = backtest.index.tz_localize('UTC')
     returns = backtest.returns
     raw_positions = []
-    for dt, pos_row in backtest.positions.iteritems():
+    for dt, pos_row in backtest.positions.items():
         df = pd.DataFrame(pos_row)
         df.index = [dt] * len(df)
         raw_positions.append(df)
